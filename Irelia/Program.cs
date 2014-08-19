@@ -41,9 +41,8 @@ namespace Irelia
         private static void Game_OnGameLoad(EventArgs args)
         {
             if (vIrelia.BaseSkinName != ChampionName) return;
-            if (vIrelia.IsDead) return;
+//            if (vIrelia.IsDead) return;
             
-            Orbwalker.SetAttacks(true);
 
             Q = new Spell(SpellSlot.Q, 650f);
             W = new Spell(SpellSlot.W, 0);
@@ -70,7 +69,8 @@ namespace Irelia
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            
+            Orbwalker.SetAttacks(true);
+          
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Menu comboUseQ = new Menu("Use Q", "comboUseQ");
