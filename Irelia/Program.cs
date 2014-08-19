@@ -1,6 +1,5 @@
 #region
 using System;
-using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
@@ -28,18 +27,24 @@ namespace Irelia
         public static Spell E;
         public static Spell R;
 
+        public static SpellSlot IgniteSlot;
         //Menu
         public static Menu Config;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
+        
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-            Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
         }
 
-        public static void LoadSpellList()
+        private static void Game_OnGameLoad(EventArgs args)
         {
+            if (vIrelia.BaseSkinName != ChampionName) return;
+            if (vIrelia.IsDead) return;
+            
+            Orbwalker.SetAttacks(true);
+
             Q = new Spell(SpellSlot.Q, 650f);
             W = new Spell(SpellSlot.W, 0);
             E = new Spell(SpellSlot.E, 325);
@@ -48,20 +53,14 @@ namespace Irelia
             Q.SetSkillshot(0.25f, 75f, 1500f, false, Prediction.SkillshotType.SkillshotLine);
             E.SetSkillshot(0.15f, 75f, 1500f, false, Prediction.SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.15f, 80f, 1500f, false, Prediction.SkillshotType.SkillshotLine);
-        
+
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
             SpellList.Add(R);
-        }
-        private static void Game_OnGameLoad(EventArgs args)
-        {
-            if (vIrelia.BaseSkinName != "Irelia") return;
-            string message = String.Format("{0} Loaded!", ChampionName);
 
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx:</font> <font color='#FFFFFF'>{0}</font>", message));
-            LoadSpellList();
-
+            IgniteSlot = vIrelia.GetSpellSlot("SummonerDot");
+            
             //Create the menu
             Config = new Menu("Irelia", "Irelia", true);
 
@@ -137,11 +136,15 @@ namespace Irelia
             // Extras -> Use Items -> Targeted Items
             MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
             menuUseItems.AddSubMenu(MenuTargetedItems);
-            MenuTargetedItems.AddItem(new MenuItem("item3188", "Blackfire Torch").SetValue(true));
+            if (Utility.Map.GetMap() == Utility.Map.MapType.SummonersRift)
+                MenuTargetedItems.AddItem(new MenuItem("item3128", "Deathfire Grasp").SetValue(true));
+            else
+                MenuTargetedItems.AddItem(new MenuItem("item3188", "Blackfire Torch").SetValue(true));
+        
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3128", "Deathfire Grasp").SetValue(true));
+                
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
             
@@ -165,9 +168,14 @@ namespace Irelia
 
             Config.AddToMainMenu();
 
-            Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
+            Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
+
             QUsedTime = Game.Time;
+
+            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx:</font> <font color='#FFFFFF'>{0} Loaded!</font>", ChampionName));
+
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -182,23 +190,27 @@ namespace Irelia
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (!Orbwalking.CanMove(50)) return;
+            //if (!Orbwalking.CanMove(50)) return;
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
-                Combo();
-
-            if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
-                Harass();
-
-            if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = ObjectManager.Player.MaxMana * (Config.Item("LaneClearMana").GetValue<Slider>().Value / 100.0);
-                if (vIrelia.Mana > existsMana)
-                    LaneClear();
+                Combo();
             }
+            else
+            {
+                if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
+                    Harass();
 
-            if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
-                JungleFarm();
+                if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
+                {
+                    var existsMana = ObjectManager.Player.MaxMana * (Config.Item("LaneClearMana").GetValue<Slider>().Value / 100.0);
+                    if (vIrelia.Mana > existsMana)
+                        LaneClear();
+                }
+
+                if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
+                    JungleFarm();
+            }
         }
 
         private static void CastSpellQ()
@@ -252,7 +264,7 @@ namespace Irelia
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
 
-            if (Q.IsReady() && useQ))
+            if (Q.IsReady() && useQ)// && vIrelia.Mana > existsMana)
                 CastSpellQ();
 
             if (E.IsReady() && useE)
@@ -294,7 +306,7 @@ namespace Irelia
                         if (Q.IsReady() && E.IsReady())
                         {
                             CastSpellQ();
-                            CastSpellQ();
+                            CastSpellE();
                         }
                         break;
                     }
@@ -364,11 +376,6 @@ namespace Irelia
                                 Q.CastOnUnit(vMinion);
                                 QUsedTime = Game.Time * 60;
                             }
-                            
-                            /*
-                                var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
-                                Utility.DelayAction.Add(500, () => { Q.CastOnUnit(vMinion); });
-                            */
                         }
                     }
 
@@ -383,18 +390,26 @@ namespace Irelia
             }
         }
 
-        private static float GetComboDamage(Obj_AI_Base target)
+        private static float GetComboDamage(Obj_AI_Base vTarget)
         {
-            float comboDamage = 0;
+            var fComboDamage = 0d;
 
-            if ((vIrelia.Spellbook.GetSpell(SpellSlot.Q).Level) > 0)
-                comboDamage += Q.GetDamage(target);
-            if ((vIrelia.Spellbook.GetSpell(SpellSlot.E).Level) > 0)
-                comboDamage += E.GetDamage(target);
-            if ((vIrelia.Spellbook.GetSpell(SpellSlot.R).Level) > 0)
-                comboDamage += R.GetDamage(target) * 4;
+            if (Q.IsReady())
+                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.Q);
+            
+            if (E.IsReady())
+                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.E);
+            
+            if (R.IsReady())
+                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.R) * 4;
 
-            return comboDamage;
+            if (IgniteSlot != SpellSlot.Unknown && vIrelia.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.IGNITE);
+
+            if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3153))
+                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.BOTRK);
+
+            return (float)fComboDamage;
         }
         
         private static bool isStunPossible(Obj_AI_Base vTarget)
@@ -426,8 +441,8 @@ namespace Irelia
 
             return true;
         }
-        
-        private static void OnProcessSpell(Obj_AI_Base vTarget, GameObjectProcessSpellCastEventArgs args)
+
+        private static void OnProcessSpellCast(Obj_AI_Base vTarget, GameObjectProcessSpellCastEventArgs args)
         {
             var stopUlties = Config.Item("StopUlties").GetValue<KeyBind>().Active;
 
@@ -494,7 +509,5 @@ namespace Irelia
 
             }
         }
-
-
     }
 }
