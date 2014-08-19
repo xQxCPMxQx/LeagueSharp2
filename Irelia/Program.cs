@@ -1,5 +1,6 @@
-﻿#region
+#region
 using System;
+using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
@@ -16,6 +17,8 @@ namespace Irelia
 
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
+
+        public static float QUsedTime;
 
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
@@ -71,7 +74,6 @@ namespace Irelia
             
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
-
             Menu comboUseQ = new Menu("Use Q", "comboUseQ");
             Config.SubMenu("Combo").AddSubMenu(comboUseQ);
                 comboUseQ.AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
@@ -86,15 +88,12 @@ namespace Irelia
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
-
             Menu harassUseQ = new Menu("Use Q", "harassUseQ");
             Config.SubMenu("Harass").AddSubMenu(harassUseQ);
                 harassUseQ.AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
                 harassUseQ.AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-            Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                 .AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q", "E", "Q+E"}))); 
 
@@ -104,13 +103,19 @@ namespace Irelia
             
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
+            Menu laneClearUseQ = new Menu("Use Q", "laneClearUseQ");
+            Config.SubMenu("LaneClear").AddSubMenu(laneClearUseQ);
+                laneClearUseQ.AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(true));
+                laneClearUseQ.AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("QFarmDelay", "Q Farm Delay").SetValue(new Slider(200, 500, 0)));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
                 .AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
-            //Config.SubMenu("LaneClear").AddItem(new MenuItem("QFarmDelay", "Q Farm Delay").SetValue(new Slider(250, 500, 0)));
+
 
             // Jungling Farm
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
@@ -162,6 +167,7 @@ namespace Irelia
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
+            QUsedTime = Game.Time;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -176,122 +182,133 @@ namespace Irelia
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (!Orbwalking.CanMove(100)) return;
+            if (!Orbwalking.CanMove(50)) return;
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
-            {
                 Combo();
-                return;
-            }
 
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
-            {
-                Combo();
-                return;
-            }
-            
+                Harass();
+
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
-                LaneClear();
+            {
+                var existsMana = ObjectManager.Player.MaxMana * (Config.Item("LaneClearMana").GetValue<Slider>().Value / 100.0);
+                if (vIrelia.Mana > existsMana)
+                    LaneClear();
+            }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
                 JungleFarm();
         }
 
+        private static void CastSpellQ()
+        {
+            var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            if (vTarget != null)
+                if (IsPositionSafe(vTarget, Q))
+                    Q.CastOnUnit(vTarget);
+        
+        }
+
+        private static void CastSpellE()
+        {
+            var vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            if (vTarget != null)
+                E.CastOnUnit(vTarget);
+        }
+
+        private static void CastSpellW()
+        {
+            var vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.True);
+            if (vTarget != null && Vector3.Distance(vTarget.ServerPosition, vIrelia.Position) <=
+                vIrelia.AttackRange)
+            {
+                if (R.IsReady()) /* Protect the mana for the Spell R. */
+                {
+                    if (vIrelia.Mana >= vIrelia.Spellbook.GetSpell(SpellSlot.W).ManaCost +
+                            vIrelia.Spellbook.GetSpell(SpellSlot.E).ManaCost)
+                        W.Cast();
+                }
+                else
+                {
+                    W.Cast();
+                }
+            }
+        }
+        private static void CastSpellR()
+        {
+            var vTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
+            if (vTarget != null)
+                if (R.IsReady() && GetComboDamage(vTarget) > vTarget.Health)
+                {
+                    R.Cast(vTarget, false, true);
+                    UseItems(vTarget);
+                }
+        }
         private static void Combo()
         {
-            var ComboActive = Config.Item("ComboActive").GetValue<KeyBind>().Active;
-            var HarassActive = Config.Item("HarassActive").GetValue<KeyBind>().Active;
+            var useQ = Config.Item("UseQCombo").GetValue<bool>();
+            var useW = Config.Item("UseWCombo").GetValue<bool>();
+            var useE = Config.Item("UseECombo").GetValue<bool>();
+            var useR = Config.Item("UseRCombo").GetValue<bool>();
 
-            if (ComboActive || HarassActive)
+            if (Q.IsReady() && useQ))
+                CastSpellQ();
+
+            if (E.IsReady() && useE)
+                CastSpellE();
+
+            if (W.IsReady() && useW)
+                CastSpellW();
+
+            if (R.IsReady() && useR)
+                CastSpellR();
+        }
+
+
+        private static void Harass()
+        {
+            var useQ = Config.Item("UseQHarass").GetValue<bool>();
+            var useW = Config.Item("UseWHarass").GetValue<bool>();
+            var useE = Config.Item("UseEHarass").GetValue<bool>();
+
+            var mana = ObjectManager.Player.MaxMana * (Config.Item("HarassMana")
+                .GetValue<Slider>().Value / 100.0);
+
+            int vHarassMode = Config.Item("HarassMode").GetValue<StringList>().SelectedIndex;
+
+            switch (vHarassMode)
             {
-                var useQ = Config.Item("UseQ" + (ComboActive ? "Combo" : "Harass"))
-                    .GetValue<bool>();
-                var useW = Config.Item("UseQ" + (ComboActive ? "Combo" : "Harass"))
-                    .GetValue<bool>();
-                var useE = Config.Item("UseQ" + (ComboActive ? "Combo" : "Harass"))
-                    .GetValue<bool>();
-                var useR = Config.Item("UseQCombo").GetValue<bool>();
-
-                var mana = ObjectManager.Player.MaxMana * (Config.Item("HarassMana")
-                    .GetValue<Slider>().Value / 100.0);
-
-                if (HarassActive)
-                {
-                    var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-                    int vHarassMode = Config.Item("HarassMode").GetValue<StringList>().SelectedIndex;
-
-                    switch (vHarassMode)
+                case 0:
                     {
-                        case 0:
-                            {
-                                if (Q.IsReady())
-                                    Q.CastOnUnit(vTarget);
-                                break;
-                            }
-                        case 1:
-                            {
-                                if (E.IsReady())
-                                    E.CastOnUnit(vTarget);
-                                break;
-                            }
-                        case 2:
-                            {
-                                if (Q.IsReady() && E.IsReady())
-                                {
-                                    Q.CastOnUnit(vTarget);
-                                    E.CastOnUnit(vTarget);
-                                }
-                                break;
-                            }
+                        CastSpellQ();
+                        break;
                     }
-                }
-
-                if (Q.IsReady() && useQ)
-                {
-                    var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-                    if (vTarget != null)
-                        if (IsPositionSafe(vTarget, Q))
-                            Q.CastOnUnit(vTarget);
-                }
-
-                if (E.IsReady() && useE)
-                {
-                    var vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-                    if (vTarget != null)
-                        E.CastOnUnit(vTarget);
-                }
-
-                if (W.IsReady() && useW)
-                {
-                    var vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.True);
-                    if (vTarget != null && Vector3.Distance(vTarget.ServerPosition, vIrelia.Position) <=
-                        vIrelia.AttackRange)
+                case 1:
                     {
-                        if (R.IsReady()) /* Protect the mana for the Spell R. */
-                        {
-                            if (vIrelia.Mana >= vIrelia.Spellbook.GetSpell(SpellSlot.W).ManaCost +
-                                    vIrelia.Spellbook.GetSpell(SpellSlot.E).ManaCost)
-                                W.Cast();
-                        }
-                        else
-                        {
-                            W.Cast();
-                        }
+                        CastSpellE();
+                        break;
                     }
-                }
-
-                if (R.IsReady() && useR)
-                {
-                    var vTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
-                    if (vTarget != null)
-                        if (R.IsReady() && useR && GetComboDamage(vTarget) > vTarget.Health)
+                case 2:
+                    {
+                        if (Q.IsReady() && E.IsReady())
                         {
-                            R.Cast(vTarget, false, true);
-                            UseItems(vTarget);
+                            CastSpellQ();
+                            CastSpellQ();
                         }
-                }
-              
+                        break;
+                    }
             }
+
+
+            if (Q.IsReady() && useQ)
+                CastSpellQ();
+
+            if (E.IsReady() && useE)
+                CastSpellE();
+
+            if (W.IsReady() && useW)
+                CastSpellW();
         }
         
         private static void JungleFarm()
@@ -309,7 +326,7 @@ namespace Irelia
 
                 if (mobs.Count > 0)
                 {
-                    if (Q.IsReady() && useQ)
+                    if (Q.IsReady() && useQ && IsPositionSafe(mobs[0], Q))
                         Q.CastOnUnit(mobs[0]);
 
                     if (W.IsReady() && useW)
@@ -329,21 +346,28 @@ namespace Irelia
                 var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
                 var useW = Config.Item("UseWLaneClear").GetValue<bool>();
                 var useE = Config.Item("UseELaneClear").GetValue<bool>();
-
+                
                 var vMinions = MinionManager.GetMinions(vIrelia.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in vMinions)
                 {
+
                     var vMinionQDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.Q, DamageLib.StageType.FirstDamage);
                     var vMinionEDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.E, DamageLib.StageType.FirstDamage);
 
+                    var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
                     if (vMinion.IsValidTarget(Q.Range) && HealthPrediction.GetHealthPrediction(vMinion, (int)Q.Delay) < vMinionQDamage && Q.IsReady() && useQ)
                     {
                         if (IsPositionSafe(vMinion, Q))
                         {
-                            Q.CastOnUnit(vMinion);
+                            if ((Game.Time * 60 - QUsedTime) > qFarmDelay)
+                            {
+                                Q.CastOnUnit(vMinion);
+                                QUsedTime = Game.Time * 60;
+                            }
+                            
                             /*
-                            var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
-                            Utility.DelayAction.Add(500, () => { Q.CastOnUnit(vMinion); });
+                                var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
+                                Utility.DelayAction.Add(500, () => { Q.CastOnUnit(vMinion); });
                             */
                         }
                     }
@@ -388,7 +412,7 @@ namespace Irelia
             Vector2 checkPos = predPos + newPos * (vSpell.Range - Vector2.Distance(predPos, myPos));
             Obj_Turret closestTower = null;
 
-            foreach (Obj_Turret tower in ObjectManager.Get<Obj_Turret>().Where(tower => tower.IsValid && !tower.IsDead && tower.Health != 0))
+            foreach (Obj_Turret tower in ObjectManager.Get<Obj_Turret>().Where(tower => tower.IsValid && !tower.IsDead && tower.Health != 0 && tower.IsEnemy))
             {
                 if (Vector3.Distance(tower.Position, ObjectManager.Player.Position) < 1450)
                     closestTower = tower;
@@ -451,10 +475,9 @@ namespace Irelia
                     var useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>();
                     if (useItem)
                     {
-                        var itemCode = menuItem.Name.ToString().Substring(4, 4);
-                        var itemID = Convert.ToInt16(itemCode);
-                        if (Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null) 
-                            Items.UseItem(Convert.ToInt16(itemCode), vTarget);
+                        var itemID = Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4));
+                        if (Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null)
+                            Items.UseItem(itemID, vTarget);
                     }
                 }
 
@@ -463,10 +486,9 @@ namespace Irelia
                     var useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>();
                     if (useItem)
                     {
-                        var itemCode = menuItem.Name.ToString().Substring(4, 4);
-                        var itemID = Convert.ToInt16(itemCode);
+                        var itemID = Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4));
                         if (Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null)
-                            Items.UseItem(Convert.ToInt16(itemCode));
+                            Items.UseItem(itemID);
                     }
                 }
 
