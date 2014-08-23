@@ -272,7 +272,7 @@ namespace Irelia
 
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
-            if (Q.IsReady() && useQ)// && vIrelia.Mana > existsMana)
+            if (Q.IsReady() && useQ)
                 CastSpellQ(useQDontUnderTurret);
 
             if (E.IsReady() && useE)
@@ -302,7 +302,7 @@ namespace Irelia
             {
                 case 0:
                     {
-                        if (Q.IsReady() && useQ)// && vIrelia.Mana > existsMana)
+                        if (Q.IsReady() && useQ)
                             CastSpellQ(useQDontUnderTurret);
                         break;
                     }
@@ -348,7 +348,7 @@ namespace Irelia
 
                 if (mobs.Count > 0)
                 {
-                    if (Q.IsReady() && useQ) //&& !Utility.UnderTurret(mobs[0])
+                    if (Q.IsReady() && useQ)
                         Q.CastOnUnit(mobs[0]);
 
                     if (W.IsReady() && useW)
@@ -378,9 +378,7 @@ namespace Irelia
                     var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
 
                     if (vMinion.Health <= vMinionQDamage)
-                        //if (vMinion.IsValidTarget(Q.Range) && HealthPrediction.GetHealthPrediction(vMinion, (int)Q.Delay) < vMinionQDamage && Q.IsReady() && useQ)
                     {
-                            Game.PrintChat((Game.Time * 1000).ToString());
                             if ((Game.Time * 1000 - QUsedTime) > qFarmDelay * 3)
                             {
                                 Q.CastOnUnit(vMinion);
