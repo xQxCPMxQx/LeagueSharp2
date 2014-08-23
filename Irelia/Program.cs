@@ -378,7 +378,6 @@ namespace Irelia
 
                     if (vMinion.Health <= vMinionQDamage)
                     {
-                            Game.PrintChat((Game.Time * 1000).ToString());
                             if ((Game.Time * 1000 - QUsedTime) > qFarmDelay * 3)
                             {
                                 Q.CastOnUnit(vMinion);
