@@ -376,7 +376,7 @@ namespace Irelia
 
                     var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
 
-                    if (vMinion.Health <= vMinionQDamage)
+                    if (useQ && vMinion.Health <= vMinionQDamage)
                     {
                         if (useQDontUnderTurret)
                         {
