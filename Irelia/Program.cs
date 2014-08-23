@@ -126,7 +126,7 @@ namespace Irelia
             // Extras
             Config.AddSubMenu(new Menu("Extras", "Extras"));
             Config.SubMenu("Extras").AddItem(new MenuItem("StopUlties", "Interrupt Ulti With E").SetValue(true));
-            Config.SubMenu("Extras").AddItem(new MenuItem("ForceInterruptUlties", "Force Interrupt Ulti With Q+E").SetValue(false));
+            Config.SubMenu("Extras").AddItem(new MenuItem("ForceInterruptUlties", "Force Interrupt Ulti With Q+E").SetValue(true));
 
             // Extras -> Use Items 
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
@@ -322,7 +322,6 @@ namespace Irelia
                     }
             }
 
-
             if (Q.IsReady() && useQ)
                 CastSpellQ();
 
@@ -368,7 +367,8 @@ namespace Irelia
                 var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
                 var useW = Config.Item("UseWLaneClear").GetValue<bool>();
                 var useE = Config.Item("UseELaneClear").GetValue<bool>();
-                
+                var useQDontUnderTurret = Config.Item("UseQLaneClearDontUnderTurret").GetValue<bool>();
+
                 var vMinions = MinionManager.GetMinions(vIrelia.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in vMinions)
                 {
@@ -379,22 +379,30 @@ namespace Irelia
 
                     if (vMinion.Health <= vMinionQDamage)
                     {
-                            if ((Game.Time * 1000 - QUsedTime) > qFarmDelay * 3)
-                            {
-                                Q.CastOnUnit(vMinion);
-                                QUsedTime = Game.Time * 1000;
-                            }
+                        if (useQDontUnderTurret)
+                        {
+                            if (!Utility.UnderTurret(vMinion))
+                                LaneClearQ(qFarmDelay, vMinion);
+                        }
+                        else
+                            LaneClearQ(qFarmDelay, vMinion);
                     }
 
                     if (W.IsReady() && useW)
                         W.Cast();
 
-                    if (E.IsReady() && useE)
-                    {
-                        if (vMinion.Health <= vMinionEDamage)
-                            E.CastOnUnit(vMinion);
-                    }
+                    if (E.IsReady() && useE && vMinion.Health <= vMinionEDamage)
+                        E.CastOnUnit(vMinion);
                 }
+            }
+        }
+
+        private static void LaneClearQ(int qFarmDelay, Obj_AI_Base vMinion)
+        {
+            if ((Game.Time * 1000 - QUsedTime) > qFarmDelay * 3)
+            {
+                Q.CastOnUnit(vMinion);
+                QUsedTime = Game.Time * 1000;
             }
         }
 
@@ -493,6 +501,19 @@ namespace Irelia
                     }
                 }
             }
+            /*    
+            if (stopUlties)
+            {
+                foreach (string interruptSpellName in interruptSpells)
+                {
+                    if (vTarget.Team != vIrelia.Team && args.SData.Name == interruptSpellName)
+                    {
+                        if (vIrelia.Distance(vTarget) <= E.Range && E.IsReady() && isStunPossible(vTarget))
+                            E.CastOnUnit(vTarget);
+                    }
+                }
+            }
+            */
         }
 
         private static InventorySlot GetInventorySlot(int ID)
