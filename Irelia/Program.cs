@@ -483,7 +483,7 @@ namespace Irelia
                 {
                     if (vIrelia.Health < vTarget.Health)
                     {
-                        if (vIrelia.Distance(vTarget) >= E.Range || vIrelia.Distance(vTarget) <= Q.Range + E.Range)
+                        if (forceInterrupt || vIrelia.Distance(vTarget) >= E.Range || vIrelia.Distance(vTarget) <= Q.Range + E.Range)
                         {
                             var vMinions = MinionManager.GetMinions(vIrelia.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                             foreach (var vMinion in vMinions)
