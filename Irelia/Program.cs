@@ -501,19 +501,6 @@ namespace Irelia
                     }
                 }
             }
-            /*    
-            if (stopUlties)
-            {
-                foreach (string interruptSpellName in interruptSpells)
-                {
-                    if (vTarget.Team != vIrelia.Team && args.SData.Name == interruptSpellName)
-                    {
-                        if (vIrelia.Distance(vTarget) <= E.Range && E.IsReady() && isStunPossible(vTarget))
-                            E.CastOnUnit(vTarget);
-                    }
-                }
-            }
-            */
         }
 
         private static InventorySlot GetInventorySlot(int ID)
