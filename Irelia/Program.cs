@@ -125,7 +125,8 @@ namespace Irelia
 
             // Extras
             Config.AddSubMenu(new Menu("Extras", "Extras"));
-            Config.SubMenu("Extras").AddItem(new MenuItem("StopUlties", "Stop Ulties").SetValue(true));
+            Config.SubMenu("Extras").AddItem(new MenuItem("StopUlties", "Interrupt Ulti With E").SetValue(true));
+            Config.SubMenu("Extras").AddItem(new MenuItem("ForceInterruptUlties", "Force Interrupt Ulti With Q+E").SetValue(false));
 
             // Extras -> Use Items 
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
@@ -301,7 +302,7 @@ namespace Irelia
             {
                 case 0:
                     {
-                        if (Q.IsReady() && useQ)
+                        if (Q.IsReady() && useQ)// && vIrelia.Mana > existsMana)
                             CastSpellQ(useQDontUnderTurret);
                         break;
                     }
@@ -347,7 +348,7 @@ namespace Irelia
 
                 if (mobs.Count > 0)
                 {
-                    if (Q.IsReady() && useQ) 
+                    if (Q.IsReady() && useQ) //&& !Utility.UnderTurret(mobs[0])
                         Q.CastOnUnit(mobs[0]);
 
                     if (W.IsReady() && useW)
@@ -377,7 +378,9 @@ namespace Irelia
                     var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
 
                     if (vMinion.Health <= vMinionQDamage)
+                        //if (vMinion.IsValidTarget(Q.Range) && HealthPrediction.GetHealthPrediction(vMinion, (int)Q.Delay) < vMinionQDamage && Q.IsReady() && useQ)
                     {
+                            Game.PrintChat((Game.Time * 1000).ToString());
                             if ((Game.Time * 1000 - QUsedTime) > qFarmDelay * 3)
                             {
                                 Q.CastOnUnit(vMinion);
@@ -418,11 +421,6 @@ namespace Irelia
 
             return (float)fComboDamage;
         }
-        
-        private static bool isStunPossible(Obj_AI_Base vTarget)
-        {
-            return vIrelia.Health < vTarget.Health;
-        }
 
         public static bool IsPositionSafe(Obj_AI_Base vTarget, Spell vSpell) 
         {
@@ -452,9 +450,10 @@ namespace Irelia
         private static void OnProcessSpellCast(Obj_AI_Base vTarget, GameObjectProcessSpellCastEventArgs args)
         {
             var stopUlties = Config.Item("StopUlties").GetValue<KeyBind>().Active;
+            var forceInterrupt = Config.Item("ForceInterruptUlties").GetValue<KeyBind>().Active;
 
-            if (stopUlties)
-            {
+            if (!stopUlties || forceInterrupt) return;
+
                 String[] interruptSpells = {
                     "AbsoluteZero",
                     "AlZaharNetherGrasp", 
@@ -472,11 +471,26 @@ namespace Irelia
 		            "UrgotSwap2"
                 };
 
-                foreach (string interruptSpellName in interruptSpells)
+            foreach (string interruptSpellName in interruptSpells)
+            {
+                if (vTarget.Team != vIrelia.Team && args.SData.Name == interruptSpellName)
                 {
-                    if (vTarget.Team != vIrelia.Team && args.SData.Name == interruptSpellName)
+                    if (vIrelia.Health < vTarget.Health)
                     {
-                        if (vIrelia.Distance(vTarget) <= E.Range && E.IsReady() && isStunPossible(vTarget)) /* stun possible */
+                        if (vIrelia.Distance(vTarget) >= E.Range || vIrelia.Distance(vTarget) <= Q.Range + E.Range)
+                        {
+                            var vMinions = MinionManager.GetMinions(vIrelia.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                            foreach (var vMinion in vMinions)
+                            {
+                                if (vMinion.Distance(vTarget) <= E.Range || vMinion.Distance(vIrelia) <= Q.Range) // Choose best minnion 
+                                {
+                                    Q.CastOnUnit(vMinion);
+                                    if (vIrelia.Distance(vTarget) <= E.Range)
+                                        E.CastOnUnit(vTarget);
+                                }
+                            }
+                        }
+                        else if (vIrelia.Distance(vTarget) <= E.Range && E.IsReady())
                             E.CastOnUnit(vTarget);
                     }
                 }
