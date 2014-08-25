@@ -48,9 +48,9 @@ namespace Irelia
             E = new Spell(SpellSlot.E, 325);
             R = new Spell(SpellSlot.R, 1000f);
 
-            Q.SetSkillshot(0.25f, 75f, 1500f, false, Prediction.SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.15f, 75f, 1500f, false, Prediction.SkillshotType.SkillshotCircle);
-            R.SetSkillshot(0.15f, 80f, 1500f, false, Prediction.SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 75f, 1500f, false, SkillshotType.SkillshotLine);
+            E.SetSkillshot(0.15f, 75f, 1500f, false, SkillshotType.SkillshotCircle);
+            R.SetSkillshot(0.15f, 80f, 1500f, false, SkillshotType.SkillshotLine);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -188,8 +188,6 @@ namespace Irelia
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            //if (!Orbwalking.CanMove(50)) return;
-
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
@@ -201,8 +199,6 @@ namespace Irelia
 
                 if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
                 {
-                   // var existsMana = ObjectManager.Player.MaxMana * (Config.Item("LaneClearMana").GetValue<Slider>().Value / 100.0);
-                   // if (vIrelia.Mana > existsMana)
                         LaneClear();
                 }
 
@@ -211,19 +207,35 @@ namespace Irelia
             }
         }
 
-        private static void CastSpellQ(bool CheckEnemyUnderTurretPosition = false)
+        private static bool canUseQ()
         {
-            var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
+            return (Game.Time * 1000 - QUsedTime) > qFarmDelay * 3;
+        }
 
-            if (vTarget != null)
+        private static void CastSpellQ(Obj_AI_Base vTarget, bool dontUnderTurret = false)
+        {
+            if (vTarget == null) return;
+            var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
+
+            if (dontUnderTurret)
             {
-                if (CheckEnemyUnderTurretPosition)
+                if (!Utility.UnderTurret(vTarget))
                 {
-                    if (!Utility.UnderTurret(vTarget))
+                    if (canUseQ())
+                    {
                         Q.CastOnUnit(vTarget);
+                        QUsedTime = Game.Time * 1000;
+                    }
                 }
-                else
+            }
+            else
+            {
+                if (canUseQ())
+                {
                     Q.CastOnUnit(vTarget);
+                    QUsedTime = Game.Time * 1000;
+                }
             }
         }
 
@@ -268,11 +280,11 @@ namespace Irelia
             var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
-
+            var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
             if (Q.IsReady() && useQ)
-                CastSpellQ(useQDontUnderTurret);
+                CastSpellQ(vTarget, useQDontUnderTurret);
 
             if (E.IsReady() && useE)
                 CastSpellE();
@@ -287,6 +299,9 @@ namespace Irelia
 
         private static void Harass()
         {
+            var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical); 
+            if (vTarget == null) return;
+
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useW = Config.Item("UseWHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
@@ -294,7 +309,7 @@ namespace Irelia
 
             var mana = ObjectManager.Player.MaxMana * (Config.Item("HarassMana")
                 .GetValue<Slider>().Value / 100.0);
-
+            
             int vHarassMode = Config.Item("HarassMode").GetValue<StringList>().SelectedIndex;
 
             switch (vHarassMode)
@@ -302,7 +317,7 @@ namespace Irelia
                 case 0:
                     {
                         if (Q.IsReady() && useQ)
-                            CastSpellQ(useQDontUnderTurret);
+                            CastSpellQ(vTarget, useQDontUnderTurret);
                         break;
                     }
                 case 1:
@@ -314,7 +329,7 @@ namespace Irelia
                     {
                         if (Q.IsReady() && E.IsReady())
                         {
-                            CastSpellQ(useQDontUnderTurret);
+                            CastSpellQ(vTarget, useQDontUnderTurret);
                             CastSpellE();
                         }
                         break;
@@ -322,7 +337,7 @@ namespace Irelia
             }
 
             if (Q.IsReady() && useQ)
-                CastSpellQ();
+                CastSpellQ(vTarget, useQDontUnderTurret);
 
             if (E.IsReady() && useE)
                 CastSpellE();
@@ -347,7 +362,7 @@ namespace Irelia
                 if (mobs.Count > 0)
                 {
                     if (Q.IsReady() && useQ)
-                        Q.CastOnUnit(mobs[0]);
+                        CastSpellQ(mobs[0]);
 
                     if (W.IsReady() && useW)
                         W.Cast();
@@ -378,19 +393,13 @@ namespace Irelia
 
                     if (useQ && vMinion.Health <= vMinionQDamage)
                     {
-                        if (useQDontUnderTurret)
-                        {
-                            if (!Utility.UnderTurret(vMinion))
-                                LaneClearQ(qFarmDelay, vMinion);
-                        }
-                        else
-                            LaneClearQ(qFarmDelay, vMinion);
+                        CastSpellQ(vMinion, useQDontUnderTurret);
                     }
 
-                    if (W.IsReady() && useW)
+                    if (useW && W.IsReady())
                         W.Cast();
 
-                    if (E.IsReady() && useE && vMinion.Health <= vMinionEDamage)
+                    if (useE && E.IsReady() && vMinion.Health <= vMinionEDamage)
                         E.CastOnUnit(vMinion);
                 }
             }
@@ -429,7 +438,7 @@ namespace Irelia
 
         public static bool IsPositionSafe(Obj_AI_Base vTarget, Spell vSpell) 
         {
-            Vector2 predPos = vSpell.GetPrediction(vTarget).Position.To2D();
+            Vector2 predPos = vSpell.GetPrediction(vTarget).CastPosition.To2D();
             Vector2 myPos = ObjectManager.Player.Position.To2D();
             Vector2 newPos = (vTarget.Position.To2D() - myPos);
             newPos.Normalize();
@@ -534,6 +543,14 @@ namespace Irelia
                 }
 
             }
+        }
+
+        public static void smartFollow()
+        {
+            var vTarget = SimpleTs.GetTarget(Q.Range * 2 - 30, SimpleTs.DamageType.Physical);
+            var vMinions = MinionManager.GetMinions(vIrelia.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+            var vMobs = MinionManager.GetMinions(vIrelia.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
         }
     }
 }
