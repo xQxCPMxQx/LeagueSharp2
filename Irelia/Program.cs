@@ -170,7 +170,7 @@ namespace Irelia
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
 
-            QUsedTime = Game.Time;
+            QUsedTime = Game.Time * 1000;
 
             Game.PrintChat(String.Format("<font color='#70DBDB'>xQx:</font> <font color='#FFFFFF'>{0} Loaded!</font>", ChampionName));
 
