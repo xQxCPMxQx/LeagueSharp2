@@ -24,11 +24,13 @@ namespace Vi
         public static Spell E2;
         public static Spell R;
 
-        public static SpellSlot IgniteSlot;
+        private static SpellSlot IgniteSlot;
+        private static SpellSlot SmiteSlot;
+        public static int DelayTick = 0;
         //Menu
-        public static Menu Config;
-        public static Menu MenuTargetedItems;
-        public static Menu MenuNonTargetedItems;
+        private static Menu Config;
+        private static Menu MenuTargetedItems;
+        private static Menu MenuNonTargetedItems;
 
         private static void Main(string[] args)
         {
@@ -56,6 +58,7 @@ namespace Vi
             SpellList.Add(R);
 
             IgniteSlot = vPlayer.GetSpellSlot("SummonerDot");
+            SmiteSlot = vPlayer.GetSpellSlot("SummonerSmite");
 
             //Create the menu
             Config = new Menu("xQx | Vi", "Vi", true);
@@ -115,6 +118,10 @@ namespace Vi
             // Extras -> Use Items 
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
             Config.SubMenu("Extras").AddSubMenu(menuUseItems);
+            
+            // Extras -> Other
+            Config.SubMenu("Extras").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
+               
 
             // Extras -> Use Items -> Targeted Items
             MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
@@ -170,9 +177,39 @@ namespace Vi
             }
         }
 
+        private static void UseSummoners()
+        {
+            if (Config.Item("AutoSmite").GetValue<KeyBind>().Active)
+            {
+                float[] SmiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
+                string[] MonsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
+                var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
+                    spell => spell.Name == "SummonerSmite").SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                foreach (var vMinion in vMinions)
+                {
+                    if (vMinion != null 
+                        && !vMinion.IsDead 
+                        && !vPlayer.IsDead 
+                        && !vPlayer.IsStunned 
+                        && SmiteSlot != SpellSlot.Unknown 
+                        && vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                    {
+                        if ((vMinion.Health < SmiteDmg.Max()) && (MonsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name))))
+                        {
+                            vPlayer.SummonerSpellbook.CastSpell(SmiteSlot, vMinion);
+                        }
+                    }
+                }
+            }
+        }
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100)) return;
+            if (DelayTick - Environment.TickCount <= 250)
+            { 
+                UseSummoners();
+                DelayTick = Environment.TickCount;
+            }
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
@@ -251,7 +288,6 @@ namespace Vi
                     }
             }
         }
-
 
         private static void Harass()
          {
