@@ -273,10 +273,6 @@ namespace Swain
             {
                 R.Cast();
             }
-            else if (rTarget == null && UltiActive)
-            {
-                R.Cast();
-            }
         }
 
         private static void Farm()
