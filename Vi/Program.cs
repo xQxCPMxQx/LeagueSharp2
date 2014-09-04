@@ -401,7 +401,10 @@ namespace Vi
             {
                 Q.Cast(vTarget);
             }
-
+            else if (vPlayer.Distance(vTarget) < R.Range)
+            {
+                R.Cast(vTarget);
+            }
         }
 
         private static InventorySlot GetInventorySlot(int ID)
