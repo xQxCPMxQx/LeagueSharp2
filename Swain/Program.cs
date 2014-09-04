@@ -49,7 +49,7 @@ namespace Swain
             Q = new Spell(SpellSlot.Q, 625);
             W = new Spell(SpellSlot.W, 900);
             E = new Spell(SpellSlot.E, 625);
-            R = new Spell(SpellSlot.R, 550);
+            R = new Spell(SpellSlot.R, 500);
 
             Q.SetTargetted(0.5f, float.MaxValue);
             W.SetSkillshot(1f, 100f, 1000f, false, SkillshotType.SkillshotCone);
