@@ -52,7 +52,7 @@ namespace Swain
             R = new Spell(SpellSlot.R, 500);
 
             Q.SetTargetted(0.5f, float.MaxValue);
-            W.SetSkillshot(1f, 100f, 1000f, false, SkillshotType.SkillshotCone);
+            W.SetSkillshot(0.75f, 100f, 1000f, false, SkillshotType.SkillshotCone);
             E.SetTargetted(0.5f, float.MaxValue);
             R.SetSkillshot(0.3f, 50f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
