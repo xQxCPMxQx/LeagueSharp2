@@ -43,7 +43,7 @@ namespace Swain
         {
             vPlayer = ObjectManager.Player;
 
-            if (vPlayer.BaseSkinName != ChampionName) return;
+            //if (vPlayer.BaseSkinName != ChampionName) return;
 
             //Create the spells
             Q = new Spell(SpellSlot.Q, 625);
