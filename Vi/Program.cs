@@ -39,7 +39,7 @@ namespace Vi
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (vPlayer.BaseSkinName != "Vi") return;
+            //if (vPlayer.BaseSkinName != "Vi") return;
             if (vPlayer.IsDead) return;
 
             Q = new Spell(SpellSlot.Q, 850f);
