@@ -36,8 +36,6 @@ namespace JaxQx
                                               "Bushwhack" };
 
         public static Map map;
-
-        public static Obj_AI_Hero target;
         
         public static SpellSlot IgniteSlot;
         //Menu
@@ -173,6 +171,8 @@ namespace JaxQx
             
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            GameObject.OnCreate += GameObject_OnCreate;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
             Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
         }
@@ -187,17 +187,16 @@ namespace JaxQx
             }
             if (Config.Item("Ward").GetValue<bool>())
             {
-                Drawing.DrawCircle(vPlayer.Position, 600, System.Drawing.Color.Gray);
+                Drawing.DrawCircle(vPlayer.Position, 600, System.Drawing.Color.Aquamarine);
             }
         }
-        private static void OnCreateObject(GameObject sender, EventArgs args)
+        private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
             if (sender.Name.Contains("Missile") || sender.Name.Contains("Minion"))
                 return;
-
         }
 
-        public static void OnProcessSpell(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
+        public static void Obj_AI_Base_OnProcessSpellCast(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
         {
             if (TestSpells.ToList().Contains(arg.SData.Name))
             {
