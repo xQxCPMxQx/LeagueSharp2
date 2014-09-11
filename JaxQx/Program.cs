@@ -10,7 +10,7 @@ using SharpDX;
 
 #endregion
 
-namespace Jax
+namespace JaxQx
 {
     internal class Program
     {

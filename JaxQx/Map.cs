@@ -8,7 +8,7 @@ using SharpDX;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-namespace Jax
+namespace JaxQx
 {
     class Map
     {

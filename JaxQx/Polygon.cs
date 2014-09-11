@@ -9,7 +9,7 @@ using SharpDX;
 using System.Drawing;
 using LeagueSharp.Common;
 
-namespace Jax
+namespace JaxQx
 {
     class Polygon
     {

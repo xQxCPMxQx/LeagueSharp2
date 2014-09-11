@@ -4,7 +4,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace Jax
+namespace JaxQx
 {
     class Jumper
     {
