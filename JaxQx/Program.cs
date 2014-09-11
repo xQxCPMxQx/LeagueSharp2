@@ -1,13 +1,10 @@
 
 #region
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
-
 #endregion
 
 namespace JaxQx
@@ -89,8 +86,12 @@ namespace JaxQx
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q")
+                .SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+
             Config.SubMenu("Combo")
                   .AddItem(
                        new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
@@ -99,9 +100,11 @@ namespace JaxQx
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q")
+                .SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass")
-                  .AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q", "E", "Q+E" })));
+                  .AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q+W", "Q+E", "Default" })));
             Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                   .AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
@@ -249,60 +252,112 @@ namespace JaxQx
         private static void Combo()
         {
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
+            var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
-            
+            var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
+
+            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var wTarget = SimpleTs.GetTarget(vPlayer.AttackRange, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
 
-            if (Q.IsReady() && useQ)
+            if (Q.IsReady() && useQ && qTarget != null)
             {
-                var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
-                {
-                    UseItems(vTarget);
-                    if (Q.IsReady() && E.IsReady())
-                    {
-                        E.Cast();
-                        Q.CastOnUnit(vTarget);
-                        UseItems(vTarget);
-                    }
-                }
+                if (useQDontUnderTurret)
+                { 
+                    if (!Utility.UnderTurret(qTarget))
+                        Q.CastOnUnit(qTarget);
+                } else
+                    Q.CastOnUnit(qTarget);
+                UseItems(qTarget);
             }
-            
-            if (W.IsReady())
+
+            if (W.IsReady() && useW && wTarget != null)
+            {
                 W.CastOnUnit(vPlayer);
-            
-            if (E.IsReady() && useE)
+            }
+
+            if (E.IsReady() && useE && eTarget != null)
             {
-                if (eTarget != null)
-                    E.Cast(eTarget);
+                E.CastOnUnit(vPlayer);
             }
             
-            if (R.IsReady() || useR)
+            if (R.IsReady() || useR && wTarget != null)
             {
-                var vTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
-                if (vTarget != null && R.IsReady())
-                    R.CastOnUnit(vPlayer);
+                R.CastOnUnit(vPlayer);
             }
         }
         
         private static void Harass()
         {
-            var useQ = Config.Item("UseQHarass").GetValue<bool>();
-            var useE = Config.Item("UseEHarass").GetValue<bool>();
+            var useQ = Config.Item("UseQCombo").GetValue<bool>();
+            var useW = Config.Item("UseWCombo").GetValue<bool>();
+            var useE = Config.Item("UseECombo").GetValue<bool>();
+            var useQDontUnderTurret = Config.Item("UseQHarassDontUnderTurret").GetValue<bool>();
+
+            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var wTarget = SimpleTs.GetTarget(vPlayer.AttackRange, SimpleTs.DamageType.Magical);
+            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
             
-            if (Q.IsReady() && useQ)
+            int vHarassMode = Config.Item("HarassMode").GetValue<StringList>().SelectedIndex;
+
+            switch (vHarassMode)
             {
-                var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
-                    Q.Cast(vTarget);
-            }
-            
-            if (E.IsReady() && useE)
-            {
-                var vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
-                    E.Cast(vTarget);
+                case 0:
+                    {
+                        if (Q.IsReady() && W.IsReady() && qTarget != null)
+                        {
+                            if (useQDontUnderTurret)
+                            {
+                                if (!Utility.UnderTurret(qTarget))
+                                    Q.CastOnUnit(qTarget);
+                            }
+                            else
+                                Q.CastOnUnit(qTarget);
+                            W.CastOnUnit(vPlayer);
+                        }
+                        break;
+                    }
+                case 1:
+                    {
+                        if (Q.IsReady() && E.IsReady() && qTarget != null)
+                        {
+                            if (useQDontUnderTurret)
+                            {
+                                if (!Utility.UnderTurret(qTarget))
+                                    Q.CastOnUnit(qTarget);
+                            }
+                            else
+                                Q.CastOnUnit(qTarget);
+                            E.CastOnUnit(vPlayer);
+                        }
+                        break;
+                    }
+                case 2:
+                    {
+                        if (Q.IsReady() && useQ && qTarget != null)
+                        {
+                            if (useQDontUnderTurret)
+                            {
+                                if (!Utility.UnderTurret(qTarget))
+                                    Q.CastOnUnit(qTarget);
+                            }
+                            else
+                                Q.CastOnUnit(qTarget);
+                            UseItems(qTarget);
+                        }
+
+                        if (W.IsReady() && useW && wTarget != null)
+                        {
+                            W.CastOnUnit(vPlayer);
+                        }
+
+                        if (E.IsReady() && useE && eTarget != null)
+                        {
+                            E.CastOnUnit(vPlayer);
+                        }
+                        break;
+                    }
             }
         }
 
