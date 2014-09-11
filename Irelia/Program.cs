@@ -40,7 +40,7 @@ namespace Irelia
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-           // if (vIrelia.BaseSkinName != "Irelia") return;
+            if (vIrelia.BaseSkinName != "Irelia") return;
             if (vIrelia.IsDead) return;
             
             Q = new Spell(SpellSlot.Q, 650f);
