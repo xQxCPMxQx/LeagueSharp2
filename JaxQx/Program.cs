@@ -59,7 +59,7 @@ namespace JaxQx
             Q = new Spell(SpellSlot.Q, 680f);
             E = new Spell(SpellSlot.E, 200f);
             W = new Spell(SpellSlot.E, 200f);
-            R = new Spell(SpellSlot.R, 0f);
+            R = new Spell(SpellSlot.R, 200f);
             
             Q.SetTargetted(0.50f, 75f);
             W.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
