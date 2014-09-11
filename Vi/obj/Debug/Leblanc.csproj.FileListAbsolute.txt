@@ -1,0 +1,3 @@
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Leblanc\obj\Debug\Vi.exe
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Leblanc\obj\Debug\Leblanc.csprojResolveAssemblyReference.cache
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Leblanc\bin\Debug\Vi.exe.config

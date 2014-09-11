@@ -1,0 +1,10 @@
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\bin\Debug\LeagueSharp.Common.dll
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\bin\Debug\LeagueSharp.dll
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\bin\Debug\SharpDX.dll
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\bin\Debug\SharpDX.Direct3D9.dll
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\bin\Debug\LeagueSharp.xml
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\bin\Debug\Swain.exe.config
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\bin\Debug\Swain.exe
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\bin\Debug\Swain.pdb
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\obj\Debug\Swain.exe
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\Swain\obj\Debug\Swain.pdb

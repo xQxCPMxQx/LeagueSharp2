@@ -1,0 +1,11 @@
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\bin\Debug\Irelia.exe.config
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\bin\Debug\Irelia.exe
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\bin\Debug\Irelia.pdb
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\bin\Debug\LeagueSharp.Common.dll
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\bin\Debug\LeagueSharp.dll
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\bin\Debug\SharpDX.dll
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\bin\Debug\SharpDX.Direct3D9.dll
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\bin\Debug\LeagueSharp.xml
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\obj\Debug\Irelia.csprojResolveAssemblyReference.cache
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\obj\Debug\Irelia.exe
+C:\Program Files (x86)\LeagueSharp\SVN\Repositories\AE72DDF8\trunk\Irelia\obj\Debug\Irelia.pdb
