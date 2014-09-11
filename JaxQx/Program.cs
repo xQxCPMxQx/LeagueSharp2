@@ -57,13 +57,11 @@ namespace JaxQx
             if (vPlayer.IsDead) return;
             
             Q = new Spell(SpellSlot.Q, 680f);
-            E = new Spell(SpellSlot.E, 200f);
-            W = new Spell(SpellSlot.E, 200f);
-            R = new Spell(SpellSlot.R, 200f);
+            W = new Spell(SpellSlot.W, 150f);
+            E = new Spell(SpellSlot.E, 150f);
+            R = new Spell(SpellSlot.R, 150f);
             
             Q.SetTargetted(0.50f, 75f);
-            W.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -176,10 +174,11 @@ namespace JaxQx
             Config.AddToMainMenu();
             Config.SubMenu("Drawings").AddItem(new MenuItem("Ward", "Draw Ward")).SetValue(true);
 
-            
+
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             GameObject.OnCreate += GameObject_OnCreate;
+            //Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
             Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
@@ -204,6 +203,20 @@ namespace JaxQx
                 return;
         }
 
+        private static void Orbwalking_AfterAttack(Obj_AI_Base unit, Obj_AI_Base target)
+        {
+            if (Config.Item("ComboActive").GetValue<KeyBind>().Active && Config.Item("UseWCombo").GetValue<bool>() &&
+                unit.IsMe && (target is Obj_AI_Hero) && W.IsReady())
+            {
+                W.Cast();
+            }
+
+            if (Config.Item("ComboActive").GetValue<KeyBind>().Active && Config.Item("UseRCombo").GetValue<bool>() &&
+                unit.IsMe && (target is Obj_AI_Hero) && R.IsReady())
+            {
+                R.Cast();
+            }
+        }
         public static void Obj_AI_Base_OnProcessSpellCast(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
         {
             if (TestSpells.ToList().Contains(arg.SData.Name))
@@ -272,8 +285,9 @@ namespace JaxQx
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var wTarget = SimpleTs.GetTarget(vPlayer.AttackRange, SimpleTs.DamageType.Magical);
+            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
 
             if (Q.IsReady() && useQ && qTarget != null)
             {
@@ -295,11 +309,12 @@ namespace JaxQx
             {
                 E.CastOnUnit(vPlayer);
             }
-            
-            if (R.IsReady() || useR && wTarget != null)
+
+            if (R.IsReady() && useR && rTarget != null)
             {
                 R.CastOnUnit(vPlayer);
             }
+
         }
         
         private static void Harass()
@@ -328,7 +343,7 @@ namespace JaxQx
                             }
                             else
                                 Q.CastOnUnit(qTarget);
-                            W.CastOnUnit(vPlayer);
+                            W.Cast();
                         }
                         break;
                     }
@@ -363,7 +378,7 @@ namespace JaxQx
 
                         if (W.IsReady() && useW && wTarget != null)
                         {
-                            W.CastOnUnit(vPlayer);
+                            W.Cast();
                         }
 
                         if (E.IsReady() && useE && eTarget != null)
@@ -385,7 +400,7 @@ namespace JaxQx
                 var useE = Config.Item("UseELaneClear").GetValue<bool>();
                 var useQDontUnderTurret = Config.Item("UseQLaneClearDontUnderTurret").GetValue<bool>();
 
-                var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, W.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in vMinions)
                 {
                 //    var qMinionDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.Q);
@@ -393,7 +408,7 @@ namespace JaxQx
                 //    var eMinionDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.E);
 
 
-                    if (useQ && Q.IsReady())
+                    if (useQ && Q.IsReady() && vPlayer.Distance(vMinion) > vPlayer.AttackRange)
                     //if (useQ && vMinion.Health <= qMinionDamage)
                     {
                         if (useQDontUnderTurret)
@@ -406,7 +421,7 @@ namespace JaxQx
                     }
 
                     if (useW && W.IsReady())
-                        W.CastOnUnit(vPlayer);
+                        W.Cast();
 
                     if (useE && E.IsReady())
                         E.CastOnUnit(vPlayer);
@@ -429,11 +444,11 @@ namespace JaxQx
 
                 if (mobs.Count > 0)
                 {
-                    if (Q.IsReady() && useQ)
+                    if (Q.IsReady() && useQ && vPlayer.Distance(mobs[0]) > vPlayer.AttackRange)
                         Q.CastOnUnit(mobs[0]);
 
                     if (W.IsReady() && useW)
-                        W.CastOnUnit(vPlayer);
+                        W.Cast();
 
                     if (E.IsReady() && useE)
                         E.CastOnUnit(vPlayer);
