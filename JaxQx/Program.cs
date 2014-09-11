@@ -229,7 +229,6 @@ namespace JaxQx
                 }
             }
         }
-
         
         private static void Game_OnGameUpdate(EventArgs args)
         {
@@ -403,13 +402,7 @@ namespace JaxQx
                 var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, W.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in vMinions)
                 {
-                //    var qMinionDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.Q);
-                //    var wMinionDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.W);
-                //    var eMinionDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.E);
-
-
-                    if (useQ && Q.IsReady() && vPlayer.Distance(vMinion) > vPlayer.AttackRange)
-                    //if (useQ && vMinion.Health <= qMinionDamage)
+                    if (useQ && Q.IsReady() && vPlayer.Distance(vMinion) > Orbwalking.GetRealAutoAttackRange(vPlayer))
                     {
                         if (useQDontUnderTurret)
                         {
