@@ -36,8 +36,10 @@ namespace JaxQx
                                               "Bushwhack" };
 
         public static Map map;
-        
-        public static SpellSlot IgniteSlot;
+
+        private static SpellSlot IgniteSlot;
+        private static SpellSlot SmiteSlot;
+        public static int DelayTick = 0;
         //Menu
         public static Menu Config;
         public static Menu MenuTargetedItems;
@@ -47,7 +49,6 @@ namespace JaxQx
         {
             map = new Map();
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-
         }
         
         private static void Game_OnGameLoad(EventArgs args)
@@ -57,10 +58,11 @@ namespace JaxQx
             
             Q = new Spell(SpellSlot.Q, 680f);
             E = new Spell(SpellSlot.E, 200f);
-            W = new Spell(SpellSlot.E, 0f);
+            W = new Spell(SpellSlot.E, 200f);
             R = new Spell(SpellSlot.R, 0f);
             
             Q.SetTargetted(0.50f, 75f);
+            W.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             
             SpellList.Add(Q);
@@ -69,6 +71,7 @@ namespace JaxQx
             SpellList.Add(R);
             
             IgniteSlot = vPlayer.GetSpellSlot("SummonerDot");
+            SmiteSlot = vPlayer.GetSpellSlot("SummonerSmite");
             
             //Create the menu
             Config = new Menu("xQx | Jax", "Jax", true);
@@ -84,9 +87,9 @@ namespace JaxQx
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q")
                 .SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
 
@@ -111,7 +114,10 @@ namespace JaxQx
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Under Turret Q")
+                .SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
                   .AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0],
@@ -121,8 +127,10 @@ namespace JaxQx
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJungleFarm", "Use W").SetValue(false));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
+
             Config.SubMenu("JungleFarm")
                   .AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0],
                       KeyBindType.Press)));
@@ -215,11 +223,18 @@ namespace JaxQx
             if (!Orbwalking.CanMove(100))
                 return;
 
+            
+            if (DelayTick - Environment.TickCount <= 250)
+            {
+                UseSummoners();
+                DelayTick = Environment.TickCount;
+            }
+            
             if (Config.Item("Ward").GetValue<KeyBind>().Active)
             {
                 Jumper.wardJump(Game.CursorPos.To2D());
             }
-
+            
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
@@ -365,16 +380,64 @@ namespace JaxQx
             var laneClearActive = Config.Item("LaneClearActive").GetValue<KeyBind>().Active;
             if (laneClearActive)
             {
+                var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
+                var useW = Config.Item("UseWLaneClear").GetValue<bool>();
+                var useE = Config.Item("UseELaneClear").GetValue<bool>();
+                var useQDontUnderTurret = Config.Item("UseQLaneClearDontUnderTurret").GetValue<bool>();
 
+                var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                foreach (var vMinion in vMinions)
+                {
+                //    var qMinionDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.Q);
+                //    var wMinionDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.W);
+                //    var eMinionDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.E);
+
+
+                    if (useQ && Q.IsReady())
+                    //if (useQ && vMinion.Health <= qMinionDamage)
+                    {
+                        if (useQDontUnderTurret)
+                        {
+                            if (!Utility.UnderTurret(vMinion))
+                                Q.CastOnUnit(vMinion);
+                        }
+                        else
+                            Q.CastOnUnit(vMinion);
+                    }
+
+                    if (useW && W.IsReady())
+                        W.CastOnUnit(vPlayer);
+
+                    if (useE && E.IsReady())
+                        E.CastOnUnit(vPlayer);
+                }
             }
         }
 
         private static void JungleFarm()
         {
-            var JungleFarmActive = Config.Item("JungleFarmActive").GetValue<KeyBind>().Active;
-            if (JungleFarmActive)
-            {
+            var jungleFarmActive = Config.Item("JungleFarmActive").GetValue<KeyBind>().Active;
 
+            if (jungleFarmActive)
+            {
+                var useQ = Config.Item("UseQJungleFarm").GetValue<bool>();
+                var useW = Config.Item("UseWJungleFarm").GetValue<bool>();
+                var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
+
+                var mobs = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range,
+                    MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
+                if (mobs.Count > 0)
+                {
+                    if (Q.IsReady() && useQ)
+                        Q.CastOnUnit(mobs[0]);
+
+                    if (W.IsReady() && useW)
+                        W.CastOnUnit(vPlayer);
+
+                    if (E.IsReady() && useE)
+                        E.CastOnUnit(vPlayer);
+                }
             }
         }
 
@@ -419,6 +482,32 @@ namespace JaxQx
                         var itemID = Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4));
                         if (Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null)
                             Items.UseItem(itemID);
+                    }
+                }
+            }
+        }
+
+        private static void UseSummoners()
+        {
+            if (Config.Item("AutoSmite").GetValue<KeyBind>().Active)
+            {
+                float[] SmiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
+                string[] MonsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
+                var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
+                    spell => spell.Name.Contains("smite")).SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                foreach (var vMinion in vMinions)
+                {
+                    if (vMinion != null
+                        && !vMinion.IsDead
+                        && !vPlayer.IsDead
+                        && !vPlayer.IsStunned
+                        && SmiteSlot != SpellSlot.Unknown
+                        && vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                    {
+                        if ((vMinion.Health < SmiteDmg.Max()) && (MonsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name))))
+                        {
+                            vPlayer.SummonerSpellbook.CastSpell(SmiteSlot, vMinion);
+                        }
                     }
                 }
             }
