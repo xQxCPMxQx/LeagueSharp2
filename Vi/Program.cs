@@ -50,7 +50,7 @@ namespace Vi
 
             Q.SetSkillshot(0.50f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
-            R.SetSkillshot(0.15f, 80f, 1500f, false, SkillshotType.SkillshotCone);
+            R.SetTargetted(0.15f, 1500f);
 
             Q.SetCharged("ViQ", "ViQ", 100, 850, 1f);
 
@@ -303,13 +303,14 @@ namespace Vi
                         Config.Item("DontUlt" + rTarget.BaseSkinName).GetValue<bool>() == false) && useR;
 
 
-            if (rTarget != null && R.IsReady() || useR && comboDamage > rTarget.Health)
+            if (rTarget != null && R.IsReady() && useR && comboDamage > rTarget.Health)
             {
                 var vTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
                 if (vTarget != null)
                     if (R.IsReady() && GetComboDamage(vTarget) > vTarget.Health)
                     {
-                        R.Cast(vTarget, false, true);
+                        Game.PrintChat("Combo!!!!!!");
+                        R.CastOnUnit(vTarget);
                     }
             }
         }
