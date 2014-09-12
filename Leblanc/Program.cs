@@ -69,7 +69,7 @@ namespace Leblanc
 
         private void Game_OnGameLoad(EventArgs args)
         {
-            //if (vPlayer.BaseSkinName != ChampionName) return;
+            if (vPlayer.BaseSkinName != ChampionName) return;
             Console.Clear();
             //Create the spells
             Q = new Spell(SpellSlot.Q, 720);
@@ -181,9 +181,7 @@ namespace Leblanc
                 .AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
             Config.AddToMainMenu();
 
-            //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
-
             GameObject.OnCreate += GameObject_OnCreate;
             GameObject.OnDelete += GameObject_OnDelete;
 
@@ -199,13 +197,6 @@ namespace Leblanc
             Game.PrintChat(String.Format("<font color='#70DBDB'>xQx </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
         }
 
-        /* ~Program()
-         {
-             Drawing.OnPreReset -= Drawing_OnPreReset;
-             Drawing.OnPostReset -= Drawing_OnPostReset;
-             Drawing.OnEndScene -= Drawing_OnEndScene;
-         }
-         */
         private static Obj_AI_Hero EnemyHaveSoulShackle
         {
             get
@@ -296,10 +287,6 @@ namespace Leblanc
 
         public static bool LeBlancStillJumped
         {
-            //"LeblancSlide" // W is ready + LB can jump with W
-            //"lblancslidereturn" LB jumped with W
-            //"LeblancSlideM" // R-W is ready + LB can jump with R
-            //"lblancslidereturnm" LB jumped with R
             get
             {
                 if (W.IsReady() && vPlayer.Spellbook.GetSpell(SpellSlot.W).Name != "leblancslidereturn") // LB jumped with W
@@ -351,10 +338,6 @@ namespace Leblanc
         }
         private static void Combo()
         {
-            //            Game.PrintChat("W Name: " + vPlayer.Spellbook.GetSpell(SpellSlot.W).Name);
-            //            if (R.Level > 0)
-            //                Game.PrintChat("R Name: " + vPlayer.Spellbook.GetSpell(SpellSlot.R).Name);
-
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
@@ -365,14 +348,6 @@ namespace Leblanc
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
             var wqTarget = SimpleTs.GetTarget(W.Range + Q.Range - 30, SimpleTs.DamageType.Magical);
-
-
-           // Console.WriteLine("Q Damage: " + Q.GetDamage(wqTarget, DamageLib.StageType.Default).ToString());// DamageLib.getDmg(wqTarget, DamageLib.SpellType.Q).ToString());
-            //Console.WriteLine("W Damage: " + DamageLib.getDmg(wqTarget, DamageLib.SpellType.W).ToString());
-            //Console.WriteLine("E Damage: " + DamageLib.getDmg(wqTarget, DamageLib.SpellType.E).ToString());
-           // Console.WriteLine("---------------------------------------------------------");
-
-
 
             if (useQ && qTarget != null && Q.IsReady())
             {
@@ -435,7 +410,6 @@ namespace Leblanc
             {
                 if (E.Cast(eTarget) == Spell.CastStates.SuccessfullyCasted)
                     return;
-                //E.Cast(eTarget);
             }
 
         }
@@ -476,9 +450,6 @@ namespace Leblanc
             if (Items.CanUseItem(3092))
                 fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.FROSTQUEENSCLAIM);
 
-            //   if (R.IsReady())
-            //       fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.R);
-
             return (float)fComboDamage;
         }
 
@@ -517,7 +488,6 @@ namespace Leblanc
                 {
                     case "LeblancChaosOrbM":
                         {
-                            //Game.PrintChat("R = Q");
                             R.Range = Q.Range;
                             R.SetTargetted(0.5f, float.MaxValue);
                             if (qTarget != null)
@@ -526,7 +496,6 @@ namespace Leblanc
                         }
                     case "LeblancSlideM":
                         {
-                            //Game.PrintChat("R = W");
                             R.Range = W.Range;
                             R.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
                             if (wTarget != null)
@@ -535,7 +504,6 @@ namespace Leblanc
                         }
                     case "LeblancSoulShackleM":
                         {
-                            //Game.PrintChat("R = E");
                             R.Range = E.Range;
                             R.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
                             if (eTarget != null)
@@ -613,31 +581,7 @@ namespace Leblanc
         {
             if (vPlayer.IsDead) return;
 
-
-            foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (hero.IsEnemy)
-                {
-                    foreach (BuffInstance buff in hero.Buffs)
-                    {
-                        if (buff.Name.Contains("blanc"))
-                        {
-                            //Game.PrintChat(hero.BaseSkinName + " have : " + buff.Name);
-                        }
-                    }
-                }
-            }
-
             Orbwalker.SetAttacks(true);
-            /*
-                        foreach (var buff in vPlayer.Buffs)
-                        {
-                            if (buff.Name.Contains("lone"))
-                            {
-                                Game.PrintChat(buff.Name);
-                            }
-                        }
-            */
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
@@ -667,16 +611,6 @@ namespace Leblanc
                 if (menuItem.Active && spell.Level > 0)
                     Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color, 1, 10);
             }
-            /*
-            var size = 10;
-            var topLeft = new Vector2(vPlayer.Position.X - 10 * size, vPlayer.Position.Y - 10 * size);
-            var topRight = new Vector2(vPlayer.Position.X + 10 * size, vPlayer.Position.Y - 10 * size);
-            var botLeft = new Vector2(vPlayer.Position.X - 10 * size, vPlayer.Position.Y + 10 * size);
-            var botRight = new Vector2(vPlayer.Position.X + 10 * size, vPlayer.Position.Y + 10 * size);
-
-            Drawing.DrawLine(topLeft.X, topLeft.Y, botRight.X, botRight.Y, 10, Color.Red);
-            Drawing.DrawLine(topRight.X, topRight.Y, botLeft.X, botLeft.Y, 10, Color.Red);
-            */
 
             var wObjectPosition = Config.Item("WObjectPosition").GetValue<Circle>();
             var wObjectTimeTick = Config.Item("WObjectTimeTick").GetValue<bool>();
@@ -689,20 +623,10 @@ namespace Leblanc
                 var vTarget = EnemyHaveSoulShackle;
                 if (vTarget != null)
                 {
-                  /*  TimeSpan time = TimeSpan.FromSeconds(soulShackleTimeExperies - Game.Time);
-                    Vector2 pos = Drawing.WorldToScreen(vTarget.Position);
-                    string display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
-                    Drawing.DrawText(pos.X - display.Length * 3, pos.Y + 20, System.Drawing.Color.YellowGreen, display);
-                    */
                     Utility.DrawCircle(vPlayer.Position, 1100f, eActiveRange.Color);
                 }
             }
 
-            /*  if (DrawEnemySoulShackle && eActiveRange.Active)
-              {
-                  Utility.DrawCircle(vPlayer.Position, 1100f, eActiveRange.Color);
-              }
-              */
             foreach (var existingSlide in ExistingSlide)
             {
                 if (wObjectPosition.Active)
@@ -715,17 +639,7 @@ namespace Leblanc
                         Vector2 pos;
                         string display;
                         
-                        /*
-                        float existingSlidePosition = 66;
-                        if (existingSlide.ExpireTimePicture == picClockR)
-                            existingSlidePosition = 122;
-                        */
                         TimeSpan time = TimeSpan.FromSeconds(existingSlide.ExpireTime - Game.Time);
-
-                        //pos = Drawing.WorldToScreen(vPlayer.Position);
-                        //display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
-                        //Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65 - existingSlidePosition, System.Drawing.Color.GreenYellow, display);
-
                         pos = Drawing.WorldToScreen(existingSlide.Position);
                         display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
                         Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65, System.Drawing.Color.GreenYellow, display);
@@ -753,14 +667,6 @@ namespace Leblanc
                         DirectXDrawer.DrawSprite(SlideSprite, existingSlide.Picture,
                             mPos.ScaleSize(percentScale, new Vector2(mPos.Width, mPos.Height)),
                             new[] { 0.3f * percentScale, 0.3f * percentScale });
-
-                        /*if (existingSlide.ExpireTimePicture == picClockR)
-                            picturePosition = 122;
-                        Size cPos = new Size((int)(playerServerPos[0] - 82 * 0.3f), (int)(playerServerPos[1] + picturePosition * 0.3f));
-                        DirectXDrawer.DrawSprite(SlideSprite, existingSlide.ExpireTimePicture,
-                            cPos.ScaleSize(percentclockScale, new Vector2(cPos.Width, cPos.Height)),
-                            new[] { 0.3f * percentclockScale, 0.3f * percentclockScale });
-                        */
                     }
                     SlideSprite.End();
                 }
@@ -834,7 +740,6 @@ namespace Leblanc
 
                 }
             }
-            Game.PrintChat("Init Done!");
         }
 
         void Drawing_OnPostReset(EventArgs args)
