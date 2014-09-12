@@ -5,6 +5,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Color = System.Drawing.Color;
 #endregion
 
 namespace Vi
@@ -14,30 +15,34 @@ namespace Vi
         public const string ChampionName = "Vi";
         private static readonly Obj_AI_Hero vPlayer = ObjectManager.Player;
 
-        //Orbwalker instance
+        /* [ Orbwalker Instance ] */
         public static Orbwalking.Orbwalker Orbwalker;
 
-        //Spells
+        /* [ Spells ] */
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
         public static Spell E;
         public static Spell E2;
         public static Spell R;
 
+        /* [ Summoners ] */
         private static SpellSlot IgniteSlot;
         private static SpellSlot SmiteSlot;
-        public static int DelayTick = 0;
-        //Menu
+
+        /* [ Variables ] */
+        private static int DelayTick = 0;
+
+        /* [ Menu ] */
         private static Menu Config;
         private static Menu MenuTargetedItems;
         private static Menu MenuNonTargetedItems;
 
-        private static void Main(string[] args)
+        private static void Main()
         {
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+            CustomEvents.Game.OnGameLoad += new Program().Game_OnGameLoad;
         }
 
-        private static void Game_OnGameLoad(EventArgs args)
+        private void Game_OnGameLoad(EventArgs args)
         {
             if (vPlayer.BaseSkinName != "Vi") return;
             if (vPlayer.IsDead) return;
@@ -48,40 +53,48 @@ namespace Vi
             R = new Spell(SpellSlot.R, 800f);
 
             Q.SetSkillshot(0.50f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            Q.SetCharged("ViQ", "ViQ", 100, 850, 1f);
+
             E.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.15f, 80f, 1500f, false, SkillshotType.SkillshotCone);
-
-            Q.SetCharged("ViQ", "ViQ", 100, 850, 1f);
 
             SpellList.Add(Q);
             SpellList.Add(E);
             SpellList.Add(R);
 
+            /* [ Summoners ] */
             IgniteSlot = vPlayer.GetSpellSlot("SummonerDot");
             SmiteSlot = vPlayer.GetSpellSlot("SummonerSmite");
 
-            //Create the menu
+            /* [ Main Menu ] */
             Config = new Menu("xQx | Vi", "Vi", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
+                SimpleTs.AddToMenu(targetSelectorMenu);
+                Config.AddSubMenu(targetSelectorMenu);
 
-            Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            Orbwalker.SetAttacks(true);
+                Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+                Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+                Orbwalker.SetAttacks(true);
 
-            // Combo
+            /* [ Combo ] */
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use R on", "DontUlt"));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
+            {
+                Config.SubMenu("Combo")
+                    .SubMenu("DontUlt")
+                    .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+            }
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
                         KeyBindType.Press)));
 
-            // Harass
+            /* [ Harass ] */
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
@@ -92,7 +105,7 @@ namespace Vi
                 .AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
                         KeyBindType.Press)));
 
-            // Lane Clear
+            /* [ Lane Clear ] */
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
@@ -101,44 +114,42 @@ namespace Vi
                 .AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
 
-            // Jungling Farm
+            /* [ Jungling Farm ] */
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
             Config.SubMenu("JungleFarm")
                 .AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
 
-            // Extras
+            /* [ Misc ] */
+            Config.AddSubMenu(new Menu("Misc", "Misc"));
+            Config.SubMenu("Misc").AddItem(new MenuItem("InterruptSpells", "Interrupt spells").SetValue(true));
+
+            /* [ Extras ] */
             Config.AddSubMenu(new Menu("Extras", "Extras"));
             Config.SubMenu("Extras").AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
-            // Extras -> Use Items 
+            /* [ Extras - > Use Items ] */
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
             Config.SubMenu("Extras").AddSubMenu(menuUseItems);
-            
-            // Extras -> Other
-            Config.SubMenu("Extras").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
-               
 
-            // Extras -> Use Items -> Targeted Items
+            /* [ Extras - > Use Items -> Targeted Items ] */
             MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
             menuUseItems.AddSubMenu(MenuTargetedItems);
             if (Utility.Map.GetMap() == Utility.Map.MapType.SummonersRift)
                 MenuTargetedItems.AddItem(new MenuItem("item3128", "Deathfire Grasp").SetValue(true));
             else
                 MenuTargetedItems.AddItem(new MenuItem("item3188", "Blackfire Torch").SetValue(true));
-
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
 
-            // Extras -> Use Items -> AOE Items
+            /* [ Extras - > Use Items -> AoE Items ] */
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
             menuUseItems.AddSubMenu(MenuNonTargetedItems);
             MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
@@ -147,33 +158,35 @@ namespace Vi
             MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
 
-            // Drawing
+            /* [ Drawing ] */
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q range").SetValue(new Circle(true,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WQRange", "W-Q range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(true,
+                Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false,
+                Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false,
+                Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("WRRange", "Q-R Range").SetValue(new Circle(false,
+                Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("WRRange", "Flash-Q Range").SetValue(new Circle(false,
+                Color.FromArgb(255, 255, 255, 255))));
 
             Config.AddToMainMenu();
 
+            /* [ Events ] */
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
 
+            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
         }
-         private static void Drawing_OnDraw(EventArgs args)
+        private static void Drawing_OnDraw(EventArgs args)
         {
             foreach (var spell in SpellList)
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color, 1, 5);
+                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
         }
 
@@ -184,14 +197,14 @@ namespace Vi
                 float[] SmiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
                 string[] MonsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
                 var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
-                    spell => spell.Name.Contains("smite")).SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                    spell => spell.Name.Contains("mite")).SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in vMinions)
                 {
-                    if (vMinion != null 
-                        && !vMinion.IsDead 
-                        && !vPlayer.IsDead 
-                        && !vPlayer.IsStunned 
-                        && SmiteSlot != SpellSlot.Unknown 
+                    if (vMinion != null
+                        && !vMinion.IsDead
+                        && !vPlayer.IsDead
+                        && !vPlayer.IsStunned
+                        && SmiteSlot != SpellSlot.Unknown
                         && vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
                     {
                         if ((vMinion.Health < SmiteDmg.Max()) && (MonsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name))))
@@ -206,7 +219,7 @@ namespace Vi
         {
             if (!Orbwalking.CanMove(100)) return;
             if (DelayTick - Environment.TickCount <= 250)
-            { 
+            {
                 UseSummoners();
                 DelayTick = Environment.TickCount;
             }
@@ -214,7 +227,7 @@ namespace Vi
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
-                
+
             }
 
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
@@ -233,7 +246,7 @@ namespace Vi
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = vPlayer.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value; 
+                var existsMana = vPlayer.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
                 if (vPlayer.Mana >= existsMana)
                     JungleFarm();
             }
@@ -242,55 +255,59 @@ namespace Vi
 
         private static void Combo()
         {
+            var qTarget = SimpleTs.GetTarget(Q.ChargedMaxRange, SimpleTs.DamageType.Physical);
+            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var e2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
+            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
+
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
+            var comboDamage = rTarget != null ? GetComboDamage(rTarget) : 0;
+
+            if (rTarget != null && useR)
+                useR = (Config.Item("DontUlt" + rTarget.BaseSkinName) != null && Config.Item("DontUlt" + rTarget.BaseSkinName).GetValue<bool>() == false) && useR;
+
 
             if (Q.IsReady() && useQ)
             {
-                var vTarget = SimpleTs.GetTarget(Q.ChargedMaxRange, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
+                if (qTarget != null)
                 {
-                    UseItems(vTarget);
+                    UseItems(qTarget);
                     if (Q.IsCharging)
                     {
-                        Q.Cast(vTarget);
-                        UseItems(vTarget);
+                        Q.Cast(qTarget);
                     }
-                    else 
+                    else
                     {
                         Q.StartCharging();
                     }
-
                 }
             }
 
+            if (eTarget != null)
+                UseItems(eTarget);
+
             if (E.IsReady() && useE)
             {
-                var ETarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-                var E2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
-                UseItems(E2Target);
-                if (ETarget != null)
-                    E.Cast(ETarget);
-                else 
-                if (E2Target != null && EMinion != null)
-                    E.Cast(EMinion);
+                if (eTarget != null)
+                    E.Cast(eTarget);
+                else
+                    if (e2Target != null && EMinion != null)
+                        E.Cast(EMinion);
             }
 
-            if (R.IsReady() || useR)
+            if (rTarget != null && useR && comboDamage > rTarget.Health)
             {
-                var vTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
-                    if (R.IsReady() && GetComboDamage(vTarget) > vTarget.Health)
-                    {
-                        R.Cast(vTarget, false, true);
-                        UseItems(vTarget);
-                    }
+                if (R.IsReady())
+                {
+                    R.Cast(rTarget, false, true);
+                }
             }
         }
 
         private static void Harass()
-         {
+        {
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
 
@@ -308,7 +325,7 @@ namespace Vi
                     E.Cast(vTarget);
             }
         }
-        
+
         private static void JungleFarm()
         {
             var jungleFarmActive = Config.Item("JungleFarmActive").GetValue<KeyBind>().Active;
@@ -346,7 +363,7 @@ namespace Vi
             {
                 var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
                 var useE = Config.Item("UseELaneClear").GetValue<bool>();
-                
+
                 var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.ChargedMaxRange, MinionTypes.All);
                 var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E2.Range, MinionTypes.All);
 
@@ -397,7 +414,7 @@ namespace Vi
                 return (from vMinion in vMinions.Where(vMinion => vMinion.IsValidTarget(E.Range))
                         let endPoint =
                             vMinion.ServerPosition.To2D()
-                                .Extend(ObjectManager.Player.ServerPosition.To2D(), - E.Range)
+                                .Extend(ObjectManager.Player.ServerPosition.To2D(), -E.Range)
                                 .To3D()
                         where
                             Intersection(
@@ -415,7 +432,7 @@ namespace Vi
 
             if (E.IsReady())
                 fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.E) * E.Instance.Ammo;
-            
+
             if (R.IsReady())
                 fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.R);
 
@@ -476,5 +493,6 @@ namespace Vi
 
             }
         }
+
     }
 }
