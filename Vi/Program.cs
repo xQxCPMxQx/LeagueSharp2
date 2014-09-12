@@ -1,4 +1,3 @@
-
 #region
 using System;
 using System.Collections.Generic;
@@ -309,7 +308,6 @@ namespace Vi
                 if (vTarget != null)
                     if (R.IsReady() && GetComboDamage(vTarget) > vTarget.Health)
                     {
-                        Game.PrintChat("Combo!!!!!!");
                         R.CastOnUnit(vTarget);
                     }
             }
