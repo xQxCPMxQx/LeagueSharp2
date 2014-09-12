@@ -77,6 +77,15 @@ namespace Vi
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+            
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Dont use R on", "DontUlt"));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
+            {
+                Config.SubMenu("Combo")
+                    .SubMenu("DontUlt")
+                    .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+            }
+            
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
@@ -185,7 +194,7 @@ namespace Vi
                 float[] SmiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
                 string[] MonsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
                 var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
-                    spell => spell.Name == "SummonerSmite").SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                    spell => spell.Name.Contains("mite")).SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in vMinions)
                 {
                     if (vMinion != null
@@ -243,49 +252,54 @@ namespace Vi
 
         private static void Combo()
         {
+            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var e2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
+            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
+            
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
+            var comboDamage = rTarget != null ? GetComboDamage(rTarget) : 0;
 
-            if (Q.IsReady() && useQ)
+            if (qTarget != null && Q.IsReady() && useQ)
             {
-                var vTarget = SimpleTs.GetTarget(Q.ChargedMaxRange, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
+                if (Q.IsCharging)
                 {
-                    UseItems(vTarget);
-                    if (Q.IsCharging)
-                    {
-                        Q.Cast(vTarget);
-                        UseItems(vTarget);
-                    }
-                    else
-                    {
-                        Q.StartCharging();
-                    }
-
+                    Q.Cast(qTarget);
+                    UseItems(qTarget);
+                }
+                else
+                {
+                    Q.StartCharging();
                 }
             }
 
+            if (eTarget != null)
+                UseItems(eTarget);
+
             if (E.IsReady() && useE)
             {
-                var ETarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-                var E2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
-                UseItems(E2Target);
-                if (ETarget != null)
-                    E.Cast(ETarget);
+                UseItems(e2Target);
+                if (eTarget != null)
+                    E.Cast(eTarget);
                 else
-                    if (E2Target != null && EMinion != null)
+                    if (e2Target != null && EMinion != null)
                         E.Cast(EMinion);
             }
 
-            if (R.IsReady() || useR)
+            if (rTarget != null)
+                useR = (Config.Item("DontUlt" + rTarget.BaseSkinName) != null &&
+                        Config.Item("DontUlt" + rTarget.BaseSkinName).GetValue<bool>() == false) && useR;
+
+
+            if (rTarget != null && R.IsReady() || useR && comboDamage > rTarget.Health)
             {
                 var vTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
                 if (vTarget != null)
                     if (R.IsReady() && GetComboDamage(vTarget) > vTarget.Health)
                     {
                         R.Cast(vTarget, false, true);
-                        UseItems(vTarget);
                     }
             }
         }
