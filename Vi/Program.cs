@@ -95,9 +95,8 @@ namespace Vi
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-            Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q", "E", "Q+E" })));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ")
+                .SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                 .AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
                         KeyBindType.Press)));
@@ -115,8 +114,10 @@ namespace Vi
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite")
+                .SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ")
+                .SetValue(new Slider(50, 100, 0)));
 
             Config.SubMenu("JungleFarm")
                 .AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0],
@@ -224,7 +225,6 @@ namespace Vi
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
-
             }
 
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
@@ -277,6 +277,16 @@ namespace Vi
 
             if (eTarget != null)
                 UseItems(eTarget);
+
+
+            if (rTarget != null && IgniteSlot != SpellSlot.Unknown &&
+                vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            {
+                if (comboDamage > rTarget.Health)
+                {
+                    vPlayer.SummonerSpellbook.CastSpell(IgniteSlot, rTarget);
+                }
+            }
 
             if (E.IsReady() && useE)
             {
