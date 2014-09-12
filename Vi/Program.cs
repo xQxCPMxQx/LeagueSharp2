@@ -166,10 +166,10 @@ namespace Vi
                 Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false,
                 Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WRRange", "Q-R Range").SetValue(new Circle(false,
-                Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WRRange", "Flash-Q Range").SetValue(new Circle(false,
-                Color.FromArgb(255, 255, 255, 255))));
+         //   Config.SubMenu("Drawings").AddItem(new MenuItem("WRRange", "Q-R Range").SetValue(new Circle(false,
+         //       Color.FromArgb(255, 255, 255, 255))));
+           // Config.SubMenu("Drawings").AddItem(new MenuItem("WRRange", "Flash-Q Range").SetValue(new Circle(false,
+        //        Color.FromArgb(255, 255, 255, 255))));
 
             Config.AddToMainMenu();
 
