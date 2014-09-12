@@ -27,6 +27,9 @@ namespace Vi
 
         private static SpellSlot IgniteSlot;
         private static SpellSlot SmiteSlot;
+        private static SpellSlot FlashSlot;
+        
+        public static float FlashRange = 450f;
         public static int DelayTick = 0;
         //Menu
         private static Menu Config;
@@ -48,7 +51,7 @@ namespace Vi
             E2 = new Spell(SpellSlot.E, 600f);
             R = new Spell(SpellSlot.R, 800f);
 
-            Q.SetSkillshot(0.50f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(1f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             R.SetTargetted(0.15f, 1500f);
 
@@ -60,6 +63,7 @@ namespace Vi
 
             IgniteSlot = vPlayer.GetSpellSlot("SummonerDot");
             SmiteSlot = vPlayer.GetSpellSlot("SummonerSmite");
+            FlashSlot = vPlayer.GetSpellSlot("SummonerFlash");
 
             //Create the menu
             Config = new Menu("xQx | Vi", "Vi", true);
@@ -75,14 +79,15 @@ namespace Vi
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Menu comboUseQ = new Menu("Q Settings", "comboUseQ");
-                Config.SubMenu("Combo").AddSubMenu(comboUseQ);
-                    comboUseQ.AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-                    comboUseQ.AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+            Config.SubMenu("Combo").AddSubMenu(comboUseQ);
+            comboUseQ.AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
+            comboUseQ.AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q").SetValue(true));
 
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseFQCombo", "Use Flash+Q").SetValue(true));
 
-            Config.SubMenu("Combo").AddSubMenu(new Menu("Dont use R on", "DontUlt"));
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use R on", "DontUlt"));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
             {
                 Config.SubMenu("Combo")
@@ -98,9 +103,9 @@ namespace Vi
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Menu harassUseQ = new Menu("Q Settings", "harassUseQ");
-                Config.SubMenu("Harass").AddSubMenu(harassUseQ);
-                    harassUseQ.AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
-                    harassUseQ.AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+            Config.SubMenu("Harass").AddSubMenu(harassUseQ);
+            harassUseQ.AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
+            harassUseQ.AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ")
                 .SetValue(new Slider(50, 100, 0)));
@@ -173,9 +178,8 @@ namespace Vi
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WQRange", "W-Q range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("FQRange", "Flash+Q range").SetValue(new Circle(false,
+                System.Drawing.Color.FromArgb(0xFF, 0xCC, 0x00))));
 
             Config.AddToMainMenu();
 
@@ -191,7 +195,14 @@ namespace Vi
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color, 1, 5);
+                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
+            }
+
+            var drawFQCombo = Config.Item("FQRange").GetValue<Circle>();
+            if (drawFQCombo.Active)
+            {
+                Utility.DrawCircle(vPlayer.Position, Q.Range + 450f, drawFQCombo.Color);
+
             }
         }
 
@@ -263,15 +274,39 @@ namespace Vi
         private static void Combo()
         {
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange - 20, SimpleTs.DamageType.Physical);
+
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
             var e2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
+            
             var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
+            var useFQ = Config.Item("UseFQCombo").GetValue<bool>();
             var comboDamage = rTarget != null ? GetComboDamage(rTarget) : 0;
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
+
+            if (qTarget == null && fqTarget != null && vPlayer.Distance(fqTarget) > Q.Range && useFQ)
+            {
+                if (comboDamage > rTarget.Health && Q.IsReady() && 
+                    FlashSlot != SpellSlot.Unknown &&
+                    vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
+                    
+                {
+                    if (Q.IsCharging && Q.Range > 800)
+                    {
+                        vPlayer.SummonerSpellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
+                        Q.Cast(fqTarget);
+                    }
+                    else
+                    {
+                        Q.StartCharging();
+                    }
+                }
+
+            }
 
             if (qTarget != null && Q.IsReady() && useQ)
             {
@@ -293,13 +328,11 @@ namespace Vi
             if (eTarget != null)
                 UseItems(eTarget);
 
-            if (rTarget != null && IgniteSlot != SpellSlot.Unknown &&
+            if (rTarget != null && comboDamage > rTarget.Health && 
+                IgniteSlot != SpellSlot.Unknown &&
                 vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (comboDamage > rTarget.Health)
-                {
-                    vPlayer.SummonerSpellbook.CastSpell(IgniteSlot, rTarget);
-                }
+                vPlayer.SummonerSpellbook.CastSpell(IgniteSlot, rTarget);
             }
 
             if (E.IsReady() && useE)
@@ -319,12 +352,7 @@ namespace Vi
 
             if (rTarget != null && R.IsReady() && useR && comboDamage > rTarget.Health)
             {
-                var vTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
-                    if (R.IsReady() && GetComboDamage(vTarget) > vTarget.Health)
-                    {
-                        R.CastOnUnit(vTarget);
-                    }
+                R.CastOnUnit(rTarget);
             }
         }
 
