@@ -1,3 +1,4 @@
+
 #region
 using System;
 using System.Collections.Generic;
@@ -76,7 +77,7 @@ namespace Vi
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            
+
             Config.SubMenu("Combo").AddSubMenu(new Menu("Dont use R on", "DontUlt"));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
             {
@@ -84,7 +85,7 @@ namespace Vi
                     .SubMenu("DontUlt")
                     .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
             }
-            
+
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
@@ -189,6 +190,8 @@ namespace Vi
 
         private static void UseSummoners()
         {
+            if (SmiteSlot == SpellSlot.Unknown)
+                return;
             if (Config.Item("AutoSmite").GetValue<KeyBind>().Active)
             {
                 float[] SmiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
@@ -215,6 +218,7 @@ namespace Vi
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100)) return;
+
             if (DelayTick - Environment.TickCount <= 250)
             {
                 UseSummoners();
@@ -255,7 +259,7 @@ namespace Vi
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
             var e2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
             var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
-            
+
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
