@@ -296,7 +296,12 @@ namespace JaxQx
                         Q.CastOnUnit(qTarget);
                 } else
                     Q.CastOnUnit(qTarget);
-                UseItems(qTarget);
+                
+            }
+
+            if (wTarget != null)
+            {
+                UseItems(wTarget);
             }
 
             if (W.IsReady() && useW && wTarget != null)
@@ -307,6 +312,15 @@ namespace JaxQx
             if (E.IsReady() && useE && eTarget != null)
             {
                 E.CastOnUnit(vPlayer);
+            }
+
+            if (rTarget != null && IgniteSlot != SpellSlot.Unknown &&
+                vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            {
+                if (DamageLib.getDmg(rTarget, DamageLib.SpellType.IGNITE) > rTarget.Health)
+                {
+                    vPlayer.SummonerSpellbook.CastSpell(IgniteSlot, rTarget);
+                }
             }
 
             if (R.IsReady() && useR && rTarget != null)
