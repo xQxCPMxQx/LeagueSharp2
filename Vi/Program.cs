@@ -74,7 +74,11 @@ namespace Vi
 
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
+            Menu comboUseQ = new Menu("Q Settings", "comboUseQ");
+                Config.SubMenu("Combo").AddSubMenu(comboUseQ);
+                    comboUseQ.AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
+                    comboUseQ.AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
 
@@ -93,7 +97,10 @@ namespace Vi
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
+            Menu harassUseQ = new Menu("Q Settings", "harassUseQ");
+                Config.SubMenu("Harass").AddSubMenu(harassUseQ);
+                    harassUseQ.AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
+                    harassUseQ.AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ")
                 .SetValue(new Slider(50, 100, 0)));
@@ -264,13 +271,18 @@ namespace Vi
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
             var comboDamage = rTarget != null ? GetComboDamage(rTarget) : 0;
+            var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
             if (qTarget != null && Q.IsReady() && useQ)
             {
                 if (Q.IsCharging)
                 {
-                    Q.Cast(qTarget);
-                    UseItems(qTarget);
+                    if (useQDontUnderTurret)
+                    {
+                        if (!Utility.UnderTurret(qTarget))
+                            Q.Cast(qTarget);
+                    } else
+                        Q.Cast(qTarget);
                 }
                 else
                 {
@@ -280,7 +292,6 @@ namespace Vi
 
             if (eTarget != null)
                 UseItems(eTarget);
-
 
             if (rTarget != null && IgniteSlot != SpellSlot.Unknown &&
                 vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
@@ -319,21 +330,28 @@ namespace Vi
 
         private static void Harass()
         {
+            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
 
-            if (Q.IsReady() && useQ)
+            var useQDontUnderTurret = Config.Item("UseQHarassDontUnderTurret").GetValue<bool>();
+            if (qTarget != null && Q.IsReady() && useQ)
             {
-                var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
-                    Q.Cast(vTarget);
+                if (useQDontUnderTurret)
+                {
+                    if (!Utility.UnderTurret(qTarget))
+                        Q.Cast(qTarget);
+                }
+                else
+                    Q.Cast(qTarget);
+
             }
 
-            if (E.IsReady() && useE)
+            if (eTarget != null && E.IsReady() && useE)
             {
-                var vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-                if (vTarget != null)
-                    E.Cast(vTarget);
+                E.Cast(eTarget);
             }
         }
 
