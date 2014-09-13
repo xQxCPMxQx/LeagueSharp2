@@ -70,7 +70,7 @@ namespace Leblanc
         private void Game_OnGameLoad(EventArgs args)
         {
             if (vPlayer.BaseSkinName != ChampionName) return;
-            Console.Clear();
+           
             //Create the spells
             Q = new Spell(SpellSlot.Q, 720);
             W = new Spell(SpellSlot.W, 580);
