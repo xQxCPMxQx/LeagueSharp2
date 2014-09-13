@@ -1,4 +1,4 @@
-﻿#region
+#region
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,7 +10,7 @@ using LeagueSharp.Common;
 using SharpDX;
 using SharpDX.Direct3D9;
 using Font = SharpDX.Direct3D9.Font;
-using Rectangle = SharpDX.Rectangle;
+using Color = System.Drawing.Color;
 #endregion
 
 namespace Leblanc
@@ -21,7 +21,6 @@ namespace Leblanc
         public static readonly Obj_AI_Hero vPlayer = ObjectManager.Player;
 
         private static readonly List<Texture> Enemies2 = new List<Texture>();
-        private static readonly Dictionary<Obj_AI_Hero, Texture> Enemies = new Dictionary<Obj_AI_Hero, Texture>();
         private static Sprite SlideSprite;
         private static Font RecF;
         private static Texture wButton;
@@ -50,18 +49,6 @@ namespace Leblanc
         //Menu
         public static Menu Config;
 
-        public static bool LeBlancClone
-        {
-            get
-            {
-                return leBlancClone;
-            }
-            set
-            {
-                leBlancClone = value;
-            }
-        }
-
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += new Program().Game_OnGameLoad;
@@ -70,16 +57,16 @@ namespace Leblanc
         private void Game_OnGameLoad(EventArgs args)
         {
             if (vPlayer.BaseSkinName != ChampionName) return;
-           
             //Create the spells
             Q = new Spell(SpellSlot.Q, 720);
-            W = new Spell(SpellSlot.W, 580);
-            E = new Spell(SpellSlot.E, 950);
-            R = new Spell(SpellSlot.R, 950);
+            W = new Spell(SpellSlot.W, 600);
+            E = new Spell(SpellSlot.E, 900);
+            R = new Spell(SpellSlot.R, 720);
 
-            Q.SetTargetted(0.5f, float.MaxValue);
+            Q.SetTargetted(0.5f, 1500f);
             W.SetSkillshot(0.5f, 200f, 1200f, false, SkillshotType.SkillshotCircle);
-            E.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
+            E.SetSkillshot(0.25f, 100f, 1750f, true, SkillshotType.SkillshotLine);
+            R.SetTargetted(0.5f, 1500f);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -90,15 +77,13 @@ namespace Leblanc
 
             //Create the menu
             Config = new Menu(ChampionName, ChampionName, true);
-            //Orbwalker submenu
+
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
 
-            //Add the target selector to the menu as submenu.
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             SimpleTs.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
-
-            //Load the orbwalker and add it to the menu as submenu.
+            
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
             //Combo menu:
@@ -109,8 +94,6 @@ namespace Leblanc
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use Deathfire Grasp").SetValue(true));
-            Config.SubMenu("Combo")
-                .AddItem(new MenuItem("ComboMode", "Combo Mode: ").SetValue(new StringList(new[] { "Q+R+W+E", "W+R+Q+E" })));
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboActive", "Combo!").SetValue(
@@ -123,22 +106,25 @@ namespace Leblanc
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(false));
             Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q+W+E", "W+Q+E" })));
+                .AddItem(
+                    new MenuItem("HarassMode", "Harass Mode: ").SetValue(
+                        new StringList(new[] { "Q+W+E", "W+Q+E" })));
             Config.SubMenu("Harass")
                 .AddItem(
                     new MenuItem("HarassActive", "Harass!").SetValue(
                         new KeyBind(Config.Item("Farm").GetValue<KeyBind>().Key, KeyBindType.Press)));
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(new KeyBind("T".ToCharArray()[0],
-                        KeyBindType.Toggle)));
+                    new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(
+                        new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle)));
 
             //Farming menu:
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ")
+                .SetValue(new Slider(50, 100, 0)));
 
             Config.SubMenu("LaneClear")
                 .AddItem(
@@ -150,7 +136,8 @@ namespace Leblanc
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", "Use W").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "Use E").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ")
+                .SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("JungleFarm")
                 .AddItem(
                     new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(
@@ -162,23 +149,14 @@ namespace Leblanc
 
             //Drawings menu:
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("WRange", "W Range").SetValue(new Circle(true, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("WObjectPosition", "W Object Position").SetValue(new Circle(true, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("WObjectTimeTick", "Show W Tick").SetValue(true));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("WQRange", "W+Q Range").SetValue(new Circle(false, System.Drawing.Color.GreenYellow)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("EActiveRange", "E Active Range").SetValue(new Circle(false, System.Drawing.Color.GreenYellow)));
-            Config.SubMenu("Drawings")
-
-                .AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("WRange", "W Range").SetValue(new Circle(true,  Color.FromArgb(100, 255, 0, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("WObjectPosition", "W Object Position").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("WObjectTimeTick", "Show W Tick").SetValue(true));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("WQRange", "W+Q Range").SetValue(new Circle(false, Color.GreenYellow)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("EActiveRange", "E Active Range").SetValue(new Circle(false, Color.GreenYellow)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -188,7 +166,6 @@ namespace Leblanc
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
 
             Drawing.OnDraw += Drawing_OnDraw;
-            
             Drawing.OnPreReset += Drawing_OnPreReset;
             Drawing.OnPostReset += Drawing_OnPostReset;
             Drawing.OnEndScene += Drawing_OnEndScene;
@@ -295,66 +272,77 @@ namespace Leblanc
                     SpellJump = W;
                     return false;
                 }
-                else if (R.IsReady() && vPlayer.Spellbook.GetSpell(SpellSlot.R).Name != "leblancslidereturnm") // LB jumped with R
-                {
-
-                    SpellJump = R;
-                    return false;
-                }
-
                 return true;
             }
 
         }
 
-        private static void UseSpellR(Obj_AI_Hero vTarget)
+        private static void UserSummoners(Obj_AI_Hero target)
         {
-            var rMode = vPlayer.Spellbook.GetSpell(SpellSlot.R).Name;
-            switch (rMode)
+            var useDFG = Config.Item("UseDFGCombo").GetValue<bool>();
+            var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
+
+            if (Dfg.IsReady() && useDFG)
             {
-                case "LeblancChaosOrbM":
-                    {
-                        R.Range = Q.Range;
-                        R.SetTargetted(0.5f, float.MaxValue);
-                        R.CastOnUnit(vTarget);
-                        break;
-                    }
-                case "LeblancSlideM":
-                    {
-                        R.Range = W.Range;
-                        R.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
-                        R.Cast(vTarget);
-                        break;
-                    }
-                case "LeblancSoulShackleM":
-                    {
-                        R.Range = E.Range;
-                        R.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
-                        R.Cast(vTarget);
-                        break;
-                    }
+                Dfg.Cast(target);
+            }
+
+            if (useIgnite && IgniteSlot != SpellSlot.Unknown &&
+                vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            {
+                if (vPlayer.Distance(target) < 650 && GetComboDamage(target) >= target.Health)
+                {
+                    vPlayer.SummonerSpellbook.CastSpell(IgniteSlot, target);
+                }
             }
 
         }
+
         private static void Combo()
         {
+            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
+            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
+
+            var useDFG = Config.Item("UseDFGCombo").GetValue<bool>();
             var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
 
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-            var wqTarget = SimpleTs.GetTarget(W.Range + Q.Range - 30, SimpleTs.DamageType.Magical);
-
-            if (useQ && qTarget != null && Q.IsReady())
+            if (useQ && useR && Q.IsReady() && R.IsReady() && qTarget != null)
             {
-                Q.Cast(qTarget);
+                Q.CastOnUnit(qTarget);
+                if (vPlayer.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
+                    R.CastOnUnit(qTarget);
+            }
+            else
+            {
+                if (useW && wTarget != null && W.IsReady() && !LeBlancStillJumped)
+                {
+                    W.Cast(wTarget);
+                }
+
+                if (useE && eTarget != null && E.IsReady())
+                {
+                    E.Cast(eTarget);
+                }
+
+                if (useQ && qTarget != null && Q.IsReady())
+                {
+                    Q.CastOnUnit(qTarget);
+                }
+
+                if (useR && qTarget != null && R.IsReady() && vPlayer.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
+                {
+                    R.Cast(qTarget);
+                }
+
             }
 
-            if (qTarget != null && Dfg.IsReady())
+            if (qTarget != null && Dfg.IsReady() && useDFG)
             {
                 Dfg.Cast(qTarget);
             }
@@ -367,51 +355,6 @@ namespace Leblanc
                     vPlayer.SummonerSpellbook.CastSpell(IgniteSlot, qTarget);
                 }
             }
-
-            if (useR && R.IsReady())
-            {
-                var rMode = vPlayer.Spellbook.GetSpell(SpellSlot.R).Name;
-                switch (rMode)
-                {
-                    case "LeblancChaosOrbM":
-                        {
-                            R.Range = Q.Range;
-                            R.SetTargetted(0.5f, float.MaxValue);
-                            if (qTarget != null)
-                                R.CastOnUnit(qTarget);
-                            break;
-                        }
-                    case "LeblancSlideM":
-                        {
-                            R.Range = W.Range;
-                            R.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
-                            if (wTarget != null)
-                                R.Cast(wTarget);
-                            break;
-                        }
-                    case "LeblancSoulShackleM":
-                        {
-                            R.Range = E.Range;
-                            R.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
-                            if (eTarget != null)
-                                R.Cast(eTarget);
-                            break;
-                        }
-                }
-            }
-
-            if (useW && wTarget != null && W.IsReady() && !LeBlancStillJumped)
-            {
-                W.Cast(wTarget);
-            }
-
-
-            if (useE && eTarget != null && E.IsReady())
-            {
-                if (E.Cast(eTarget) == Spell.CastStates.SuccessfullyCasted)
-                    return;
-            }
-
         }
 
         private static void Harass()
@@ -450,6 +393,25 @@ namespace Leblanc
             if (Items.CanUseItem(3092))
                 fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.FROSTQUEENSCLAIM);
 
+            switch (vPlayer.Spellbook.GetSpell(SpellSlot.R).Name)
+            {
+                case "LeblancChaosOrbM":
+                    {
+                        fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.Q, DamageLib.StageType.FirstDamage)
+                                      + DamageLib.getDmg(vTarget, DamageLib.SpellType.Q, DamageLib.StageType.SecondDamage);
+                        break;
+                    }
+                case "LeblancSlideM":
+                    {
+                        fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.W, DamageLib.StageType.FirstDamage);
+                        break;
+                    }
+                case "LeblancSoulShackleM":
+                    {
+                        fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.E, DamageLib.StageType.FirstDamage);
+                        break;
+                    }
+            }
             return (float)fComboDamage;
         }
 
@@ -488,24 +450,21 @@ namespace Leblanc
                 {
                     case "LeblancChaosOrbM":
                         {
-                            R.Range = Q.Range;
-                            R.SetTargetted(0.5f, float.MaxValue);
+                            R = Q;
                             if (qTarget != null)
                                 R.Cast(qTarget);
                             break;
                         }
                     case "LeblancSlideM":
                         {
-                            R.Range = W.Range;
-                            R.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+                            R = W;
                             if (wTarget != null)
                                 R.CastIfWillHit(wTarget);
                             break;
                         }
                     case "LeblancSoulShackleM":
                         {
-                            R.Range = E.Range;
-                            R.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
+                            R = E;
                             if (eTarget != null)
                                 R.CastIfWillHit(eTarget);
                             break;
@@ -609,7 +568,7 @@ namespace Leblanc
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color, 1, 10);
+                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
 
             var wObjectPosition = Config.Item("WObjectPosition").GetValue<Circle>();
@@ -617,14 +576,16 @@ namespace Leblanc
 
             var eActiveRange = Config.Item("EActiveRange").GetValue<Circle>();
 
+            var wqRange = Config.Item("WQRange").GetValue<Circle>();
 
-            if (eActiveRange.Active)
+            if (wqRange.Active && Q.IsReady() && W.IsReady())
             {
-                var vTarget = EnemyHaveSoulShackle;
-                if (vTarget != null)
-                {
-                    Utility.DrawCircle(vPlayer.Position, 1100f, eActiveRange.Color);
-                }
+                Utility.DrawCircle(vPlayer.Position, W.Range + Q.Range, eActiveRange.Color);
+            }
+            
+            if (eActiveRange.Active && EnemyHaveSoulShackle != null)
+            {
+                Utility.DrawCircle(vPlayer.Position, 1100f, eActiveRange.Color);
             }
 
             foreach (var existingSlide in ExistingSlide)
@@ -640,9 +601,10 @@ namespace Leblanc
                         string display;
                         
                         TimeSpan time = TimeSpan.FromSeconds(existingSlide.ExpireTime - Game.Time);
+
                         pos = Drawing.WorldToScreen(existingSlide.Position);
                         display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
-                        Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65, System.Drawing.Color.GreenYellow, display);
+                        Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65, Color.GreenYellow, display);
                     }
                 }
             }
@@ -654,9 +616,7 @@ namespace Leblanc
             {
                 foreach (var existingSlide in ExistingSlide)
                 {
-                    float percentScale = 4;
-                    float percentclockScale = 2;
-                    float picturePosition = 62;
+                    const float percentScale = 4;
                     SlideSprite.Begin();
                     foreach (Texture enemy in Enemies2)
                     {
