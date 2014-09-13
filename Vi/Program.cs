@@ -50,7 +50,7 @@ namespace Vi
             E2 = new Spell(SpellSlot.E, 600f);
             R = new Spell(SpellSlot.R, 800f);
 
-            Q.SetSkillshot(1f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.5f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             R.SetTargetted(0.15f, 1500f);
 
