@@ -21,12 +21,7 @@ namespace Leblanc
         public static readonly Obj_AI_Hero vPlayer = ObjectManager.Player;
 
         private static readonly List<Texture> Enemies2 = new List<Texture>();
-        private static Sprite SlideSprite;
-        private static Font RecF;
-        private static Texture wButton;
-        private static Texture rButton;
-        private static Texture picClockR;
-        private static Texture picClockW;
+
 
         private static readonly List<Slide> ExistingSlide = new List<Slide>();
         private static bool leBlancClone;
@@ -45,9 +40,20 @@ namespace Leblanc
         public static Items.Item Fqc = new Items.Item(3092, 750); // Frost Queen's Claim; 
         public static Items.Item Dfg = Utility.Map.GetMap() != Utility.Map.MapType.SummonersRift ? new Items.Item(3188, 750) : new Items.Item(3128, 750);
         
-
         //Menu
         public static Menu Config;
+
+        public static bool LeBlancClone
+        {
+            get
+            {
+                return leBlancClone;
+            }
+            set
+            {
+                leBlancClone = value;
+            }
+        }
 
         private static void Main(string[] args)
         {
@@ -94,6 +100,21 @@ namespace Leblanc
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use Deathfire Grasp").SetValue(true));
+
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
+            {
+                Config.SubMenu("Combo")
+                    .SubMenu("DontCombo")
+                    .AddItem(new MenuItem("DontCombo" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+            }
+
+            Config.SubMenu("Combo")
+                .AddItem(
+                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
+                        KeyBindType.Press)));
+
+
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboActive", "Combo!").SetValue(
@@ -103,6 +124,7 @@ namespace Leblanc
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(false));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseWQHarass", "Use W+Q").SetValue(false));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(false));
             Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
@@ -166,11 +188,12 @@ namespace Leblanc
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Drawing.OnPreReset += Drawing_OnPreReset;
-            Drawing.OnPostReset += Drawing_OnPostReset;
-            Drawing.OnEndScene += Drawing_OnEndScene;
+            //Drawing.OnPreReset += Drawing_OnPreReset;
+            //Drawing.OnPostReset += Drawing_OnPostReset;
+            //Drawing.OnEndScene += Drawing_OnEndScene;
             
-            Init();
+            
+            //Init();
             Game.PrintChat(String.Format("<font color='#70DBDB'>xQx </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
         }
 
@@ -178,19 +201,12 @@ namespace Leblanc
         {
             get
             {
-                foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => vPlayer.Distance(hero) <= 1100))
+                foreach (var hero in from hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => vPlayer.Distance(hero) <= 1100) where hero.IsEnemy 
+                                     from buff in hero.Buffs where buff.Name.Contains("LeblancSoulShackle") 
+                                     select hero)
                 {
-                    if (hero.IsEnemy)
-                    {
-                        foreach (BuffInstance buff in hero.Buffs)
-                        {
-                            if (buff.Name.Contains("LeblancSoulShackle"))
-                            {
-                                soulShackleTimeExperies = Game.Time + 2;
-                                return hero;
-                            }
-                        }
-                    }
+                    soulShackleTimeExperies = Game.Time + 2;
+                    return hero;
                 }
                 soulShackleTimeExperies = 0;
                 return null;
@@ -199,17 +215,9 @@ namespace Leblanc
         private static bool DrawEnemySoulShackle
         {
             get
-            {
-                foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => vPlayer.Distance(hero) <= 1100))
-                {
-                    if (hero.IsEnemy)
-                    {
-                        foreach (BuffInstance buff in hero.Buffs)
-                            return (buff.Name.Contains("LeblancSoulShackle"));
-                    }
-                }
-                return false;
-            }
+            { return (from hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => vPlayer.Distance(hero) <= 1100) where hero.IsEnemy 
+                      from buff in hero.Buffs 
+                      select (buff.Name.Contains("LeblancSoulShackle"))).FirstOrDefault(); }
         }
 
         private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
@@ -228,6 +236,7 @@ namespace Leblanc
 
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
+
             leBlancClone = sender.Name.Contains("LeBlanc_MirrorImagePoff.troy");
 
             if (sender.Name.Contains("displacement_blink_indicator"))
@@ -238,9 +247,9 @@ namespace Leblanc
                         Object = sender,
                         NetworkId = sender.NetworkId,
                         Position = sender.Position,
-                        ExpireTime = Game.Time + 3,
-                        ExpireTimePicture = sender.Name.Contains("ult") ? picClockR : picClockW,
-                        Picture = sender.Name.Contains("ult") ? rButton : wButton
+                        ExpireTime = Game.Time + 3
+                        //ExpireTimePicture = sender.Name.Contains("ult") ? picClockR : picClockW,
+                        //Picture = sender.Name.Contains("ult") ? rButton : wButton
                     });
             }
         }
@@ -249,44 +258,93 @@ namespace Leblanc
         {
             leBlancClone = sender.Name.Contains("LeBlanc_MirrorImagePoff.troy");
 
-            if (sender.Name.Contains("displacement_blink_indicator"))
+            if (!sender.Name.Contains("displacement_blink_indicator")) return;
+            
+            for (var i = 0; i < ExistingSlide.Count; i++)
             {
-                for (var i = 0; i < ExistingSlide.Count; i++)
+                if (ExistingSlide[i].NetworkId == sender.NetworkId)
                 {
-                    if (ExistingSlide[i].NetworkId == sender.NetworkId)
-                    {
-                        ExistingSlide.RemoveAt(i);
-                        return;
-                    }
+                    ExistingSlide.RemoveAt(i);
+                    return;
                 }
             }
         }
 
         public static bool LeBlancStillJumped
         {
+            //"LeblancSlide" // W is ready + LB can jump with W
+            //"lblancslidereturn" LB jumped with W
+            //"LeblancSlideM" // R-W is ready + LB can jump with R
+            //"lblancslidereturnm" LB jumped with R
             get
             {
-                if (W.IsReady() && vPlayer.Spellbook.GetSpell(SpellSlot.W).Name != "leblancslidereturn") // LB jumped with W
+                if (!W.IsReady() || vPlayer.Spellbook.GetSpell(SpellSlot.W).Name == "leblancslidereturn") return true;
+                SpellJump = W;
+                return false;
+                /*
+                else if (R.IsReady() && vPlayer.Spellbook.GetSpell(SpellSlot.R).Name != "leblancslidereturnm") // LB jumped with R
                 {
 
-                    SpellJump = W;
+                    SpellJump = R;
                     return false;
                 }
-                return true;
+               */
+            }
+
+        }
+
+        private static void UseSpellR(Obj_AI_Hero vTarget)
+        {
+            var rMode = vPlayer.Spellbook.GetSpell(SpellSlot.R).Name;
+
+            if (rMode != "LeblancChaosOrbM" || !R.IsReady()) return;
+
+            Game.PrintChat("->>>>>>>>>>>> R = Q");
+            R.CastOnUnit(vTarget);
+            Game.PrintChat("R = Q ->>>>>>>>>>>>");
+
+            switch (rMode)
+            {
+                case "LeblancChaosOrbM":
+                    {
+                        R.Range = Q.Range;
+                        R.SetTargetted(0.5f, float.MaxValue);
+                        R.CastOnUnit(vTarget);
+                        break;
+                    }
+                case "LeblancSlideM":
+                    {
+                        R.Range = W.Range;
+                        R.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+                        R.Cast(vTarget);
+                        break;
+                    }
+                case "LeblancSoulShackleM":
+                    {
+                        R.Range = E.Range;
+                        R.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
+                        R.Cast(vTarget);
+                        break;
+                    }
             }
 
         }
 
         private static void UserSummoners(Obj_AI_Hero target)
         {
-            var useDFG = Config.Item("UseDFGCombo").GetValue<bool>();
+            var useDfg = Config.Item("UseDFGCombo").GetValue<bool>();
             var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
 
-            if (Dfg.IsReady() && useDFG)
+            if (Dfg.IsReady() && useDfg)
             {
                 Dfg.Cast(target);
             }
 
+            if (Fqc.IsReady())
+            {
+                Fqc.Cast(target.ServerPosition);
+            }
+          
             if (useIgnite && IgniteSlot != SpellSlot.Unknown &&
                 vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
@@ -300,6 +358,9 @@ namespace Leblanc
 
         private static void Combo()
         {
+           
+           // Game.PrintChat("Distance: " + vPlayer.Distance(wqTarget).ToString());
+
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
@@ -311,12 +372,19 @@ namespace Leblanc
 
             var useDFG = Config.Item("UseDFGCombo").GetValue<bool>();
             var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
+         //   var comboDamage = qTarget != null ? GetComboDamage(qTarget) : 0;
 
-            if (useQ && useR && Q.IsReady() && R.IsReady() && qTarget != null)
+
+            if (Q.IsReady() && R.IsReady() && qTarget != null)
             {
-                Q.CastOnUnit(qTarget);
-                if (vPlayer.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
-                    R.CastOnUnit(qTarget);
+                if (qTarget != null)
+                    useR = (Config.Item("DontCombo" + qTarget.BaseSkinName) != null &&
+                            Config.Item("DontCombo" + qTarget.BaseSkinName).GetValue<bool>() == false) && useR && useQ;
+                {
+                        Q.CastOnUnit(qTarget);
+                        if (vPlayer.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
+                            R.CastOnUnit(qTarget);
+                }
             }
             else
             {
@@ -335,7 +403,8 @@ namespace Leblanc
                     Q.CastOnUnit(qTarget);
                 }
 
-                if (useR && qTarget != null && R.IsReady() && vPlayer.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
+                if (useR && qTarget != null && R.IsReady() && 
+                    vPlayer.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
                 {
                     R.Cast(qTarget);
                 }
@@ -359,16 +428,54 @@ namespace Leblanc
 
         private static void Harass()
         {
-            var existsMana = vPlayer.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
+            var existsMana = vPlayer.MaxMana / 100 * Config.Item("HarassMana").GetValue<Slider>().Value;
             if (vPlayer.Mana <= existsMana) return;
 
-            UseSpells(
-                Config.Item("UseQHarass").GetValue<bool>(),
-                Config.Item("UseWHarass").GetValue<bool>(),
-                Config.Item("UseEHarass").GetValue<bool>(),
-                false,
-                false
-                );
+
+            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
+            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            var wqTarget = SimpleTs.GetTarget(W.Range + Q.Range, SimpleTs.DamageType.Magical);
+
+            var useQ = Config.Item("UseQHarass").GetValue<bool>();
+            var useW = Config.Item("UseWHarass").GetValue<bool>();
+            var useE = Config.Item("UseEHarass").GetValue<bool>();
+            var useWQ = Config.Item("UseWQHarass").GetValue<bool>();
+
+            if (useWQ && wqTarget != null)
+            {
+                if (Q.IsReady() && W.IsReady() && !LeBlancStillJumped)
+                {
+                    W.Cast(wqTarget.ServerPosition);
+                    Q.CastOnUnit(wqTarget);
+                }
+            }
+
+            if (useQ && qTarget != null) 
+            {
+                if (Q.IsReady())
+                {
+                    Q.CastOnUnit(qTarget);
+                    if (vPlayer.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
+                        R.CastOnUnit(qTarget);
+                }
+            }
+
+            if (useW && wTarget != null)
+            {
+                if (W.IsReady() && !LeBlancStillJumped)
+                {
+                    W.Cast(wTarget);
+                }
+            }
+
+            if (useE && eTarget != null)
+            {
+                if (E.IsReady())
+                {
+                    E.Cast(eTarget);
+                }
+            }
         }
 
         private static float GetComboDamage(Obj_AI_Base vTarget)
@@ -443,32 +550,34 @@ namespace Leblanc
                 }
             }
 
-            if (useR && R.IsReady())
+            if (!useR || !R.IsReady()) return;
+            
+            var rMode = vPlayer.Spellbook.GetSpell(SpellSlot.R).Name;
+            switch (rMode)
             {
-                var rMode = vPlayer.Spellbook.GetSpell(SpellSlot.R).Name;
-                switch (rMode)
+                case "LeblancChaosOrbM":
                 {
-                    case "LeblancChaosOrbM":
-                        {
-                            R = Q;
-                            if (qTarget != null)
-                                R.Cast(qTarget);
-                            break;
-                        }
-                    case "LeblancSlideM":
-                        {
-                            R = W;
-                            if (wTarget != null)
-                                R.CastIfWillHit(wTarget);
-                            break;
-                        }
-                    case "LeblancSoulShackleM":
-                        {
-                            R = E;
-                            if (eTarget != null)
-                                R.CastIfWillHit(eTarget);
-                            break;
-                        }
+                    //Game.PrintChat("R = Q");
+                    R = Q;
+                    if (qTarget != null)
+                        R.Cast(qTarget);
+                    break;
+                }
+                case "LeblancSlideM":
+                {
+                    //Game.PrintChat("R = W");
+                    R = W;
+                    if (wTarget != null)
+                        R.CastIfWillHit(wTarget);
+                    break;
+                }
+                case "LeblancSoulShackleM":
+                {
+                    //Game.PrintChat("R = E");
+                    R = E;
+                    if (eTarget != null)
+                        R.CastIfWillHit(eTarget);
+                    break;
                 }
             }
         }
@@ -486,27 +595,21 @@ namespace Leblanc
             if (useQ && Q.IsReady())
             {
                 var minionsQ = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-                foreach (Obj_AI_Base vMinion in minionsQ)
+                foreach (Obj_AI_Base vMinion in 
+                    from vMinion in minionsQ let vMinionEDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.Q, DamageLib.StageType.FirstDamage) 
+                        where vMinion.Health <= vMinionEDamage 
+                            select vMinion)
                 {
-                    var vMinionEDamage = DamageLib.getDmg(vMinion, DamageLib.SpellType.Q, DamageLib.StageType.FirstDamage);
-
-                    if (vMinion.Health <= vMinionEDamage)
-                    {
-                        Q.CastOnUnit(vMinion);
-                    }
+                    Q.CastOnUnit(vMinion);
                 }
             }
 
             var rangedMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range + W.Width + 30);
-            if (useW && W.IsReady())
-            {
-                var minionsW = W.GetCircularFarmLocation(rangedMinionsW, W.Width * 0.75f);
-                if (minionsW.MinionsHit >= 3 && W.InRange(minionsW.Position.To3D()))
-                {
-                    W.Cast(minionsW.Position);
-                    return;
-                }
-            }
+            if (!useW || !W.IsReady()) return;
+            var minionsW = W.GetCircularFarmLocation(rangedMinionsW, W.Width * 0.75f);
+            if (minionsW.MinionsHit < 3 || !W.InRange(minionsW.Position.To3D())) return;
+            W.Cast(minionsW.Position);
+
         }
 
         private static void JungleFarm()
@@ -521,18 +624,16 @@ namespace Leblanc
             var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
-            if (mobs.Count > 0)
-            {
-                var mob = mobs[0];
-                if (useQ && Q.IsReady())
-                    Q.CastOnUnit(mob);
+            if (mobs.Count <= 0) return;
+            var mob = mobs[0];
+            if (useQ && Q.IsReady())
+                Q.CastOnUnit(mob);
 
-                if (useW && W.IsReady())
-                    W.Cast(mob);
+            if (useW && W.IsReady())
+                W.Cast(mob);
 
-                if (useE && E.IsReady())
-                    E.CastOnUnit(mob);
-            }
+            if (useE && E.IsReady())
+                E.CastOnUnit(mob);
         }
 
 
@@ -593,125 +694,20 @@ namespace Leblanc
                 if (wObjectPosition.Active)
                     Utility.DrawCircle(existingSlide.Position, 110f, wObjectPosition.Color);
 
-                if (wObjectTimeTick)
-                {
-                    if (existingSlide.ExpireTime > Game.Time)
-                    {
-                        Vector2 pos;
-                        string display;
-                        
-                        TimeSpan time = TimeSpan.FromSeconds(existingSlide.ExpireTime - Game.Time);
+                if (!wObjectTimeTick) continue;
+                if (!(existingSlide.ExpireTime > Game.Time)) continue;
 
-                        pos = Drawing.WorldToScreen(existingSlide.Position);
-                        display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
-                        Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65, Color.GreenYellow, display);
-                    }
-                }
-            }
-        }
+                var time = TimeSpan.FromSeconds(existingSlide.ExpireTime - Game.Time);
 
-        void Drawing_OnEndScene(EventArgs args)
-        {
-            try
-            {
-                foreach (var existingSlide in ExistingSlide)
-                {
-                    const float percentScale = 4;
-                    SlideSprite.Begin();
-                    foreach (Texture enemy in Enemies2)
-                    {
-                        Vector2 serverPos = Drawing.WorldToScreen(existingSlide.Position);
-                        Vector2 playerServerPos = Drawing.WorldToScreen(vPlayer.Position);
-                        Size mPos = new Size((int)(serverPos[0] - 62 * 0.3f), (int)(serverPos[1] - 62 * 0.3f));
-
-                        DirectXDrawer.DrawSprite(SlideSprite, existingSlide.Picture,
-                            mPos.ScaleSize(percentScale, new Vector2(mPos.Width, mPos.Height)),
-                            new[] { 0.3f * percentScale, 0.3f * percentScale });
-                    }
-                    SlideSprite.End();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                if (ex.GetType() == typeof(SharpDXException))
-                {
-                    Game.PrintChat("An error occured. Please re-load LeBlanc app.");
-                }
+                var pos = Drawing.WorldToScreen(existingSlide.Position);
+                var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
+                Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65, Color.GreenYellow, display);
             }
         }
 
         public static void Init()
         {
-            try
-            {
-                SlideSprite = new Sprite(Drawing.Direct3DDevice);
-                RecF = new Font(Drawing.Direct3DDevice, new System.Drawing.Font("Tahoma", 9));
-            }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var picLocation = Assembly.GetExecutingAssembly().Location;
-            picLocation = picLocation.Remove(picLocation.LastIndexOf("\\", StringComparison.Ordinal));
-            picLocation = picLocation + "\\Sprites\\xQx\\LeBlanc\\";
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (hero.IsMe)
-                {
-                    if (!File.Exists(picLocation + "W2.png"))
-                    {
-                        Game.PrintChat(picLocation + "W2.png file not found!");
-                    }
-                    else
-                    {
-                        SpriteHelper.LoadTexture(picLocation + "W2.png", ref wButton);
-                        Enemies2.Add(wButton);
-                    }
-
-                    if (!File.Exists(picLocation + "R2.png"))
-                    {
-                        Game.PrintChat(picLocation + "R2.png file not found!");
-                    }
-                    else
-                    {
-                        SpriteHelper.LoadTexture(picLocation + "R2.png", ref rButton);
-                        Enemies2.Add(rButton);
-                    }
-                    if (!File.Exists(picLocation + "clockW.png"))
-                    {
-                        Game.PrintChat(picLocation + "clockW.png file not found!");
-                    }
-                    else
-                    {
-                        SpriteHelper.LoadTexture(picLocation + "clockW.png", ref picClockW);
-                        Enemies2.Add(picClockW);
-                    }
-                    if (!File.Exists(picLocation + "clockR.png"))
-                    {
-                        Game.PrintChat(picLocation + "clockR.png file not found!");
-                    }
-                    else
-                    {
-                        SpriteHelper.LoadTexture(picLocation + "clockR.png", ref picClockR);
-                        Enemies2.Add(picClockR);
-                    }
-
-                }
-            }
-        }
-
-        void Drawing_OnPostReset(EventArgs args)
-        {
-            SlideSprite.OnResetDevice();
-            RecF.OnResetDevice();
-        }
-
-        void Drawing_OnPreReset(EventArgs args)
-        {
-            SlideSprite.OnLostDevice();
-            RecF.OnLostDevice();
+         
         }
 
         public static void UseItems(Obj_AI_Hero vTarget)
