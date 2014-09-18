@@ -188,12 +188,6 @@ namespace Leblanc
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
 
             Drawing.OnDraw += Drawing_OnDraw;
-            //Drawing.OnPreReset += Drawing_OnPreReset;
-            //Drawing.OnPostReset += Drawing_OnPostReset;
-            //Drawing.OnEndScene += Drawing_OnEndScene;
-            
-            
-            //Init();
             Game.PrintChat(String.Format("<font color='#70DBDB'>xQx </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
         }
 
@@ -248,8 +242,6 @@ namespace Leblanc
                         NetworkId = sender.NetworkId,
                         Position = sender.Position,
                         ExpireTime = Game.Time + 3
-                        //ExpireTimePicture = sender.Name.Contains("ult") ? picClockR : picClockW,
-                        //Picture = sender.Name.Contains("ult") ? rButton : wButton
                     });
             }
         }
@@ -272,23 +264,11 @@ namespace Leblanc
 
         public static bool LeBlancStillJumped
         {
-            //"LeblancSlide" // W is ready + LB can jump with W
-            //"lblancslidereturn" LB jumped with W
-            //"LeblancSlideM" // R-W is ready + LB can jump with R
-            //"lblancslidereturnm" LB jumped with R
             get
             {
                 if (!W.IsReady() || vPlayer.Spellbook.GetSpell(SpellSlot.W).Name == "leblancslidereturn") return true;
                 SpellJump = W;
                 return false;
-                /*
-                else if (R.IsReady() && vPlayer.Spellbook.GetSpell(SpellSlot.R).Name != "leblancslidereturnm") // LB jumped with R
-                {
-
-                    SpellJump = R;
-                    return false;
-                }
-               */
             }
 
         }
@@ -299,9 +279,7 @@ namespace Leblanc
 
             if (rMode != "LeblancChaosOrbM" || !R.IsReady()) return;
 
-            Game.PrintChat("->>>>>>>>>>>> R = Q");
             R.CastOnUnit(vTarget);
-            Game.PrintChat("R = Q ->>>>>>>>>>>>");
 
             switch (rMode)
             {
@@ -359,8 +337,6 @@ namespace Leblanc
         private static void Combo()
         {
            
-           // Game.PrintChat("Distance: " + vPlayer.Distance(wqTarget).ToString());
-
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
@@ -372,8 +348,6 @@ namespace Leblanc
 
             var useDFG = Config.Item("UseDFGCombo").GetValue<bool>();
             var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
-         //   var comboDamage = qTarget != null ? GetComboDamage(qTarget) : 0;
-
 
             if (Q.IsReady() && R.IsReady() && qTarget != null)
             {
@@ -557,7 +531,6 @@ namespace Leblanc
             {
                 case "LeblancChaosOrbM":
                 {
-                    //Game.PrintChat("R = Q");
                     R = Q;
                     if (qTarget != null)
                         R.Cast(qTarget);
@@ -565,7 +538,6 @@ namespace Leblanc
                 }
                 case "LeblancSlideM":
                 {
-                    //Game.PrintChat("R = W");
                     R = W;
                     if (wTarget != null)
                         R.CastIfWillHit(wTarget);
@@ -573,7 +545,6 @@ namespace Leblanc
                 }
                 case "LeblancSoulShackleM":
                 {
-                    //Game.PrintChat("R = E");
                     R = E;
                     if (eTarget != null)
                         R.CastIfWillHit(eTarget);
@@ -703,11 +674,6 @@ namespace Leblanc
                 var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
                 Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65, Color.GreenYellow, display);
             }
-        }
-
-        public static void Init()
-        {
-         
         }
 
         public static void UseItems(Obj_AI_Hero vTarget)
