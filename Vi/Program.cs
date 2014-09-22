@@ -433,7 +433,6 @@ namespace Vi
         }
 
         public static bool Intersection(Vector2 p1, Vector2 p2, Vector2 pC, float radius)
-        /* Credits to DETUKS https://github.com/detuks/LeagueSharp/blob/master/YasuoSharp/YasMath.cs */
         {
             var p3 = new Vector2(pC.X + radius, pC.Y + radius);
             var m = ((p2.Y - p1.Y) / (p2.X - p1.X));
