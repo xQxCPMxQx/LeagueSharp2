@@ -31,6 +31,7 @@ namespace Vi
         
         public static float FlashRange = 450f;
         public static int DelayTick = 0;
+
         //Menu
         private static Menu Config;
         private static Menu MenuTargetedItems;
@@ -320,7 +321,7 @@ namespace Vi
             }
 
             if (eTarget != null)
-                UseItems(eTarget);
+                UseItems(eTarget, 4);
 
             if (rTarget != null && comboDamage > rTarget.Health && 
                 IgniteSlot != SpellSlot.Unknown &&
@@ -331,7 +332,7 @@ namespace Vi
 
             if (E.IsReady() && useE)
             {
-                UseItems(e2Target);
+                UseItems(e2Target, 4);
                 if (eTarget != null)
                     E.Cast(eTarget);
                 else
@@ -517,10 +518,11 @@ namespace Vi
                                    let useItem = 
                                         MenuTargetedItems.Item(menuItem.Name).GetValue<bool>() 
                                    where useItem 
-                                        select Convert.ToInt16(menuItem.Name.Substring(4, 4)) into itemId 
-                                        where Items.HasItem(itemId) && 
-                                              Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null 
-                                   select itemId)
+                                   select Convert.ToInt16(menuItem.Name.Substring(4, 4))
+                                   into itemId where Items.HasItem(itemId) &&
+                                                     Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                                               select itemId)
+
             {
                 Items.UseItem(itemID, vTarget);
             }
@@ -529,10 +531,10 @@ namespace Vi
                                    let useItem = 
                                         MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>() 
                                    where useItem 
-                                        select Convert.ToInt16(menuItem.Name.Substring(4, 4)) into itemId 
-                                        where Items.HasItem(itemId) && 
-                                              Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null 
-                                   select itemId)
+                                   select Convert.ToInt16(menuItem.Name.Substring(4, 4)) 
+                                   into itemId where Items.HasItem(itemId) && 
+                                                     Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null 
+                                               select itemId)
             {
                 Items.UseItem(itemID);
             }
