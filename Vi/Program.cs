@@ -1,3 +1,4 @@
+
 #region
 using System;
 using System.Collections.Generic;
@@ -142,8 +143,6 @@ namespace Vi
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
             Config.SubMenu("Extras").AddSubMenu(menuUseItems);
 
-            // Extras -> Other
-
 
             // Extras -> Use Items -> Targeted Items
             MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
@@ -185,7 +184,7 @@ namespace Vi
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
+            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> 2 Loaded!</font>", ChampionName));
 
         }
         private static void Drawing_OnDraw(EventArgs args)
@@ -197,10 +196,10 @@ namespace Vi
                     Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
 
-            var drawFQCombo = Config.Item("FQRange").GetValue<Circle>();
-            if (drawFQCombo.Active)
+            var DrawFQCombo = Config.Item("FQRange").GetValue<Circle>();
+            if (DrawFQCombo.Active)
             {
-                Utility.DrawCircle(vPlayer.Position, Q.Range + 450f, drawFQCombo.Color);
+                Utility.DrawCircle(vPlayer.Position, Q.Range + 450f, DrawFQCombo.Color);
 
             }
         }
@@ -209,27 +208,25 @@ namespace Vi
         {
             if (SmiteSlot == SpellSlot.Unknown)
                 return;
-            if (Config.Item("AutoSmite").GetValue<KeyBind>().Active)
+            if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active) return;
+
+            float[] smiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
+
+            string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
+            var firstOrDefault = vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
+                spell => spell.Name.Contains("mite"));
+            if (firstOrDefault == null) return;
+
+            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+            foreach (var vMinion in vMinions.Where(vMinion => vMinion != null
+                                                              && !vMinion.IsDead
+                                                              && !vPlayer.IsDead
+                                                              && !vPlayer.IsStunned
+                                                              && SmiteSlot != SpellSlot.Unknown
+                                                              && vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                                                              .Where(vMinion => (vMinion.Health < smiteDmg.Max()) && (monsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name)))))
             {
-                float[] SmiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
-                string[] MonsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-                var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
-                    spell => spell.Name.Contains("mite")).SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-                foreach (var vMinion in vMinions)
-                {
-                    if (vMinion != null
-                        && !vMinion.IsDead
-                        && !vPlayer.IsDead
-                        && !vPlayer.IsStunned
-                        && SmiteSlot != SpellSlot.Unknown
-                        && vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                    {
-                        if ((vMinion.Health < SmiteDmg.Max()) && (MonsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name))))
-                        {
-                            vPlayer.SummonerSpellbook.CastSpell(SmiteSlot, vMinion);
-                        }
-                    }
-                }
+                vPlayer.SummonerSpellbook.CastSpell(SmiteSlot, vMinion);
             }
         }
         private static void Game_OnGameUpdate(EventArgs args)
@@ -283,18 +280,17 @@ namespace Vi
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
-            var useFQ = Config.Item("UseFQCombo").GetValue<bool>();
+            var useFq = Config.Item("UseFQCombo").GetValue<bool>();
             var comboDamage = rTarget != null ? GetComboDamage(rTarget) : 0;
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
-            if (qTarget == null && fqTarget != null && vPlayer.Distance(fqTarget) > Q.Range && useFQ)
+            if (qTarget == null && fqTarget != null && vPlayer.Distance(fqTarget) > Q.Range && useFq)
             {
-                if (comboDamage > rTarget.Health && Q.IsReady() && 
-                    FlashSlot != SpellSlot.Unknown &&
-                    vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
-                    
+                if (rTarget != null && (comboDamage > rTarget.Health && Q.IsReady() && 
+                                        FlashSlot != SpellSlot.Unknown &&
+                                        vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready))
                 {
-                    if (Q.IsCharging && Q.Range > 800)
+                    if (Q.IsCharging && Q.Range == Q.ChargedMaxRange)
                     {
                         vPlayer.SummonerSpellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
                         Q.Cast(fqTarget);
@@ -304,7 +300,6 @@ namespace Vi
                         Q.StartCharging();
                     }
                 }
-
             }
 
             if (qTarget != null && Q.IsReady() && useQ)
@@ -344,14 +339,14 @@ namespace Vi
                         E.Cast(EMinion);
             }
 
-            if (rTarget != null)
+            if (rTarget != null && R.IsReady())
                 useR = (Config.Item("DontUlt" + rTarget.BaseSkinName) != null &&
                         Config.Item("DontUlt" + rTarget.BaseSkinName).GetValue<bool>() == false) && useR;
-
-
-            if (rTarget != null && R.IsReady() && useR && comboDamage > rTarget.Health)
-            {
-                R.CastOnUnit(rTarget);
+            { 
+                if (useR && comboDamage > rTarget.Health)
+                {
+                    R.CastOnUnit(rTarget);
+                }
             }
         }
 
@@ -373,7 +368,6 @@ namespace Vi
                 }
                 else
                     Q.Cast(qTarget);
-
             }
 
             if (eTarget != null && E.IsReady() && useE)
@@ -384,63 +378,57 @@ namespace Vi
 
         private static void JungleFarm()
         {
-            var jungleFarmActive = Config.Item("JungleFarmActive").GetValue<KeyBind>().Active;
+            if (!Config.Item("JungleFarmActive").GetValue<KeyBind>().Active) return;
 
-            if (jungleFarmActive)
+            var useQ = Config.Item("UseQJungleFarm").GetValue<bool>();
+            var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
+
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E2.Range, MinionTypes.All,
+                MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
+            if (mobs.Count <= 0) return;
+
+            var mob = mobs[0];
+            if (useE && E.IsReady())
             {
-                var useQ = Config.Item("UseQJungleFarm").GetValue<bool>();
-                var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
-
-                var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E2.Range, MinionTypes.All,
-                    MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-
-                if (mobs.Count > 0)
-                {
-                    var mob = mobs[0];
-                    if (useE && E.IsReady())
-                    {
-                        E.Cast(mob);
-                    }
-                    else if (useQ && Q.IsReady())
-                    {
-                        if (!Q.IsCharging)
-                            Q.StartCharging();
-                        else
-                            Q.Cast(mob);
-                    }
-                }
+                E.Cast(mob);
+            }
+            else if (useQ && Q.IsReady())
+            {
+                if (!Q.IsCharging)
+                    Q.StartCharging();
+                else
+                    Q.Cast(mob);
             }
         }
 
         private static void LaneClear()
         {
-            var laneClearActive = Config.Item("LaneClearActive").GetValue<KeyBind>().Active;
-            if (laneClearActive)
+            if (!Config.Item("LaneClearActive").GetValue<KeyBind>().Active) return;
+
+            var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
+            var useE = Config.Item("UseELaneClear").GetValue<bool>();
+
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.ChargedMaxRange, MinionTypes.All);
+            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E2.Range, MinionTypes.All);
+
+            if (useQ && Q.IsReady())
             {
-                var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
-                var useE = Config.Item("UseELaneClear").GetValue<bool>();
-
-                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.ChargedMaxRange, MinionTypes.All);
-                var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E2.Range, MinionTypes.All);
-
-                if (useQ && Q.IsReady())
+                if (Q.IsCharging)
                 {
-                    if (Q.IsCharging)
-                    {
-                        var locQ = Q.GetLineFarmLocation(allMinionsQ);
-                        if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < Q.Range) && locQ.MinionsHit > 2 && locQ.Position.IsValid())
-                            Q.Cast(locQ.Position);
-                    }
-                    else if (allMinionsQ.Count > 2)
-                        Q.StartCharging();
+                    var locQ = Q.GetLineFarmLocation(allMinionsQ);
+                    if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < Q.Range) && locQ.MinionsHit > 2 && locQ.Position.IsValid())
+                        Q.Cast(locQ.Position);
                 }
+                else if (allMinionsQ.Count > 2)
+                    Q.StartCharging();
+            }
 
-                if (useE && E.IsReady())
-                {
-                    var locE = E.GetLineFarmLocation(allMinionsE);
-                    if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 && locE.Position.IsValid())
-                        E.Cast(locE.Position);
-                }
+            if (useE && E.IsReady())
+            {
+                var locE = E.GetLineFarmLocation(allMinionsE);
+                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 && locE.Position.IsValid())
+                    E.Cast(locE.Position);
             }
         }
 
@@ -516,37 +504,38 @@ namespace Vi
             }
         }
 
-        private static InventorySlot GetInventorySlot(int ID)
+        private static InventorySlot GetInventorySlot(int id)
         {
-            return ObjectManager.Player.InventoryItems.FirstOrDefault(item => (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
+            return ObjectManager.Player.InventoryItems.FirstOrDefault(
+                item => (item.Id == (ItemId)id && item.Stacks >= 1) || (item.Id == (ItemId)id && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero vTarget)
         {
-            if (vTarget != null)
+            if (vTarget == null) return;
+
+            foreach (var itemID in from menuItem in MenuTargetedItems.Items 
+                                   let useItem = 
+                                        MenuTargetedItems.Item(menuItem.Name).GetValue<bool>() 
+                                   where useItem 
+                                        select Convert.ToInt16(menuItem.Name.Substring(4, 4)) into itemId 
+                                        where Items.HasItem(itemId) && 
+                                              Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null 
+                                   select itemId)
             {
-                foreach (MenuItem menuItem in MenuTargetedItems.Items)
-                {
-                    var useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>();
-                    if (useItem)
-                    {
-                        var itemID = Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4));
-                        if (Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null)
-                            Items.UseItem(itemID, vTarget);
-                    }
-                }
+                Items.UseItem(itemID, vTarget);
+            }
 
-                foreach (MenuItem menuItem in MenuNonTargetedItems.Items)
-                {
-                    var useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>();
-                    if (useItem)
-                    {
-                        var itemID = Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4));
-                        if (Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null)
-                            Items.UseItem(itemID);
-                    }
-                }
-
+            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items 
+                                   let useItem = 
+                                        MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>() 
+                                   where useItem 
+                                        select Convert.ToInt16(menuItem.Name.Substring(4, 4)) into itemId 
+                                        where Items.HasItem(itemId) && 
+                                              Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null 
+                                   select itemId)
+            {
+                Items.UseItem(itemID);
             }
         }
 
