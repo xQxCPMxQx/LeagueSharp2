@@ -320,7 +320,7 @@ namespace Vi
             }
 
             if (eTarget != null)
-                UseItems(eTarget, 4);
+                UseItems(eTarget);
 
             if (rTarget != null && comboDamage > rTarget.Health && 
                 IgniteSlot != SpellSlot.Unknown &&
@@ -331,7 +331,7 @@ namespace Vi
 
             if (E.IsReady() && useE)
             {
-                UseItems(e2Target, 4);
+                UseItems(e2Target);
                 if (eTarget != null)
                     E.Cast(eTarget);
                 else
