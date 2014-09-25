@@ -5,6 +5,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+
 #endregion
 
 namespace Vi
@@ -497,11 +498,11 @@ namespace Vi
             if (R.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R);
 
-//            if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3153))
-//                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.);
+            if (Items.CanUseItem(3128))
+                fComboDamage += vPlayer.GetItemDamage(vTarget, Damage.DamageItems.Botrk); 
 
-            //if (IgniteSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-              //  fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.IGNITE);
+            if (IgniteSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                fComboDamage += vPlayer.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float)fComboDamage;
         }
