@@ -5,6 +5,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Swain;
 
 #endregion
 
@@ -195,6 +196,7 @@ namespace Vi
             Config.SubMenu("Drawings").AddItem(new MenuItem("FQRange", "Flash+Q Range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(0xFF, 0xCC, 0x00))));
 
+            new PotionManager();
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
