@@ -1,15 +1,10 @@
 ﻿#region
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
 using SharpDX.Direct3D9;
-using Font = SharpDX.Direct3D9.Font;
 using Color = System.Drawing.Color;
 #endregion
 
