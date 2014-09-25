@@ -5,6 +5,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+
 #endregion
 
 namespace Vi
@@ -13,7 +14,6 @@ namespace Vi
     {
         public const string ChampionName = "Vi";
         private static readonly Obj_AI_Hero vPlayer = ObjectManager.Player;
-
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
 
@@ -27,12 +27,14 @@ namespace Vi
         private static SpellSlot IgniteSlot;
         private static SpellSlot SmiteSlot;
         private static SpellSlot FlashSlot;
-        
+
         public static float FlashRange = 450f;
+        public static float SmiteRange = 700f;
         public static int DelayTick = 0;
 
         //Menu
-        private static Menu Config;
+        public static Menu Config;
+        public static Menu MenuExtras;
         private static Menu MenuTargetedItems;
         private static Menu MenuNonTargetedItems;
 
@@ -46,8 +48,8 @@ namespace Vi
             if (vPlayer.BaseSkinName != "Vi") return;
             if (vPlayer.IsDead) return;
 
-            Q = new Spell(SpellSlot.Q, 850f);
-            E = new Spell(SpellSlot.E, 200f);
+            Q = new Spell(SpellSlot.Q, 860f);
+            E = new Spell(SpellSlot.E, 235f);
             E2 = new Spell(SpellSlot.E, 600f);
             R = new Spell(SpellSlot.R, 800f);
 
@@ -55,7 +57,7 @@ namespace Vi
             E.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             R.SetTargetted(0.15f, 1500f);
 
-            Q.SetCharged("ViQ", "ViQ", 100, 850, 1f);
+            Q.SetCharged("ViQ", "ViQ", 100, 860, 1f);
 
             SpellList.Add(Q);
             SpellList.Add(E);
@@ -78,6 +80,28 @@ namespace Vi
 
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
+
+            /* [ Don't Use Ult ] */
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Don't use Ult on", "DontUlt"));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
+            {
+                Config.SubMenu("Combo")
+                    .SubMenu("DontUlt")
+                    .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+            }
+
+            /* [ Find Him in Team Fight ] */
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Focus in TF", "FindHim"));
+            Config.SubMenu("Combo").SubMenu("FindHim")
+                .AddItem(new MenuItem("ForceFocusctive", "Force Focus Active").SetValue(false));
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
+            {
+                Config.SubMenu("Combo")
+                    .SubMenu("FindHim")
+                    .AddItem(new MenuItem("FindHim" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+            }
+
             Menu comboUseQ = new Menu("Q Settings", "comboUseQ");
             Config.SubMenu("Combo").AddSubMenu(comboUseQ);
             comboUseQ.AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
@@ -86,14 +110,6 @@ namespace Vi
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseFQCombo", "Use Flash+Q").SetValue(true));
-
-            Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use R on", "DontUlt"));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
-            {
-                Config.SubMenu("Combo")
-                    .SubMenu("DontUlt")
-                    .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
-            }
 
             Config.SubMenu("Combo")
                 .AddItem(
@@ -136,22 +152,20 @@ namespace Vi
                         KeyBindType.Press)));
 
             // Extras
-            Config.AddSubMenu(new Menu("Extras", "Extras"));
-            Config.SubMenu("Extras").AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
+            //Config.AddSubMenu(new Menu("Extras", "Extras"));
+            //Config.SubMenu("Extras").AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
             // Extras -> Use Items 
+            MenuExtras = new Menu("Extras", "Extras");
+            Config.AddSubMenu(MenuExtras);
+            MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
+
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
             Config.SubMenu("Extras").AddSubMenu(menuUseItems);
-
-
             // Extras -> Use Items -> Targeted Items
             MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
             menuUseItems.AddSubMenu(MenuTargetedItems);
-            if (Utility.Map.GetMap() == Utility.Map.MapType.SummonersRift)
-                MenuTargetedItems.AddItem(new MenuItem("item3128", "Deathfire Grasp").SetValue(true));
-            else
-                MenuTargetedItems.AddItem(new MenuItem("item3188", "Blackfire Torch").SetValue(true));
-
+            
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
@@ -170,23 +184,29 @@ namespace Vi
 
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q range").SetValue(new Circle(true,
+            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(true,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E range").SetValue(new Circle(false,
+            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false,
+            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("FQRange", "Flash+Q range").SetValue(new Circle(false,
+            Config.SubMenu("Drawings").AddItem(new MenuItem("SmiteRange", "Smite Range").SetValue(new Circle(false,
+                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("FQRange", "Flash+Q Range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(0xFF, 0xCC, 0x00))));
 
             Config.AddToMainMenu();
 
+            new PotionManager();
+
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> 2 Loaded!</font>", ChampionName));
+
+            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
 
         }
+
         private static void Drawing_OnDraw(EventArgs args)
         {
             foreach (var spell in SpellList)
@@ -196,39 +216,19 @@ namespace Vi
                     Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
 
-            var DrawFQCombo = Config.Item("FQRange").GetValue<Circle>();
-            if (DrawFQCombo.Active)
+            var drawFqCombo = Config.Item("FQRange").GetValue<Circle>();
+            if (drawFqCombo.Active)
             {
-                Utility.DrawCircle(vPlayer.Position, Q.Range + 450f, DrawFQCombo.Color);
+                Utility.DrawCircle(vPlayer.Position, Q.Range + 450f, drawFqCombo.Color);
+            }
 
+            var drawSmite = Config.Item("SmiteRange").GetValue<Circle>();
+            if (Config.Item("AutoSmite").GetValue<KeyBind>().Active && drawSmite.Active)
+            {
+                Utility.DrawCircle(vPlayer.Position, SmiteRange, drawSmite.Color);
             }
         }
 
-        private static void UseSummoners()
-        {
-            if (SmiteSlot == SpellSlot.Unknown)
-                return;
-            if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active) return;
-
-            float[] smiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
-
-            string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-            var firstOrDefault = vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
-                spell => spell.Name.Contains("mite"));
-            if (firstOrDefault == null) return;
-
-            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-            foreach (var vMinion in vMinions.Where(vMinion => vMinion != null
-                                                              && !vMinion.IsDead
-                                                              && !vPlayer.IsDead
-                                                              && !vPlayer.IsStunned
-                                                              && SmiteSlot != SpellSlot.Unknown
-                                                              && vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                                                              .Where(vMinion => (vMinion.Health < smiteDmg.Max()) && (monsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name)))))
-            {
-                vPlayer.SummonerSpellbook.CastSpell(SmiteSlot, vMinion);
-            }
-        }
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100)) return;
@@ -264,7 +264,6 @@ namespace Vi
                 if (vPlayer.Mana >= existsMana)
                     JungleFarm();
             }
-
         }
 
         private static void Combo()
@@ -274,7 +273,7 @@ namespace Vi
 
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
             var e2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
-            
+
             var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
@@ -286,7 +285,7 @@ namespace Vi
 
             if (qTarget == null && fqTarget != null && vPlayer.Distance(fqTarget) > Q.Range && useFq)
             {
-                if (rTarget != null && (comboDamage > rTarget.Health && Q.IsReady() && 
+                if (rTarget != null && (comboDamage > rTarget.Health && Q.IsReady() &&
                                         FlashSlot != SpellSlot.Unknown &&
                                         vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready))
                 {
@@ -310,7 +309,8 @@ namespace Vi
                     {
                         if (!Utility.UnderTurret(qTarget))
                             Q.Cast(qTarget);
-                    } else
+                    }
+                    else
                         Q.Cast(qTarget);
                 }
                 else
@@ -322,7 +322,7 @@ namespace Vi
             if (eTarget != null)
                 UseItems(eTarget);
 
-            if (rTarget != null && comboDamage > rTarget.Health && 
+            if (rTarget != null && comboDamage > rTarget.Health &&
                 IgniteSlot != SpellSlot.Unknown &&
                 vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
@@ -340,12 +340,31 @@ namespace Vi
             }
 
             if (rTarget != null && R.IsReady())
+            {
                 useR = (Config.Item("DontUlt" + rTarget.BaseSkinName) != null &&
                         Config.Item("DontUlt" + rTarget.BaseSkinName).GetValue<bool>() == false) && useR;
-            { 
-                if (useR && comboDamage > rTarget.Health)
+
+                var rDamage = vPlayer.GetSpellDamage(rTarget, SpellSlot.R);
+                var qDamage = vPlayer.GetSpellDamage(rTarget, SpellSlot.Q);
+                var eDamage = vPlayer.GetSpellDamage(rTarget, SpellSlot.E); //* E.get .Instance.Ammo;
+
+                if (qTarget != null && qTarget.IsValidTarget(Q.Range) && qTarget.Health < qDamage)
+                    return;
+
+                if (eTarget != null && (eTarget.IsValidTarget(E.Range) && eTarget.Health < eDamage))
+                    return;
+
+                if (qTarget != null && Q.IsReady() && E.IsReady() && qTarget.Health < qDamage + eDamage)
+                    return;
+
+                if (useR && rTarget != null && rTarget.Health > rDamage)
                 {
-                    R.CastOnUnit(rTarget);
+                    if (Q.IsReady() && E.IsReady() && rTarget.Health < rDamage + qDamage + eDamage)
+                        R.CastOnUnit(rTarget);
+                    if (E.IsReady() && rTarget.Health < rDamage + eDamage)
+                        R.CastOnUnit(rTarget);
+                    if (Q.IsReady() && rTarget.Health < rDamage + qDamage)
+                        R.CastOnUnit(rTarget);
                 }
             }
         }
@@ -471,19 +490,19 @@ namespace Vi
             var fComboDamage = 0d;
 
             if (Q.IsReady())
-                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.Q);
+                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.Q);
 
             if (E.IsReady())
-                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.E) * E.Instance.Ammo;
+                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E);
 
             if (R.IsReady())
-                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.R);
+                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R);
 
-            if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3153))
-                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.BOTRK);
+//            if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3153))
+//                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.);
 
-            if (IgniteSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.IGNITE);
+            //if (IgniteSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+              //  fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.IGNITE);
 
             return (float)fComboDamage;
         }
@@ -513,31 +532,56 @@ namespace Vi
         {
             if (vTarget == null) return;
 
-            foreach (var itemID in from menuItem in MenuTargetedItems.Items 
-                                   let useItem = 
-                                        MenuTargetedItems.Item(menuItem.Name).GetValue<bool>() 
-                                   where useItem 
+            foreach (var itemID in from menuItem in MenuTargetedItems.Items
+                                   let useItem =
+                                        MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
+                                   where useItem
                                    select Convert.ToInt16(menuItem.Name.Substring(4, 4))
-                                   into itemId where Items.HasItem(itemId) &&
-                                                     Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
-                                               select itemId)
-
+                                       into itemId
+                                       where Items.HasItem(itemId) &&
+                                             Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                                       select itemId)
             {
                 Items.UseItem(itemID, vTarget);
             }
 
-            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items 
-                                   let useItem = 
-                                        MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>() 
-                                   where useItem 
-                                   select Convert.ToInt16(menuItem.Name.Substring(4, 4)) 
-                                   into itemId where Items.HasItem(itemId) && 
-                                                     Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null 
-                                               select itemId)
+            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items
+                                   let useItem =
+                                        MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
+                                   where useItem
+                                   select Convert.ToInt16(menuItem.Name.Substring(4, 4))
+                                       into itemId
+                                       where Items.HasItem(itemId) &&
+                                             Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                                       select itemId)
             {
                 Items.UseItem(itemID);
             }
         }
+        private static void UseSummoners()
+        {
+            if (SmiteSlot == SpellSlot.Unknown)
+                return;
+            if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active) return;
 
+            float[] smiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
+
+            string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
+            var firstOrDefault = vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
+                spell => spell.Name.Contains("mite"));
+            if (firstOrDefault == null) return;
+
+            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+            foreach (var vMinion in vMinions.Where(vMinion => vMinion != null
+                                                              && !vMinion.IsDead
+                                                              && !vPlayer.IsDead
+                                                              && !vPlayer.IsStunned
+                                                              && SmiteSlot != SpellSlot.Unknown
+                                                              && vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                                                              .Where(vMinion => (vMinion.Health < smiteDmg.Max()) && (monsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name)))))
+            {
+                vPlayer.SummonerSpellbook.CastSpell(SmiteSlot, vMinion);
+            }
+        }
     }
 }
