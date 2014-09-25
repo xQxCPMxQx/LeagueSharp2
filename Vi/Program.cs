@@ -5,8 +5,6 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using Swain;
-
 #endregion
 
 namespace Vi
