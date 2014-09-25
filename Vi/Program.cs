@@ -5,7 +5,6 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-
 #endregion
 
 namespace Vi
