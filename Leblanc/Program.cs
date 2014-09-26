@@ -31,9 +31,8 @@ namespace Leblanc
 
         public static SpellSlot IgniteSlot;
 
-        public static Items.Item Fqc = new Items.Item(3092, 750); // Frost Queen's Claim; 
-        public static Items.Item Dfg = new Items.Item(3188, 750);
-        
+        public static Items.Item Fqc = new Items.Item(3188, 750); // Frost Queen's Claim; 
+        public static Items.Item Dfg = new Items.Item(3128, 750);        
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
