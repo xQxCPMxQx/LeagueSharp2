@@ -41,7 +41,7 @@ namespace Swain
         {
             if (vPlayer.BaseSkinName != ChampionName) return;
 
-            Dfg = new Items.Item(3188, 750);
+            Dfg = new Items.Item(3128, 750);
 
             //Create the spells
             Q = new Spell(SpellSlot.Q, 625);
