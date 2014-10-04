@@ -109,7 +109,10 @@ namespace Vi
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseFQCombo", "Use Flash+Q").SetValue(true));
-
+            Config.SubMenu("Combo")
+                .AddItem(
+                    new MenuItem("ComboFlashQActive", "Combo Flash+Q!").SetValue(new KeyBind("T".ToCharArray()[0],
+                        KeyBindType.Press)));
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
@@ -217,7 +220,7 @@ namespace Vi
             var drawFqCombo = Config.Item("FQRange").GetValue<Circle>();
             if (drawFqCombo.Active)
             {
-                Utility.DrawCircle(vPlayer.Position, Q.Range + 450f, drawFqCombo.Color);
+                Utility.DrawCircle(vPlayer.Position, Q.Range + FlashRange, drawFqCombo.Color);
             }
 
             var drawSmite = Config.Item("SmiteRange").GetValue<Circle>();
@@ -240,6 +243,11 @@ namespace Vi
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
+            }
+
+            if (Config.Item("ComboFlashQActive").GetValue<KeyBind>().Active)
+            {
+                ComboFlashQ();
             }
 
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
@@ -267,7 +275,6 @@ namespace Vi
         private static void Combo()
         {
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-            var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange - 20, SimpleTs.DamageType.Physical);
 
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
             var e2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
@@ -277,27 +284,8 @@ namespace Vi
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
-            var useFq = Config.Item("UseFQCombo").GetValue<bool>();
             var comboDamage = rTarget != null ? GetComboDamage(rTarget) : 0;
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
-
-            if (qTarget == null && fqTarget != null && vPlayer.Distance(fqTarget) > Q.Range && useFq)
-            {
-                if (rTarget != null && (comboDamage > rTarget.Health && Q.IsReady() &&
-                                        FlashSlot != SpellSlot.Unknown &&
-                                        vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready))
-                {
-                    if (Q.IsCharging && Q.Range == Q.ChargedMaxRange)
-                    {
-                        vPlayer.SummonerSpellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
-                        Q.Cast(fqTarget);
-                    }
-                    else
-                    {
-                        Q.StartCharging();
-                    }
-                }
-            }
 
             if (qTarget != null && Q.IsReady() && useQ)
             {
@@ -366,7 +354,29 @@ namespace Vi
                 }
             }
         }
+        private static void ComboFlashQ()
+        {
+            var useFq = Config.Item("UseFQCombo").GetValue<bool>();
+            if (!useFq) return;
 
+            var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange, SimpleTs.DamageType.Physical);
+            
+            if (vPlayer.Distance(fqTarget) > Q.Range && fqTarget != null)
+            {
+                if (FlashSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
+                {
+                    if (Q.IsCharging && Q.Range == Q.ChargedMaxRange)
+                    {
+                        vPlayer.SummonerSpellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
+                        Q.Cast(fqTarget);
+                    }
+                    else
+                    {
+                        Q.StartCharging();
+                    }
+                }
+            }
+        }
         private static void Harass()
         {
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);

@@ -102,6 +102,7 @@ namespace Vi
 
         private void OnGameUpdate(EventArgs args)
         {
+            if (Utility.InShopRange()) return;
             try
             {
                 if (Program.MenuExtras.Item("HealthPotion").GetValue<bool>())
