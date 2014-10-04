@@ -35,8 +35,6 @@ namespace Pantheon
         private static Spell[] junglerLevel = { E, Q, W, Q, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
         private static Spell[] topLanerLevel = { Q, E, Q, W, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
 
-        private static readonly List<Tuple<DamageLib.SpellType, DamageLib.StageType>> mainCombo = new List<Tuple<DamageLib.SpellType, DamageLib.StageType>>();
-
         public static int DelayTick = 0;
 
         private static readonly float smiteRange = 700f;
@@ -267,15 +265,15 @@ namespace Pantheon
             var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
 
+            if (Q.IsReady() && useQ && qTarget != null)
+            {
+                Q.CastOnUnit(qTarget);
+            }
+
             if (W.IsReady() && useW && wTarget != null)
             {
                 if (!Utility.UnderTurret(wTarget, true))
                     W.CastOnUnit(wTarget);
-            }
-
-            if (Q.IsReady() && useQ && qTarget != null)
-            {
-                Q.CastOnUnit(qTarget);
             }
 
             if (E.IsReady() && !W.IsReady() && useE && eTarget != null && !Player.HasBuff("sound", true))
