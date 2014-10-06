@@ -215,23 +215,7 @@ namespace Leblanc
         }
 
         private static void Game_OnWndProc(WndEventArgs args)
-        {/*
-            if (MenuGUI.IsChatOpen || ObjectManager.Player.Spellbook.SelectedSpellSlot != SpellSlot.Unknown || args.WParam != 1)
-                return;
-
-            switch (args.Msg)
-            {
-                case 257:
-                    foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValidTarget() &&
-                                        SharpDX.Vector2.Distance(Game.CursorPos.To2D(), hero.ServerPosition.To2D()) < 300))
-                    {
-                        _selectedTarget = hero;
-                        vTargetSelectorStr = hero.ChampionName;
-                        Game.PrintChat("UC-TargetSelector: New main target: " + vTargetSelectorStr);
-                    }
-                    break;
-            }
-            */
+        {
             if (args.Msg != 0x201)
             {
                 return;
@@ -413,10 +397,6 @@ namespace Leblanc
         {
             if (vTarget == null)
                 vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-//            Game.PrintChat(vTarget.ChampionName);
-            //var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            //var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            //var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useW = Config.Item("UseWCombo").GetValue<bool>();
@@ -620,10 +600,6 @@ namespace Leblanc
                             
 
                         }
-                        
-
-
-
                     }
                     if (onPlayerPositionEnemyCount > onSlidePositionEnemyCount)
                     {
@@ -648,17 +624,8 @@ namespace Leblanc
                         }
                          
                     }
-                    //Game.PrintChat(slide.Position.ToString());
                     Utility.DrawCircle(slide.Position, 400f, Color.Red);
-
-//                    Game.PrintChat("Slide Pos. Enemy Count: " + onSlidePositionEnemyCount);
-//                    Game.PrintChat("Player Pos. Enemy Count: " + onPlayerPositionEnemyCount);
-                   
-
-//                    Game.PrintChat("W Posision : " + existingSlide.Position);
- //                   Game.PrintChat("Target Position : " + vTarget.Position);
                 }
-         //   }
         }
 
         private static void UseSpells(bool useQ, bool useW, bool useE, bool useR, bool useIgnite)
