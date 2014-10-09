@@ -323,13 +323,6 @@ namespace Wukong
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
 
-            if (selectedTarget != null && selectedTarget.IsValidTarget(Config.Item("TSRange").GetValue<Slider>().Value))
-                Game.PrintChat("--->>>" + selectedTarget.ChampionName);
-            else
-            {
-                Game.PrintChat("--->>> x");
-            }
-           
             if (qTarget != null && Q.IsReady() && useQ)
             {
             Q.CastOnUnit(Player);
