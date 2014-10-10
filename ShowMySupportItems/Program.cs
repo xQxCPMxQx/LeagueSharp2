@@ -25,7 +25,7 @@ namespace ShowMySupportItems
             
             Config = new Menu("xQx | Show Stacks", "ShowSupportStacks", true);
 
-            Config.AddItem(new MenuItem("ShowRelic", "Show Relic Shiled").SetValue(new Circle(true, Color.GreenYellow)));
+            Config.AddItem(new MenuItem("ShowRelic", "Show Relic Shield").SetValue(new Circle(true, Color.GreenYellow)));
             Config.AddItem(new MenuItem("MenuX", " "));
             Config.AddItem(new MenuItem("StackRange", "Stack Control Range").SetValue(new Slider(1000, 2000)));
             Config.AddItem(new MenuItem("DrawStackRange", "Draw Control Range").SetValue(new Circle(true, Color.FromArgb(255, 176, 186, 160))));
