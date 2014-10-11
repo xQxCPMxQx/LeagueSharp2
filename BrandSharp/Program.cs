@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -31,13 +32,13 @@ namespace BrandSharp
             if (Player.ChampionName != ChampionName)
                 return;
 
-            Q = new Spell(SpellSlot.Q, 1100);
+            Q = new Spell(SpellSlot.Q, 1080);
             W = new Spell(SpellSlot.W, 900);
             E = new Spell(SpellSlot.E, 625);
             R = new Spell(SpellSlot.R, 750);
 
-            Q.SetSkillshot(0.25f, 66f, 1600, true, SkillshotType.SkillshotLine);
-            W.SetSkillshot(0.75f, 250f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.25f, 66f, 1400, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.75f, 250f, 800, false, SkillshotType.SkillshotCircle);
             E.SetTargetted(0.25f, float.MaxValue);
             R.SetTargetted(0.25f, 1000f);
 
@@ -95,12 +96,15 @@ namespace BrandSharp
             Drawings.AddItem(new MenuItem("DrawRangeW", "W Range").SetValue(new Circle(true, Color.FromArgb(150, Color.IndianRed))));
             Drawings.AddItem(new MenuItem("DrawRangeE", "E Range").SetValue(new Circle(false, Color.FromArgb(150, Color.DarkRed))));
             Drawings.AddItem(new MenuItem("DrawRangeR", "R Range").SetValue(new Circle(false, Color.FromArgb(150, Color.Red))));
-            Drawings.AddItem(new MenuItem("DrawRangeAblazed", "Burning Enemy").SetValue(new Circle(false, Color.FromArgb(150, Color.Red))));
+            Drawings.AddItem(new MenuItem("DrawBurningEnemy", "Burning Enemy").SetValue(new Circle(false, Color.FromArgb(150, Color.Red))));
+            Drawings.AddItem(new MenuItem("DrawBurningMinions", "Burning Minions").SetValue(new Circle(false, Color.FromArgb(150, Color.Red))));
 
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+
+            Game.PrintChat(String.Format("<font color='#70DBDB'>Hellsing / xQx</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded! Visit our forum http://www.joduska.me</font>", ChampionName));
         }
 
         private static bool IsAblazed(Obj_AI_Base target)
@@ -117,18 +121,31 @@ namespace BrandSharp
                     Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color);
             }
 
-            var drawRangeAblazed = Config.SubMenu("Drawings").Item("DrawRangeAblazed").GetValue<Circle>();
-            if (drawRangeAblazed.Active)
+            var drawBurningEnemy = Config.SubMenu("Drawings").Item("DrawBurningEnemy").GetValue<Circle>();
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => !enemy.IsDead && enemy.IsEnemy && IsAblazed(enemy) && enemy.IsVisible))
             {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => !enemy.IsAlly && enemy.IsVisible && !enemy.IsDead && enemy.HasBuff("brandablaze", true)))
-                {
-                    Utility.DrawCircle(enemy.Position, 100f, drawRangeAblazed.Color);
-                }
+                Utility.DrawCircle(enemy.Position, 90f, Color.White);
+                Utility.DrawCircle(enemy.Position, 95f, drawBurningEnemy.Color);
+                Utility.DrawCircle(enemy.Position, 100f, Color.Wheat);
+            }
+
+            var drawBurningMinions = Config.SubMenu("Drawings").Item("DrawBurningMinions").GetValue<Circle>();
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Minion>().Where(enemy => !enemy.IsDead && enemy.IsEnemy && IsAblazed(enemy) && Player.Distance(enemy) < E.Range && E.IsReady()))
+            {
+                Utility.DrawCircle(enemy.Position, 50f, Color.White);
+                Utility.DrawCircle(enemy.Position, 55f, drawBurningMinions.Color);
             }
         }
 
         static void Game_OnGameUpdate(EventArgs args)
         {
+
+            var qTarget = SimpleTs.GetTarget(1500, SimpleTs.DamageType.Magical);
+            if (qTarget != null)
+            {
+             //   Game.PrintChat(qTarget.ChampionName + " : " + qTarget.MoveSpeed.ToString());
+
+            }
             if (Config.SubMenu("Combo").Item("ComboActive").GetValue<KeyBind>().Active)
                 Combo();
 
@@ -168,13 +185,114 @@ namespace BrandSharp
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
             var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
 
-            var useQ = Config.SubMenu("Combo").Item("ComboUseQ").GetValue<bool>() && Q.IsReady();
-            var useW = Config.SubMenu("Combo").Item("ComboUseW").GetValue<bool>() && W.IsReady();
-            var useE = Config.SubMenu("Combo").Item("ComboUseE").GetValue<bool>() && E.IsReady();
-            var useR = Config.SubMenu("Combo").Item("ComboUseR").GetValue<bool>() && R.IsReady();
+            var useQ = Config.SubMenu("Combo").Item("ComboUseQ").GetValue<bool>();
+            var useW = Config.SubMenu("Combo").Item("ComboUseW").GetValue<bool>();
+            var useE = Config.SubMenu("Combo").Item("ComboUseE").GetValue<bool>();
+            var useR = Config.SubMenu("Combo").Item("ComboUseR").GetValue<bool>();
 
-            // Killable status
+            var cdQEx = Player.Spellbook.GetSpell(SpellSlot.Q).CooldownExpires;
+            var cdWEx = Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
+            var cdEEx = Player.Spellbook.GetSpell(SpellSlot.E).CooldownExpires;
+
+            var cdQ = Game.Time < cdQEx ? cdQEx - Game.Time : 0;
+            var cdW = Game.Time < cdWEx ? cdWEx - Game.Time : 0;
+            var cdE = Game.Time < cdEEx ? cdEEx - Game.Time : 0;
+            
+            // var cdW = Player.Spellbook.GetSpell(SpellSlot.W).Cooldown;
+            // var cdE = Player.Spellbook.GetSpell(SpellSlot.E).Cooldown;
+
+            //Game.PrintChat("Q Cd: " + cdQ + " | W Cd: " + cdW + " | E Cd: " + cdE);
+
+            if (IsAblazed(qTarget))
+            {
+                if (qTarget != null && Q.IsReady() && useQ)
+                    Q.Cast(qTarget, true);
+                if (!Q.IsReady() && cdQ > 4)
+                {
+                    if (eTarget != null && E.IsReady() && useE)
+                        E.CastOnUnit(eTarget, true);
+                    if (useW && wTarget != null && W.IsReady())
+                        W.Cast(wTarget);
+                }
+            }
+            else
+            {
+                if (eTarget != null && E.IsReady() && useE)
+                    E.CastOnUnit(eTarget, true);
+                if (useW && wTarget != null && W.IsReady())
+                    W.Cast(wTarget);
+                if (Q.IsReady() && !E.IsReady() && !W.IsReady() && cdW > 4 && cdE > 4)
+                    Q.Cast(qTarget, true);
+            }
+
+            if (rTarget != null && R.IsReady() && useR)
+            {
+                if (rTarget.Health < Player.GetSpellDamage(eTarget, SpellSlot.R))
+                    R.CastOnUnit(rTarget);
+            }
+
+            if (rTarget != null && IgniteSlot != SpellSlot.Unknown &&
+                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            {
+                if (Player.GetSummonerSpellDamage(rTarget, Damage.SummonerSpell.Ignite) >= rTarget.Health)
+                {
+                    Player.SummonerSpellbook.CastSpell(IgniteSlot, rTarget);
+                }
+            }
+            return;
+            if (qTarget != null)
+            {
+                if (eTarget != null && useE && E.IsReady())
+                    E.CastOnUnit(eTarget);
+                if (wTarget != null && useW && W.IsReady())
+                    W.Cast(wTarget);
+            }
+            if (eTarget != null && E.IsReady() && useE)
+                E.CastOnUnit(eTarget);
+
+            if (useW && wTarget != null && W.IsReady())
+                W.Cast(wTarget);
+
+            if (qTarget != null && Q.IsReady() && useQ)
+            {
+                if (Player.Spellbook.GetSpell(SpellSlot.W).Cooldown > 2 && Player.Spellbook.GetSpell(SpellSlot.E).Cooldown > 2)
+                    Q.Cast(qTarget);
+                if (IsAblazed(qTarget))
+                    Q.Cast(qTarget);
+            }
+
+            return;
+            if (IsAblazed(qTarget) && useQ && qTarget != null && Q.IsReady())
+                Q.CastIfHitchanceEquals(qTarget, HitChance.High);
+            else
+            {
+                if (useW && wTarget != null && W.IsReady())
+                    W.CastIfHitchanceEquals(wTarget, HitChance.High);
+
+                if (useE && eTarget != null && E.IsReady())
+                    E.CastOnUnit(eTarget);
+
+                if (useQ && qTarget != null && Q.IsReady() && (!E.IsReady() || !useE))
+                    Q.CastIfHitchanceEquals(qTarget, HitChance.High);
+            }
+
             bool inMinimumRange = Vector2.DistanceSquared(eTarget.ServerPosition.To2D(), Player.Position.To2D()) < E.Range * E.Range;
+
+            if (Vector2.DistanceSquared(rTarget.ServerPosition.To2D(), Player.Position.To2D()) < R.Range * R.Range)
+            {
+                // Logic prechecks
+                if ((useQ && Q.IsReady() && Q.GetPrediction(rTarget).Hitchance == HitChance.High || useW && W.IsReady()) && Player.Health / Player.MaxHealth > 0.4f)
+                    
+
+                // Single hit
+                if (inMinimumRange)
+                    R.CastOnUnit(rTarget);
+            }
+            
+            return;
+            
+            // Killable status
+            inMinimumRange = Vector2.DistanceSquared(eTarget.ServerPosition.To2D(), Player.Position.To2D()) < E.Range * E.Range;
 
             foreach (var spell in SpellList.Where(spell => spell.IsReady()))
             {
@@ -231,27 +349,23 @@ namespace BrandSharp
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
 
-            var useQ = Config.SubMenu("Combo").Item("HarassUseQ").GetValue<bool>() && Q.IsReady();
-            var useW = Config.SubMenu("Combo").Item("HarassseW").GetValue<bool>() && W.IsReady();
-            var useE = Config.SubMenu("Combo").Item("HarassUseE").GetValue<bool>() && E.IsReady();
+            var useQ = Config.SubMenu("Harass").Item("HarassUseQ").GetValue<bool>();
+            var useW = Config.SubMenu("Harass").Item("HarassUseW").GetValue<bool>();
+            var useE = Config.SubMenu("Harass").Item("HarassUseE").GetValue<bool>();
 
-            if (useW && wTarget != null)
+            if (wTarget != null && useW && W.IsReady())
             {
-                W.CastIfHitchanceEquals(wTarget, HitChance.High);
+                W.Cast(wTarget);
             }
 
-            if (useE && eTarget != null && useQ && qTarget != null)
-            {
-                E.CastOnUnit(eTarget);
-                Q.CastIfHitchanceEquals(eTarget, HitChance.High);
-            }
-            else if (useE && eTarget != null)
+            if (eTarget != null && useE && E.IsReady())
             {
                 E.CastOnUnit(eTarget);
             }
-            else if (useQ && qTarget != null)
+
+            if (qTarget != null && useQ && Q.IsReady())
             {
-                Q.CastIfHitchanceEquals(eTarget, HitChance.High);
+                Q.Cast(eTarget);
             }
         }
 
@@ -282,7 +396,8 @@ namespace BrandSharp
 
             if (useW)
             {
-                var minionsW = MinionManager.GetBestCircularFarmLocation(minions.Select(minion => minion.ServerPosition.To2D()).ToList(), W.Width, W.Range);
+                var minionsW = MinionManager.GetBestCircularFarmLocation(minions
+                    .Select(minion => minion.ServerPosition.To2D()).ToList(), W.Width, W.Range);
 
                 if (minionsW.MinionsHit >= 2)
                     W.Cast(minionsW.Position);
@@ -290,9 +405,8 @@ namespace BrandSharp
 
             if (useE)
             {
-                foreach (var minion in minions.Where(minion => Vector2.DistanceSquared(minion.ServerPosition.To2D(), Player.Position.To2D()) < E.Range * E.Range)
-                    .Where(minion =>
-                        IsAblazed(minion) || minion.Health > Player.GetAutoAttackDamage(minion)))
+                foreach (var minion in minions
+                    .Where(minion => Vector2.DistanceSquared(minion.ServerPosition.To2D(), Player.Position.To2D()) < E.Range * E.Range && minions.Count >= 3 && IsAblazed(minion)))
                 {
                     E.CastOnUnit(minion);
                 }
