@@ -82,8 +82,8 @@ namespace Mordekaiser
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
 
-            var comboRSettings = new Menu("R Settings", "ComboRSettings");
-            Config.AddSubMenu(comboRSettings);
+//            var comboRSettings = new Menu("R Settings", "ComboRSettings");
+//            Config.AddSubMenu(comboRSettings);
             //comboRSettings.AddItem(new MenuItem("ComboRPriority", "Focus Priority Target").SetValue(true));
             //comboRSettings.AddItem(new MenuItem("ComboRAttack", "Focus  Attacking Target").SetValue(true));
 
@@ -116,9 +116,9 @@ namespace Mordekaiser
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseE", "Use E").SetValue(true));
-            Config.SubMenu("LaneClear").AddItem(
-                new MenuItem("LaneClearActive", "Lane Clear!").SetValue(
-                    new KeyBind(Config.Item("LaneClear").GetValue<KeyBind>().Key, KeyBindType.Press)));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearActive", "Lane Clear!").SetValue(new KeyBind("V".ToCharArray()[0],
+                        KeyBindType.Press)));
 
             /* [ JungleFarm ] */
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
@@ -126,9 +126,9 @@ namespace Mordekaiser
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseW", "Use W").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseE", "Use E").SetValue(true));
             Config.SubMenu("JungleFarm")
-                .AddItem(
-                    new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(
-                        new KeyBind(Config.Item("LaneClear").GetValue<KeyBind>().Key, KeyBindType.Press)));
+                .AddItem(new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0],
+                        KeyBindType.Press)));
+
 
             /* [ Extras ] */
             MenuExtras = new Menu("Extras", "Extras");
@@ -261,31 +261,32 @@ namespace Mordekaiser
             if (Player.IsDead) return;
 
             if (!Orbwalking.CanMove(100)) return;
-
-
-
-            if (MordekaiserHaveSlave)
-            {
-            }
            
             Orbwalker.SetAttacks(true);
 
-            if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
-                Combo();
             
+            if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
+            {
+                Combo();
+            }
+
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active || Config.Item("HarassActiveT").GetValue<KeyBind>().Active)
                 Harass();
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
+            {
                 LaneClear();
+            }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
+            {
                 JungleFarm();
+            }
         }
 
         private static void Combo()
         {
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
+            var wTarget = SimpleTs.GetTarget(W.Range / 2, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
             var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
             var rGhostArea = SimpleTs.GetTarget(1500f, SimpleTs.DamageType.Magical);
@@ -303,7 +304,6 @@ namespace Mordekaiser
 
             if (useE && eTarget != null)
                 E.Cast(eTarget.Position);
-
 
             if (MordekaiserHaveSlave && rGhostArea != null && Environment.TickCount >= SlaveDelay)
             {
@@ -382,8 +382,9 @@ namespace Mordekaiser
 
             if (useW && W.IsReady())
             {
-                var rangedMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, WDamageRange + 30);
-                var minionsW = W.GetCircularFarmLocation(rangedMinionsW, Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) * 0.3f);
+                
+                var rangedMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range);
+                var minionsW = W.GetCircularFarmLocation(rangedMinionsW, W.Range * 0.3f);
                 if (minionsW.MinionsHit < 1 || !W.InRange(minionsW.Position.To3D()))
                     return;
                 W.CastOnUnit(Player);
@@ -405,11 +406,12 @@ namespace Mordekaiser
             var useW = Config.Item("JungleFarmUseW").GetValue<bool>();
             var useE = Config.Item("JungleFarmUseE").GetValue<bool>();
 
-            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All,
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range , MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0) return;
             var mob = mobs[0];
+
             if (useQ && Q.IsReady())
                 Q.Cast();
 
