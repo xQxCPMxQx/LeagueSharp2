@@ -406,7 +406,7 @@ namespace Mordekaiser
             var useW = Config.Item("JungleFarmUseW").GetValue<bool>();
             var useE = Config.Item("JungleFarmUseE").GetValue<bool>();
 
-            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range , MinionTypes.All,
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range /2 , MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0) return;
