@@ -26,10 +26,11 @@ namespace Mordekaiser
         public static Menu Config;
         public static Menu MenuExtras;
 
-        private static SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
+        public static SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
         private const float WDamageRange = 270f;
-        private const float SlaveActvationRange = 2000f;
+        private const float SlaveActivationRange = 2000f;
+        private static string SlaveTargetinMode = "Priority Target";
 
         private static void Main(string[] args)
         {
@@ -80,6 +81,12 @@ namespace Mordekaiser
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
+
+            var comboRSettings = new Menu("R Settings", "ComboRSettings");
+            Config.AddSubMenu(comboRSettings);
+            comboRSettings.AddItem(new MenuItem("ComboRPriority", "Focus Priority Target").SetValue(true));
+            comboRSettings.AddItem(new MenuItem("ComboRAttack", "Focus  Attacking Target").SetValue(true));
+
             Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Ult On", "DontUlt"));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
             {
@@ -136,6 +143,7 @@ namespace Mordekaiser
                 .AddItem(new MenuItem("DrawWAffectedRange", "W Affected Range").SetValue(new Circle(true, Color.Pink)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "E Range").SetValue(new Circle(true, Color.Pink)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "R Range").SetValue(new Circle(true, Color.Pink)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("DrawAloneEnemy", "Q Alone Target").SetValue(new Circle(false, Color.Pink)));
             Config.SubMenu("Drawings")
@@ -144,7 +152,22 @@ namespace Mordekaiser
                 .AddItem(new MenuItem("DrawSlaveRange", "Ult Slave Range").SetValue(new Circle(false, Color.Pink)));
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("DrawThickness", "Draw Thickness").SetValue(new Slider(1, 5, 5)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQuality", "Draw Quality").SetValue(new Slider(5, 30, 30)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawDisable", "Disable All").SetValue(false));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
+
+            /* [ Damage After Combo ] */
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw Damage After Combo").SetValue(true);
+            Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
+
+            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+            dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
 
             Config.AddToMainMenu();
 
@@ -186,6 +209,9 @@ namespace Mordekaiser
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("DrawDisable").GetValue<bool>())
+                return;
+
             var drawThickness = Config.Item("DrawThickness" ).GetValue<Slider>().Value;
             var drawQuality = Config.Item("DrawQuality").GetValue<Slider>().Value;
 
@@ -213,7 +239,7 @@ namespace Mordekaiser
             {
                 var drawSlaveRange = Config.Item("DrawSlaveRange").GetValue<Circle>();
                 if (drawSlaveRange.Active)
-                    Utility.DrawCircle(Player.Position, SlaveActvationRange, drawSlaveRange.Color, drawThickness,
+                    Utility.DrawCircle(Player.Position, SlaveActivationRange, drawSlaveRange.Color, drawThickness,
                         drawQuality);
 
                 if (!Config.Item("DrawSlavePos").GetValue<Circle>().Active) return;
@@ -231,6 +257,10 @@ namespace Mordekaiser
 
                     foreach (var xL in xList)
                         Utility.DrawCircle(xL.Position, 75f, drawSlavePos.Color, drawThickness, drawQuality);
+
+                Drawing.DrawLine(Drawing.Width * 0.5f - 61, Drawing.Height * 0.73f - 3, Drawing.Width * 0.5f + 201, Drawing.Height * 0.73f - 3, 27, Color.Black);
+                Drawing.DrawLine(Drawing.Width * 0.5f - 60, Drawing.Height * 0.73f - 2, Drawing.Width * 0.5f + 200, Drawing.Height * 0.73f - 2, 25, Color.Wheat);
+                Drawing.DrawText(Drawing.Width * 0.5f - 35, Drawing.Height * 0.832f, Color.Black, SlaveTargetinMode);
             }
         }
 
@@ -281,11 +311,34 @@ namespace Mordekaiser
                 E.Cast(eTarget.Position);
 
             if (MordekaiserHaveSlave && rGhostArea != null)
-                R.Cast(rGhostArea.Position);
+            {
+                if (Config.Item("ComboRPriority").GetValue<bool>())
+                {
+                    rTarget = SimpleTs.GetTarget(SlaveActivationRange, SimpleTs.DamageType.Magical);
+                    if (rTarget != null)
+                        R.Cast(rTarget.Position);
+                    SlaveTargetinMode = "Priority Target";
+                }
+                if (Config.Item("ComboRAttack").GetValue<bool>())
+                {
+                    var xEnemy =
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .FirstOrDefault(
+                                enemy => enemy.IsEnemy && !enemy.IsDead && Player.Distance(enemy) < SlaveActivationRange);
+                    if (xEnemy != null) 
+                        R.Cast(xEnemy.Position);
+                    SlaveTargetinMode = "Attacking Target";
+                }
+            }
+            if (rTarget != null && !MordekaiserHaveSlave)
+            {
+                useR = (Config.Item("DontUlt" + rTarget.BaseSkinName) != null &&
+                        Config.Item("DontUlt" + rTarget.BaseSkinName).GetValue<bool>() == false) && useR;
 
-            if (!MordekaiserHaveSlave && rTarget.Health < Player.GetSpellDamage(rTarget, SpellSlot.R))
-                R.CastOnUnit(rTarget);
-            
+                if (useR && rTarget.Health < Player.GetSpellDamage(rTarget, SpellSlot.R))
+                    R.CastOnUnit(rTarget);
+            }
+           
             foreach (var item in ItemList.Where(item => item.IsReady()))
                 item.Cast(wTarget);
         }
@@ -340,8 +393,8 @@ namespace Mordekaiser
             if (useE && E.IsReady())
             {
                 var rangedMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range + E.Width);
-                var minionsE = E.GetCircularFarmLocation(rangedMinionsE, E.Width*0.45f);
-                if (minionsE.MinionsHit < 2 || !E.InRange(minionsE.Position.To3D()))
+                var minionsE = E.GetCircularFarmLocation(rangedMinionsE, E.Width * 0.45f);
+                if (minionsE.MinionsHit < 2) // || !E.InRange(minionsE.Position.To3D()))
                     return;
                 E.Cast(minionsE.Position);
             }
@@ -391,35 +444,31 @@ namespace Mordekaiser
             }
         }
 
-        private static float GetComboDamage()
+        private static float GetComboDamage(Obj_AI_Hero vTarget)
         {
             var fComboDamage = 0d;
 
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-            var rTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            if (Q.IsReady() && Player.Distance(vTarget) < Orbwalking.GetRealAutoAttackRange(Player))
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.Q);
 
-            if (Q.IsReady() && qTarget != null)
-                fComboDamage += Player.GetSpellDamage(wTarget, SpellSlot.Q);
+            if (W.IsReady() && Player.Distance(vTarget) < WDamageRange)
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.W);
 
-            if (W.IsReady() && wTarget != null)
-                fComboDamage += Player.GetSpellDamage(wTarget, SpellSlot.W);
+            if (E.IsReady() && Player.Distance(vTarget) < E.Range)
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.E);
 
-            if (E.IsReady() && eTarget != null)
-                fComboDamage += Player.GetSpellDamage(eTarget, SpellSlot.E);
+            if (R.IsReady() && Player.Distance(vTarget) < R.Range)
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.R);
 
-            if (R.IsReady() && rTarget != null)
-                fComboDamage += Player.GetSpellDamage(eTarget, SpellSlot.R);
+            if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
+                Player.Distance(vTarget) < R.Range) 
+                fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
-            if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                fComboDamage += Player.GetSummonerSpellDamage(wTarget, Damage.SummonerSpell.Ignite);
+            if (Items.CanUseItem(3128) && Player.Distance(vTarget) < R.Range)
+                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Dfg);
 
-            if (Items.CanUseItem(3128))
-                fComboDamage += Player.GetItemDamage(wTarget, Damage.DamageItems.Dfg);
-
-            if (Items.CanUseItem(3092))
-                fComboDamage += Player.GetItemDamage(wTarget, Damage.DamageItems.FrostQueenClaim);
+            if (Items.CanUseItem(3092) && Player.Distance(vTarget) < R.Range)
+                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.FrostQueenClaim);
 
             return (float)fComboDamage;
         }
