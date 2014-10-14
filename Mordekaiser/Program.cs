@@ -143,8 +143,8 @@ namespace Mordekaiser
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("DrawSlaveRange", "Ult Slave Range").SetValue(new Circle(false, Color.Pink)));
             Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawThickness", "Draw Thickness").SetValue(new Slider(1, 5)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQuality", "Draw Quality").SetValue(new Slider(5, 30)));
+                .AddItem(new MenuItem("DrawThickness", "Draw Thickness").SetValue(new Slider(1, 5, 5)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQuality", "Draw Quality").SetValue(new Slider(5, 30, 30)));
 
             Config.AddToMainMenu();
 
@@ -313,15 +313,15 @@ namespace Mordekaiser
         {
             var useQ = Config.Item("LaneClearUseQ").GetValue<bool>();
             var useW = Config.Item("LaneClearUseW").GetValue<bool>();
-            var useE = Config.Item("LaneClearUseW").GetValue<bool>();
+            var useE = Config.Item("LaneClearUseE").GetValue<bool>();
 
             if (useQ && Q.IsReady())
             {
                 var minionsQ = MinionManager.GetMinions(Player.ServerPosition,
-                    Q.Range, MinionTypes.All, MinionTeam.NotAlly);
+                    Orbwalking.GetRealAutoAttackRange(ObjectManager.Player), MinionTypes.All, MinionTeam.NotAlly);
                 foreach (var vMinion in from vMinion in minionsQ
                     let vMinionEDamage = Player.GetSpellDamage(vMinion, SpellSlot.Q)
-                    where vMinion.Health <= vMinionEDamage && vMinion.Health > Player.GetAutoAttackDamage(vMinion)
+                    //where vMinion.Health <= vMinionEDamage && vMinion.Health > Player.GetAutoAttackDamage(vMinion)
                     select vMinion) 
                 {
                     Q.Cast(vMinion);
@@ -349,9 +349,9 @@ namespace Mordekaiser
 
         private static void JungleFarm()
         {
-            var useQ = Config.Item("UseQJFarm").GetValue<bool>();
-            var useW = Config.Item("UseWJFarm").GetValue<bool>();
-            var useE = Config.Item("UseEJFarm").GetValue<bool>();
+            var useQ = Config.Item("JungleFarmUseQ").GetValue<bool>();
+            var useW = Config.Item("JungleFarmUseW").GetValue<bool>();
+            var useE = Config.Item("JungleFarmUseE").GetValue<bool>();
 
             var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -359,7 +359,7 @@ namespace Mordekaiser
             if (mobs.Count <= 0) return;
             var mob = mobs[0];
             if (useQ && Q.IsReady())
-                Q.Cast(mob);
+                Q.Cast();
 
             if (useW && W.IsReady())
                 W.CastOnUnit(Player);
