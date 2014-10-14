@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using Color = System.Drawing.Color;
@@ -25,12 +22,14 @@ namespace Mordekaiser
 
         public static Menu Config;
         public static Menu MenuExtras;
+        public static float SlaveDelay = 0;
+
+        public static float SlaveTimer;
 
         public static SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
         private const float WDamageRange = 270f;
-        private const float SlaveActivationRange = 2000f;
-        private static string SlaveTargetinMode = "Priority Target";
+        private const float SlaveActivationRange = 2200f;
 
         private static void Main(string[] args)
         {
@@ -42,6 +41,7 @@ namespace Mordekaiser
             if (Player.BaseSkinName != ChampionName) return;
             if (Player.IsDead) return;
 
+            SlaveTimer = Game.Time;
             /* [ Set Items ]*/
             Dfg = new Items.Item(3128, 750);
             ItemList.Add(Dfg);
@@ -58,7 +58,7 @@ namespace Mordekaiser
             SpellList.Add(W);
 
             E = new Spell(SpellSlot.E, 670);
-            E.SetSkillshot(0.25f, 10f*2*(float) Math.PI/180, 2000f, false, SkillshotType.SkillshotCone);
+            E.SetSkillshot(0.25f, 15f*2*(float) Math.PI/180, 2000f, false, SkillshotType.SkillshotCone);
             SpellList.Add(E);
 
             R = new Spell(SpellSlot.R, 850);
@@ -84,8 +84,8 @@ namespace Mordekaiser
 
             var comboRSettings = new Menu("R Settings", "ComboRSettings");
             Config.AddSubMenu(comboRSettings);
-            comboRSettings.AddItem(new MenuItem("ComboRPriority", "Focus Priority Target").SetValue(true));
-            comboRSettings.AddItem(new MenuItem("ComboRAttack", "Focus  Attacking Target").SetValue(true));
+            //comboRSettings.AddItem(new MenuItem("ComboRPriority", "Focus Priority Target").SetValue(true));
+            //comboRSettings.AddItem(new MenuItem("ComboRAttack", "Focus  Attacking Target").SetValue(true));
 
             Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Ult On", "DontUlt"));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
@@ -139,26 +139,22 @@ namespace Mordekaiser
             /* [ Drawing ] */
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "W Available Range").SetValue(new Circle(true, Color.Pink)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawWAffectedRange", "W Affected Range").SetValue(new Circle(true, Color.Pink)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawWAffectedRange", "W Affected Range").SetValue(new Circle(true, Color.Pink)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "E Range").SetValue(new Circle(true, Color.Pink)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "R Range").SetValue(new Circle(true, Color.Pink)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawAloneEnemy", "Q Alone Target").SetValue(new Circle(false, Color.Pink)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawSlavePos", "Ult Slave Pos.").SetValue(new Circle(false, Color.Pink)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawSlaveRange", "Ult Slave Range").SetValue(new Circle(false, Color.Pink)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawThickness", "Draw Thickness").SetValue(new Slider(1, 5, 5)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawAloneEnemy", "Q Alone Target").SetValue(new Circle(true, Color.Pink)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSlavePos", "Ult Slave Pos.").SetValue(new Circle(true, Color.Pink)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSlaveRange", "Ult Slave Range").SetValue(new Circle(true, Color.Pink)));
+            //Config.SubMenu("Drawings").AddItem(new MenuItem("DrawThickness", "Draw Thickness").SetValue(new Slider(1, 5)));
+
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQuality", "Draw Quality").SetValue(new Slider(5, 30, 30)));
+            //Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQuality", "Draw Quality").SetValue(new Slider(5, 30, 30)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawDisable", "Disable All").SetValue(false));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
 
             /* [ Damage After Combo ] */
-            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw Damage After Combo").SetValue(true);
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
             Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
 
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
@@ -168,52 +164,33 @@ namespace Mordekaiser
                 Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
             };
 
-
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
 
-            GameObject.OnCreate += GameObject_OnCreate;
-            GameObject.OnDelete += GameObject_OnDelete;
-            Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
-
             WelcomeMessage();
-        }
-
-        private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (MordekaiserHaveSlave && !sender.Name.Contains("inion"))
-            {
-               // Game.PrintChat(sender.Name + " : " + args.SData.Name);
-                // Ult casting
-             
-            }
-        }
-        private static void GameObject_OnCreate(GameObject sender, EventArgs args)
-        {
-          //  if (RGhost)
-        //    if (sender.Name.Contains("orde") || sender.Name.Contains("relia"))
-        //        Game.PrintChat(sender.Name);
-        }
-
-        private static void GameObject_OnDelete(GameObject sender, EventArgs args)
-        {
-          
         }
 
         private static bool MordekaiserHaveSlave
         {
             get { return Player.Spellbook.GetSpell(SpellSlot.R).Name == "mordekaisercotgguide"; }
-            
+        }
+        private static void MordekaiserHaveSlave2()
+        {
+            if (Player.Spellbook.GetSpell(SpellSlot.R).Name == "mordekaisercotgguide")
+            {
+                if (SlaveTimer + 11000 < Game.Time)
+                    SlaveTimer = Game.Time;
+            }
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("DrawDisable").GetValue<bool>())
                 return;
 
-            var drawThickness = Config.Item("DrawThickness" ).GetValue<Slider>().Value;
-            var drawQuality = Config.Item("DrawQuality").GetValue<Slider>().Value;
+            var drawThickness = 3;//Config.Item("DrawThickness" ).GetValue<Slider>().Value;
+            var drawQuality = 15;//Config.Item("DrawQuality").GetValue<Slider>().Value;
 
             foreach (var spell in SpellList.Where(spell => spell != Q && spell != W))
             {
@@ -222,45 +199,60 @@ namespace Mordekaiser
                     Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color, drawThickness, drawQuality);
             }
 
-            var drawWAffectedRange = Config.Item("DrawWAffectedRange").GetValue<Circle>();
-            if (drawWAffectedRange.Active && W.Level > 0 && W.IsReady())
-                Utility.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(ObjectManager.Player),
-                    drawWAffectedRange.Color, drawThickness, drawQuality);
-
-            if (Config.Item("DrawAloneEnemy").GetValue<Circle>().Active && Q.Level > 0 && Q.IsReady())
-            { 
-                var vTarget = SimpleTs.GetTarget(Player.AttackRange, SimpleTs.DamageType.Magical);
-                if (TargetAlone(vTarget))
-                    Utility.DrawCircle(vTarget.Position, 75f, Config.Item("DrawAloneEnemy").GetValue<Circle>().Color,
-                        drawThickness, drawQuality);
-            }
-
+            var drawSlaveRange = Config.Item("DrawSlaveRange").GetValue<Circle>();
+            
             if (MordekaiserHaveSlave)
             {
-                var drawSlaveRange = Config.Item("DrawSlaveRange").GetValue<Circle>();
+                MordekaiserHaveSlave2();
+
                 if (drawSlaveRange.Active)
-                    Utility.DrawCircle(Player.Position, SlaveActivationRange, drawSlaveRange.Color, drawThickness,
-                        drawQuality);
+                    Utility.DrawCircle(Player.Position, SlaveActivationRange, drawSlaveRange.Color, drawThickness, drawQuality);
 
                 if (!Config.Item("DrawSlavePos").GetValue<Circle>().Active) return;
+                var drawSlavePos = Config.Item("DrawSlavePos").GetValue<Circle>();    
 
-                var drawSlavePos = Config.Item("DrawSlavePos").GetValue<Circle>();
-
-                var xMinion =
-                    ObjectManager.Get<Obj_AI_Minion>().Where(minion => Player.Distance(minion) < 2000 && minion.IsAlly);
-                var xEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsDead);
+                var xMinion = ObjectManager.Get<Obj_AI_Minion>().Where(minion => Player.Distance(minion) < SlaveActivationRange && Player.IsAlly && !Player.IsDead);
+                var xEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy);
 
                 var xList = from xM in xMinion
-                    join xE in xEnemy on new {pEquals1 = xM.Name, pEquals2 = xM.NetworkId}
-                        equals new {pEquals1 = xE.Name, pEquals2 = xE.NetworkId}
-                    select new {xM.Position, xM.Name, xM.NetworkId};
+                    join xE in xEnemy on new {pEquals1 = xM.BaseSkinName}
+                        equals new { pEquals1 = xE.BaseSkinName }
+                            select new { xM.Position, xM.Name, xM.NetworkId, xM.BaseSkinName };
 
-                    foreach (var xL in xList)
-                        Utility.DrawCircle(xL.Position, 75f, drawSlavePos.Color, drawThickness, drawQuality);
+                foreach (var xL in xList)
+                {
+                 //   Game.PrintChat(xL.BaseSkinName);
+                    Utility.DrawCircle(xL.Position, 70f, Color.White, drawThickness, drawQuality);
+                    Utility.DrawCircle(xL.Position, 75f, drawSlavePos.Color, drawThickness, drawQuality);
+                    Utility.DrawCircle(xL.Position, 80f, Color.White, drawThickness, drawQuality);
+                }
+                /*
+                double x = (SlaveTimer - Game.Time) + 20;
+                if (x >= 10)
+                    for (var i = 0; i < (int)x; i++)
+                    {
+                        var j = 0;
+                        while (j < i)
+                        {
+                            foreach (var xL in xList)
+                            {
+                                Utility.DrawCircle(xL.Position, (float) j*7.0f, Color.White, drawThickness, drawQuality);
+                                Utility.DrawCircle(xL.Position, (float) j*7.1f, drawSlavePos.Color, drawThickness,
+                                    drawQuality);
+                                Utility.DrawCircle(xL.Position, (float) j*7.2f, Color.White, drawThickness, drawQuality);
+                            }
+                            j++;
+                        }
+                    }
+                */
 
-                Drawing.DrawLine(Drawing.Width * 0.5f - 61, Drawing.Height * 0.73f - 3, Drawing.Width * 0.5f + 201, Drawing.Height * 0.73f - 3, 27, Color.Black);
-                Drawing.DrawLine(Drawing.Width * 0.5f - 60, Drawing.Height * 0.73f - 2, Drawing.Width * 0.5f + 200, Drawing.Height * 0.73f - 2, 25, Color.Wheat);
+
+
+               /*
+                Drawing.DrawLine(Drawing.Width * 0.5f - 61, Drawing.Height * 0.83f - 3, Drawing.Width * 0.5f + 171, Drawing.Height * 0.83f - 3, 27, Color.Black);
+                Drawing.DrawLine(Drawing.Width * 0.5f - 60, Drawing.Height * 0.83f - 2, Drawing.Width * 0.5f + 170, Drawing.Height * 0.83f - 2, 25, Color.Wheat);
                 Drawing.DrawText(Drawing.Width * 0.5f - 35, Drawing.Height * 0.832f, Color.Black, SlaveTargetinMode);
+               */
             }
         }
 
@@ -269,6 +261,8 @@ namespace Mordekaiser
             if (Player.IsDead) return;
 
             if (!Orbwalking.CanMove(100)) return;
+
+
 
             if (MordekaiserHaveSlave)
             {
@@ -310,8 +304,12 @@ namespace Mordekaiser
             if (useE && eTarget != null)
                 E.Cast(eTarget.Position);
 
-            if (MordekaiserHaveSlave && rGhostArea != null)
+
+            if (MordekaiserHaveSlave && rGhostArea != null && Environment.TickCount >= SlaveDelay)
             {
+                R.Cast(rGhostArea);
+                SlaveDelay = Environment.TickCount + 1000;
+                /*
                 if (Config.Item("ComboRPriority").GetValue<bool>())
                 {
                     rTarget = SimpleTs.GetTarget(SlaveActivationRange, SimpleTs.DamageType.Magical);
@@ -329,6 +327,7 @@ namespace Mordekaiser
                         R.Cast(xEnemy.Position);
                     SlaveTargetinMode = "Attacking Target";
                 }
+                */
             }
             if (rTarget != null && !MordekaiserHaveSlave)
             {
@@ -383,18 +382,18 @@ namespace Mordekaiser
 
             if (useW && W.IsReady())
             {
-                var rangedMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(ObjectManager.Player));
-                var minionsW = W.GetCircularFarmLocation(rangedMinionsW, Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) * 0.25f);
-                if (minionsW.MinionsHit < 2 || !E.InRange(minionsW.Position.To3D()))
+                var rangedMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, WDamageRange + 30);
+                var minionsW = W.GetCircularFarmLocation(rangedMinionsW, Orbwalking.GetRealAutoAttackRange(ObjectManager.Player) * 0.3f);
+                if (minionsW.MinionsHit < 1 || !W.InRange(minionsW.Position.To3D()))
                     return;
                 W.CastOnUnit(Player);
             }
 
             if (useE && E.IsReady())
             {
-                var rangedMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range + E.Width);
-                var minionsE = E.GetCircularFarmLocation(rangedMinionsE, E.Width * 0.45f);
-                if (minionsE.MinionsHit < 2) // || !E.InRange(minionsE.Position.To3D()))
+                var rangedMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
+                var minionsE = E.GetCircularFarmLocation(rangedMinionsE, E.Range);
+                if (minionsE.MinionsHit < 1 || !E.InRange(minionsE.Position.To3D()))
                     return;
                 E.Cast(minionsE.Position);
             }
