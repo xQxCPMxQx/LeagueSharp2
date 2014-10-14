@@ -340,7 +340,7 @@ namespace Mordekaiser
             if (useE && E.IsReady())
             {
                 var rangedMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range + E.Width);
-                var minionsE = W.GetCircularFarmLocation(rangedMinionsE, W.Width*0.45f);
+                var minionsE = E.GetCircularFarmLocation(rangedMinionsE, E.Width*0.45f);
                 if (minionsE.MinionsHit < 2 || !E.InRange(minionsE.Position.To3D()))
                     return;
                 E.Cast(minionsE.Position);
