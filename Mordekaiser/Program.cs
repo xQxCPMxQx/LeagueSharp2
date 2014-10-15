@@ -82,11 +82,6 @@ namespace Mordekaiser
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
 
-//            var comboRSettings = new Menu("R Settings", "ComboRSettings");
-//            Config.AddSubMenu(comboRSettings);
-            //comboRSettings.AddItem(new MenuItem("ComboRPriority", "Focus Priority Target").SetValue(true));
-            //comboRSettings.AddItem(new MenuItem("ComboRAttack", "Focus  Attacking Target").SetValue(true));
-
             Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Ult On", "DontUlt"));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
             {
@@ -146,10 +141,8 @@ namespace Mordekaiser
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawAloneEnemy", "Q Alone Target").SetValue(new Circle(true, Color.Pink)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSlavePos", "Ult Slave Pos.").SetValue(new Circle(true, Color.Pink)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSlaveRange", "Ult Slave Range").SetValue(new Circle(true, Color.Pink)));
-            //Config.SubMenu("Drawings").AddItem(new MenuItem("DrawThickness", "Draw Thickness").SetValue(new Slider(1, 5)));
 
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
-            //Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQuality", "Draw Quality").SetValue(new Slider(5, 30, 30)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawDisable", "Disable All").SetValue(false));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
 
@@ -226,33 +219,6 @@ namespace Mordekaiser
                     Utility.DrawCircle(xL.Position, 75f, drawSlavePos.Color, drawThickness, drawQuality);
                     Utility.DrawCircle(xL.Position, 80f, Color.White, drawThickness, drawQuality);
                 }
-                /*
-                double x = (SlaveTimer - Game.Time) + 20;
-                if (x >= 10)
-                    for (var i = 0; i < (int)x; i++)
-                    {
-                        var j = 0;
-                        while (j < i)
-                        {
-                            foreach (var xL in xList)
-                            {
-                                Utility.DrawCircle(xL.Position, (float) j*7.0f, Color.White, drawThickness, drawQuality);
-                                Utility.DrawCircle(xL.Position, (float) j*7.1f, drawSlavePos.Color, drawThickness,
-                                    drawQuality);
-                                Utility.DrawCircle(xL.Position, (float) j*7.2f, Color.White, drawThickness, drawQuality);
-                            }
-                            j++;
-                        }
-                    }
-                */
-
-
-
-               /*
-                Drawing.DrawLine(Drawing.Width * 0.5f - 61, Drawing.Height * 0.83f - 3, Drawing.Width * 0.5f + 171, Drawing.Height * 0.83f - 3, 27, Color.Black);
-                Drawing.DrawLine(Drawing.Width * 0.5f - 60, Drawing.Height * 0.83f - 2, Drawing.Width * 0.5f + 170, Drawing.Height * 0.83f - 2, 25, Color.Wheat);
-                Drawing.DrawText(Drawing.Width * 0.5f - 35, Drawing.Height * 0.832f, Color.Black, SlaveTargetinMode);
-               */
             }
         }
 
@@ -309,25 +275,6 @@ namespace Mordekaiser
             {
                 R.Cast(rGhostArea);
                 SlaveDelay = Environment.TickCount + 1000;
-                /*
-                if (Config.Item("ComboRPriority").GetValue<bool>())
-                {
-                    rTarget = SimpleTs.GetTarget(SlaveActivationRange, SimpleTs.DamageType.Magical);
-                    if (rTarget != null)
-                        R.Cast(rTarget.Position);
-                    SlaveTargetinMode = "Priority Target";
-                }
-                if (Config.Item("ComboRAttack").GetValue<bool>())
-                {
-                    var xEnemy =
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .FirstOrDefault(
-                                enemy => enemy.IsEnemy && !enemy.IsDead && Player.Distance(enemy) < SlaveActivationRange);
-                    if (xEnemy != null) 
-                        R.Cast(xEnemy.Position);
-                    SlaveTargetinMode = "Attacking Target";
-                }
-                */
             }
             if (rTarget != null && !MordekaiserHaveSlave)
             {
@@ -382,7 +329,6 @@ namespace Mordekaiser
 
             if (useW && W.IsReady())
             {
-                
                 var rangedMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range);
                 var minionsW = W.GetCircularFarmLocation(rangedMinionsW, W.Range * 0.3f);
                 if (minionsW.MinionsHit < 1 || !W.InRange(minionsW.Position.To3D()))
