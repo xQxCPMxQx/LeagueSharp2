@@ -114,6 +114,8 @@ namespace XinZhao
 
             /* [ Draw Can Be Thrown Enemy ] */
             var drawThrownEnemy = Config.SubMenu("Drawings").Item("DrawThrown").GetValue<Circle>();
+            if (drawThrownEnemy.Active())
+            {
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => !enemy.IsDead && enemy.IsEnemy && Player.Distance(enemy) < R.Range && R.IsReady()))
             {
                 foreach (var buff in enemy.Buffs.Where(buff => !buff.Name.Contains("xenzhaointimidate")))
@@ -121,6 +123,7 @@ namespace XinZhao
                     Utility.DrawCircle(enemy.Position, 90f, Color.White, 1, 5);
                     Utility.DrawCircle(enemy.Position, 95f, drawThrownEnemy.Color, 1, 5);
                 }
+            }
             }
         }
 
