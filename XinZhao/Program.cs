@@ -114,7 +114,7 @@ namespace XinZhao
 
             /* [ Draw Can Be Thrown Enemy ] */
             var drawThrownEnemy = Config.SubMenu("Drawings").Item("DrawThrown").GetValue<Circle>();
-            if (drawThrownEnemy.Active())
+            if (drawThrownEnemy.Active)
             {
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => !enemy.IsDead && enemy.IsEnemy && Player.Distance(enemy) < R.Range && R.IsReady()))
             {
