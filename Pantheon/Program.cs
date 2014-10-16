@@ -1,7 +1,6 @@
 #region
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -23,15 +22,12 @@ namespace Pantheon
         public static Spell W;
         public static Spell R;
 
-        private static SpellSlot igniteSlot;
+        private static SpellSlot IgniteSlot;
         private static SpellSlot smiteSlot;
         private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
 
-        private static TargetSelector vTargetSelector;
-        private static string vTargetSelectorStr = "";
-        private static Obj_AI_Hero _selectedTarget;
-
-
+        public static float EDelay = 0;
+        private static bool UsingE = false;
         private static Spell[] junglerLevel = { E, Q, W, Q, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
         private static Spell[] topLanerLevel = { Q, E, Q, W, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
 
@@ -71,25 +67,18 @@ namespace Pantheon
             SpellList.Add(E);
             SpellList.Add(R);
 
-            igniteSlot = Player.GetSpellSlot("SummonerDot");
+            IgniteSlot = Player.GetSpellSlot("SummonerDot");
             smiteSlot = Player.GetSpellSlot("SummonerSmite");
-            vTargetSelector = new TargetSelector(1000, TargetSelector.TargetingMode.LowHP);
-
+            
             Config = new Menu("xQx | Pantheon", "Pantheon", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "TargetSelector");
             SimpleTs.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
-
-            Config.SubMenu("TargetSelector")
-                .AddItem(new MenuItem("Mode", "Mode")).SetValue(new StringList(new[] { "AutoPriority", "Closest", "LessAttack", "LessCast", "LowHP", "MostAD", "MostAP", "NearMouse" }, 1));
-            Config.SubMenu("TargetSelector")
-                .AddItem(new MenuItem("TSRange", "Range")).SetValue(new Slider(1000, 2000, 100));
-
+            
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            Orbwalker.SetAttacks(true);
-
+            
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
@@ -161,38 +150,46 @@ namespace Pantheon
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Game.OnWndProc += Game_OnWndProc;
             Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
+            GameObject.OnDelete += Game_OnObjectDelete;
 
             CustomEvents.Unit.OnLevelUp += CustomEvents_Unit_OnLevelUp;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>" +
-                                         "{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
+            WelcomeMessage();
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (_selectedTarget != null && _selectedTarget.IsValidTarget(Config.Item("TSRange").GetValue<Slider>().Value))
-            {
-                Utility.DrawCircle(_selectedTarget.Position, 100f, System.Drawing.Color.GreenYellow);
-            }
-
             foreach (var spell in SpellList)
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color);
+                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1, 5);
             }
 
             var drawSmite = Config.Item("SmiteRange").GetValue<Circle>();
             if (Config.Item("AutoSmite").GetValue<KeyBind>().Active && drawSmite.Active)
             {
-                Utility.DrawCircle(Player.Position, smiteRange, drawSmite.Color);
+                Utility.DrawCircle(Player.Position, smiteRange, drawSmite.Color, 1, 5);
             }
 
             //Vector2 pos = Drawing.WorldToMinimap(Player.Position);
-            Utility.DrawCircle(Player.Position, 200f, System.Drawing.Color.Red, 2, 2, true);
+            Utility.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 2, 2, true);
+        }
+
+        private static void Game_OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs spell)
+        {
+            if (!unit.IsMe) return;
+            UsingE = false;
+            if (spell.SData.Name.ToLower() != "pantheone") return;
+            UsingE = true;
+            Utility.DelayAction.Add(750, () => UsingE = false);
+        }
+        private static void Game_OnObjectDelete(GameObject sender, EventArgs args)
+        {
+            if (!sender.Name.Contains("Pantheon_") || !sender.Name.Contains("_E_cas.troy")) return;
+            UsingE = false;
         }
 
         public static void CustomEvents_Unit_OnLevelUp(Obj_AI_Base sender, CustomEvents.Unit.OnLevelUpEventArgs args)
@@ -210,15 +207,16 @@ namespace Pantheon
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (!Orbwalking.CanMove(100)) return;
-            //TargetSelectorMode();
+            //if (!Orbwalking.CanMove(100)) return;
 
+            Orbwalker.SetAttack(!SoundActive());
+            Orbwalker.SetMovement(!SoundActive());
+            
             if (DelayTick - Environment.TickCount <= 250)
             {
                 UseSummoners();
                 DelayTick = Environment.TickCount;
             }
-
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
@@ -257,6 +255,8 @@ namespace Pantheon
         }
         private static void Combo()
         {
+            if (SoundActive()) return;
+
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Physical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
@@ -276,17 +276,27 @@ namespace Pantheon
                     W.CastOnUnit(wTarget);
             }
 
-            if (E.IsReady() && !W.IsReady() && useE && eTarget != null && !Player.HasBuff("sound", true))
+            if (E.IsReady() && useE && eTarget != null && !Player.HasBuff("sound", true) && !W.IsReady())
             {
                 E.Cast(eTarget.Position);
+                EDelay = Environment.TickCount + 1000;
             }
 
             if (eTarget != null && !Player.HasBuff("sound", true))
                 UseItems(eTarget);
+            
+            if (qTarget != null && IgniteSlot != SpellSlot.Unknown &&
+                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
+                Player.GetSummonerSpellDamage(qTarget, Damage.SummonerSpell.Ignite) > qTarget.Health)
+            {
+                Player.SummonerSpellbook.CastSpell(IgniteSlot, qTarget);
+            }
         }
 
         private static void Harass()
         {
+            if (SoundActive()) return;
+
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
 
@@ -298,7 +308,7 @@ namespace Pantheon
                 Q.CastOnUnit(qTarget);
             }
 
-            if (eTarget != null && E.IsReady() && useE)
+            if (eTarget != null && E.IsReady() && useE && !W.IsReady())
             {
                 E.Cast(eTarget.Position);
             }
@@ -306,6 +316,8 @@ namespace Pantheon
 
         private static void JungleFarm()
         {
+            if (SoundActive()) return;
+
             var useQ = Config.Item("UseQJungleFarm").GetValue<bool>();
             var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
 
@@ -334,6 +346,7 @@ namespace Pantheon
 
         private static void LaneClear()
         {
+            if (SoundActive()) return;
             var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
             var useE = Config.Item("UseELaneClear").GetValue<bool>();
 
@@ -352,24 +365,6 @@ namespace Pantheon
                     Q.CastOnUnit(vMinion);
                 }
             }
-            return;
-            if (useE && E.IsReady() && !Player.HasBuff("sound", true))
-            {
-                var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 
-                    E.Range);
-                var locE = E.GetCircularFarmLocation(allMinionsE);
-                if (allMinionsE.Count == allMinionsE.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit > 2 && locE.Position.IsValid())
-                    E.Cast(locE.Position);
-            }
-
-            if (Tiamat.IsReady() && Config.Item("LaneClearUseTiamat").GetValue<bool>())
-            {
-                var allMinions = MinionManager.GetMinions(Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(ObjectManager.Player));
-                var locTiamat = E.GetCircularFarmLocation(allMinions);
-                if (locTiamat.MinionsHit >= 3)
-                    Tiamat.Cast(Player);
-                //Items.UseItem(itemTiamat, locTiamat.Position);
-            }
         }
 
         private static float GetComboDamage(Obj_AI_Base vTarget)
@@ -385,7 +380,7 @@ namespace Pantheon
             if (Items.CanUseItem(3128))
                 fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
 
-            if (igniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
+            if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float)fComboDamage;
@@ -455,76 +450,20 @@ namespace Pantheon
                 Player.SummonerSpellbook.CastSpell(smiteSlot, vMinion);
             }
         }
-
-        private static void Game_OnWndProc(WndEventArgs args)
+        private static void WelcomeMessage()
         {
-            if (args.Msg != 0x201)
-            {
-                return;
-            }
-            foreach (var objAIHero in from hero in ObjectManager.Get<Obj_AI_Hero>()
-                                      where hero.IsValidTarget()
-                                      select hero into h
-                                      orderby h.Distance(Game.CursorPos, false) descending
-                                      select h into enemy
-                                      where enemy.Distance(Game.CursorPos, false) < 150f
-                                      select enemy)
-            {
-                if (_selectedTarget == null || objAIHero.NetworkId != _selectedTarget.NetworkId && _selectedTarget.IsVisible && !_selectedTarget.IsDead)
-                {
-                    _selectedTarget = objAIHero;
-                    vTargetSelectorStr = objAIHero.ChampionName;
-                    Game.PrintChat(string.Format("<font color='#FFFFFF'>New Target: </font> <font color='#70DBDB'>{0}</font>", objAIHero.ChampionName));
-                }
-                else
-                {
-                    _selectedTarget = null;
-                    vTargetSelectorStr = "";
-                }
-            }
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded!</font>",
+                    ChampionName));
         }
-        private static void TargetSelectorMode()
+        
+        public static bool SoundActive()
         {
-
-            float tsRange = Config.Item("TSRange").GetValue<Slider>().Value;
-            vTargetSelector.SetRange(tsRange);
-            var mode = Config.Item("Mode").GetValue<StringList>().SelectedIndex;
-            vTargetSelectorStr = "";
-            switch (mode)
-            {
-                case 0:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.AutoPriority);
-                    vTargetSelectorStr = "Targetin Mode: Auto Priority";
-                    break;
-                case 1:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.Closest);
-                    vTargetSelectorStr = "Targetin Mode: Closest";
-                    break;
-                case 2:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LessAttack);
-                    vTargetSelectorStr = "Targetin Mode: Less Attack";
-                    break;
-                case 3:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LessCast);
-                    vTargetSelectorStr = "Targetin Mode: Less Cast";
-                    break;
-                case 4:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LowHP);
-                    vTargetSelectorStr = "Targetin Mode: Low HP";
-                    break;
-                case 5:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.MostAD);
-                    vTargetSelectorStr = "Targetin Mode: Most AD";
-                    break;
-                case 6:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.MostAP);
-                    vTargetSelectorStr = "Targetin Mode: Most AP";
-                    break;
-                case 7:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.NearMouse);
-                    vTargetSelectorStr = "Targetin Mode: Near Mouse";
-                    break;
-            }
+            if (ObjectManager.Player.HasBuff("pantheonesound"))
+                UsingE = true;
+            return UsingE || ObjectManager.Player.IsChannelingImportantSpell();
         }
+
     }
 }
