@@ -55,7 +55,7 @@ namespace VeigarEndboss
                     double damage = ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q);
 
                     // Valid minion
-                    if (predictedHealth > 0 && damage > predictedHealth)
+                    if (predictedHealth > 0 && damage - 15 > predictedHealth)
                     {
                         spell.CastOnUnit(minion);
                         lastNetworkId = minion.NetworkId;
