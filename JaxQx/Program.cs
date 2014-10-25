@@ -23,16 +23,11 @@ namespace JaxQx
         public static Spell W;
         public static Spell R;
 
-        public static string[] TestSpells = { "RelicSmallLantern", 
-                                              "RelicLantern", 
-                                              "SightWard", 
-                                              "wrigglelantern", 
-                                              "ItemGhostWard", 
-                                              "VisionWard", 
-                                              "BantamTrap", 
-                                              "JackInTheBox", 
-                                              "CaitlynYordleTrap", 
-                                              "Bushwhack" };
+        public static string[] TestSpells =
+        {
+            "RelicSmallLantern", "RelicLantern", "SightWard", "wrigglelantern",
+            "ItemGhostWard", "VisionWard", "BantamTrap", "JackInTheBox", "CaitlynYordleTrap", "Bushwhack"
+        };
 
         public static Map map;
 
@@ -89,7 +84,8 @@ namespace JaxQx
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q")
                 .SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int)Q.Range)));
+            Config.SubMenu("Combo")
+                .AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int) Q.Range)));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
@@ -106,8 +102,10 @@ namespace JaxQx
                 .SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass")
-                  .AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q+W", "Q+E", "Default" })));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                .AddItem(
+                    new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] {"Q+W", "Q+E", "Default"})));
+            Config.SubMenu("Harass")
+                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                   .AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
                       KeyBindType.Press)));
@@ -119,7 +117,8 @@ namespace JaxQx
                 .SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
                   .AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0],
                       KeyBindType.Press)));
@@ -129,8 +128,10 @@ namespace JaxQx
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJungleFarm", "Use W").SetValue(false));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
+            Config.SubMenu("JungleFarm")
+                .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("JungleFarm")
+                .AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
 
             Config.SubMenu("JungleFarm")
                   .AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0],
@@ -142,7 +143,9 @@ namespace JaxQx
             MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
             Config.AddSubMenu(new Menu("WardJump", "WardJump"));
-            Config.SubMenu("WardJump").AddItem(new MenuItem("Ward", "Ward Jump")).SetValue(new KeyBind('T', KeyBindType.Press, false));
+            Config.SubMenu("WardJump")
+                .AddItem(new MenuItem("Ward", "Ward Jump"))
+                .SetValue(new KeyBind('T', KeyBindType.Press));
             
             // Extras -> Use Items 
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
@@ -168,14 +171,21 @@ namespace JaxQx
             
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQRange", "Q range").SetValue(new Circle(true,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQMinRange", "Min. Q range").SetValue(new Circle(true,
-                System.Drawing.Color.GreenYellow)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawWard", "Ward Range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSmiteRange", "Smite Range").SetValue(new Circle(false,
-                System.Drawing.Color.Indigo)));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawQRange", "Q range").SetValue(new Circle(true,
+                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawQMinRange", "Min. Q range").SetValue(new Circle(true,
+                        System.Drawing.Color.GreenYellow)));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawWard", "Ward Range").SetValue(new Circle(false,
+                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawSmiteRange", "Smite Range").SetValue(new Circle(false, System.Drawing.Color.Indigo)));
 
             new PotionManager();
             Config.AddToMainMenu();
@@ -185,7 +195,10 @@ namespace JaxQx
             GameObject.OnCreate += GameObject_OnCreate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>",
+                    ChampionName));
         }
         
         private static void Drawing_OnDraw(EventArgs args)
@@ -221,7 +234,8 @@ namespace JaxQx
          //   if (sender.Name.Contains("Missile") || sender.Name.Contains("Minion"))
         }
 
-        public static void Obj_AI_Base_OnProcessSpellCast(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
+        public static void Obj_AI_Base_OnProcessSpellCast(LeagueSharp.Obj_AI_Base obj,
+            LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
         {
             if (!TestSpells.ToList().Contains(arg.SData.Name)) return;
 
@@ -271,7 +285,7 @@ namespace JaxQx
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
+                var existsMana = Player.MaxMana/100*Config.Item("JungleFarmMana").GetValue<Slider>().Value;
                 if (Player.Mana >= existsMana)
                     JungleFarm();
             }
@@ -329,7 +343,8 @@ namespace JaxQx
             {
                 if (Player.Distance(eTarget) < Player.AttackRange)
                 {
-                    if (Utility.CountEnemysInRange((int)Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2 || eTarget.Health > Player.Health)
+                    if (Utility.CountEnemysInRange((int) Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2 ||
+                        eTarget.Health > Player.Health) 
                     {
                         R.CastOnUnit(Player);
                     }
@@ -423,7 +438,7 @@ namespace JaxQx
             var useE = Config.Item("UseELaneClear").GetValue<bool>();
             var useQDontUnderTurret = Config.Item("UseQLaneClearDontUnderTurret").GetValue<bool>();
 
-            var vMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+            var vMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.NotAlly);
             foreach (var vMinion in vMinions)
             {
                 if (useQ && Q.IsReady() && Player.Distance(vMinion) > Orbwalking.GetRealAutoAttackRange(Player))
@@ -488,19 +503,34 @@ namespace JaxQx
         
         private static InventorySlot GetInventorySlot(int ID)
         {
-            return ObjectManager.Player.InventoryItems.FirstOrDefault(item => (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
+            return
+                ObjectManager.Player.InventoryItems.FirstOrDefault(
+                    item =>
+                        (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
         }
         
         public static void UseItems(Obj_AI_Hero vTarget)
         {
             if (vTarget == null) return;
 
-            foreach (var itemID in from menuItem in MenuTargetedItems.Items let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>() where useItem select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4)) into itemID where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null select itemID)
+            foreach (var itemID in from menuItem in MenuTargetedItems.Items
+                let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
+                where useItem
+                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
+                into itemID
+                where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
+                select itemID) 
             {
                 Items.UseItem(itemID, vTarget);
             }
 
-            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>() where useItem select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4)) into itemID where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null select itemID)
+            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items
+                let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
+                where useItem
+                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
+                into itemID
+                where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
+                select itemID) 
             {
                 Items.UseItem(itemID);
             }
@@ -518,14 +548,19 @@ namespace JaxQx
                 spell => spell.Name.Contains("mite"));
             if (firstOrDefault == null) return;
 
-            var vMonsters = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-            foreach (var vMonster in vMonsters.Where(vMonster => vMonster != null
-                                                              && !vMonster.IsDead
-                                                              && !Player.IsDead
-                                                              && !Player.IsStunned
-                                                              && SmiteSlot != SpellSlot.Unknown
-                                                              && Player.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                                                              .Where(vMonster => (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) && (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name)))))
+            var vMonsters = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0],
+                MinionTypes.All, MinionTeam.NotAlly);
+            foreach (
+                var vMonster in
+                    vMonsters.Where(
+                        vMonster =>
+                            vMonster != null && !vMonster.IsDead && !Player.IsDead && !Player.IsStunned &&
+                            SmiteSlot != SpellSlot.Unknown &&
+                            Player.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                        .Where(
+                            vMonster =>
+                                (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) &&
+                                (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name))))) 
             {
                 Player.SummonerSpellbook.CastSpell(SmiteSlot, vMonster);
             }
