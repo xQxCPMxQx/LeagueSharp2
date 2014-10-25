@@ -1,4 +1,4 @@
-﻿#region
+#region
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -47,7 +47,8 @@ namespace Leblanc
 
         public static Items.Item Fqc = new Items.Item(3092, 750); // Frost Queen's Claim; 
         public static Items.Item Dfg = new Items.Item(3128, 750);
-        
+        public static Items.Item Bft = new Items.Item(3188, 750);
+
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
@@ -109,6 +110,7 @@ namespace Leblanc
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use Deathfire Grasp").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseBFTCombo", "Blackfire Torch").SetValue(true));
 
             Config.SubMenu("Combo")
                 .AddItem(
@@ -370,13 +372,17 @@ namespace Leblanc
         private static void UserSummoners(Obj_AI_Hero target)
         {
             var useDfg = Config.Item("UseDFGCombo").GetValue<bool>();
+            var useBft = Config.Item("UseBFTCombo").GetValue<bool>();
             var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
 
             if (Dfg.IsReady() && useDfg)
             {
                 Dfg.Cast(target);
             }
-
+            if (Bft.IsReady() && useBft)
+            {
+                Bft.Cast(target);
+            }
             if (Fqc.IsReady())
             {
                 Fqc.Cast(target.ServerPosition);
@@ -404,6 +410,7 @@ namespace Leblanc
             var useR = Config.Item("UseRCombo").GetValue<bool>();
 
             var useDfg = Config.Item("UseDFGCombo").GetValue<bool>();
+            var useBft = Config.Item("UseBFTCombo").GetValue<bool>();
             var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
 
             if (Q.IsReady() && R.IsReady() && Player.Distance(vTarget) < Q.Range)
@@ -448,8 +455,11 @@ namespace Leblanc
             {
                 Dfg.Cast(vTarget);
             }
-
-            if (Fqc.IsReady() && useDfg && Player.Distance(vTarget) < Q.Range)
+            if (Bft.IsReady() && useBft && Player.Distance(vTarget) < Q.Range)
+            {
+                Bft.Cast(vTarget);
+            }
+            if (Fqc.IsReady() && (useDfg || useBft) && Player.Distance(vTarget) < Q.Range)
             {
                 if (Fqc.IsReady())
                 {
@@ -556,6 +566,9 @@ namespace Leblanc
                 fComboDamage += Player.GetSummonerSpellDamage(wTarget, Damage.SummonerSpell.Ignite);
 
             if (Items.CanUseItem(3128))
+                fComboDamage += Player.GetItemDamage(wTarget, Damage.DamageItems.Dfg);
+
+            if (Items.CanUseItem(3188))
                 fComboDamage += Player.GetItemDamage(wTarget, Damage.DamageItems.Dfg); 
 
             if (Items.CanUseItem(3092))
