@@ -1,4 +1,3 @@
-
 #region
 using System;
 using System.Collections.Generic;
@@ -83,13 +82,14 @@ namespace JaxQx
             
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
             
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q")
                 .SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int)Q.Range)));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
@@ -130,7 +130,7 @@ namespace JaxQx
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJungleFarm", "Use W").SetValue(false));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
 
             Config.SubMenu("JungleFarm")
                   .AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0],
@@ -170,10 +170,12 @@ namespace JaxQx
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQRange", "Q range").SetValue(new Circle(true,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQMinRange", "Min. Q range").SetValue(new Circle(true,
+                System.Drawing.Color.GreenYellow)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawWard", "Ward Range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("SmiteRange", "Smite Range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSmiteRange", "Smite Range").SetValue(new Circle(false,
+                System.Drawing.Color.Indigo)));
 
             new PotionManager();
             Config.AddToMainMenu();
@@ -188,30 +190,35 @@ namespace JaxQx
         
         private static void Drawing_OnDraw(EventArgs args)
         {
-            foreach (var spell in SpellList)
-            {
-                var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
-                if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1, 5);
-            }
-
             var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
             if (drawQRange.Active)
             {
-                Utility.DrawCircle(Player.Position, Q.Range, drawQRange.Color);
+                Utility.DrawCircle(Player.Position, Q.Range, drawQRange.Color, 1, 15);
             }
 
             var drawWard = Config.Item("DrawWard").GetValue<Circle>();
             if (drawWard.Active)
             {
-                Utility.DrawCircle(Player.Position, wardRange, drawWard.Color);
+                Utility.DrawCircle(Player.Position, wardRange, drawWard.Color, 1, 15);
+            }
+
+            var drawSmiteRange = Config.Item("DrawSmiteRange").GetValue<Circle>();
+            if (drawSmiteRange.Active && Config.Item("AutoSmite").GetValue<KeyBind>().Active)
+            {
+                Utility.DrawCircle(Player.Position, SmiteRange, drawWard.Color, 1, 15);
+            }
+
+            var drawMinQRange = Config.Item("DrawQMinRange").GetValue<Circle>();
+            if (drawMinQRange.Active)
+            {
+                var minQRange = Config.Item("ComboUseQMinRange").GetValue<Slider>().Value;
+                Utility.DrawCircle(Player.Position, minQRange, drawMinQRange.Color, 1, 15);
             }
 
         }
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            if (sender.Name.Contains("Missile") || sender.Name.Contains("Minion"))
-                return;
+         //   if (sender.Name.Contains("Missile") || sender.Name.Contains("Minion"))
         }
 
         public static void Obj_AI_Base_OnProcessSpellCast(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
@@ -276,21 +283,26 @@ namespace JaxQx
             var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
+
+            var minQRange = Config.Item("ComboUseQMinRange").GetValue<Slider>().Value;
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
 
-            if (Q.IsReady() && useQ && qTarget != null)
+            if (Q.IsReady() && useQ && qTarget != null && Player.Distance(qTarget) >= minQRange)
             {
+                if (E.IsReady())
+                    E.Cast();
+
                 if (useQDontUnderTurret)
                 {
                     if (!Utility.UnderTurret(qTarget))
-                        Q.CastOnUnit(qTarget);
+                        Q.Cast(qTarget);
                 }
                 else
                 {
-                    Q.CastOnUnit(qTarget);
+                    Q.Cast(qTarget);
                 }
 
             }
@@ -338,19 +350,19 @@ namespace JaxQx
             {
                 case 0:
                     {
-                        if (Q.IsReady() && W.IsReady() && qTarget != null)
+                        if (Q.IsReady() && W.IsReady() && qTarget != null && useQ && useW)
                         {
                             if (useQDontUnderTurret)
                             {
                                 if (!Utility.UnderTurret(qTarget))
                                 {
-                                    Q.CastOnUnit(qTarget);
+                                    Q.Cast(qTarget);
                                     W.Cast();
                                 }
                             }
                             else
                             {
-                                Q.CastOnUnit(qTarget);
+                                Q.Cast(qTarget);
                                 W.Cast();
                             }
                         }
@@ -358,19 +370,19 @@ namespace JaxQx
                     }
                 case 1:
                     {
-                        if (Q.IsReady() && E.IsReady() && qTarget != null)
+                        if (Q.IsReady() && E.IsReady() && qTarget != null && useQ && useE)
                         {
                             if (useQDontUnderTurret)
                             {
                                 if (!Utility.UnderTurret(qTarget))
                                 {
-                                    Q.CastOnUnit(qTarget);
+                                    Q.Cast(qTarget);
                                     E.Cast();
                                 }
                             }
                             else
                             {
-                                Q.CastOnUnit(qTarget);
+                                Q.Cast(qTarget);
                                 E.Cast();
                             }
                         }
@@ -378,15 +390,15 @@ namespace JaxQx
                     }
                 case 2:
                     {
-                        if (Q.IsReady() && useQ && qTarget != null)
+                        if (Q.IsReady() && useQ && qTarget != null && useQ)
                         {
                             if (useQDontUnderTurret)
                             {
                                 if (!Utility.UnderTurret(qTarget))
-                                    Q.CastOnUnit(qTarget);
+                                    Q.Cast(qTarget);
                             }
                             else
-                                Q.CastOnUnit(qTarget);
+                                Q.Cast(qTarget);
                             UseItems(qTarget);
                         }
 
@@ -419,10 +431,10 @@ namespace JaxQx
                     if (useQDontUnderTurret)
                     {
                         if (!Utility.UnderTurret(vMinion))
-                            Q.CastOnUnit(vMinion);
+                            Q.Cast(vMinion);
                     }
                     else
-                        Q.CastOnUnit(vMinion);
+                        Q.Cast(vMinion);
                 }
 
                 if (useW && W.IsReady())
@@ -445,7 +457,7 @@ namespace JaxQx
             if (mobs.Count <= 0) return;
 
             if (Q.IsReady() && useQ && Player.Distance(mobs[0]) > Player.AttackRange)
-                Q.CastOnUnit(mobs[0]);
+                Q.Cast(mobs[0]);
 
             if (W.IsReady() && useW)
                 W.Cast();
