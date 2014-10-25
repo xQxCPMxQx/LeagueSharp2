@@ -110,7 +110,7 @@ namespace Leblanc
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use Deathfire Grasp").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseBFTCombo", "Blackfire Torch").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseBFTCombo", "Use Blackfire Torch").SetValue(true));
 
             Config.SubMenu("Combo")
                 .AddItem(
