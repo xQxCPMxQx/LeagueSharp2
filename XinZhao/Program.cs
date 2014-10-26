@@ -1,4 +1,4 @@
-﻿#region
+#region
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -21,13 +21,16 @@ namespace XinZhao
 
         private static readonly SpellSlot SmiteSlot = Player.GetSpellSlot("SummonerSmite");
         private static readonly SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
-        
+
+        public static Items.Item Tiamat = new Items.Item(3077, 375);
+        public static Items.Item Hydra = new Items.Item(3074, 375); 
+
         public static Menu Config;
         public static Menu MenuTargetSelector;
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
-        
+
         private static int DelayTick { get; set; }
         static void Main(string[] args)
         {
@@ -48,10 +51,10 @@ namespace XinZhao
 
             CreateChampionMenu();
 
-            Game.OnGameUpdate += Game_OnGameUpdate; 
+            Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-            
+
             WelcomeMessage();
         }
 
@@ -116,14 +119,20 @@ namespace XinZhao
             var drawThrownEnemy = Config.SubMenu("Drawings").Item("DrawThrown").GetValue<Circle>();
             if (drawThrownEnemy.Active)
             {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => !enemy.IsDead && enemy.IsEnemy && Player.Distance(enemy) < R.Range && R.IsReady()))
-            {
-                foreach (var buff in enemy.Buffs.Where(buff => !buff.Name.Contains("xenzhaointimidate")))
+                foreach (
+                    var enemy in
+                        from enemy in
+                            ObjectManager.Get<Obj_AI_Hero>()
+                                .Where(
+                                    enemy =>
+                                        !enemy.IsDead && enemy.IsEnemy && Player.Distance(enemy) < R.Range &&
+                                        R.IsReady())
+                        from buff in enemy.Buffs.Where(buff => !buff.Name.Contains("xenzhaointimidate"))
+                        select enemy) 
                 {
                     Utility.DrawCircle(enemy.Position, 90f, Color.White, 1, 5);
                     Utility.DrawCircle(enemy.Position, 95f, drawThrownEnemy.Color, 1, 5);
                 }
-            }
             }
         }
 
@@ -157,6 +166,12 @@ namespace XinZhao
                     Player.SummonerSpellbook.CastSpell(IgniteSlot, vTarget);
                 }
             }
+
+            if (Tiamat.IsReady() && Player.Distance(vTarget) <= Tiamat.Range)
+                Tiamat.Cast();
+
+            if (Hydra.IsReady() && Player.Distance(vTarget) <= Hydra.Range)
+                Tiamat.Cast();
         }
 
         private static void LaneClear()
@@ -164,6 +179,10 @@ namespace XinZhao
             var useQ = Config.Item("LaneClearUseQ").GetValue<bool>();
             var useW = Config.Item("LaneClearUseW").GetValue<bool>();
             var useE = Config.Item("LaneClearUseE").GetValue<bool>();
+
+
+            var allMinions = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All,
+                MinionTeam.NotAlly);
 
             if ((useQ || useW))
             {
@@ -179,14 +198,24 @@ namespace XinZhao
                         W.Cast();
                 }
             }
-            
+
+            if (allMinions.Count >= 2)
+            {
+                if (Tiamat.IsReady())
+                    Tiamat.Cast();
+
+                if (Hydra.IsReady())
+                    Hydra.Cast();
+            }
+
             if (useE && E.IsReady())
             {
-                var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
-                var locE = E.GetCircularFarmLocation(allMinionsE);
-                if (allMinionsE.Count == allMinionsE.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 && locE.Position.IsValid())
+            
+                var locE = E.GetCircularFarmLocation(allMinions);
+                if (allMinions.Count == allMinions.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 && locE.Position.IsValid())
                     E.Cast(locE.Position);
             }
+
         }
         private static void JungleFarm()
         {
@@ -208,6 +237,16 @@ namespace XinZhao
 
             if (useE && E.IsReady() && mobs.Count >= 2)
                 E.CastOnUnit(mob);
+
+            if (mobs.Count >= 2)
+            {
+                if (Tiamat.IsReady())
+                    Tiamat.Cast();
+
+                if (Hydra.IsReady())
+                    Hydra.Cast();
+            }
+
         }
 
         private static InventorySlot GetInventorySlot(int ID)
@@ -256,14 +295,19 @@ namespace XinZhao
                 spell => spell.Name.Contains("mite"));
             if (firstOrDefault == null) return;
 
-            var vMonsters = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-            foreach (var vMonster in vMonsters.Where(vMonster => vMonster != null
-                                                              && !vMonster.IsDead
-                                                              && !Player.IsDead
-                                                              && !Player.IsStunned
-                                                              && SmiteSlot != SpellSlot.Unknown
-                                                              && Player.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                                                              .Where(vMonster => (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) && (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name)))))
+            var vMonsters = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0],
+                MinionTypes.All, MinionTeam.NotAlly);
+            foreach (
+                var vMonster in
+                    vMonsters.Where(
+                        vMonster =>
+                            vMonster != null && !vMonster.IsDead && !Player.IsDead && !Player.IsStunned &&
+                            SmiteSlot != SpellSlot.Unknown &&
+                            Player.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                        .Where(
+                            vMonster =>
+                                (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) &&
+                                (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name))))) 
             {
                 Player.SummonerSpellbook.CastSpell(SmiteSlot, vMonster);
             }
@@ -303,7 +347,8 @@ namespace XinZhao
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseE", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear!")
                 .SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
@@ -312,17 +357,23 @@ namespace XinZhao
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseQ", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseW", "Use W").SetValue(false));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseE", "Use E").SetValue(false));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("JungleFarm")
+                .AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
+            Config.SubMenu("JungleFarm")
+                .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "JungleFarm!")
                 .SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             /* [ Drawing ] */
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQRange", "Q Range").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawRRange", "R Range").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("SmiteRange", "Smite Range").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("DrawQRange", "Q Range").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("DrawRRange", "R Range").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("SmiteRange", "Smite Range").SetValue(new Circle(false, Color.PowderBlue)));
 
             /* [  Extras -> Use Items ] */
             MenuExtras = new Menu("Extras", "Extras");
@@ -348,7 +399,6 @@ namespace XinZhao
             MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
 
             new PotionManager();
@@ -357,7 +407,10 @@ namespace XinZhao
         }
         private static void WelcomeMessage()
         {
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx |</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded!</font>", ChampionName));
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx |</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded!</font>",
+                    ChampionName));
         }
 
     }
