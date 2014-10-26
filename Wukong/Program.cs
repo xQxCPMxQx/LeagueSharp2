@@ -126,8 +126,6 @@ namespace Wukong
             
             var menuLaneClearItems = new Menu("Use Items", "menuLaneClearItems");
             Config.SubMenu("LaneClear").AddSubMenu(menuLaneClearItems);
-            menuLaneClearItems.AddItem(new MenuItem("LaneClearUseTiamat", "Tiamat").SetValue(true));
-
             Config.SubMenu("LaneClear")
                 .AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
@@ -143,8 +141,6 @@ namespace Wukong
 
             var menuJungleFarmItems = new Menu("Use Items", "menuJungleFarmItems");
             Config.SubMenu("JungleFarm").AddSubMenu(menuJungleFarmItems);
-            menuLaneClearItems.AddItem(new MenuItem("JungleFarmUseTiamat", "Tiamat").SetValue(true));
-
             Config.SubMenu("JungleFarm")
                 .AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
@@ -378,11 +374,14 @@ namespace Wukong
 
             if (useE && E.IsReady() && mobs.Count >= 2)
                 E.CastOnUnit(mob);
-
-            if (Tiamat.IsReady() && Config.Item("JungleFarmUseTiamat").GetValue<bool>())
+            
+            if (mobs.Count >= 2)
             {
-                if (mobs.Count >= 2)
+                if (Tiamat.IsReady())
                     Tiamat.Cast();
+
+                if (Hydra.IsReady())
+                    Hydra.Cast();
             }
         }
 
@@ -406,16 +405,6 @@ namespace Wukong
                 {
                     Q.CastOnUnit(Player);
                 }
-            }
-
-            if (Tiamat.IsReady() && Config.Item("LaneClearUseTiamat").GetValue<bool>())
-            {
-                var allMinions = MinionManager.GetMinions(Player.ServerPosition,
-                    Orbwalking.GetRealAutoAttackRange(ObjectManager.Player));
-                var locTiamat = E.GetCircularFarmLocation(allMinions);
-                if (locTiamat.MinionsHit >= 3)
-                    Tiamat.Cast(Player);
-                //Items.UseItem(itemTiamat, locTiamat.Position);
             }
 
             if (useE && E.IsReady())
