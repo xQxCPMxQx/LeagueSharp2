@@ -72,13 +72,15 @@ namespace XinZhao
             {
                 var assassinRange = MenuTargetSelector.Item("AssassinRange").GetValue<Slider>().Value;
                 Obj_AI_Hero vTarget = null;
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()
-                                                           .Where(enemy => enemy.Team != Player.Team &&
-                                                                           !enemy.IsDead && enemy.IsVisible &&
-                                                                           MenuTargetSelector.Item("Assassin" + enemy.ChampionName) != null &&
-                                                                           MenuTargetSelector.Item("Assassin" + enemy.ChampionName).GetValue<bool>())
-                                                           .OrderBy(enemy => enemy.Distance(Game.CursorPos))
-                        )
+                foreach (
+                    var enemy in
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .Where(
+                                enemy =>
+                                    enemy.Team != Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                                    MenuTargetSelector.Item("Assassin" + enemy.ChampionName) != null &&
+                                    MenuTargetSelector.Item("Assassin" + enemy.ChampionName).GetValue<bool>())
+                            .OrderBy(enemy => enemy.Distance(Game.CursorPos))) 
                 {
                     vTarget = Player.Distance(enemy) < assassinRange ? enemy : null;
                 }
@@ -212,7 +214,8 @@ namespace XinZhao
             {
             
                 var locE = E.GetCircularFarmLocation(allMinions);
-                if (allMinions.Count == allMinions.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 && locE.Position.IsValid())
+                if (allMinions.Count == allMinions.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 &&
+                    locE.Position.IsValid())
                     E.Cast(locE.Position);
             }
 
@@ -251,19 +254,22 @@ namespace XinZhao
 
         private static InventorySlot GetInventorySlot(int ID)
         {
-            return ObjectManager.Player.InventoryItems.FirstOrDefault(item => (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
+            return
+                ObjectManager.Player.InventoryItems.FirstOrDefault(
+                    item =>
+                        (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero vTarget, bool useNonTargetedItems = false)
         {
             if (vTarget == null) return;
             foreach (var itemID in from menuItem in MenuTargetedItems.Items
-                                   let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                                   where useItem
-                                   select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
-                                       into itemID
-                                       where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
-                                       select itemID)
+                let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
+                where useItem
+                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
+                into itemID
+                where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
+                select itemID) 
             {
                 Items.UseItem(itemID, vTarget);
             }
@@ -272,12 +278,12 @@ namespace XinZhao
                 return;
 
             foreach (var itemID in from menuItem in MenuNonTargetedItems.Items
-                                   let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                                   where useItem
-                                   select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
-                                       into itemID
-                                       where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
-                                       select itemID)
+                let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
+                where useItem
+                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
+                into itemID
+                where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
+                select itemID)
             {
                 Items.UseItem(itemID);
             }
