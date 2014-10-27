@@ -108,7 +108,6 @@ namespace Vi
 
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseFQCombo", "Use Flash+Q").SetValue(true));
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboFlashQActive", "Combo Flash+Q!").SetValue(new KeyBind("T".ToCharArray()[0],
@@ -356,16 +355,15 @@ namespace Vi
         }
         private static void ComboFlashQ()
         {
-            var useFq = Config.Item("UseFQCombo").GetValue<bool>();
-            if (!useFq) return;
-
-            var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange, SimpleTs.DamageType.Physical);
+            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+			
+            var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange - 30, SimpleTs.DamageType.Physical);
             
             if (vPlayer.Distance(fqTarget) > Q.Range && fqTarget != null)
             {
                 if (FlashSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                 {
-                    if (Q.IsCharging && Q.Range == Q.ChargedMaxRange)
+                    if (Q.IsCharging && Q.Range >= Q.ChargedMaxRange)
                     {
                         vPlayer.SummonerSpellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
                         Q.Cast(fqTarget);
