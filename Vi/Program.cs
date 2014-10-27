@@ -108,14 +108,8 @@ namespace Vi
 
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboFlashQActive", "Combo Flash+Q!").SetValue(new KeyBind("T".ToCharArray()[0],
-                        KeyBindType.Press)));
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
-                        KeyBindType.Press)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboFlashQActive", "Combo Flash+Q!").SetValue(new KeyBind("T".ToCharArray()[0],KeyBindType.Press)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],KeyBindType.Press)));
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -357,7 +351,7 @@ namespace Vi
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 			
-            var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange - 30, SimpleTs.DamageType.Physical);
+            var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange, SimpleTs.DamageType.Physical);
             
             if (vPlayer.Distance(fqTarget) > Q.Range && fqTarget != null)
             {
