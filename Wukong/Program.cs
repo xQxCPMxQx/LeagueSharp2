@@ -25,13 +25,6 @@ namespace Wukong
         private static readonly SpellSlot SmiteSlot = Player.GetSpellSlot("SummonerSmite");
         private static readonly SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
-        private static Obj_AI_Hero selectedTarget;
-        private static TargetSelector vTargetSelector;
-        private static string vTargetSelectorStr = "";
-
-        private static readonly Spell[] JunglerLevel = { E, Q, W, Q, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
-        private static readonly Spell[] TopLaneLevel = { Q, E, Q, W, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
-
         private const float SmiteRange = 700f;
 
         //Menu
@@ -51,66 +44,63 @@ namespace Wukong
         {
             if (Player.BaseSkinName != "MonkeyKing") return;
             if (Player.IsDead) return;
-
-            DelayTick = 0;
             
+            DelayTick = 0;
+
             Q = new Spell(SpellSlot.Q, 420f);
             E = new Spell(SpellSlot.E, 640f);
             R = new Spell(SpellSlot.R, 355f);
 
             E.SetTargetted(0.5f, 2000f);
-            
+
             SpellList.Add(Q);
             SpellList.Add(E);
             SpellList.Add(R);
 
-            vTargetSelector = new TargetSelector(1000, TargetSelector.TargetingMode.LowHP);
-
             //Create the menu
-            Config = new Menu("xQx | Monkey King", "MonkeyKig", true);
+            Config = new Menu("xQx | Monkey King", "MonkeyKing", true);
 
-            var targetSelectorMenu = new Menu("Target Selector", "TargetSelector");
+            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             SimpleTs.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
-            Config.SubMenu("TargetSelector").AddItem(new MenuItem("Mode", "Mode")).SetValue(new StringList(new[] { "AutoPriority", "Closest", "LessAttack", "LessCast", "LowHP", "MostAD", "MostAP", "NearMouse" }, 1));
-            Config.SubMenu("TargetSelector").AddItem(new MenuItem("TSRange", "Range")).SetValue(new Slider(1000, 2000, 100));
-            Config.SubMenu("TargetSelector").AddItem(new MenuItem("DrawTSRange", "Range Color").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
 
+
+
+            var menuCombo = new Menu("Combo", "Combo");
             // Combo
-            Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseEComboTurret", "Don't Under Turret E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseRComboEnemyCount", "Min. Enemy Count : ")
-                .SetValue(new Slider(1, 5, 0)));
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
-                        KeyBindType.Press)));
+            Config.AddSubMenu(menuCombo);
+            menuCombo.AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
+      
+            menuCombo.AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
+            menuCombo.AddItem(new MenuItem("UseEComboTurret", "Don't Under Turret E").SetValue(true));
+            menuCombo.AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+            menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Min. Enemy Count : ").SetValue(new Slider(1, 5, 0)));
+            menuCombo.AddItem(
+                new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarassTurret", "Don't Under Turret E").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ")
-                .SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
-                        KeyBindType.Press)));
+                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("Harass")
+                .AddItem(
+                    new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+
 
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+
             var menuLaneClearItems = new Menu("Use Items", "menuLaneClearItems");
             Config.SubMenu("LaneClear").AddSubMenu(menuLaneClearItems);
             menuLaneClearItems.AddItem(new MenuItem("LaneClearUseTiamat", "Tiamat").SetValue(true));
@@ -147,7 +137,7 @@ namespace Wukong
             // Extras -> Use Items -> Targeted Items
             MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
             menuUseItems.AddSubMenu(MenuTargetedItems);
-            
+
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
@@ -175,64 +165,37 @@ namespace Wukong
             Config.SubMenu("Drawings").AddItem(new MenuItem("SmiteRange", "Smite Range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
-            new PotionManager();
+           // new PotionManager();
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Game.OnWndProc += Game_OnWndProc;
             Drawing.OnDraw += Drawing_OnDraw;
-
-            CustomEvents.Unit.OnLevelUp += CustomEvents_Unit_OnLevelUp;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
 
             Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>" +
                                          "{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
         }
 
-  
+
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (selectedTarget != null && selectedTarget.IsValidTarget(Config.Item("TSRange").GetValue<Slider>().Value))
-            {
-                Utility.DrawCircle(selectedTarget.Position, 100f, System.Drawing.Color.GreenYellow);
-            }
-
-            var drawTSRange = Config.Item("DrawTSRange").GetValue<Circle>();
-            if (drawTSRange.Active)
-                Utility.DrawCircle(Player.Position, Config.Item("TSRange").GetValue<Slider>().Value, drawTSRange.Color);
-
             foreach (var spell in SpellList)
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color);
+                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1, 15);
             }
 
             var drawSmite = Config.Item("SmiteRange").GetValue<Circle>();
             if (Config.Item("AutoSmite").GetValue<KeyBind>().Active && drawSmite.Active)
             {
-                Utility.DrawCircle(Player.Position, SmiteRange, drawSmite.Color);
+                Utility.DrawCircle(Player.Position, SmiteRange, drawSmite.Color, 1, 15);
             }
-        }
-
-        public static void CustomEvents_Unit_OnLevelUp(Obj_AI_Base sender, CustomEvents.Unit.OnLevelUpEventArgs args)
-        {
-            if (sender.NetworkId != Player.NetworkId) 
-                return;
-
-            if (!Config.Item("AutoLevelUp").GetValue<bool>())
-                return;
-
-            Player.Spellbook.LevelUpSpell(SmiteSlot != SpellSlot.Unknown
-                ? JunglerLevel[args.NewLevel - 1].Slot
-                : TopLaneLevel[args.NewLevel - 1].Slot);
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100)) return;
-
-            TargetSelectorMode();
 
             if (DelayTick - Environment.TickCount <= 250)
             {
@@ -269,8 +232,8 @@ namespace Wukong
 
         private static void Combo()
         {
-           // var q1Target = selectedTarget ?? SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-           // var e1Target = selectedTarget ?? SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            // var q1Target = selectedTarget ?? SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            // var e1Target = selectedTarget ?? SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
 
 
 
@@ -301,7 +264,7 @@ namespace Wukong
             if (eTarget != null)
                 UseItems(eTarget);
 
-            if (qTarget != null && IgniteSlot != SpellSlot.Unknown && 
+            if (qTarget != null && IgniteSlot != SpellSlot.Unknown &&
                 Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                 Player.GetSummonerSpellDamage(rTarget, Damage.SummonerSpell.Ignite) > rTarget.Health)
             {
@@ -310,11 +273,12 @@ namespace Wukong
 
             if (R.IsReady() && useR)
             {
-                if(Utility.CountEnemysInRange((int)Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= Config.Item("UserRComboEnemyCount").GetValue<Slider>().Value)
+                if (Utility.CountEnemysInRange((int) Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >=
+                    Config.Item("UserRComboEnemyCount").GetValue<Slider>().Value) 
                     R.Cast();
             }
         }
-       
+
         private static void Harass()
         {
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
@@ -323,16 +287,10 @@ namespace Wukong
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
 
-            /*if (selectedTarget != null && selectedTarget.IsValidTarget(Config.Item("TSRange").GetValue<Slider>().Value))
-                Game.PrintChat("--->>>" + selectedTarget.ChampionName);
-            else
-            {
-                Game.PrintChat("--->>> x");
-            }*/
-           
+
             if (qTarget != null && Q.IsReady() && useQ)
             {
-            Q.CastOnUnit(Player);
+                Q.CastOnUnit(Player);
             }
 
             if (eTarget != null && E.IsReady() && useE)
@@ -380,11 +338,10 @@ namespace Wukong
             {
                 var minionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
 
-                foreach (var vMinion in
-                                       from vMinion in minionsQ
-                                       let vMinionEDamage = Player.GetSpellDamage(vMinion, SpellSlot.Q)
-                                       where vMinion.Health <= vMinionEDamage && vMinion.Health > Player.GetAutoAttackDamage(vMinion)
-                                       select vMinion)
+                foreach (var vMinion in from vMinion in minionsQ
+                    let vMinionEDamage = Player.GetSpellDamage(vMinion, SpellSlot.Q)
+                    where vMinion.Health <= vMinionEDamage && vMinion.Health > Player.GetAutoAttackDamage(vMinion)
+                    select vMinion) 
                 {
                     Q.CastOnUnit(Player);
                 }
@@ -392,7 +349,8 @@ namespace Wukong
 
             if (Tiamat.IsReady() && Config.Item("LaneClearUseTiamat").GetValue<bool>())
             {
-                var allMinions = MinionManager.GetMinions(Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(ObjectManager.Player));
+                var allMinions = MinionManager.GetMinions(Player.ServerPosition,
+                    Orbwalking.GetRealAutoAttackRange(ObjectManager.Player));
                 var locTiamat = E.GetCircularFarmLocation(allMinions);
                 if (locTiamat.MinionsHit >= 3)
                     Tiamat.Cast(Player);
@@ -403,7 +361,8 @@ namespace Wukong
             {
                 var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
                 var locE = E.GetCircularFarmLocation(allMinionsE);
-                if (allMinionsE.Count == allMinionsE.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 && locE.Position.IsValid())
+                if (allMinionsE.Count == allMinionsE.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 &&
+                    locE.Position.IsValid()) 
                     E.Cast(locE.Position);
             }
         }
@@ -422,7 +381,7 @@ namespace Wukong
                 fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.R);
 
             if (Items.CanUseItem(3128))
-                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk); 
+                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
 
             if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
@@ -455,7 +414,9 @@ namespace Wukong
                                    let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
                                    where useItem
                                    select Convert.ToInt16(menuItem.Name.Substring(4, 4))
-                                   into itemId where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null select itemId)
+                                       into itemId
+                                       where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                                       select itemId)
             {
                 Items.UseItem(itemID, vTarget);
             }
@@ -464,7 +425,9 @@ namespace Wukong
                                    let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
                                    where useItem
                                    select Convert.ToInt16(menuItem.Name.Substring(4, 4))
-                                   into itemId where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null select itemId)
+                                       into itemId
+                                       where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                                       select itemId)
             {
                 Items.UseItem(itemID);
             }
@@ -480,88 +443,24 @@ namespace Wukong
             var firstOrDefault = Player.SummonerSpellbook.Spells.FirstOrDefault(
                 spell => spell.Name.Contains("mite"));
             if (firstOrDefault == null) return;
-            
-            var vMonsters = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-            foreach (var vMonster in vMonsters.Where(vMonster => vMonster != null
-                                                              && !vMonster.IsDead
-                                                              && !Player.IsDead
-                                                              && !Player.IsStunned
-                                                              && SmiteSlot != SpellSlot.Unknown
-                                                              && Player.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                                                              .Where(vMonster => (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) && (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name)))))
-                                                              
+
+            var vMonsters = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0],
+                MinionTypes.All, MinionTeam.NotAlly);
+            foreach (
+                var vMonster in
+                    vMonsters.Where(
+                        vMonster =>
+                            vMonster != null && !vMonster.IsDead && !Player.IsDead && !Player.IsStunned &&
+                            SmiteSlot != SpellSlot.Unknown &&
+                            Player.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                        .Where(
+                            vMonster =>
+                                (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) &&
+                                (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name))))) 
             {
                 Player.SummonerSpellbook.CastSpell(SmiteSlot, vMonster);
             }
         }
 
-        private static void Game_OnWndProc(WndEventArgs args)
-        {
-            if (args.Msg != 0x201)
-            {
-                return;
-            }
-            foreach (var objAIHero in from hero in ObjectManager.Get<Obj_AI_Hero>()
-                                      where hero.IsValidTarget()
-                                      select hero into h orderby h.Distance(Game.CursorPos, false) descending select h into enemy where enemy.Distance(Game.CursorPos, false) < 150f select enemy)
-            {
-                if (selectedTarget == null || objAIHero.NetworkId != selectedTarget.NetworkId && selectedTarget.IsVisible && !selectedTarget.IsDead)
-                {
-                    selectedTarget = objAIHero;
-                    vTargetSelectorStr = objAIHero.ChampionName;
-                    Game.PrintChat(string.Format("<font color='#FFFFFF'>New Target: </font> <font color='#70DBDB'>{0}</font>", objAIHero.ChampionName));
-                }
-                else
-                {
-                    selectedTarget = null;
-                    vTargetSelectorStr = "";
-                }
-            }
-
-
-        }
-        private static void TargetSelectorMode()
-        {
-
-            float tsRange = Config.Item("TSRange").GetValue<Slider>().Value;
-            vTargetSelector.SetRange(tsRange);
-            var mode = Config.Item("Mode").GetValue<StringList>().SelectedIndex;
-            vTargetSelectorStr = "";
-            switch (mode)
-            {
-                case 0:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.AutoPriority);
-                    vTargetSelectorStr = "Targetin Mode: Auto Priority";
-                    break;
-                case 1:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.Closest);
-                    vTargetSelectorStr = "Targetin Mode: Closest";
-                    break;
-                case 2:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LessAttack);
-                    vTargetSelectorStr = "Targetin Mode: Less Attack";
-                    break;
-                case 3:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LessCast);
-                    vTargetSelectorStr = "Targetin Mode: Less Cast";
-                    break;
-                case 4:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LowHP);
-                    vTargetSelectorStr = "Targetin Mode: Low HP";
-                    break;
-                case 5:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.MostAD);
-                    vTargetSelectorStr = "Targetin Mode: Most AD";
-                    break;
-                case 6:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.MostAP);
-                    vTargetSelectorStr = "Targetin Mode: Most AP";
-                    break;
-                case 7:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.NearMouse);
-                    vTargetSelectorStr = "Targetin Mode: Near Mouse";
-                    break;
-            }
-        }
     }
 }
