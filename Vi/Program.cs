@@ -319,10 +319,10 @@ namespace Vi
             {
                 UseItems(e2Target);
                 if (eTarget != null)
-                    E.Cast(eTarget);
+                    E.Cast();
                 else
                     if (e2Target != null && EMinion != null)
-                        E.Cast(EMinion);
+                        E.Cast();
             }
 
             if (rTarget != null && R.IsReady())
@@ -399,7 +399,7 @@ namespace Vi
 
             if (eTarget != null && E.IsReady() && useE)
             {
-                E.Cast(eTarget);
+                E.Cast();
             }
         }
 
@@ -418,7 +418,7 @@ namespace Vi
             var mob = mobs[0];
             if (useE && E.IsReady())
             {
-                E.Cast(mob);
+                E.Cast();
             }
             else if (useQ && Q.IsReady())
             {
@@ -455,7 +455,7 @@ namespace Vi
             {
                 var locE = E.GetLineFarmLocation(allMinionsE);
                 if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 && locE.Position.IsValid())
-                    E.Cast(locE.Position);
+                    E.Cast();
             }
         }
 
