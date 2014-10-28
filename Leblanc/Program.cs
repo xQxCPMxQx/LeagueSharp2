@@ -1,4 +1,4 @@
-#region
+﻿#region
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,16 +27,12 @@ namespace Leblanc
         public static SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
         public static Items.Item Fqc = new Items.Item(3092, 750);
         public static Items.Item Dfg = new Items.Item(3128, 750);
-<<<<<<< HEAD
 
         private static readonly Dictionary<HitChance, string> PlayOptHitchance = new Dictionary<HitChance, string>();
 
         private static readonly string[] PlayOptComboOption = { "Q-R", "W-R" };
         private static HitChance vOptEHitChange = HitChance.Medium;
         private static String vOptComboOption = "W-R";
-=======
-        public static Items.Item Bft = new Items.Item(3188, 750);
->>>>>>> origin/master
 
         //Menu
         public static Menu Config;
@@ -100,7 +96,6 @@ namespace Leblanc
                 return;
             }
 
-<<<<<<< HEAD
             try
             { 
                 Config = new Menu(ChampionName, ChampionName, true);
@@ -111,23 +106,6 @@ namespace Leblanc
                 Game.PrintChat("There is a problem about Creating Config Menu");
                 return;
             }
-=======
-            //Combo menu:
-            Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseSmartW", "Smart W Active").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use Deathfire Grasp").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseBFTCombo", "Use Blackfire Torch").SetValue(true));
-
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboDoubleStun", "Double Stun!").SetValue(new KeyBind("T".ToCharArray()[0],
-                        KeyBindType.Press)));
->>>>>>> origin/master
 
             try
             {
@@ -387,22 +365,11 @@ namespace Leblanc
 
         private static void UserSummoners(Obj_AI_Hero target)
         {
-<<<<<<< HEAD
             if (Dfg.IsReady())
-=======
-            var useDfg = Config.Item("UseDFGCombo").GetValue<bool>();
-            var useBft = Config.Item("UseBFTCombo").GetValue<bool>();
-            var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
-
-            if (Dfg.IsReady() && useDfg)
->>>>>>> origin/master
             {
                 Dfg.Cast(target);
             }
-            if (Bft.IsReady() && useBft)
-            {
-                Bft.Cast(target);
-            }
+
             if (Fqc.IsReady())
             {
                 Fqc.Cast(target.ServerPosition);
@@ -426,16 +393,10 @@ namespace Leblanc
             if (vTarget == null)
                 return;
 
-<<<<<<< HEAD
             var useQ = Config.Item("ComboUseQ").GetValue<bool>();
             var useW = Config.Item("ComboUseW").GetValue<bool>();
             var useE = Config.Item("ComboUseE").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
-=======
-            var useDfg = Config.Item("UseDFGCombo").GetValue<bool>();
-            var useBft = Config.Item("UseBFTCombo").GetValue<bool>();
-            var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
->>>>>>> origin/master
 
             if (vOptComboOption == "W-R")
             {
@@ -492,34 +453,7 @@ namespace Leblanc
 
             }
 
-<<<<<<< HEAD
             UserSummoners(vTarget);
-=======
-            if (Dfg.IsReady() && useDfg && Player.Distance(vTarget) < Q.Range)
-            {
-                Dfg.Cast(vTarget);
-            }
-            if (Bft.IsReady() && useBft && Player.Distance(vTarget) < Q.Range)
-            {
-                Bft.Cast(vTarget);
-            }
-            if (Fqc.IsReady() && (useDfg || useBft) && Player.Distance(vTarget) < Q.Range)
-            {
-                if (Fqc.IsReady())
-                {
-                    Fqc.Cast(vTarget.ServerPosition);
-                }
-            }
-
-            if (vTarget != null && useIgnite && IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-            {
-                if (GetComboDamage() >= vTarget.Health)
-                {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, vTarget);
-                }
-            }
->>>>>>> origin/master
         }
 
         private static void Harass()
@@ -595,9 +529,6 @@ namespace Leblanc
                 fComboDamage += Player.GetSummonerSpellDamage(wTarget, Damage.SummonerSpell.Ignite);
 
             if (Items.CanUseItem(3128))
-                fComboDamage += Player.GetItemDamage(wTarget, Damage.DamageItems.Dfg);
-
-            if (Items.CanUseItem(3188))
                 fComboDamage += Player.GetItemDamage(wTarget, Damage.DamageItems.Dfg); 
 
             if (Items.CanUseItem(3092))
