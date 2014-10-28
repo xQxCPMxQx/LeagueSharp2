@@ -75,7 +75,7 @@ namespace Vi
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
 
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
@@ -108,15 +108,13 @@ namespace Vi
 
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseFQCombo", "Use Flash+Q").SetValue(true));
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboFlashQActive", "Combo Flash+Q!").SetValue(new KeyBind("T".ToCharArray()[0],
                         KeyBindType.Press)));
             Config.SubMenu("Combo")
                 .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
-                        KeyBindType.Press)));
+                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -135,7 +133,8 @@ namespace Vi
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
                 .AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
@@ -204,7 +203,10 @@ namespace Vi
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
 
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>",
+                    ChampionName));
 
         }
 
@@ -319,10 +321,10 @@ namespace Vi
             {
                 UseItems(e2Target);
                 if (eTarget != null)
-                    E.Cast(eTarget);
+                    E.Cast();
                 else
                     if (e2Target != null && EMinion != null)
-                        E.Cast(EMinion);
+                        E.Cast();
             }
 
             if (rTarget != null && R.IsReady())
@@ -356,16 +358,16 @@ namespace Vi
         }
         private static void ComboFlashQ()
         {
-            var useFq = Config.Item("UseFQCombo").GetValue<bool>();
-            if (!useFq) return;
-
+            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+			
             var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange, SimpleTs.DamageType.Physical);
             
             if (vPlayer.Distance(fqTarget) > Q.Range && fqTarget != null)
             {
-                if (FlashSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
+                if (FlashSlot != SpellSlot.Unknown &&
+                    vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                 {
-                    if (Q.IsCharging && Q.Range == Q.ChargedMaxRange)
+                    if (Q.IsCharging && Q.Range >= Q.ChargedMaxRange)
                     {
                         vPlayer.SummonerSpellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
                         Q.Cast(fqTarget);
@@ -399,7 +401,7 @@ namespace Vi
 
             if (eTarget != null && E.IsReady() && useE)
             {
-                E.Cast(eTarget);
+                E.Cast();
             }
         }
 
@@ -418,7 +420,7 @@ namespace Vi
             var mob = mobs[0];
             if (useE && E.IsReady())
             {
-                E.Cast(mob);
+                E.Cast();
             }
             else if (useQ && Q.IsReady())
             {
@@ -436,15 +438,16 @@ namespace Vi
             var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
             var useE = Config.Item("UseELaneClear").GetValue<bool>();
 
-            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.ChargedMaxRange, MinionTypes.All);
-            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E2.Range, MinionTypes.All);
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.ChargedMaxRange);
+            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E2.Range);
 
             if (useQ && Q.IsReady())
             {
                 if (Q.IsCharging)
                 {
                     var locQ = Q.GetLineFarmLocation(allMinionsQ);
-                    if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < Q.Range) && locQ.MinionsHit > 2 && locQ.Position.IsValid())
+                    if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < Q.Range) &&
+                        locQ.MinionsHit > 2 && locQ.Position.IsValid()) 
                         Q.Cast(locQ.Position);
                 }
                 else if (allMinionsQ.Count > 2)
@@ -454,8 +457,9 @@ namespace Vi
             if (useE && E.IsReady())
             {
                 var locE = E.GetLineFarmLocation(allMinionsE);
-                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 && locE.Position.IsValid())
-                    E.Cast(locE.Position);
+                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 &&
+                    locE.Position.IsValid()) 
+                    E.Cast();
             }
         }
 
@@ -580,13 +584,17 @@ namespace Vi
             if (firstOrDefault == null) return;
 
             var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-            foreach (var vMinion in vMinions.Where(vMinion => vMinion != null
-                                                              && !vMinion.IsDead
-                                                              && !vPlayer.IsDead
-                                                              && !vPlayer.IsStunned
-                                                              && SmiteSlot != SpellSlot.Unknown
-                                                              && vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                                                              .Where(vMinion => (vMinion.Health < smiteDmg.Max()) && (monsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name)))))
+            foreach (
+                var vMinion in
+                    vMinions.Where(
+                        vMinion =>
+                            vMinion != null && !vMinion.IsDead && !vPlayer.IsDead && !vPlayer.IsStunned &&
+                            SmiteSlot != SpellSlot.Unknown &&
+                            vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                        .Where(
+                            vMinion =>
+                                (vMinion.Health < smiteDmg.Max()) &&
+                                (monsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name))))) 
             {
                 vPlayer.SummonerSpellbook.CastSpell(SmiteSlot, vMinion);
             }
