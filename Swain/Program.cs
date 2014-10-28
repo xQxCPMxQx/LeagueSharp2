@@ -195,7 +195,7 @@ namespace Swain
 
         private static void Combo()
         {
-            Orbwalker.SetAttacks(!(Q.IsReady() || W.IsReady() || E.IsReady()));
+            Orbwalker.SetAttack(!(Q.IsReady() || W.IsReady() || E.IsReady()));
             UseSpells(
                 Config.Item("UseQCombo").GetValue<bool>(), 
                 Config.Item("UseWCombo").GetValue<bool>(),
@@ -358,7 +358,7 @@ namespace Swain
         {
             if (vPlayer.IsDead) return;
             
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
