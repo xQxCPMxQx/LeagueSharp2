@@ -1,15 +1,10 @@
 ﻿#region
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
-using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
-using Font = SharpDX.Direct3D9.Font;
 
 #endregion
 
@@ -20,41 +15,42 @@ namespace Leblanc
         public const string ChampionName = "Leblanc";
         public static readonly Obj_AI_Hero Player = ObjectManager.Player;
 
-        private static readonly List<Texture> Enemies2 = new List<Texture>();
-
         private static readonly List<Slide> ExistingSlide = new List<Slide>();
         private static bool leBlancClone;
-        private static Texture wButton;
-        //private static Texture rButton;
-        private static Obj_AI_Hero _selectedTarget;
 
-        private static double soulShackleTimeExperies;
-
-        private static Sprite S;
-        private static Font RecF;
-
-        //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
-        public static TargetSelector vTargetSelector;
-        public static string vTargetSelectorStr = "";
 
-        //Spells
         public static List<Spell> SpellList = new List<Spell>();
 
         public static Spell Q, W, E, R;
 
-        public static SpellSlot IgniteSlot;
-
-        public static Items.Item Fqc = new Items.Item(3092, 750); // Frost Queen's Claim; 
+        public static SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
+        public static Items.Item Fqc = new Items.Item(3092, 750);
         public static Items.Item Dfg = new Items.Item(3128, 750);
-        
+
+        private static readonly Dictionary<HitChance, string> PlayOptHitchance = new Dictionary<HitChance, string>();
+
+        private static readonly string[] PlayOptComboOption = { "Q-R", "W-R" };
+        private static HitChance vOptEHitChange = HitChance.Medium;
+        private static String vOptComboOption = "W-R";
+
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
         public static Menu TargetSelectorMenu;
+        public static Menu MenuPlayOptions;
 
-        private static readonly string[] LeBlancIsWeakAgainst = {"Galio", "Karma", "Sion", "Annie", "Syndra", "Diana", "Aatrox", "Mordekaiser", "Talon", "Morgana" };
-        private static readonly string[] LeBlancIsStrongAgainst = {"Velkoz", "Ahri", "Karthus", "Fizz", "Ziggs", "Katarina", "Orianna", "Nidalee", "Yasuo", "Akali" };
+        private static readonly string[] LeBlancIsWeakAgainst =
+        {
+            "Galio", "Karma", "Sion", "Annie", "Syndra", "Diana",
+            "Aatrox", "Mordekaiser", "Talon", "Morgana"
+        };
+
+        private static readonly string[] LeBlancIsStrongAgainst =
+        {
+            "Velkoz", "Ahri", "Karthus", "Fizz", "Ziggs",
+            "Katarina", "Orianna", "Nidalee", "Yasuo", "Akali"
+        };
 
         public static bool LeBlancClone
         {
@@ -69,180 +65,216 @@ namespace Leblanc
         private static void Game_OnGameLoad(EventArgs args)
         {
             if (Player.BaseSkinName != ChampionName) return;
+
+            PlayOptHitchance.Add(HitChance.Low, "Low");
+            PlayOptHitchance.Add(HitChance.Medium, "Medium");
+            PlayOptHitchance.Add(HitChance.High, "High");
+            PlayOptHitchance.Add(HitChance.VeryHigh, "Very High");
+
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 720);
-            W = new Spell(SpellSlot.W, 600);
-            E = new Spell(SpellSlot.E, 900);
-            R = new Spell(SpellSlot.R, 720);
-
-            Q.SetTargetted(0.5f, 1500f);
-            W.SetSkillshot(0.5f, 200f, 1200f, false, SkillshotType.SkillshotCircle);
-            E.SetSkillshot(0.25f, 100f, 1750f, true, SkillshotType.SkillshotLine);
-            R.SetTargetted(0.5f, 1500f);
-
-            SpellList.Add(Q);
-            SpellList.Add(W);
-            SpellList.Add(E);
-            SpellList.Add(R);
-
-            IgniteSlot = Player.GetSpellSlot("SummonerDot");
-            vTargetSelector = new TargetSelector(1000, TargetSelector.TargetingMode.LowHP);
-            
-            //Create the menu
-            Config = new Menu(ChampionName, ChampionName, true);
-
-            Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-
-            TargetSelectorMenu = new Menu("Target Selector", "TargetSelector");
-            SimpleTs.AddToMenu(TargetSelectorMenu);
-
-            Config.AddSubMenu(TargetSelectorMenu);
-            
-            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-
-            //Combo menu:
-            Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseSmartW", "Smart W Active").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use Deathfire Grasp").SetValue(true));
-
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboDoubleStun", "Double Stun!").SetValue(new KeyBind("T".ToCharArray()[0],
-                        KeyBindType.Press)));
-
-            Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+            try
             {
-                Config.SubMenu("Combo")
-                    .SubMenu("DontCombo")
-                    .AddItem(new MenuItem("DontCombo" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                Q = new Spell(SpellSlot.Q, 720);
+                W = new Spell(SpellSlot.W, 600);
+                E = new Spell(SpellSlot.E, 900);
+                R = new Spell(SpellSlot.R, 720);
+
+                Q.SetTargetted(0.5f, 1500f);
+                W.SetSkillshot(0.5f, 200f, 1200f, false, SkillshotType.SkillshotCircle);
+                E.SetSkillshot(0.25f, 100f, 1750f, true, SkillshotType.SkillshotLine);
+                //R.SetTargetted(0.5f, 1500f);
+
+                SpellList.Add(Q);
+                SpellList.Add(W);
+                SpellList.Add(E);
+                SpellList.Add(R);
+
+            }
+            catch (Exception)
+            {
+                Game.PrintChat("There is a problem about Loading Spell Informations");
+                return;
             }
 
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
-                        KeyBindType.Press)));
+            try
+            { 
+                Config = new Menu(ChampionName, ChampionName, true);
+                Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+            }
+            catch (Exception)
+            {
+                Game.PrintChat("There is a problem about Creating Config Menu");
+                return;
+            }
 
+            try
+            {
+                TargetSelectorMenu = new Menu("Target Selector", "TargetSelector");
+                SimpleTs.AddToMenu(TargetSelectorMenu);
+                Config.AddSubMenu(TargetSelectorMenu);
+            }
+            catch (Exception)
+            {
+                Game.PrintChat("There is a problem about Creating TargetSelectorMenu");
+                return;
+            }
 
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(
-                        new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
+            try
+            {
+                //Combo menu:
+                Config.AddSubMenu(new Menu("Combo", "Combo"));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
+                //Config.SubMenu("Combo").AddItem(new MenuItem("ComboSmartW", "Use Smart W").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+                Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                {
+                    Config.SubMenu("Combo").SubMenu("DontCombo").AddItem(new MenuItem("DontCombo" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                }
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],KeyBindType.Press)));
+
+                /* [ Combo Option ] */
+                var menuComboOption = new Menu("Combo Option", "ComboOption", false);
+                foreach (var t in PlayOptComboOption)
+                {
+                    var menuItem = menuComboOption.AddItem(new MenuItem(t, t).SetValue(false));
+                    menuItem.ValueChanged += (sender, eventArgs) =>
+                    {
+                        if (eventArgs.GetNewValue<bool>())
+                        {
+                            menuComboOption.Items.ForEach(
+                                p => { if (p.GetValue<bool>() && p.Name != t) p.SetValue(false); });
+                            vOptComboOption = t;
+                            Game.PrintChat(string.Format("Combo Mode: <font color='#FFF9C200'>{0}</font>", vOptComboOption));
+                        }
+                    };
+                }
+                Config.SubMenu("Combo").AddSubMenu(menuComboOption);
+
+            }
+            catch (Exception)
+            {
+                Game.PrintChat("There is a problem about Loading Combo Menu");
+                return;
+            }
             //Harass menu:
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(false));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseWQHarass", "Use W+Q").SetValue(false));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(false));
             Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             //Config.SubMenu("Harass").AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q+W", "Q+W+E", "W+Q+E" })));
-            Config.SubMenu("Harass")
-                .AddItem(
-                    new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0],
-                        KeyBindType.Press)));
-            Config.SubMenu("Harass")
-                .AddItem(
-                    new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(
-                        new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             //Farming menu:
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ")
-                .SetValue(new Slider(50, 100, 0)));
-
-            Config.SubMenu("LaneClear")
-                .AddItem(
-                    new MenuItem("LaneClearActive", "Lane Clear!").SetValue(
-                        new KeyBind(Config.Item("LaneClear").GetValue<KeyBind>().Key, KeyBindType.Press)));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseRLaneClear", "Use E").SetValue(false));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "Harass!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             //JungleFarm menu:
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", "Use W").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "Use E").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ")
-                .SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("JungleFarm")
-                .AddItem(
-                    new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(
-                        new KeyBind(Config.Item("LaneClear").GetValue<KeyBind>().Key, KeyBindType.Press)));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseRJFarm", "Use E").SetValue(true));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "Harass!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
-            //Misc
+            //Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(new KeyBind(Config.Item("LaneClear").GetValue<KeyBind>().Key, KeyBindType.Press)));
+            try
+            {
+                MenuPlayOptions = new Menu("Play Options", "PlayOptions");
+                Config.AddSubMenu(MenuPlayOptions);
+
+                /* [ Assassin manager ] */
+                try
+                {
+                    new AssassinManager();
+                }
+                catch (Exception)
+                {
+                    Game.PrintChat("Something wrong 'Loading Assassing Manager'");
+                    return;
+                }
+
+                /* [ E HitChance ] */
+                var menuEHitChance = new Menu("E Hitchance", "EHitChange", false);
+                foreach (var t in PlayOptHitchance.ToList())
+                {
+                    var menuItem = menuEHitChance.AddItem(new MenuItem(t.Value, t.Value).SetValue(false));
+                    KeyValuePair<HitChance, string> t1 = t;
+                    menuItem.ValueChanged += (sender, eventArgs) =>
+                    {
+                        if (eventArgs.GetNewValue<bool>())
+                        {
+                            menuEHitChance.Items.ForEach(
+                                p => { if (p.GetValue<bool>() && p.Name != t1.Value) p.SetValue(false); });
+                            vOptEHitChange = t1.Key;
+                            Game.PrintChat(string.Format("E Hitchance mode: <font color='#FFF9C200'>{0}</font>", t1.Value));
+                        }
+                    };
+                }
+                MenuPlayOptions.AddSubMenu(menuEHitChance);
+
+                /* [ Double Stun ] */
+                MenuPlayOptions.AddItem(
+                    new MenuItem("OptDoubleStun", "Double Stun!").SetValue(new KeyBind("T".ToCharArray()[0],
+                        KeyBindType.Press)));
+            }
+            catch (Exception)
+            {
+                Game.PrintChat("There is a problem about Loading Oplay Options Menu");
+                return;
+            }
+
+
             MenuExtras = new Menu("Extras", "Extras");
             Config.AddSubMenu(MenuExtras);
             MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
             //Drawings menu:
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WRange", "W Range").SetValue(new Circle(true,  Color.FromArgb(100, 255, 0, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WObjectPosition", "W Object Position").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WObjectTimeTick", "Show W Tick").SetValue(true));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(false, Color.Honeydew)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("WRange", "W Range").SetValue(new Circle(true, Color.Honeydew)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false, Color.Honeydew)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, Color.Honeydew)));
+
+            Config.SubMenu("Drawings").AddItem(new MenuItem("ActiveERange", "Active E Range").SetValue(new Circle(false, Color.GreenYellow)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("WObjPosition", "W Obj. Pos.").SetValue(new Circle(true, Color.GreenYellow)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("WObjTimeTick", "W Obj. Tick").SetValue(true));
             Config.SubMenu("Drawings").AddItem(new MenuItem("WQRange", "W+Q Range").SetValue(new Circle(false, Color.GreenYellow)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("EActiveRange", "E Active Range").SetValue(new Circle(false, Color.GreenYellow)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
 
             new PotionManager();
-            new AssassinManager();
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             //Game.OnWndProc += Game_OnWndProc;
             GameObject.OnCreate += GameObject_OnCreate;
             GameObject.OnDelete += GameObject_OnDelete;
-
-            Drawing.OnPreReset += Drawing_OnPreReset;
-            Drawing.OnPostReset += Drawing_OnPostReset;
-            Drawing.OnEndScene += Drawing_OnEndScene;
-
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-
             Drawing.OnDraw += Drawing_OnDraw;
+            Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
             
             //Init();
-            
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
+
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded!</font>",
+                    ChampionName));
         }
 
-        private static void Game_OnWndProc(WndEventArgs args)
-        {
-            if (args.Msg != 0x201)
-            {
-                return;
-            }
-            foreach (var objAIHero in from hero in ObjectManager.Get<Obj_AI_Hero>()
-                                      where hero.IsValidTarget() 
-                                      select hero into h
-                                      orderby h.Distance(Game.CursorPos, false) descending
-                                      select h into enemy
-                                      where enemy.Distance(Game.CursorPos, false) < 150f
-                                      select enemy)
-            {
-                if (_selectedTarget == null || objAIHero.NetworkId != _selectedTarget.NetworkId && _selectedTarget.IsVisible && !_selectedTarget.IsDead)
-                {
-                    _selectedTarget = objAIHero;
-                    vTargetSelectorStr = objAIHero.ChampionName;
-                    Game.PrintChat(string.Format("<font color='#FFFFFF'>New Target: </font> <font color='#70DBDB'>{0}</font>", objAIHero.ChampionName));
-                }
-                else
-                {
-                    _selectedTarget = null;
-                    vTargetSelectorStr = "";
-                }
-            }
-             
-             
-        }
         private static int FindCounterStatusForTarget(string enemyBaseSkinName)
         {
             if (LeBlancIsWeakAgainst.Contains(enemyBaseSkinName))
@@ -258,23 +290,22 @@ namespace Leblanc
         {
             get
             {
-                foreach (var hero in from hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => Player.Distance(hero) <= 1100) where hero.IsEnemy 
-                                     from buff in hero.Buffs where buff.Name.Contains("LeblancSoulShackle") 
-                                     select hero)
-                {
-                    soulShackleTimeExperies = Game.Time + 2;
-                    return hero;
-                }
-                soulShackleTimeExperies = 0;
-                return null;
+                return (from hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => Player.Distance(hero) <= 1100)
+                    where hero.IsEnemy
+                    from buff in hero.Buffs
+                    where buff.Name.Contains("LeblancSoulShackle")
+                    select hero).FirstOrDefault();
             }
         }
         private static bool DrawEnemySoulShackle
         {
             get
-            { return (from hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => Player.Distance(hero) <= 1100) where hero.IsEnemy 
-                      from buff in hero.Buffs 
-                      select (buff.Name.Contains("LeblancSoulShackle"))).FirstOrDefault(); }
+            {
+                return (from hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => Player.Distance(hero) <= 1100)
+                    where hero.IsEnemy
+                    from buff in hero.Buffs
+                    select (buff.Name.Contains("LeblancSoulShackle"))).FirstOrDefault();
+            }
         }
 
         private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
@@ -284,13 +315,11 @@ namespace Leblanc
 
             var isValidTarget = unit.IsValidTarget(E.Range) && spell.DangerLevel == InterruptableDangerLevel.High;
 
-            if (E.IsReady() && isValidTarget)
+            if (E.IsReady() && isValidTarget && E.CastIfHitchanceEquals(unit, vOptEHitChange))
             {
                 E.Cast(unit);
-                return;
-            }  
-
-            if (R.IsReady() && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSoulShackleM" && isValidTarget)
+            }
+            else if (R.IsReady() && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSoulShackleM" && isValidTarget)
             {
                 R.Cast(unit);
             }
@@ -333,46 +362,10 @@ namespace Leblanc
             { return !W.IsReady() || Player.Spellbook.GetSpell(SpellSlot.W).Name == "leblancslidereturn";}
         }
 
-        private static void UseSpellR(Obj_AI_Hero vTarget)
-        {
-            var rMode = Player.Spellbook.GetSpell(SpellSlot.R).Name;
-
-            if (rMode != "LeblancChaosOrbM" || !R.IsReady()) return;
-
-            R.CastOnUnit(vTarget);
-
-            switch (rMode)
-            {
-                case "LeblancChaosOrbM":
-                    {
-                        R.Range = Q.Range;
-                        R.SetTargetted(0.5f, float.MaxValue);
-                        R.CastOnUnit(vTarget);
-                        break;
-                    }
-                case "LeblancSlideM":
-                    {
-                        R.Range = W.Range;
-                        R.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
-                        R.Cast(vTarget);
-                        break;
-                    }
-                case "LeblancSoulShackleM":
-                    {
-                        R.Range = E.Range;
-                        R.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
-                        R.Cast(vTarget);
-                        break;
-                    }
-            }
-        }
 
         private static void UserSummoners(Obj_AI_Hero target)
         {
-            var useDfg = Config.Item("UseDFGCombo").GetValue<bool>();
-            var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
-
-            if (Dfg.IsReady() && useDfg)
+            if (Dfg.IsReady())
             {
                 Dfg.Cast(target);
             }
@@ -382,7 +375,7 @@ namespace Leblanc
                 Fqc.Cast(target.ServerPosition);
             }
           
-            if (useIgnite && IgniteSlot != SpellSlot.Unknown &&
+            if (IgniteSlot != SpellSlot.Unknown &&
                 Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (Player.Distance(target) < 650 && GetComboDamage() >= target.Health)
@@ -390,23 +383,38 @@ namespace Leblanc
                     Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
                 }
             }
-
         }
 
         private static void Combo(Obj_AI_Hero vTarget)
         {
             if (vTarget == null)
-                vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+                vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
 
-            var useQ = Config.Item("UseQCombo").GetValue<bool>();
-            var useW = Config.Item("UseWCombo").GetValue<bool>();
-            var useE = Config.Item("UseECombo").GetValue<bool>();
+            if (vTarget == null)
+                return;
+
+            var useQ = Config.Item("ComboUseQ").GetValue<bool>();
+            var useW = Config.Item("ComboUseW").GetValue<bool>();
+            var useE = Config.Item("ComboUseE").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
 
-            var useDfg = Config.Item("UseDFGCombo").GetValue<bool>();
-            var useIgnite = Config.Item("UseIgniteCombo").GetValue<bool>();
-
-            if (Q.IsReady() && R.IsReady() && Player.Distance(vTarget) < Q.Range)
+            if (vOptComboOption == "W-R")
+            {
+                if (W.IsReady() && R.IsReady() && Player.Distance(vTarget) < W.Range)
+                {
+                    useR = (Config.Item("DontCombo" + vTarget.BaseSkinName) != null &&
+                            Config.Item("DontCombo" + vTarget.BaseSkinName).GetValue<bool>() == false) && useR;
+                    {
+                        if (useR)
+                        {
+                            W.Cast(vTarget);
+                            if (Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancSlideM"))
+                                R.Cast(vTarget);
+                        }
+                    }
+                }
+            } 
+            else if (Q.IsReady() && R.IsReady() && Player.Distance(vTarget) < Q.Range)
             {
                 useR = (Config.Item("DontCombo" + vTarget.BaseSkinName) != null &&
                         Config.Item("DontCombo" + vTarget.BaseSkinName).GetValue<bool>() == false) && useR;
@@ -421,19 +429,20 @@ namespace Leblanc
             }
             else
             {
+                if (useQ && Q.IsReady() && Player.Distance(vTarget) < Q.Range)
+                {
+                    Q.CastOnUnit(vTarget);
+                }
+
                 if (useW && W.IsReady() && !LeBlancStillJumped && Player.Distance(vTarget) < W.Range)
                 {
                     W.Cast(vTarget);
                 }
 
-                if (useE && E.IsReady() && Player.Distance(vTarget) < E.Range)
+                if (useE && E.IsReady() && Player.Distance(vTarget) < E.Range &&
+                    E.CastIfHitchanceEquals(vTarget, vOptEHitChange)) 
                 {
                     E.Cast(vTarget);
-                }
-
-                if (useQ && Q.IsReady() && Player.Distance(vTarget) < Q.Range)
-                {
-                    Q.CastOnUnit(vTarget);
                 }
 
                 if (useR && R.IsReady() && Player.Distance(vTarget) < Q.Range &&
@@ -444,69 +453,33 @@ namespace Leblanc
 
             }
 
-            if (Dfg.IsReady() && useDfg && Player.Distance(vTarget) < Q.Range)
-            {
-                Dfg.Cast(vTarget);
-            }
-
-            if (Fqc.IsReady() && useDfg && Player.Distance(vTarget) < Q.Range)
-            {
-                if (Fqc.IsReady())
-                {
-                    Fqc.Cast(vTarget.ServerPosition);
-                }
-            }
-
-            if (vTarget != null && useIgnite && IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-            {
-                if (GetComboDamage() >= vTarget.Health)
-                {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, vTarget);
-                }
-            }
+            UserSummoners(vTarget);
         }
 
         private static void Harass()
         {
-            var existsMana = Player.MaxMana / 100 * Config.Item("HarassMana").GetValue<Slider>().Value;
-            if (Player.Mana <= existsMana) return;
-
-
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-            var wqTarget = SimpleTs.GetTarget(W.Range + Q.Range, SimpleTs.DamageType.Magical);
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useW = Config.Item("UseWHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
-            var useWQ = Config.Item("UseWQHarass").GetValue<bool>();
 
             if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Cooldown) // Combo: E-W-Q-R
             {
 
             }
 
-            if (useWQ && wqTarget != null)
-            {
-                if (Q.IsReady() && W.IsReady() && !LeBlancStillJumped)
-                {
-                    W.Cast(wqTarget.ServerPosition);
-                    Q.CastOnUnit(wqTarget);
-                }
-            }
-
             if (useQ && qTarget != null && Q.IsReady()) 
             {
                 Q.CastOnUnit(qTarget);
             }
-
             if (useW && wTarget != null && W.IsReady() && !LeBlancStillJumped)
             {
                 W.Cast(wTarget);
             }
-            if (useE && eTarget != null && E.IsReady())
+            if (useE && eTarget != null && E.IsReady() && E.CastIfHitchanceEquals(eTarget, vOptEHitChange))
             {
                 E.Cast(eTarget);
             }
@@ -563,10 +536,96 @@ namespace Leblanc
 
             return (float)fComboDamage;
         }
+        private static bool xEnemyHaveSoulShackle(Obj_AI_Hero vTarget)
+        {
+            return (vTarget.HasBuff("LeblancSoulShackle"));
+        }
 
+        private static void DoubleStun()
+        {
+            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            
+            if (Config.Item("OptDoubleStun").GetValue<KeyBind>().Active)
+                //if (Config.Item("OptDoubleStun").GetValue<KeyBind>().Active && E.IsReady() && R.IsReady())
+            {
+                if (Q.IsReady())
+                    Config.Item("HarassUseQT").SetValue(false);
+
+
+                Drawing.DrawText(Drawing.Width * 0.45f, Drawing.Height * 0.80f, Color.GreenYellow, "Double Stun Active!");
+
+                /*
+                var onPlayerPositionEnemyCount2 =
+                    (from enemy in
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .Where(enemy => enemy.Team != Player.Team && Player.Distance(enemy) < E.Range + 200)
+                        select enemy).Count();
+
+                if (onPlayerPositionEnemyCount2 >= 2)
+                {
+                */
+                foreach (
+                    var enemy in
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .Where(
+                                enemy =>
+                                    enemy.IsEnemy && !enemy.IsDead && enemy.IsVisible && Player.Distance(enemy) < E.Range + 200 &&
+                                    !xEnemyHaveSoulShackle(enemy))) 
+                    {
+                        //foreach (var buff in enemy.Buffs)
+                       // {
+                            //if (buff.Name.Contains("LeblancSoulShackle"))
+                            //    Game.PrintChat(enemy.ChampionName);
+                        //}
+
+                        //Utility.DrawCircle(enemy.Position, 75f, Color.GreenYellow);
+
+                        if (E.IsReady() && Player.Distance(enemy) < E.Range)
+                        {
+                            E.CastIfHitchanceEquals(enemy, vOptEHitChange);
+                        }
+                        else
+                        if (R.IsReady() && Player.Distance(enemy) < R.Range &&
+                            Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSoulShackleM")
+                        {
+                            R.CastIfHitchanceEquals(enemy, vOptEHitChange);
+                        }
+               /*}*/
+                }
+            }
+
+
+        }
+
+        private static void RefresySpellR()
+        {
+            var rMode = Player.Spellbook.GetSpell(SpellSlot.R).Name;
+
+            switch (rMode)
+            {
+                case "LeblancChaosOrbM":
+                    {
+                        R.Range = Q.Range;
+                        R.SetTargetted(0.5f, float.MaxValue);
+                        break;
+                    }
+                case "LeblancSlideM":
+                    {
+                        R.Range = W.Range;
+                        R.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+                        break;
+                    }
+                case "LeblancSoulShackleM":
+                    {
+                        R.Range = E.Range;
+                        R.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
+                        break;
+                    }
+            }
+        }
         private static void SmartW()
         {
-            if (!Config.Item("UseSmartW").GetValue<bool>())
+            if (!Config.Item("ComboSmartW").GetValue<bool>())
                 return;
 
             var vTarget = EnemyHaveSoulShackle;
@@ -587,7 +646,7 @@ namespace Leblanc
                         select enemy).Count();
 
 
-                    if (Config.Item("ComboDoubleStun").GetValue<KeyBind>().Active && E.IsReady() && R.IsReady())
+                    if (Config.Item("OptDoubleStun").GetValue<KeyBind>().Active && E.IsReady() && R.IsReady())
                     {
                         var onPlayerPositionEnemyCount2 = (from enemy in
                             ObjectManager.Get<Obj_AI_Hero>()
@@ -600,6 +659,10 @@ namespace Leblanc
                             
 
                         }
+                        
+
+
+
                     }
                     if (onPlayerPositionEnemyCount > onSlidePositionEnemyCount)
                     {
@@ -624,72 +687,22 @@ namespace Leblanc
                         }
                          
                     }
+                    //Game.PrintChat(slide.Position.ToString());
                     Utility.DrawCircle(slide.Position, 400f, Color.Red);
+
+//                    Game.PrintChat("Slide Pos. Enemy Count: " + onSlidePositionEnemyCount);
+//                    Game.PrintChat("Player Pos. Enemy Count: " + onPlayerPositionEnemyCount);
+                   
+
+//                    Game.PrintChat("W Posision : " + existingSlide.Position);
+ //                   Game.PrintChat("Target Position : " + vTarget.Position);
                 }
-        }
-
-        private static void UseSpells(bool useQ, bool useW, bool useE, bool useR, bool useIgnite)
-        {
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-
-            if (useE && eTarget != null && E.IsReady())
-                E.Cast(eTarget);
-
-            if (useW && wTarget != null && W.IsReady())
-            {
-                W.Cast(wTarget);
-            }
-
-            if (useQ && qTarget != null && Q.IsReady())
-                Q.Cast(qTarget);
-
-
-            if (qTarget != null && useIgnite && IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-            {
-                if (Player.Distance(qTarget) < 650 && GetComboDamage() > qTarget.Health)
-                {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, qTarget);
-                }
-            }
-
-            if (!useR || !R.IsReady()) return;
-            
-            var rMode = Player.Spellbook.GetSpell(SpellSlot.R).Name;
-            switch (rMode)
-            {
-                case "LeblancChaosOrbM":
-                {
-                    R = Q;
-                    if (qTarget != null)
-                        R.Cast(qTarget);
-                    break;
-                }
-                case "LeblancSlideM":
-                {
-                    R = W;
-                    if (wTarget != null)
-                        R.CastIfWillHit(wTarget);
-                    break;
-                }
-                case "LeblancSoulShackleM":
-                {
-                    R = E;
-                    if (eTarget != null)
-                        R.CastIfWillHit(eTarget);
-                    break;
-                }
-            }
+         //   }
         }
 
         private static void LaneClear()
         {
             if (!Orbwalking.CanMove(40)) return;
-
-            var existsMana = Player.MaxMana / 100 * Config.Item("LaneClearMana").GetValue<Slider>().Value;
-            if (Player.Mana <= existsMana) return;
 
             var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
             var useW = Config.Item("UseWLaneClear").GetValue<bool>();
@@ -717,9 +730,6 @@ namespace Leblanc
 
         private static void JungleFarm()
         {
-            var existsMana = Player.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-            if (Player.Mana <= existsMana) return;
-
             var useQ = Config.Item("UseQJFarm").GetValue<bool>();
             var useW = Config.Item("UseWJFarm").GetValue<bool>();
             var useE = Config.Item("UseEJFarm").GetValue<bool>();
@@ -733,10 +743,10 @@ namespace Leblanc
                 Q.CastOnUnit(mob);
 
             if (useW && W.IsReady())
-                W.Cast(mob);
+                W.Cast(mob.Position);
 
             if (useE && E.IsReady())
-                E.CastOnUnit(mob);
+                E.Cast(mob);
         }
 
 
@@ -744,21 +754,28 @@ namespace Leblanc
         {
             if (Player.IsDead) return;
             
+            RefresySpellR();
             //Mode();
-            //if (Config.Item("UseSmartW").GetValue<KeyBind>().Active)
-            //    SmartW();
+//            if (Config.Item("ComboSmartW").GetValue<KeyBind>().Active)
+//                SmartW();
 
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
+
+            if (Config.Item("OptDoubleStun").GetValue<KeyBind>().Active)
+            {
+                DoubleStun();
+            }
+
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                var assassinRange = TargetSelectorMenu.Item("AssassinRange").GetValue<Slider>().Value;
+                var assassinRange = MenuPlayOptions.Item("AssassinRange").GetValue<Slider>().Value;
                 Obj_AI_Hero vTarget = null;
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()
                     .Where(enemy => enemy.Team != Player.Team
                         && !enemy.IsDead && enemy.IsVisible
-                        && TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null
-                        && TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>())
+                        && MenuPlayOptions.Item("Assassin" + enemy.ChampionName) != null
+                        && MenuPlayOptions.Item("Assassin" + enemy.ChampionName).GetValue<bool>())
                         .OrderBy(enemy => enemy.Distance(Game.CursorPos))
                         )
                 {
@@ -770,58 +787,68 @@ namespace Leblanc
             }
             else
             {
-                if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
-                    Config.Item("HarassActiveT").GetValue<KeyBind>().Active)
+                if (Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
                 {
-                    Harass();
+                    var t = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+                    if (t != null && Q.IsReady())
+                        Q.CastOnUnit(t);
+                }
+
+                if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
+                {
+                    var existsMana = Player.MaxMana/100*Config.Item("HarassMana").GetValue<Slider>().Value;
+                    if (Player.Mana >= existsMana)
+                        Harass();
                 }
 
                 if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
-                    LaneClear();
+                {
+                    var existsMana = Player.MaxMana/100*Config.Item("LaneClearMana").GetValue<Slider>().Value;
+                    if (Player.Mana >= existsMana)
+                        LaneClear();
+                }
 
                 if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
-                    JungleFarm();
+                {
+                    var existsMana = Player.MaxMana/100*Config.Item("JungleFarmMana").GetValue<Slider>().Value;
+                    if (Player.Mana >= existsMana)
+                        JungleFarm();                    
+                }
+
             }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            
-            if (_selectedTarget != null)
-            {
-                Utility.DrawCircle(_selectedTarget.Position, 100f, Color.GreenYellow, 7);
-            }
-
             foreach (var spell in SpellList)
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color);
+                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1, 15);
             }
 
-            var wObjectPosition = Config.Item("WObjectPosition").GetValue<Circle>();
-            var wObjectTimeTick = Config.Item("WObjectTimeTick").GetValue<bool>();
+            var wObjPosition = Config.Item("WObjPosition").GetValue<Circle>();
+            var wObjTimeTick = Config.Item("WObjTimeTick").GetValue<bool>();
 
-            var eActiveRange = Config.Item("EActiveRange").GetValue<Circle>();
 
             var wqRange = Config.Item("WQRange").GetValue<Circle>();
-
             if (wqRange.Active && Q.IsReady() && W.IsReady())
             {
-                Utility.DrawCircle(Player.Position, W.Range + Q.Range, eActiveRange.Color);
+                Utility.DrawCircle(Player.Position, W.Range + Q.Range, wqRange.Color, 1, 15);
             }
             
-            if (eActiveRange.Active && EnemyHaveSoulShackle != null)
+            var ActiveERange = Config.Item("ActiveERange").GetValue<Circle>();
+            if (ActiveERange.Active && EnemyHaveSoulShackle != null)
             {
-                Utility.DrawCircle(Player.Position, 1100f, eActiveRange.Color);
+                Utility.DrawCircle(Player.Position, 1100f, ActiveERange.Color, 1, 15);
             }
 
             foreach (var existingSlide in ExistingSlide)
             {
-                if (wObjectPosition.Active)
-                    Utility.DrawCircle(existingSlide.Position, 110f, wObjectPosition.Color);
+                if (wObjPosition.Active)
+                    Utility.DrawCircle(existingSlide.Position, 110f, wObjPosition.Color, 1, 15);
 
-                if (!wObjectTimeTick) continue;
+                if (!wObjTimeTick) continue;
                 if (!(existingSlide.ExpireTime > Game.Time)) continue;
 
                 var time = TimeSpan.FromSeconds(existingSlide.ExpireTime - Game.Time);
@@ -830,112 +857,19 @@ namespace Leblanc
                 var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
                 Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65, Color.GreenYellow, display);
             }
-        }
 
-        public static void Init()
-        {
-            try
+            foreach (
+                var enemy in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(
+                            enemy =>
+                                enemy.IsEnemy && !enemy.IsDead && enemy.IsVisible && Player.Distance(enemy) < E.Range + 1400 &&
+                                !xEnemyHaveSoulShackle(enemy)))
             {
-                S = new Sprite(Drawing.Direct3DDevice);
-                RecF = new Font(Drawing.Direct3DDevice, new System.Drawing.Font("Tahoma", 9));
-            }
-            catch (Exception)
-            {
-                return;
-            }
-            SpriteHelper.LoadTexture("W", ref wButton, SpriteHelper.TextureType.Default);
-            Enemies2.Add(wButton);
-            
-            Game.PrintChat("Init Done!");
-        }
+                
 
-        static void Drawing_OnEndScene(EventArgs args)
-        {
-            try
-            {
-               foreach (var existingSlide in ExistingSlide)
-                {
-                    if (S == null || S.IsDisposed)
-                    {
-                        return;
-                    }
-                    const float percentScale = 2;
-                    S.Begin();
-                    var slide = existingSlide;
-                    
-                   foreach (var mPos in from enemy in Enemies2
-                                         select Drawing.WorldToScreen(slide.Position) into serverPos
-                                         let playerServerPos = Drawing.WorldToScreen(Player.Position)
-                                         select new Size((int)(serverPos[0] - 62 * 0.3f), (int)(serverPos[1] - 62 * 0.3f)))
-                    {
-                        DirectXDrawer.DrawSprite(S, wButton,
-                            mPos.ScaleSize(percentScale, new Vector2(mPos.Width, mPos.Height)),
-                            new[] { 0.3f * percentScale, 0.3f * percentScale });
-                    }
-                    S.End();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                if (ex.GetType() == typeof(SharpDXException))
-                {
-                    Game.PrintChat("An error occured. Please re-load LeBlanc app.");
-                }
-            }
-        }
-        static void Drawing_OnPostReset(EventArgs args)
-        {
-            S.OnResetDevice();
-            RecF.OnResetDevice();
-        }
+                Utility.DrawCircle(enemy.Position, 75f, Color.GreenYellow, 1, 10);
 
-        static void Drawing_OnPreReset(EventArgs args)
-        {
-            S.OnLostDevice();
-            RecF.OnLostDevice();
-        }
-        private static void Mode()
-        {
-
-            float TSRange = Config.Item("Range").GetValue<Slider>().Value;
-            vTargetSelector.SetRange(TSRange);
-            var mode = Config.Item("Mode").GetValue<StringList>().SelectedIndex;
-            vTargetSelectorStr = "";
-            switch (mode)
-            {
-                case 0:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.AutoPriority);
-                    vTargetSelectorStr = "Targetin Mode: Auto Priority";
-                    break;
-                case 1:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.Closest);
-                    vTargetSelectorStr = "Targetin Mode: Closest";
-                    break;
-                case 2:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LessAttack);
-                    vTargetSelectorStr = "Targetin Mode: Less Attack";
-                    break;
-                case 3:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LessCast);
-                    vTargetSelectorStr = "Targetin Mode: Less Cast";
-                    break;
-                case 4:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.LowHP);
-                    vTargetSelectorStr = "Targetin Mode: Low HP";
-                    break;
-                case 5:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.MostAD);
-                    vTargetSelectorStr = "Targetin Mode: Most AD";
-                    break;
-                case 6:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.MostAP);
-                    vTargetSelectorStr = "Targetin Mode: Most AP";
-                    break;
-                case 7:
-                    vTargetSelector.SetTargetingMode(TargetSelector.TargetingMode.NearMouse);
-                    vTargetSelectorStr = "Targetin Mode: Near Mouse";
-                    break;
             }
         }
     }
