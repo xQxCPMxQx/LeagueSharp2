@@ -438,7 +438,7 @@ namespace JaxQx
             var useE = Config.Item("UseELaneClear").GetValue<bool>();
             var useQDontUnderTurret = Config.Item("UseQLaneClearDontUnderTurret").GetValue<bool>();
 
-            var vMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.NotAlly);
+            var vMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
             foreach (var vMinion in vMinions)
             {
                 if (useQ && Q.IsReady() && Player.Distance(vMinion) > Orbwalking.GetRealAutoAttackRange(Player))
@@ -452,10 +452,10 @@ namespace JaxQx
                         Q.Cast(vMinion);
                 }
 
-                if (useW && W.IsReady())
+                if (useW && W.IsReady() && Player.Distance(vMinion) < E.Range)
                     W.Cast();
 
-                if (useE && E.IsReady())
+                if (useE && E.IsReady() && Player.Distance(vMinion) < E.Range)
                     E.CastOnUnit(Player);
             }
         }
