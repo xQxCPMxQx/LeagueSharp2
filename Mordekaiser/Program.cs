@@ -228,7 +228,7 @@ namespace Mordekaiser
 
             if (!Orbwalking.CanMove(100)) return;
            
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
 
             
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
