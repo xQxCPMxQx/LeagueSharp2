@@ -358,7 +358,7 @@ namespace Swain
         {
             if (vPlayer.IsDead) return;
             
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
