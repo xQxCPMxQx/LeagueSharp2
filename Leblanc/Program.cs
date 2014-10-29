@@ -1,4 +1,4 @@
-﻿#region
+#region
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +29,6 @@ namespace Leblanc
         public static Items.Item Dfg = new Items.Item(3128, 750);
 
         private static readonly Dictionary<HitChance, string> PlayOptHitchance = new Dictionary<HitChance, string>();
-
         private static readonly string[] PlayOptComboOption = { "Q-R", "W-R" };
         private static HitChance vOptEHitChange = HitChance.Medium;
         private static String vOptComboOption = "W-R";
@@ -133,9 +132,14 @@ namespace Leblanc
                 Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 {
-                    Config.SubMenu("Combo").SubMenu("DontCombo").AddItem(new MenuItem("DontCombo" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                    Config.SubMenu("Combo")
+                        .SubMenu("DontCombo")
+                        .AddItem(new MenuItem("DontCombo" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
                 }
-                Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],KeyBindType.Press)));
+                Config.SubMenu("Combo")
+                    .AddItem(
+                        new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
+                            KeyBindType.Press)));
 
                 /* [ Combo Option ] */
                 var menuComboOption = new Menu("Combo Option", "ComboOption", false);
@@ -166,28 +170,42 @@ namespace Leblanc
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(false));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(false));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("Harass")
+                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             //Config.SubMenu("Harass").AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q+W", "Q+W+E", "W+Q+E" })));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Harass")
+                .AddItem(
+                    new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(new KeyBind("H".ToCharArray()[0],
+                        KeyBindType.Toggle)));
+            Config.SubMenu("Harass")
+                .AddItem(
+                    new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             //Farming menu:
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseRLaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "Harass!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+            //Config.SubMenu("LaneClear").AddItem(new MenuItem("UseRLaneClear", "Use E").SetValue(false));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear")
+                .AddItem(
+                    new MenuItem("LaneClearActive", "Harass!").SetValue(new KeyBind("V".ToCharArray()[0],
+                        KeyBindType.Press)));
 
             //JungleFarm menu:
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", "Use W").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "Use E").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseRJFarm", "Use E").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "Harass!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+//            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseRJFarm", "Use E").SetValue(true));
+            Config.SubMenu("JungleFarm")
+                .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("JungleFarm")
+                .AddItem(
+                    new MenuItem("JungleFarmActive", "Harass!").SetValue(new KeyBind("V".ToCharArray()[0],
+                        KeyBindType.Press)));
 
             //Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(new KeyBind(Config.Item("LaneClear").GetValue<KeyBind>().Key, KeyBindType.Press)));
             try
@@ -252,10 +270,13 @@ namespace Leblanc
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, Color.Honeydew)));
 
-            Config.SubMenu("Drawings").AddItem(new MenuItem("ActiveERange", "Active E Range").SetValue(new Circle(false, Color.GreenYellow)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WObjPosition", "W Obj. Pos.").SetValue(new Circle(true, Color.GreenYellow)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("ActiveERange", "Active E Range").SetValue(new Circle(false, Color.GreenYellow)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("WObjPosition", "W Obj. Pos.").SetValue(new Circle(true, Color.GreenYellow)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("WObjTimeTick", "W Obj. Tick").SetValue(true));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WQRange", "W+Q Range").SetValue(new Circle(false, Color.GreenYellow)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("WQRange", "W+Q Range").SetValue(new Circle(false, Color.GreenYellow)));
 
             new PotionManager();
             Config.AddToMainMenu();
@@ -315,7 +336,7 @@ namespace Leblanc
 
             var isValidTarget = unit.IsValidTarget(E.Range) && spell.DangerLevel == InterruptableDangerLevel.High;
 
-            if (E.IsReady() && isValidTarget && E.CastIfHitchanceEquals(unit, vOptEHitChange))
+            /*if (E.IsReady() && isValidTarget && E.CastIfHitchanceEquals(unit, vOptEHitChange))
             {
                 E.Cast(unit);
             }
@@ -323,6 +344,7 @@ namespace Leblanc
             {
                 R.Cast(unit);
             }
+             */
         }
 
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
@@ -363,7 +385,7 @@ namespace Leblanc
         }
 
 
-        private static void UserSummoners(Obj_AI_Hero target)
+        private static void UserSummoners(Obj_AI_Base target)
         {
             if (Dfg.IsReady())
             {
@@ -387,73 +409,91 @@ namespace Leblanc
 
         private static void Combo(Obj_AI_Hero vTarget)
         {
+            Game.PrintChat("Combo" +  vOptComboOption);
             if (vTarget == null)
-                vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+                vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
 
             if (vTarget == null)
                 return;
 
-            var useQ = Config.Item("ComboUseQ").GetValue<bool>();
-            var useW = Config.Item("ComboUseW").GetValue<bool>();
-            var useE = Config.Item("ComboUseE").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
 
-            if (vOptComboOption == "W-R")
-            {
-                if (W.IsReady() && R.IsReady() && Player.Distance(vTarget) < W.Range)
-                {
-                    useR = (Config.Item("DontCombo" + vTarget.BaseSkinName) != null &&
-                            Config.Item("DontCombo" + vTarget.BaseSkinName).GetValue<bool>() == false) && useR;
-                    {
-                        if (useR)
-                        {
-                            W.Cast(vTarget);
-                            if (Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancSlideM"))
-                                R.Cast(vTarget);
-                        }
-                    }
-                }
-            } 
-            else if (Q.IsReady() && R.IsReady() && Player.Distance(vTarget) < Q.Range)
+            var cdQEx = Player.Spellbook.GetSpell(SpellSlot.Q).CooldownExpires;
+            var cdWEx = Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
+
+            var cdQ = Game.Time < cdQEx ? cdQEx - Game.Time : 0;
+            var cdW = Game.Time < cdWEx ? cdWEx - Game.Time : 0;
+
+            var qIsReady = Config.Item("ComboUseQ").GetValue<bool>() && Q.IsReady() &&
+                           Player.Distance(vTarget) < Q.Range;
+
+            var wIsReady = Config.Item("ComboUseW").GetValue<bool>() && W.IsReady() &&
+                           Player.Distance(vTarget) < W.Range && !LeBlancStillJumped;
+
+            var eIsReady = Config.Item("ComboUseE").GetValue<bool>() && E.IsReady() &&
+                           Player.Distance(vTarget) < E.Range;
+
+
+            var rIsReady = useR && R.IsReady() &&
+                           (Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM" ||
+                            Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSlideM" ||
+                            Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSoulShackleM");
+
+            if (rIsReady)
             {
                 useR = (Config.Item("DontCombo" + vTarget.BaseSkinName) != null &&
                         Config.Item("DontCombo" + vTarget.BaseSkinName).GetValue<bool>() == false) && useR;
+                
+                if (!useR) return;
+
+                if (vOptComboOption == "W-R")
                 {
-                    if (useR)
+                    if (wIsReady)
                     {
-                        Q.CastOnUnit(vTarget);        
-                        if (Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
-                            R.CastOnUnit(vTarget);
+                        W.Cast(vTarget);
                     }
+
+                    if (Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSlideM" && LeBlancStillJumped &&
+                        Player.Distance(vTarget) < W.Range)
+                    {
+                        R.Cast(vTarget);
+                    }
+                }
+                else if (vOptComboOption == "Q-R")
+                {
+                    if (qIsReady)
+                    {
+                        Q.CastOnUnit(vTarget);
+                    }
+
+                    if (Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM" && 
+                        Player.Distance(vTarget) < Q.Range)
+                    {
+                        R.CastOnUnit(vTarget);
+                    }
+                    
                 }
             }
             else
             {
-                if (useQ && Q.IsReady() && Player.Distance(vTarget) < Q.Range)
+                if (qIsReady)
                 {
                     Q.CastOnUnit(vTarget);
                 }
 
-                if (useW && W.IsReady() && !LeBlancStillJumped && Player.Distance(vTarget) < W.Range)
+                if (wIsReady)
                 {
                     W.Cast(vTarget);
                 }
 
-                if (useE && E.IsReady() && Player.Distance(vTarget) < E.Range &&
-                    E.CastIfHitchanceEquals(vTarget, vOptEHitChange)) 
+                if (eIsReady)
                 {
                     E.Cast(vTarget);
                 }
-
-                if (useR && R.IsReady() && Player.Distance(vTarget) < Q.Range &&
-                    Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
-                {
-                    R.Cast(vTarget);
-                }
-
             }
 
             UserSummoners(vTarget);
+
         }
 
         private static void Harass()
@@ -551,8 +591,8 @@ namespace Leblanc
                 if (Q.IsReady())
                     Config.Item("HarassUseQT").SetValue(false);
 
-
-                Drawing.DrawText(Drawing.Width * 0.45f, Drawing.Height * 0.80f, Color.GreenYellow, "Double Stun Active!");
+                Drawing.DrawText(Drawing.Width * 0.45f, Drawing.Height * 0.80f, Color.GreenYellow, 
+                        "Double Stun Active!");
 
                 /*
                 var onPlayerPositionEnemyCount2 =
@@ -709,7 +749,8 @@ namespace Leblanc
 
             if (useQ && Q.IsReady())
             {
-                var minionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                var minionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
+                    MinionTeam.NotAlly);
                 foreach (Obj_AI_Base vMinion in 
                     from vMinion in minionsQ let vMinionEDamage = Player.GetSpellDamage(vMinion, SpellSlot.Q)
                         where vMinion.Health <= vMinionEDamage && vMinion.Health > Player.GetAutoAttackDamage(vMinion)
@@ -722,8 +763,12 @@ namespace Leblanc
 
             var rangedMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range + W.Width + 20);
             if (!useW || !W.IsReady()) return;
+            
             var minionsW = W.GetCircularFarmLocation(rangedMinionsW, W.Width * 0.75f);
-            if (minionsW.MinionsHit < 3 || !W.InRange(minionsW.Position.To3D())) return;
+            
+            if (minionsW.MinionsHit < 2 || !W.InRange(minionsW.Position.To3D())) 
+                return;
+            
             W.Cast(minionsW.Position);
 
         }
