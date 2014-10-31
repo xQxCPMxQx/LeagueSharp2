@@ -409,7 +409,7 @@ namespace Leblanc
 
         private static void Combo(Obj_AI_Hero vTarget)
         {
-            Game.PrintChat("Combo" +  vOptComboOption);
+            
             if (vTarget == null)
                 vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
 
