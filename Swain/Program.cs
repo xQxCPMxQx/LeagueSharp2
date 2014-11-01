@@ -251,7 +251,7 @@ namespace Swain
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
+            var rTarget = SimpleTs.GetTarget(R.Range + 200, SimpleTs.DamageType.Magical);
 
             if (useE && eTarget != null && E.IsReady())
             {
