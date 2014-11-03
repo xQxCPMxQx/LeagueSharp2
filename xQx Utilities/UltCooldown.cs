@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -140,17 +140,16 @@ namespace xQxUtilities
             if (R.Level == 0)
                 return;
 
-            foreach (var lang in Language.Where(lang => lang.Key == DefaultLanguage))
+            foreach (var lang in from lang in Language.Where(lang => lang.Key == DefaultLanguage)
+                let xGameTime = (int) Game.Time
+                where TimeCooldown < xGameTime
+                select lang) 
             {
-                var xGameTime = (int)Game.Time;
-                if (TimeCooldown < xGameTime)
-                {
-                    if (xTime == "UltUp")
-                        Game.Say("Ult up!");
-                    else
-                        Game.Say(string.Format(lang.Value, xTime));
-                    TimeCooldown = (int)Game.Time;
-                }
+                if (xTime == "UltUp")
+                    Game.Say("Ult up!");
+                else
+                    Game.Say(string.Format(lang.Value, xTime));
+                TimeCooldown = (int)Game.Time;
             }
         }
 
