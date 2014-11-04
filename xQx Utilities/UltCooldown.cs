@@ -106,6 +106,8 @@ namespace xQxUtilities
             Language.Add("Espanol", "{0} segundos Ulti");
             Language.Add("Francais", "{0} secondes Ulti");
             Language.Add("Italian", "{0} fino all'Ulti");
+            Language.Add("Korean", "{0} 초 궁극의");
+            Language.Add("Polish", "Ulti za {0} Sekund");
             Language.Add("Portugues", "{0} segundo Ulti");
             Language.Add("Romanian", "{0} pana la Ulti");
             Language.Add("Russian", "{0} секунд");
