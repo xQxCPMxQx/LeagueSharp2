@@ -71,7 +71,7 @@ namespace MasterYiQx
             
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            Orbwalker.SetAttacks(true);
+            Orbwalker.SetAttack(true);
             
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
