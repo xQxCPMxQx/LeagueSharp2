@@ -88,7 +88,6 @@ namespace xQxUtilities
             
             if (DefaultLanguage == null)
             { 
-                Game.PrintChat("laksjdlaskjdlaskjd");
                 DefaultLanguage = "English";
                 languageMenu.Item("English").SetValue(true);
             }
@@ -101,6 +100,7 @@ namespace xQxUtilities
 
         private static void LoadLanguageList()
         {
+            Language.Add("Chinese", "{0} 秒極致");
             Language.Add("Deutsch", "{0} sekunden Ulti");
             Language.Add("English", "{0} seconds Ulti");
             Language.Add("Espanol", "{0} segundos Ulti");
@@ -111,8 +111,9 @@ namespace xQxUtilities
             Language.Add("Portugues", "{0} segundo Ulti");
             Language.Add("Romanian", "{0} pana la Ulti");
             Language.Add("Russian", "{0} секунд");
-            Language.Add("Turkce", "{0} saniye Ulti");
-            Language.Add("Chinese", "{0} 秒極致");
+            Language.Add("Turkce", "Ulti {0} saniye");
+            Language.Add("Vietnamese", "{0} giây Ulti");
+            
         }
 
         public static int GetRandomNumber
