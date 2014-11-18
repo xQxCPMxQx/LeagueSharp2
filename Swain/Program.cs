@@ -1,4 +1,4 @@
-﻿#region
+#region
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,13 +24,15 @@ namespace Swain
         public static Spell Q, W, E, R;
         public static SpellSlot IgniteSlot;
         private static bool UltiActive;
+        
 
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
-        private static Items.Item Dfg;
+        public static Items.Item Fqc = new Items.Item(3188, 750); // Frost Queen's Claim; 
+        public static Items.Item Dfg = new Items.Item(3128, 750);
 
         private static void Main(string[] args)
         {
@@ -41,7 +43,7 @@ namespace Swain
         {
             if (vPlayer.BaseSkinName != ChampionName) return;
 
-            Dfg = new Items.Item(3128, 750);
+            
 
             //Create the spells
             Q = new Spell(SpellSlot.Q, 625);
@@ -68,6 +70,7 @@ namespace Swain
             //Add the target selector to the menu as submenu.
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             SimpleTs.AddToMenu(targetSelectorMenu);
+
             Config.AddSubMenu(targetSelectorMenu);
 
             //Load the orbwalker and add it to the menu as submenu.
@@ -79,6 +82,7 @@ namespace Swain
             Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseAutoRCombo", "Auto R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use Deathfire Grasp").SetValue(true));
             Config.SubMenu("Combo")
@@ -251,7 +255,8 @@ namespace Swain
             var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
             var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-            var rTarget = SimpleTs.GetTarget(R.Range + 200, SimpleTs.DamageType.Magical);
+            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
+
 
             if (useE && eTarget != null && E.IsReady())
             {
@@ -283,15 +288,18 @@ namespace Swain
                 }
             }
 
-            if (useR && rTarget != null && R.IsReady() && !UltiActive)
-            {
-                R.Cast();
-            }
+            if (!Config.Item("UseAutoRCombo").GetValue<bool>())
+            { 
+                if (useR && rTarget != null && R.IsReady() && !UltiActive)
+                {
+                    R.Cast();
+                }
 
-            if (rTarget == null && UltiActive)
-            {
-                R.Cast();
+                if (rTarget == null && UltiActive)
+                {
+                    R.Cast();
 
+                }
             }
 
         }
@@ -420,5 +428,7 @@ namespace Swain
 
             }
         }
+
+       
     }
 }
