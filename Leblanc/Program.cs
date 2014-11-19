@@ -66,6 +66,7 @@ namespace Leblanc
         {
             if (Player.BaseSkinName != ChampionName) return;
 
+            ComboList.Add("Auto", "Auto");
             ComboList.Add("W-R", "W-R");
             ComboList.Add("Q-R", "Q-R");
 
@@ -80,7 +81,7 @@ namespace Leblanc
                 Q = new Spell(SpellSlot.Q, 720);
                 W = new Spell(SpellSlot.W, 600);
                 E = new Spell(SpellSlot.E, 900);
-                R = new Spell(SpellSlot.R, 200);
+                R = new Spell(SpellSlot.R, 720);
                 
                 Q.SetTargetted(0.5f, 1500f);
                 W.SetSkillshot(0.5f, 200f, 1200f, false, SkillshotType.SkillshotCircle);
@@ -504,6 +505,19 @@ namespace Leblanc
 
                 switch (DefaultCombo)
                 {
+                    case "Auto":
+                        if (W.IsReady() && !LeBlancStillJumped && Player.Distance(vTarget) <= W.Range)
+                        { 
+                            W.Cast(vTarget.Position);
+                            if (Player.Distance(vTarget) <= W.Range)
+                                R.Cast(vTarget.Position);
+                        } else if (Q.IsReady() && Player.Distance(vTarget) <= Q.Range)
+                        {
+                            Q.CastOnUnit(vTarget, true);
+                            if (Player.Distance(vTarget) <= Q.Range && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM")
+                                R.CastOnUnit(vTarget, true);
+                        }
+                        break; 
                     case "W-R":
                         if (W.IsReady() && !LeBlancStillJumped && Player.Distance(vTarget) <= W.Range)
                             W.Cast(vTarget.Position);
@@ -512,9 +526,10 @@ namespace Leblanc
                         break;
 
                     case "Q-R":
+                        Game.PrintChat("Q-R");
                         if (Q.IsReady() && Player.Distance(vTarget) <= Q.Range)
                             Q.CastOnUnit(vTarget, true);
-                        if (Player.Distance(vTarget) <= Q.Range)
+                        if (Player.Distance(vTarget) <= Q.Range && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM")
                             R.CastOnUnit(vTarget, true);
                         break;
                 }
@@ -581,6 +596,9 @@ namespace Leblanc
             if (E.IsReady() && eTarget != null)
                 fComboDamage += Player.GetSpellDamage(eTarget, SpellSlot.E);
 
+/*            if (RQ.IsReady() || RW.IsReady() || RE.IsReady())
+                fComboDamage += Player.GetSpellDamage(qTarget, SpellSlot.R);
+*/
             if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(wTarget, Damage.SummonerSpell.Ignite);
 
@@ -627,6 +645,16 @@ namespace Leblanc
                 Drawing.DrawText(Drawing.Width * 0.45f, Drawing.Height * 0.80f, Color.GreenYellow, 
                         "Double Stun Active!");
 
+                /*
+                var onPlayerPositionEnemyCount2 =
+                    (from enemy in
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .Where(enemy => enemy.Team != Player.Team && Player.Distance(enemy) < E.Range + 200)
+                        select enemy).Count();
+
+                if (onPlayerPositionEnemyCount2 >= 2)
+                {
+                */
                 foreach (
                     var enemy in
                         ObjectManager.Get<Obj_AI_Hero>()
@@ -635,6 +663,14 @@ namespace Leblanc
                                     enemy.IsEnemy && !enemy.IsDead && enemy.IsVisible && Player.Distance(enemy) < E.Range + 200 &&
                                     !xEnemyHaveSoulShackle(enemy))) 
                     {
+                        //foreach (var buff in enemy.Buffs)
+                       // {
+                            //if (buff.Name.Contains("LeblancSoulShackle"))
+                            //    Game.PrintChat(enemy.ChampionName);
+                        //}
+
+                        //Utility.DrawCircle(enemy.Position, 75f, Color.GreenYellow);
+
                         if (E.IsReady() && Player.Distance(enemy) < E.Range)
                         {
                             E.CastIfHitchanceEquals(enemy, DefaultEHitChance);
@@ -645,6 +681,7 @@ namespace Leblanc
                         {
                             R.CastIfHitchanceEquals(enemy, DefaultEHitChance);
                         }
+               /*}*/
                 }
             }
 
@@ -653,11 +690,106 @@ namespace Leblanc
 
         private static void RefresySpellR()
         {
+            /*
+            var rMode = Player.Spellbook.GetSpell(SpellSlot.R).Name;
+
+            switch (rMode)
+            {
+                case "LeblancChaosOrbM":
+                    {
+                        R.Range = Q.Range;
+                        R.SetTargetted(0.5f, float.MaxValue);
+                        break;
+                    }
+                case "LeblancSlideM":
+                    {
+                        R.Range = W.Range;
+                        R.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+                        break;
+                    }
+                case "LeblancSoulShackleM":
+                    {
+                        R.Range = E.Range;
+                        R.SetSkillshot(0.5f, 100f, 1000f, true, SkillshotType.SkillshotLine);
+                        break;
+                    }
+            }
+            */
         }
 
         private static void SmartW()
         {
+            /*
+            if (!Config.Item("ComboSmartW").GetValue<bool>())
+                return;
+
+            var vTarget = EnemyHaveSoulShackle;
+            foreach (var existingSlide in ExistingSlide)
+            {
+                var slide = existingSlide;
+
+                var onSlidePositionEnemyCount = (from enemy in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(
+                            enemy => enemy.Team != Player.Team && enemy.Distance(slide.Position) < 350f)
+                    select enemy).Count();
+
+                var onPlayerPositionEnemyCount = (from enemy in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(
+                            enemy => enemy.Team != Player.Team && Player.Distance(enemy) < Q.Range)
+                    select enemy).Count();
+
+
+                if (Config.Item("OptDoubleStun").GetValue<KeyBind>().Active && E.IsReady() && R.IsReady())
+                {
+                    var onPlayerPositionEnemyCount2 = (from enemy in
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .Where(
+                                enemy => enemy.Team != Player.Team && Player.Distance(enemy) < E.Range)
+                        select enemy).Count();
+
+                    if (onPlayerPositionEnemyCount2 == 2)
+                    {
+
+                    }
+                }
+                if (onPlayerPositionEnemyCount > onSlidePositionEnemyCount)
+                {
+                    if (LeBlancStillJumped)
+                    {
+                        var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+                        if (qTarget == null)
+                            return;
+                        if ((Player.Health < qTarget.Health || Player.Level < qTarget.Level) &&
+                            vTarget.Health > GetComboDamage())
+                            W.Cast();
+                        else
+                        {
+                            if (Q.IsReady())
+                                Q.CastOnUnit(qTarget);
+                            if (RQ.IsReady())
+                                RQ.CastOnUnit(qTarget);
+                            if (E.IsReady())
+                                E.Cast(qTarget);
+                            W.Cast();
+                        }
+                    }
+
+                }
+                Game.PrintChat(slide.Position.ToString());
+                Utility.DrawCircle(slide.Position, 400f, Color.Red);
+
+                Game.PrintChat("Slide Pos. Enemy Count: " + onSlidePositionEnemyCount);
+                Game.PrintChat("Player Pos. Enemy Count: " + onPlayerPositionEnemyCount);
+
+
+                Game.PrintChat("W Posision : " + existingSlide.Position);
+                Game.PrintChat("Target Position : " + vTarget.Position);
+            }
+            */
         }
+
 
         private static void LaneClear()
         {
@@ -689,6 +821,7 @@ namespace Leblanc
                 return;
             
             W.Cast(minionsW.Position);
+
         }
 
         private static void JungleFarm()
@@ -715,6 +848,11 @@ namespace Leblanc
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (Player.IsDead) return;
+            
+            RefresySpellR();
+            //Mode();
+//            if (Config.Item("ComboSmartW").GetValue<KeyBind>().Active)
+//                SmartW();
 
             Orbwalker.SetAttack(true);
 
@@ -740,7 +878,9 @@ namespace Leblanc
                         .OrderBy(enemy => enemy.Distance(Game.CursorPos))
                         )
                 {
+
                     vTarget = Player.Distance(enemy) < assassinRange ? enemy : null;
+
                 }
                 Combo(vTarget);
             }
@@ -773,6 +913,7 @@ namespace Leblanc
                     if (Player.Mana >= existsMana)
                         JungleFarm();                    
                 }
+
             }
         }
 
@@ -810,6 +951,7 @@ namespace Leblanc
                 if (!(existingSlide.ExpireTime > Game.Time)) continue;
 
                 var time = TimeSpan.FromSeconds(existingSlide.ExpireTime - Game.Time);
+
                 var pos = Drawing.WorldToScreen(existingSlide.Position);
                 var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
                 Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 65, Color.GreenYellow, display);
@@ -823,6 +965,8 @@ namespace Leblanc
                                 enemy.IsEnemy && !enemy.IsDead && enemy.IsVisible && Player.Distance(enemy) < E.Range + 1400 &&
                                 !xEnemyHaveSoulShackle(enemy)))
             {
+                
+
                 Utility.DrawCircle(enemy.Position, 75f, Color.GreenYellow, 1, 10);
 
             }
