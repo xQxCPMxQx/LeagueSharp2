@@ -1,7 +1,5 @@
 using System;
-using System.Linq;
 using LeagueSharp;
-using System.IO;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
@@ -10,8 +8,6 @@ namespace JunglePosition
 {
     class Program
     {
-
-
         public static Menu Config;
         static void Main(string[] args)
         {
@@ -27,7 +23,6 @@ namespace JunglePosition
             Drawing.OnDraw += Drawing_OnDraw;
             Game.PrintChat(
                 "<font color='#70DBDB'>xQx | </font><font color='#FFFFFF'>Jungle Position (4.20)</font> <font color='#70DBDB'> Loaded!</font>");
-
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -36,7 +31,6 @@ namespace JunglePosition
             if (show.Active)
             {
                 var circleRange = 75f;
-
                 if (Game.MapId == (GameMapId) 11)
                 {
                     Utility.DrawCircle(new Vector3(7461.018f, 3253.575f, 52.57141f), circleRange, Color.Blue, 1, 15); // blue team :red
@@ -54,7 +48,7 @@ namespace JunglePosition
                     Utility.DrawCircle(new Vector3(7001.741f, 9915.717f, 54.02466f), circleRange, Color.Red, 1, 15); // red team :wariaths                    
 
                 }
-                else
+                else if (Game.MapId == GameMapId.SummonersRift)
                 {
                     Utility.DrawCircle(new Vector3(7444.86f, 2980.26f, 56.26f), circleRange, show.Color);
                     Utility.DrawCircle(new Vector3(7232.57f, 4671.71f, 51.95f), circleRange, show.Color);
