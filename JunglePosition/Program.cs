@@ -22,9 +22,6 @@ namespace JunglePosition
         {
             Config = new Menu("xQx | Jungle Position", "JunglePosition", true);
             Config.AddItem(new MenuItem("Show", "Show").SetValue(new Circle(true, Color.GreenYellow)));
-            Config.AddItem(
-                new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("J".ToCharArray()[0],
-                    KeyBindType.Press)));
             Config.AddToMainMenu();
             
             Drawing.OnDraw += Drawing_OnDraw;
