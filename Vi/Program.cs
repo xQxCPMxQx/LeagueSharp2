@@ -201,7 +201,7 @@ namespace Vi
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Interrupter.OnPosibleToInterrupt += Interrupter_OnPosibleToInterrupt;
+            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
 
             Game.PrintChat(
                 String.Format(
@@ -519,7 +519,7 @@ namespace Vi
             return (float)fComboDamage;
         }
 
-        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
+        private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
         {
             var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
             if (!interruptSpells) return;
