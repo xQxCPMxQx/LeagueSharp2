@@ -526,7 +526,6 @@ namespace Leblanc
                         break;
 
                     case "Q-R":
-                        Game.PrintChat("Q-R");
                         if (Q.IsReady() && Player.Distance(vTarget) <= Q.Range)
                             Q.CastOnUnit(vTarget, true);
                         if (Player.Distance(vTarget) <= Q.Range && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM")
