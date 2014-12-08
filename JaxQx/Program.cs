@@ -23,7 +23,7 @@ namespace JaxQx
         public static Spell W;
         public static Spell R;
 
-        public static string[] TestSpells =
+        public static string[] xWards =
         {
             "RelicSmallLantern", "RelicLantern", "SightWard", "wrigglelantern",
             "ItemGhostWard", "VisionWard", "BantamTrap", "JackInTheBox", "CaitlynYordleTrap", "Bushwhack"
@@ -41,6 +41,7 @@ namespace JaxQx
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
+        public static Menu TargetSelectorMenu;
         
         private static void Main(string[] args)
         {
@@ -71,9 +72,9 @@ namespace JaxQx
             //Create the menu
             Config = new Menu("xQx | Jax", "Jax", true);
             
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
+            TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            SimpleTs.AddToMenu(TargetSelectorMenu);
+            Config.AddSubMenu(TargetSelectorMenu);
             
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -188,6 +189,7 @@ namespace JaxQx
                     new MenuItem("DrawSmiteRange", "Smite Range").SetValue(new Circle(false, System.Drawing.Color.Indigo)));
 
             new PotionManager();
+            new AssassinManager();
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -229,6 +231,34 @@ namespace JaxQx
             }
 
         }
+        private static Obj_AI_Hero GetEnemy
+        {
+            get
+            {
+                var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+                var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        enemy =>
+                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
+                            TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                            ObjectManager.Player.Distance(enemy) < assassinRange);
+
+                if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+                {
+                    vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+                }
+
+                Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+                Obj_AI_Hero t = !objAiHeroes.Any()
+                    ? SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical)
+                    : objAiHeroes[0];
+
+                return t;
+            }
+        }
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
          //   if (sender.Name.Contains("Missile") || sender.Name.Contains("Minion"))
@@ -237,7 +267,7 @@ namespace JaxQx
         public static void Obj_AI_Base_OnProcessSpellCast(LeagueSharp.Obj_AI_Base obj,
             LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
         {
-            if (!TestSpells.ToList().Contains(arg.SData.Name)) return;
+            if (!xWards.ToList().Contains(arg.SData.Name)) return;
 
             Jumper.testSpellCast = arg.End.To2D();
             Polygon pol;
@@ -266,7 +296,7 @@ namespace JaxQx
             
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                Combo();
+                Combo(GetEnemy);            
             }
             
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
@@ -291,7 +321,7 @@ namespace JaxQx
             }
         }
 
-        private static void Combo()
+        private static void Combo(Obj_AI_Hero t)
         {
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useW = Config.Item("UseWCombo").GetValue<bool>();
@@ -301,50 +331,47 @@ namespace JaxQx
             var minQRange = Config.Item("ComboUseQMinRange").GetValue<Slider>().Value;
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-
-            if (Q.IsReady() && useQ && qTarget != null && Player.Distance(qTarget) >= minQRange)
+            if (Q.IsReady() && useQ && Player.Distance(t) >= minQRange && ObjectManager.Player.Distance(t) <= Q.Range)
             {
                 if (E.IsReady())
                     E.Cast();
 
                 if (useQDontUnderTurret)
                 {
-                    if (!Utility.UnderTurret(qTarget))
-                        Q.Cast(qTarget);
+                    if (!Utility.UnderTurret(t))
+                        Q.Cast(t);
                 }
                 else
                 {
-                    Q.Cast(qTarget);
+                    Q.Cast(t);
                 }
-
             }
 
-            if (eTarget != null)
-                UseItems(eTarget);
+            if (ObjectManager.Player.Distance(t) <= E.Range)
+                UseItems(t);
 
-            if (W.IsReady() && useW && eTarget != null)
+            if (W.IsReady() && useW && ObjectManager.Player.Distance(t) <= W.Range) 
                 W.Cast();
 
-            if (E.IsReady() && useE && eTarget != null)
+            if (E.IsReady() && useE && ObjectManager.Player.Distance(t) <= E.Range)
                 E.Cast();
 
             if (IgniteSlot != SpellSlot.Unknown &&
                 Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (Player.GetSummonerSpellDamage(eTarget, Damage.SummonerSpell.Ignite) > eTarget.Health)
+                if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health &&
+                    ObjectManager.Player.Distance(t) <= 500) 
                 {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, eTarget);
+                    Player.SummonerSpellbook.CastSpell(IgniteSlot, t);
                 }
             }
 
-            if (R.IsReady() && useR && eTarget != null)
+            if (R.IsReady() && useR)
             {
-                if (Player.Distance(eTarget) < Player.AttackRange)
+                if (Player.Distance(t) < Player.AttackRange)
                 {
                     if (Utility.CountEnemysInRange((int) Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2 ||
-                        eTarget.Health > Player.Health) 
+                        t.Health > Player.Health) 
                     {
                         R.CastOnUnit(Player);
                     }
