@@ -17,21 +17,19 @@ namespace XinZhao
         public static Orbwalking.Orbwalker Orbwalker;
 
         public static List<Spell> SpellList = new List<Spell>();
-        public static Spell Q, E, W, R;
+        public static Spell Q, W, E, R;
 
-        private static readonly SpellSlot SmiteSlot = Player.GetSpellSlot("SummonerSmite");
         private static readonly SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
         public static Items.Item Tiamat = new Items.Item(3077, 375);
         public static Items.Item Hydra = new Items.Item(3074, 375); 
 
         public static Menu Config;
-        public static Menu MenuTargetSelector;
+        public static Menu TargetSelectorMenu;
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
 
-        private static int DelayTick { get; set; }
         static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -47,8 +45,6 @@ namespace XinZhao
             E = new Spell(SpellSlot.E, 600);
             R = new Spell(SpellSlot.R, 480);
 
-            DelayTick = 0;
-
             CreateChampionMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -58,33 +54,42 @@ namespace XinZhao
             WelcomeMessage();
         }
 
+        private static Obj_AI_Hero GetEnemy
+        {
+            get
+            {
+                var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+                var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        enemy =>
+                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
+                            TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                            ObjectManager.Player.Distance(enemy) < assassinRange);
+
+                if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+                {
+                    vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+                }
+
+                Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+                Obj_AI_Hero t = !objAiHeroes.Any()
+                    ? SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical)
+                    : objAiHeroes[0];
+
+                return t;
+            }
+        }
+
         static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100)) return;
 
-            if (DelayTick - Environment.TickCount <= 250)
-            {
-                UseSummoners();
-                DelayTick = Environment.TickCount;
-            }
-
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                var assassinRange = MenuTargetSelector.Item("AssassinRange").GetValue<Slider>().Value;
-                Obj_AI_Hero vTarget = null;
-                foreach (
-                    var enemy in
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(
-                                enemy =>
-                                    enemy.Team != Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                                    MenuTargetSelector.Item("Assassin" + enemy.ChampionName) != null &&
-                                    MenuTargetSelector.Item("Assassin" + enemy.ChampionName).GetValue<bool>())
-                            .OrderBy(enemy => enemy.Distance(Game.CursorPos))) 
-                {
-                    vTarget = Player.Distance(enemy) < assassinRange ? enemy : null;
-                }
-                Combo(vTarget);
+                Combo(GetEnemy);            
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
@@ -108,14 +113,13 @@ namespace XinZhao
             if (drawQRange.Active)
                 Utility.DrawCircle(Player.Position, E.Range, drawQRange.Color);
 
+            var drawERange = Config.Item("DrawERange").GetValue<Circle>();
+            if (drawERange.Active)
+                Utility.DrawCircle(Player.Position, R.Range, drawERange.Color);
+
             var drawRRange = Config.Item("DrawRRange").GetValue<Circle>();
             if (drawRRange.Active)
                 Utility.DrawCircle(Player.Position, R.Range, drawRRange.Color);
-
-            /* [ Draw Smite ] */
-            var drawSmite = Config.Item("SmiteRange").GetValue<Circle>();
-            if (Config.Item("AutoSmite").GetValue<KeyBind>().Active && drawSmite.Active)
-                Utility.DrawCircle(Player.Position, 700f, drawSmite.Color);
 
             /* [ Draw Can Be Thrown Enemy ] */
             var drawThrownEnemy = Config.SubMenu("Drawings").Item("DrawThrown").GetValue<Circle>();
@@ -140,12 +144,7 @@ namespace XinZhao
 
         public static void Combo(Obj_AI_Hero vTarget)
         {
-            if (vTarget == null)
-                vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-
-            if (vTarget == null) return;
-
-            if (vTarget.IsValidTarget(E.Range) && Q.IsReady())
+           if (vTarget.IsValidTarget(E.Range) && Q.IsReady())
                 Q.Cast();
 
             if (vTarget.IsValidTarget(E.Range) && W.IsReady())
@@ -182,7 +181,6 @@ namespace XinZhao
             var useW = Config.Item("LaneClearUseW").GetValue<bool>();
             var useE = Config.Item("LaneClearUseE").GetValue<bool>();
 
-
             var allMinions = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All,
                 MinionTeam.NotAlly);
 
@@ -190,9 +188,9 @@ namespace XinZhao
             {
                 var minionsQ = MinionManager.GetMinions(Player.ServerPosition, 400);
                 foreach (var vMinion in
-                                       from vMinion in minionsQ
-                                       where vMinion.IsEnemy
-                                       select vMinion)
+                    from vMinion in minionsQ
+                    where vMinion.IsEnemy
+                    select vMinion) 
                 {
                     if (useQ && Q.IsReady())
                         Q.Cast();
@@ -215,7 +213,7 @@ namespace XinZhao
             
                 var locE = E.GetCircularFarmLocation(allMinions);
                 if (allMinions.Count == allMinions.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 &&
-                    locE.Position.IsValid())
+                    locE.Position.IsValid()) 
                     E.Cast(locE.Position);
             }
 
@@ -266,7 +264,7 @@ namespace XinZhao
             foreach (var itemID in from menuItem in MenuTargetedItems.Items
                 let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
                 where useItem
-                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
+                select Convert.ToInt16(menuItem.Name.Substring(4, 4))
                 into itemID
                 where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
                 select itemID) 
@@ -280,7 +278,7 @@ namespace XinZhao
             foreach (var itemID in from menuItem in MenuNonTargetedItems.Items
                 let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
                 where useItem
-                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
+                select Convert.ToInt16(menuItem.Name.Substring(4, 4))
                 into itemID
                 where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
                 select itemID)
@@ -289,35 +287,6 @@ namespace XinZhao
             }
         }
 
-        private static void UseSummoners()
-        {
-            if (SmiteSlot == SpellSlot.Unknown)
-                return;
-
-            if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active) return;
-
-            string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-            var firstOrDefault = Player.SummonerSpellbook.Spells.FirstOrDefault(
-                spell => spell.Name.Contains("mite"));
-            if (firstOrDefault == null) return;
-
-            var vMonsters = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0],
-                MinionTypes.All, MinionTeam.NotAlly);
-            foreach (
-                var vMonster in
-                    vMonsters.Where(
-                        vMonster =>
-                            vMonster != null && !vMonster.IsDead && !Player.IsDead && !Player.IsStunned &&
-                            SmiteSlot != SpellSlot.Unknown &&
-                            Player.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                        .Where(
-                            vMonster =>
-                                (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) &&
-                                (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name))))) 
-            {
-                Player.SummonerSpellbook.CastSpell(SmiteSlot, vMonster);
-            }
-        }
         private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
         {
             var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
@@ -336,9 +305,9 @@ namespace XinZhao
             Config.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
 
-            MenuTargetSelector = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(MenuTargetSelector);
-            Config.AddSubMenu(MenuTargetSelector);
+            TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            SimpleTs.AddToMenu(TargetSelectorMenu);
+            Config.AddSubMenu(TargetSelectorMenu);
 
             /* [ Combo ] */
             Config.AddSubMenu(new Menu("Combo", "Combo"));
@@ -364,8 +333,6 @@ namespace XinZhao
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseW", "Use W").SetValue(false));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseE", "Use E").SetValue(false));
             Config.SubMenu("JungleFarm")
-                .AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
-            Config.SubMenu("JungleFarm")
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "JungleFarm!")
                 .SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
@@ -375,11 +342,11 @@ namespace XinZhao
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("DrawQRange", "Q Range").SetValue(new Circle(false, Color.PowderBlue)));
             Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("DrawERange", "E Range").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("DrawRRange", "R Range").SetValue(new Circle(false, Color.PowderBlue)));
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("SmiteRange", "Smite Range").SetValue(new Circle(false, Color.PowderBlue)));
 
             /* [  Extras -> Use Items ] */
             MenuExtras = new Menu("Extras", "Extras");
