@@ -76,6 +76,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssassinManager.cs" />
     <Compile Include="Jumper.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Polygon.cs" />
