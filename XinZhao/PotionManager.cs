@@ -102,9 +102,8 @@ namespace XinZhao
 
         private void OnGameUpdate(EventArgs args)
         {
-
-            if (Utility.InShopRange()) return;
-
+            if(ObjectManager.Player.HasBuff("Recall") || Utility.InFountain() && Utility.InShopRange())
+                return;
             try
             {
                 if (Program.MenuExtras.Item("HealthPotion").GetValue<bool>())
