@@ -232,11 +232,11 @@ namespace BrandSharp
             }
 
             if (rTarget != null && IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (Player.GetSummonerSpellDamage(rTarget, Damage.SummonerSpell.Ignite) >= rTarget.Health)
                 {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, rTarget);
+                    Player.Spellbook.CastSpell(IgniteSlot, rTarget);
                 }
             }
             return;
