@@ -286,10 +286,10 @@ namespace Pantheon
                 UseItems(eTarget);
             
             if (qTarget != null && IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                 Player.GetSummonerSpellDamage(qTarget, Damage.SummonerSpell.Ignite) > qTarget.Health)
             {
-                Player.SummonerSpellbook.CastSpell(IgniteSlot, qTarget);
+                Player.Spellbook.CastSpell(IgniteSlot, qTarget);
             }
         }
 
@@ -380,7 +380,7 @@ namespace Pantheon
             if (Items.CanUseItem(3128))
                 fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
 
-            if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float)fComboDamage;
@@ -434,7 +434,7 @@ namespace Pantheon
             if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active) return;
 
             string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-            var firstOrDefault = Player.SummonerSpellbook.Spells.FirstOrDefault(
+            var firstOrDefault = Player.Spellbook.Spells.FirstOrDefault(
                 spell => spell.Name.Contains("mite"));
             if (firstOrDefault == null) return;
 
@@ -444,10 +444,10 @@ namespace Pantheon
                                                               && !Player.IsDead
                                                               && !Player.IsStunned
                                                               && smiteSlot != SpellSlot.Unknown
-                                                              && Player.SummonerSpellbook.CanUseSpell(smiteSlot) == SpellState.Ready)
+                                                              && Player.Spellbook.CanUseSpell(smiteSlot) == SpellState.Ready)
                                                               .Where(vMinion => (vMinion.Health < Player.GetSummonerSpellDamage(vMinion, Damage.SummonerSpell.Smite)) && (monsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name)))))
             {
-                Player.SummonerSpellbook.CastSpell(smiteSlot, vMinion);
+                Player.Spellbook.CastSpell(smiteSlot, vMinion);
             }
         }
         private static void WelcomeMessage()
