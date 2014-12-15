@@ -468,11 +468,11 @@ namespace Leblanc
             }
           
             if (IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (Player.Distance(target) < 650 && GetComboDamage() >= target.Health)
                 {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
+                    Player.Spellbook.CastSpell(IgniteSlot, target);
                 }
             }
         }
@@ -598,7 +598,7 @@ namespace Leblanc
 /*            if (RQ.IsReady() || RW.IsReady() || RE.IsReady())
                 fComboDamage += Player.GetSpellDamage(qTarget, SpellSlot.R);
 */
-            if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(wTarget, Damage.SummonerSpell.Ignite);
 
             if (Items.CanUseItem(3128))
