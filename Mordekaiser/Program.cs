@@ -407,7 +407,7 @@ namespace Mordekaiser
             if (R.IsReady() && Player.Distance(vTarget) < R.Range)
                 fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.R);
 
-            if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
+            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                 Player.Distance(vTarget) < R.Range) 
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
