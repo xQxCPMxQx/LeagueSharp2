@@ -312,9 +312,9 @@ namespace Vi
 
             if (rTarget != null && comboDamage > rTarget.Health &&
                 IgniteSlot != SpellSlot.Unknown &&
-                vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                vPlayer.SummonerSpellbook.CastSpell(IgniteSlot, rTarget);
+                vPlayer.Spellbook.CastSpell(IgniteSlot, rTarget);
             }
 
             if (E.IsReady() && useE)
@@ -365,11 +365,11 @@ namespace Vi
             if (vPlayer.Distance(fqTarget) > Q.Range && fqTarget != null)
             {
                 if (FlashSlot != SpellSlot.Unknown &&
-                    vPlayer.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
+                    vPlayer.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                 {
                     if (Q.IsCharging && Q.Range >= Q.ChargedMaxRange)
                     {
-                        vPlayer.SummonerSpellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
+                        vPlayer.Spellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
                         Q.Cast(fqTarget);
                     }
                     else
@@ -513,7 +513,7 @@ namespace Vi
             if (Items.CanUseItem(3128))
                 fComboDamage += vPlayer.GetItemDamage(vTarget, Damage.DamageItems.Botrk); 
 
-            if (IgniteSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += vPlayer.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float)fComboDamage;
@@ -579,7 +579,7 @@ namespace Vi
             float[] smiteDmg = { 20 * vPlayer.Level + 370, 30 * vPlayer.Level + 330, 40 * vPlayer.Level + 240, 50 * vPlayer.Level + 100 };
 
             string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-            var firstOrDefault = vPlayer.SummonerSpellbook.Spells.FirstOrDefault(
+            var firstOrDefault = vPlayer.Spellbook.Spells.FirstOrDefault(
                 spell => spell.Name.Contains("mite"));
             if (firstOrDefault == null) return;
 
@@ -590,13 +590,13 @@ namespace Vi
                         vMinion =>
                             vMinion != null && !vMinion.IsDead && !vPlayer.IsDead && !vPlayer.IsStunned &&
                             SmiteSlot != SpellSlot.Unknown &&
-                            vPlayer.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                            vPlayer.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
                         .Where(
                             vMinion =>
                                 (vMinion.Health < smiteDmg.Max()) &&
                                 (monsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name))))) 
             {
-                vPlayer.SummonerSpellbook.CastSpell(SmiteSlot, vMinion);
+                vPlayer.Spellbook.CastSpell(SmiteSlot, vMinion);
             }
         }
     }
