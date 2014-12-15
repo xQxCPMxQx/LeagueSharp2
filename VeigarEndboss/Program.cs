@@ -91,7 +91,7 @@ namespace VeigarEndboss
             if (Items.CanUseItem(3128))
                 fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Dfg);
 
-            if (IgniteSlot != SpellSlot.Unknown && Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float)fComboDamage;
@@ -115,10 +115,10 @@ namespace VeigarEndboss
             if (target.Health < comboResult)
             { 
                 if (IgniteSlot != SpellSlot.Unknown &&
-                    Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
+                    Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                     Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) > target.Health)
                 {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
+                    Player.Spellbook.CastSpell(IgniteSlot, target);
                 }
 
                 if (Dfg.IsReady() && target.Health < Player.GetItemDamage(target, Damage.DamageItems.Dfg))
