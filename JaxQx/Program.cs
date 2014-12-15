@@ -357,12 +357,12 @@ namespace JaxQx
                 E.Cast();
 
             if (IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health &&
                     ObjectManager.Player.Distance(t) <= 500) 
                 {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, t);
+                    Player.Spellbook.CastSpell(IgniteSlot, t);
                 }
             }
 
@@ -571,7 +571,7 @@ namespace JaxQx
             if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active) return;
 
             string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-            var firstOrDefault = Player.SummonerSpellbook.Spells.FirstOrDefault(
+            var firstOrDefault = Player.Spellbook.Spells.FirstOrDefault(
                 spell => spell.Name.Contains("mite"));
             if (firstOrDefault == null) return;
 
@@ -583,13 +583,13 @@ namespace JaxQx
                         vMonster =>
                             vMonster != null && !vMonster.IsDead && !Player.IsDead && !Player.IsStunned &&
                             SmiteSlot != SpellSlot.Unknown &&
-                            Player.SummonerSpellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
+                            Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
                         .Where(
                             vMonster =>
                                 (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) &&
                                 (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name))))) 
             {
-                Player.SummonerSpellbook.CastSpell(SmiteSlot, vMonster);
+                Player.Spellbook.CastSpell(SmiteSlot, vMonster);
             }
         }
 
