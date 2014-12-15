@@ -238,7 +238,7 @@ namespace Swain
             if (E.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E);
 
-            //if (IgniteSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            //if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             //    fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.IGNITE);
 
             //if (Config.Item("item3128").GetValue<bool>() && Items.CanUseItem(3128))
@@ -279,11 +279,11 @@ namespace Swain
             }
 
             if (qTarget != null && useIgnite && IgniteSlot != SpellSlot.Unknown &&
-                vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (vPlayer.Distance(qTarget) < 650 && GetComboDamage(qTarget) > qTarget.Health)
                 {
-                    vPlayer.SummonerSpellbook.CastSpell(IgniteSlot, qTarget);
+                    vPlayer.Spellbook.CastSpell(IgniteSlot, qTarget);
                     UseItems(qTarget);
                 }
             }
