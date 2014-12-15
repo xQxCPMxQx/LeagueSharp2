@@ -160,11 +160,11 @@ namespace XinZhao
                 UseItems(vTarget, true);
 
             if (IgniteSlot != SpellSlot.Unknown &&
-                Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite) >= vTarget.Health)
                 {
-                    Player.SummonerSpellbook.CastSpell(IgniteSlot, vTarget);
+                    Player.Spellbook.CastSpell(IgniteSlot, vTarget);
                 }
             }
 
