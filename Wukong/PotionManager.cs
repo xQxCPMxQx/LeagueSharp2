@@ -113,7 +113,7 @@ namespace Wukong
                     {
                         var healthSlot = GetPotionSlot(PotionType.Health);
                         if (!IsBuffActive(PotionType.Health))
-                            healthSlot.UseItem();
+                            ObjectManager.Player.Spellbook.CastSpell(healthSlot.SpellSlot);
                     }
                 }
                 if (Program.MenuExtras.Item("ManaPotion").GetValue<bool>())
@@ -122,7 +122,7 @@ namespace Wukong
                     {
                         var manaSlot = GetPotionSlot(PotionType.Mana);
                         if (!IsBuffActive(PotionType.Mana))
-                            manaSlot.UseItem();
+                            ObjectManager.Player.Spellbook.CastSpell(manaSlot.SpellSlot);
                     }
                 }
             }
