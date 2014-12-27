@@ -52,7 +52,7 @@ namespace JaxQx
                     .SubMenu("AssassinMode")
                     .AddItem(
                         new MenuItem("Assassin" + enemy.ChampionName, enemy.ChampionName).SetValue(
-                            SimpleTs.GetPriority(enemy) > 3));
+                            TargetSelector.GetPriority(enemy) > 3));
             }
             Program.TargetSelectorMenu.SubMenu("MenuAssassin")
                 .AddItem(new MenuItem("AssassinSearchRange", "Search Range")).SetValue(new Slider(1000, 2000));

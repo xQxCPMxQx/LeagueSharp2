@@ -70,7 +70,7 @@ namespace Mordekaiser
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -252,10 +252,10 @@ namespace Mordekaiser
 
         private static void Combo()
         {
-            var wTarget = SimpleTs.GetTarget(W.Range / 2, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
-            var rGhostArea = SimpleTs.GetTarget(1500f, SimpleTs.DamageType.Magical);
+            var wTarget = TargetSelector.GetTarget(W.Range / 2, TargetSelector.DamageType.Magical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            var rTarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+            var rGhostArea = TargetSelector.GetTarget(1500f, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("ComboUseQ").GetValue<bool>();
             var useW = Config.Item("ComboUseW").GetValue<bool>();
@@ -291,8 +291,8 @@ namespace Mordekaiser
 
         private static void Harass()
         {
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            var wTarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("ComboUseQ").GetValue<bool>();
             var useW = Config.Item("ComboUseW").GetValue<bool>();
@@ -382,7 +382,7 @@ namespace Mordekaiser
                 var qDamageVisitors = new float[] {80, 110, 140, 170, 200};
                 var qDamageAlone = new float[] {132, 181, 230, 280, 330};
 
-                var qTarget = SimpleTs.GetTarget(600, SimpleTs.DamageType.Magical);
+                var qTarget = TargetSelector.GetTarget(600, TargetSelector.DamageType.Magical);
 
                 var fxQDamage = TargetAlone(qTarget)
                     ? qDamageAlone[Q.Level] + Player.BaseAttackDamage*1.65 + Player.BaseAbilityDamage*.66

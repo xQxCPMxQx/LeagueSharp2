@@ -66,7 +66,7 @@ namespace MasterYiQx
             Config = new Menu("xQx | MasterYi", "MasterYi", true);
 
             TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(TargetSelectorMenu);
+            TargetSelector.AddToMenu(TargetSelectorMenu);
             Config.AddSubMenu(TargetSelectorMenu);
             
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -259,7 +259,7 @@ namespace MasterYiQx
         private static void Combo(Obj_AI_Hero vTarget)
         {
             if (vTarget == null)
-                vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+                vTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();

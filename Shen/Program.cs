@@ -69,7 +69,7 @@ namespace Shen
             Config = new Menu("xQx | Shen", "Shen", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -359,21 +359,21 @@ namespace Shen
 
             if (Q.IsReady() && useQ)
             {
-                var t = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                     Q.CastOnUnit(t);
             }
 
             if (W.IsReady() && useW)
             {
-                var t = SimpleTs.GetTarget(Q.Range / 2, SimpleTs.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Q.Range / 2, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                     W.CastOnUnit(ObjectManager.Player);
             }
 
             if (E.IsReady() && useE)
             {
-                var t = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                 {
                     E.Cast(t.Position);
@@ -394,13 +394,13 @@ namespace Shen
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 			
-            var fqTarget = SimpleTs.GetTarget(Q.Range + 430, SimpleTs.DamageType.Physical);
+            var fqTarget = TargetSelector.GetTarget(Q.Range + 430, TargetSelector.DamageType.Physical);
 
             if (ObjectManager.Player.Distance(fqTarget) > E.Range && E.IsReady() && fqTarget != null &&
                 FlashSlot != SpellSlot.Unknown &&
-                ObjectManager.Player.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
+                ObjectManager.Player.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
             {
-                ObjectManager.Player.SummonerSpellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
+                ObjectManager.Player.Spellbook.CastSpell(FlashSlot, fqTarget.ServerPosition);
                 Utility.DelayAction.Add(100, () => E.Cast(fqTarget.Position));
             }
         }
@@ -410,7 +410,7 @@ namespace Shen
 
             if (Q.IsReady() && useQ)
             {
-                var t = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                     Q.CastOnUnit(t);
             }

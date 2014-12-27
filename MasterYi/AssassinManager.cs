@@ -27,7 +27,7 @@ namespace MasterYiQx
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
             {
                 Program.TargetSelectorMenu.SubMenu("AssassinManager")
-                    .SubMenu("AssassinMode").AddItem(new MenuItem("Assassin" + enemy.ChampionName, enemy.ChampionName).SetValue(SimpleTs.GetPriority(enemy) > 3));
+                    .SubMenu("AssassinMode").AddItem(new MenuItem("Assassin" + enemy.ChampionName, enemy.ChampionName).SetValue(TargetSelector.GetPriority(enemy) > 3));
             }
             Program.TargetSelectorMenu.SubMenu("AssassinManager")
                 .AddItem(new MenuItem("AssassinRange", "Assassin Range")).SetValue(new Slider(1000, 2000));

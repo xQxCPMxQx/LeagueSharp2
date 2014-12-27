@@ -88,7 +88,8 @@ namespace JaxQx
                 {
                     if (lastward < Environment.TickCount)
                     {
-                        slot.UseItem(pos.To3D());
+                        ObjectManager.Player.Spellbook.CastSpell(slot.SpellSlot);
+                        //slot.UseItem(pos.To3D());
                         lastward = Environment.TickCount + 2000;
                         return true;
                     }

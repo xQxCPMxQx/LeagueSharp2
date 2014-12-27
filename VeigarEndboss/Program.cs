@@ -100,7 +100,7 @@ namespace VeigarEndboss
 
         private static void OnCombo()
         {
-            var target = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
             if (target == null)
                 return;
 
@@ -157,7 +157,7 @@ namespace VeigarEndboss
             if (Player.Mana / Player.MaxMana * 100 < menu.SubMenu("harass").Item("harassMana").GetValue<Slider>().Value)
                 return;
 
-            var target = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
             if (target == null)
                 return;
 
@@ -203,7 +203,7 @@ namespace VeigarEndboss
 
             // Target selector
             Menu targetSelector = new Menu("Target Selector", "ts");
-            SimpleTs.AddToMenu(targetSelector);
+            TargetSelector.AddToMenu(targetSelector);
             menu.AddSubMenu(targetSelector);
 
             // Orbwalker

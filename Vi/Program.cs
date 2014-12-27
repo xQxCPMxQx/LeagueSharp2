@@ -70,7 +70,7 @@ namespace Vi
             Config = new Menu("xQx | Vi", "Vi", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -276,12 +276,12 @@ namespace Vi
 
         private static void Combo()
         {
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-            var e2Target = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            var e2Target = TargetSelector.GetTarget(E2.Range, TargetSelector.DamageType.Physical);
 
-            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
+            var rTarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
@@ -360,7 +360,7 @@ namespace Vi
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 			
-            var fqTarget = SimpleTs.GetTarget(Q.Range + FlashRange, SimpleTs.DamageType.Physical);
+            var fqTarget = TargetSelector.GetTarget(Q.Range + FlashRange, TargetSelector.DamageType.Physical);
             
             if (vPlayer.Distance(fqTarget) > Q.Range && fqTarget != null)
             {
@@ -381,8 +381,8 @@ namespace Vi
         }
         private static void Harass()
         {
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
@@ -480,7 +480,7 @@ namespace Vi
         {
             get
             {
-                var vTarget = SimpleTs.GetTarget(E2.Range, SimpleTs.DamageType.Physical);
+                var vTarget = TargetSelector.GetTarget(E2.Range, TargetSelector.DamageType.Physical);
                 var vMinions = MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.NotAlly,
                     MinionOrderTypes.None);

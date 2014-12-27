@@ -64,7 +64,7 @@ namespace Irelia
             Config = new Menu("Irelia", "Irelia", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -221,7 +221,7 @@ namespace Irelia
 
         private static void CastSpellQ(Obj_AI_Base vTarget, bool dontUnderTurret = false)
         {
-//            var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+//            var vTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             if (vTarget == null) return;
             var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
@@ -249,14 +249,14 @@ namespace Irelia
 
         private static void CastSpellE()
         {
-            var vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var vTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (vTarget != null)
                 E.CastOnUnit(vTarget);
         }
 
         private static void CastSpellW()
         {
-            var vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.True);
+            var vTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.True);
             if (vTarget != null && Vector3.Distance(vTarget.ServerPosition, vPlayer.Position) <=
                 vPlayer.AttackRange)
             {
@@ -274,7 +274,7 @@ namespace Irelia
         }
         private static void CastSpellR()
         {
-            var vTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
+            var vTarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
             if (vTarget != null)
                 if (R.IsReady() && GetComboDamage(vTarget) > vTarget.Health)
                 {
@@ -288,7 +288,7 @@ namespace Irelia
             var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
-            var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+            var vTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
             if (Q.IsReady() && useQ)
@@ -307,7 +307,7 @@ namespace Irelia
 
         private static void Harass()
         {
-            var vTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical); 
+            var vTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical); 
             if (vTarget == null) return;
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
@@ -568,7 +568,7 @@ namespace Irelia
 
         public static void smartFollow()
         {
-            var vTarget = SimpleTs.GetTarget(Q.Range * 2 - 30, SimpleTs.DamageType.Physical);
+            var vTarget = TargetSelector.GetTarget(Q.Range * 2 - 30, TargetSelector.DamageType.Physical);
             var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
             var vMobs = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 

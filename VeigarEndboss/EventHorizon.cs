@@ -79,7 +79,7 @@ namespace VeigarEndboss
 
         public static CalculatedPosition GetCastPosition()
         {
-            return GetCastPosition(SimpleTs.GetTarget(range + radius, SimpleTs.DamageType.Magical));
+            return GetCastPosition(TargetSelector.GetTarget(range + radius, TargetSelector.DamageType.Magical));
         }
 
         public static CalculatedPosition GetCastPosition(Obj_AI_Hero target)

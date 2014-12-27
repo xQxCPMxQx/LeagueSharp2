@@ -44,7 +44,7 @@ namespace Leblanc
                     .SubMenu("AssassinMode")
                     .AddItem(
                         new MenuItem("Assassin" + enemy.ChampionName, enemy.ChampionName).SetValue(
-                            SimpleTs.GetPriority(enemy) > 3));
+                            TargetSelector.GetPriority(enemy) > 3));
             }
             Program.MenuPlayOptions.SubMenu("AssassinManager")
                 .AddItem(new MenuItem("AssassinRange", "Assassin Range")).SetValue(new Slider(1000, 2000));

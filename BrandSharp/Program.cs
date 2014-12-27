@@ -48,7 +48,7 @@ namespace BrandSharp
 
             // Target selector
             var MenuTargetSelector = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(MenuTargetSelector);
+            TargetSelector.AddToMenu(MenuTargetSelector);
             Config.AddSubMenu(MenuTargetSelector);
 
             // Orbwalker
@@ -140,7 +140,7 @@ namespace BrandSharp
         static void Game_OnGameUpdate(EventArgs args)
         {
 
-            var qTarget = SimpleTs.GetTarget(1500, SimpleTs.DamageType.Magical);
+            var qTarget = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Magical);
             if (qTarget != null)
             {
              //   Game.PrintChat(qTarget.ChampionName + " : " + qTarget.MoveSpeed.ToString());
@@ -172,7 +172,7 @@ namespace BrandSharp
 
             if (Config.SubMenu("harass").Item("harassToggleW").GetValue<bool>() && W.IsReady())
             {
-                var target = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
+                var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (target != null)
                     W.CastIfHitchanceEquals(target, HitChance.High);
             }
@@ -180,10 +180,10 @@ namespace BrandSharp
 
         private static void Combo()
         {
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
-            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Magical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var wTarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            var rTarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.SubMenu("Combo").Item("ComboUseQ").GetValue<bool>();
             var useW = Config.SubMenu("Combo").Item("ComboUseW").GetValue<bool>();
@@ -345,9 +345,9 @@ namespace BrandSharp
 
         private static void Harass()
         {
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var wTarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.SubMenu("Harass").Item("HarassUseQ").GetValue<bool>();
             var useW = Config.SubMenu("Harass").Item("HarassUseW").GetValue<bool>();

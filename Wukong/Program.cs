@@ -61,7 +61,7 @@ namespace Wukong
             Config = new Menu("xQx | Monkey King", "MonkeyKing", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -232,14 +232,14 @@ namespace Wukong
 
         private static void Combo()
         {
-            // var q1Target = selectedTarget ?? SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-            // var e1Target = selectedTarget ?? SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            // var q1Target = selectedTarget ?? TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            // var e1Target = selectedTarget ?? TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
 
 
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
-            var rTarget = SimpleTs.GetTarget(R.Range, SimpleTs.DamageType.Physical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            var rTarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
@@ -281,8 +281,8 @@ namespace Wukong
 
         private static void Harass()
         {
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();

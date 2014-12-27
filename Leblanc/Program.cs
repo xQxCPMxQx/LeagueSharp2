@@ -112,7 +112,7 @@ namespace Leblanc
             try
             {
                 TargetSelectorMenu = new Menu("Target Selector", "TargetSelector");
-                SimpleTs.AddToMenu(TargetSelectorMenu);
+                TargetSelector.AddToMenu(TargetSelectorMenu);
                 Config.AddSubMenu(TargetSelectorMenu);
             }
             catch (Exception)
@@ -480,7 +480,7 @@ namespace Leblanc
         private static void Combo(Obj_AI_Hero vTarget)
         {
             if (vTarget == null)
-                vTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+                vTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             if (vTarget == null)
                 return;
@@ -556,9 +556,9 @@ namespace Leblanc
 
         private static void Harass()
         {
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var wTarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useW = Config.Item("UseWHarass").GetValue<bool>();
@@ -582,9 +582,9 @@ namespace Leblanc
         {
             var fComboDamage = 0d;
 
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var wTarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             if (Q.IsReady() && qTarget != null)
                 fComboDamage += Player.GetSpellDamage(qTarget, SpellSlot.Q);
@@ -757,7 +757,7 @@ namespace Leblanc
                 {
                     if (LeBlancStillJumped)
                     {
-                        var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+                        var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                         if (qTarget == null)
                             return;
                         if ((Player.Health < qTarget.Health || Player.Level < qTarget.Level) &&
@@ -887,7 +887,7 @@ namespace Leblanc
             {
                 if (Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
                 {
-                    var t = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+                    var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                     if (t != null && Q.IsReady())
                         Q.CastOnUnit(t);
                 }

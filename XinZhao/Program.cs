@@ -76,7 +76,7 @@ namespace XinZhao
                 Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
 
                 Obj_AI_Hero t = !objAiHeroes.Any()
-                    ? SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical)
+                    ? TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical)
                     : objAiHeroes[0];
 
                 return t;
@@ -306,7 +306,7 @@ namespace XinZhao
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
 
             TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(TargetSelectorMenu);
+            TargetSelector.AddToMenu(TargetSelectorMenu);
             Config.AddSubMenu(TargetSelectorMenu);
 
             /* [ Combo ] */

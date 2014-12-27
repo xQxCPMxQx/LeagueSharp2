@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1B2E71F5-394A-4339-8A44-F595B28AD892}</ProjectGuid>
+    <ProjectGuid>{ED7A4F0C-E31C-4FAA-8C18-4F18D0DC1ED4}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pantheon</RootNamespace>

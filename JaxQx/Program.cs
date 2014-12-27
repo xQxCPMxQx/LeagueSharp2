@@ -73,7 +73,7 @@ namespace JaxQx
             Config = new Menu("xQx | Jax", "Jax", true);
             
             TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(TargetSelectorMenu);
+            TargetSelector.AddToMenu(TargetSelectorMenu);
             Config.AddSubMenu(TargetSelectorMenu);
             
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -253,7 +253,7 @@ namespace JaxQx
                 Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
 
                 Obj_AI_Hero t = !objAiHeroes.Any()
-                    ? SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical)
+                    ? TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical)
                     : objAiHeroes[0];
 
                 return t;
@@ -385,8 +385,8 @@ namespace JaxQx
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useQDontUnderTurret = Config.Item("UseQHarassDontUnderTurret").GetValue<bool>();
 
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
             switch (Config.Item("HarassMode").GetValue<StringList>().SelectedIndex)
             {

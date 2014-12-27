@@ -73,7 +73,7 @@ namespace Pantheon
             Config = new Menu("xQx | Pantheon", "Pantheon", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "TargetSelector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
             
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
@@ -257,9 +257,9 @@ namespace Pantheon
         {
             if (SoundActive()) return;
 
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-            var wTarget = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Physical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var wTarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useW = Config.Item("UseWCombo").GetValue<bool>();
@@ -297,8 +297,8 @@ namespace Pantheon
         {
             if (SoundActive()) return;
 
-            var qTarget = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();

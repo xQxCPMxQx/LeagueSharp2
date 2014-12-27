@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{14C16E44-D99B-4AE7-85AF-90E49CB211B2}</ProjectGuid>
+    <ProjectGuid>{8BD5733B-54FA-43D9-8D78-B48B8A063657}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MasterYi</RootNamespace>
