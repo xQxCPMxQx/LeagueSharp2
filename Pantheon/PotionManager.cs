@@ -102,7 +102,8 @@ namespace Pantheon
 
         private void OnGameUpdate(EventArgs args)
         {
-            if (Utility.InShopRange()) return;
+            if(ObjectManager.Player.HasBuff("Recall") || ObjectManager.Player.InFountain() || ObjectManager.Player.InShop())
+                return;
 
             try
             {

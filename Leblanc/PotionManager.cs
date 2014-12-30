@@ -102,6 +102,8 @@ namespace Leblanc
 
         private void OnGameUpdate(EventArgs args)
         {
+            if(ObjectManager.Player.HasBuff("Recall") || ObjectManager.Player.InFountain() || ObjectManager.Player.InShop())
+                return;
             try
             {
                 if (Program.MenuExtras.Item("HealthPotion").GetValue<bool>())
