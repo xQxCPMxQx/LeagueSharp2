@@ -294,12 +294,12 @@ namespace Swain
                 {
                     R.Cast();
                 }
-
+                /*
                 if (rTarget == null && UltiActive)
                 {
                     R.Cast();
-
                 }
+                */
             }
 
         }
