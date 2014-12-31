@@ -17,7 +17,7 @@ namespace JunglePosition
         private static void Game_OnGameLoad(EventArgs args)
         {
             Config = new Menu("xQx | Jungle Position", "JunglePosition", true);
-            Config.AddItem(new MenuItem("Show", "Show").SetValue(new Circle(true, Color.GreenYellow)));
+            Config.AddItem(new MenuItem("Show", "Show").SetValue(true));
             Config.AddToMainMenu();
 
             Drawing.OnDraw += Drawing_OnDraw;
@@ -27,8 +27,8 @@ namespace JunglePosition
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            var show = Config.Item("Show").GetValue<Circle>();
-            if (show.Active)
+            var show = Config.Item("Show").GetValue<bool>();
+            if (show)
             {
                 var circleRange = 75f;
                 if (Game.MapId == (GameMapId) 11)
