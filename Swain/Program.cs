@@ -288,8 +288,8 @@ namespace Swain
                 }
             }
 
-            if (!Config.Item("UseAutoRCombo").GetValue<bool>())
-            { 
+//            if (!Config.Item("UseAutoRCombo").GetValue<bool>())
+//            { 
                 if (useR && rTarget != null && R.IsReady() && !UltiActive)
                 {
                     R.Cast();
@@ -300,7 +300,7 @@ namespace Swain
                     R.Cast();
                 }
                 */
-            }
+//            }
 
         }
 
