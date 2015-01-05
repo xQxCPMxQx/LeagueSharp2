@@ -26,7 +26,9 @@ namespace Leblanc
 
         public static SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
         public static Items.Item Fqc = new Items.Item(3092, 750);
-        public static Items.Item Dfg = new Items.Item(3128, 750);
+        public static Items.Item Dfg = Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline ? 
+                                        new Items.Item(3188, 750) : 
+                                        new Items.Item(3128, 750);
 
         public static Dictionary<HitChance, string> EHitChangeList = new Dictionary<HitChance, string>();
         public static HitChance DefaultEHitChance;
