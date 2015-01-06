@@ -173,10 +173,10 @@ namespace XinZhao
                 }
             }
 
-            if (Tiamat.IsReady() && Player.Distance(vTarget) <= Tiamat.Range)
+            if (Tiamat.IsReady() && Player.Distance(t) <= Tiamat.Range)
                 Tiamat.Cast();
 
-            if (Hydra.IsReady() && Player.Distance(vTarget) <= Hydra.Range)
+            if (Hydra.IsReady() && Player.Distance(t) <= Hydra.Range)
                 Tiamat.Cast();
         }
 
