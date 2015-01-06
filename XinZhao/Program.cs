@@ -54,33 +54,36 @@ namespace XinZhao
             WelcomeMessage();
         }
 
-        private static Obj_AI_Hero GetEnemy
+        static Obj_AI_Hero GetEnemy(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
-            get
+            if (vDefaultRange == 0)
+                vDefaultRange = Q.Range;
+
+            if (!TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+
+            var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+            var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
+                .Where(
+                    enemy =>
+                        enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
+                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                        ObjectManager.Player.Distance(enemy) < assassinRange);
+
+            if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
-                var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
-
-                var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(
-                        enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                            TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
-                            TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
-
-                if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
-                {
-                    vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
-                }
-
-                Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
-
-                Obj_AI_Hero t = !objAiHeroes.Any()
-                    ? TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical)
-                    : objAiHeroes[0];
-
-                return t;
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
             }
+
+            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            Obj_AI_Hero t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -89,7 +92,7 @@ namespace XinZhao
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                Combo(GetEnemy);            
+                Combo();            
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
@@ -142,29 +145,31 @@ namespace XinZhao
             }
         }
 
-        public static void Combo(Obj_AI_Hero vTarget)
+        public static void Combo()
         {
-           if (vTarget.IsValidTarget(E.Range) && Q.IsReady())
+           var t = GetEnemy(Q.Range, TargetSelector.DamageType.Magical);
+
+           if (t.IsValidTarget(E.Range) && Q.IsReady())
                 Q.Cast();
 
-            if (vTarget.IsValidTarget(E.Range) && W.IsReady())
+            if (t.IsValidTarget(E.Range) && W.IsReady())
                 W.Cast();
 
-            if (vTarget.IsValidTarget(E.Range) && E.IsReady())
-                E.CastOnUnit(vTarget);
+            if (t.IsValidTarget(E.Range) && E.IsReady())
+                E.CastOnUnit(t);
 
-            if (Player.Distance(vTarget) <= 400)
-                UseItems(vTarget);
+            if (Player.Distance(t) <= 400)
+                UseItems(t);
 
-            if (Player.Distance(vTarget) <= E.Range)
-                UseItems(vTarget, true);
+            if (Player.Distance(t) <= E.Range)
+                UseItems(t, true);
 
             if (IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite) >= vTarget.Health)
+                if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) >= t.Health)
                 {
-                    Player.Spellbook.CastSpell(IgniteSlot, vTarget);
+                    Player.Spellbook.CastSpell(IgniteSlot, t);
                 }
             }
 
