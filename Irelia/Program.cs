@@ -30,9 +30,11 @@ namespace Irelia
         public static SpellSlot IgniteSlot;
         //Menu
         public static Menu Config;
+        public static Menu TargetSelectorMenu; 
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
+
         
         private static void Main(string[] args)
         {
@@ -63,9 +65,9 @@ namespace Irelia
             //Create the menu
             Config = new Menu("Irelia", "Irelia", true);
 
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
+            TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(TargetSelectorMenu);
+            Config.AddSubMenu(TargetSelectorMenu);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -164,7 +166,9 @@ namespace Irelia
             Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
+            
             new PotionManager();
+            new AssassinManager();
 
             Config.AddToMainMenu();
 
@@ -186,6 +190,38 @@ namespace Irelia
                 if (menuItem.Active && spell.Level > 0)
                     Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
+        }
+
+        static Obj_AI_Hero GetEnemy(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        {
+            if (vDefaultRange == 0)
+                vDefaultRange = Q.Range;
+
+            if (!TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+
+            var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+            var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
+                .Where(
+                    enemy =>
+                        enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
+                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                        ObjectManager.Player.Distance(enemy) < assassinRange);
+
+            if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+            {
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+            }
+
+            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            Obj_AI_Hero t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -288,7 +324,8 @@ namespace Irelia
             var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
-            var vTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+
+            var vTarget = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
             if (Q.IsReady() && useQ)
@@ -307,8 +344,7 @@ namespace Irelia
 
         private static void Harass()
         {
-            var vTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical); 
-            if (vTarget == null) return;
+            var vTarget = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useW = Config.Item("UseWHarass").GetValue<bool>();
