@@ -69,7 +69,7 @@ namespace XinZhao
                     "<font color='#FFFFFF'>Reset Assassin List is Complete! Click on the enemy for Add/Remove.</font>");
             }
 
-            if (args.Msg != 0x201)
+            if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)
             {
                 return;
             }
