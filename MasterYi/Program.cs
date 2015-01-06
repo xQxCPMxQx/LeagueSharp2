@@ -187,7 +187,39 @@ namespace MasterYiQx
                 Utility.DrawCircle(Player.Position, Q.Range, drawQRange.Color);
             } 
         }
-        
+
+        static Obj_AI_Hero GetEnemy(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        {
+            if (vDefaultRange == 0)
+                vDefaultRange = Q.Range;
+
+            if (!TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+
+            var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+            var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
+                .Where(
+                    enemy =>
+                        enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
+                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                        ObjectManager.Player.Distance(enemy) < assassinRange);
+
+            if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+            {
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+            }
+
+            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            Obj_AI_Hero t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
+        }
+
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100))
@@ -202,21 +234,7 @@ namespace MasterYiQx
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                var assassinRange = TargetSelectorMenu.Item("AssassinRange").GetValue<Slider>().Value;
-                Obj_AI_Hero vTarget = null;
-                foreach (
-                    var enemy in
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(
-                                enemy =>
-                                    enemy.Team != Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                                    TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
-                                    TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>())
-                            .OrderBy(enemy => enemy.Distance(Game.CursorPos)))
-                {
-                    vTarget = Player.Distance(enemy) < assassinRange ? enemy : null;
-                }
-                Combo(vTarget);
+                Combo();
             }
             
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
@@ -256,47 +274,46 @@ namespace MasterYiQx
             }
         }
         
-        private static void Combo(Obj_AI_Hero vTarget)
+        private static void Combo()
         {
-            if (vTarget == null)
-                vTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var t = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
-            if (Q.IsReady() && useQ && vTarget != null)
+            if (Q.IsReady() && useQ && t != null)
             {
                 if (useQDontUnderTurret)
                 {
-                    if (!Utility.UnderTurret(vTarget))
-                        Q.CastOnUnit(vTarget);
+                    if (!Utility.UnderTurret(t))
+                        Q.CastOnUnit(t);
                 } else
                 {
-                    Q.CastOnUnit(vTarget);
+                    Q.CastOnUnit(t);
                 }
             }
 
-            if (Player.Distance(vTarget) <= E.Range + 50)
-                UseItems(vTarget, true);
+            if (Player.Distance(t) <= E.Range + 50)
+                UseItems(t, true);
             
-            if (vTarget != null)
-                UseItems(vTarget);
+            if (t != null)
+                UseItems(t);
 
-            if (E.IsReady() && useE && Player.Distance(vTarget) <= E.Range)
+            if (E.IsReady() && useE && Player.Distance(t) <= E.Range)
                 E.Cast();
 
             if (IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (vTarget != null && Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite) > vTarget.Health)
+                if (t != null && Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
                 {
-                    Player.Spellbook.CastSpell(IgniteSlot, vTarget);
+                    Player.Spellbook.CastSpell(IgniteSlot, t);
                 }
             }
 
-            if (R.IsReady() && useR && vTarget != null)
+            if (R.IsReady() && useR && t != null)
             {
                 if (Utility.CountEnemysInRange((int)Q.Range) >= 2)
                 { 
@@ -304,10 +321,10 @@ namespace MasterYiQx
                 }
             }
 
-            if (Tiamat.IsReady() && Player.Distance(vTarget) <= Tiamat.Range)
+            if (Tiamat.IsReady() && Player.Distance(t) <= Tiamat.Range)
                 Tiamat.Cast();
 
-            if (Hydra.IsReady() && Player.Distance(vTarget) <= Hydra.Range)
+            if (Hydra.IsReady() && Player.Distance(t) <= Hydra.Range)
                 Tiamat.Cast();
 
         }
