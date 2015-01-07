@@ -77,86 +77,104 @@ namespace Mordekaiser
 
             /* [ Combo ] */
             Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
-
-            Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Ult On", "DontUlt"));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
             {
-                Config.SubMenu("Combo")
-                    .SubMenu("DontUlt")
-                    .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
-            }
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
 
+                Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Ult On", "DontUlt"));
+                {
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                    {
+                        Config.SubMenu("Combo")
+                            .SubMenu("DontUlt")
+                            .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                    }
+                }
+                Config.SubMenu("Combo")
+                    .AddItem(
+                        new MenuItem("ComboActive", "Combo!").SetValue(
+                            new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+            }
             /* [ Harass ] */
             Config.AddSubMenu(new Menu("Harass", "Harass"));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseQ", "Use Q").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseW", "Use W").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseE", "Use E").SetValue(true));
-            Config.SubMenu("Harass")
-                .AddItem(
-                    new MenuItem("HarassActiveT", "Harass (Toggle)!").SetValue(new KeyBind("H".ToCharArray()[0],
-                        KeyBindType.Toggle)));
-            Config.SubMenu("Harass")
-                .AddItem(
-                    new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
-
+            {
+                Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseQ", "Use Q").SetValue(true));
+                Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseW", "Use W").SetValue(true));
+                Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseE", "Use E").SetValue(true));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassActiveT", "Harass (Toggle)!").SetValue(new KeyBind("H".ToCharArray()[0],
+                            KeyBindType.Toggle)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0],
+                            KeyBindType.Press)));
+            }
             /* [ Farming ] */
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(true));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(true));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseE", "Use E").SetValue(true));
-            Config.SubMenu("LaneClear")
-                .AddItem(new MenuItem("LaneClearActive", "Lane Clear!").SetValue(new KeyBind("V".ToCharArray()[0],
+            {
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(true));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(true));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseE", "Use E").SetValue(true));
+                Config.SubMenu("LaneClear")
+                    .AddItem(new MenuItem("LaneClearActive", "Lane Clear!").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
-
+            }
             /* [ JungleFarm ] */
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseQ", "Use Q").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseW", "Use W").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseE", "Use E").SetValue(true));
-            Config.SubMenu("JungleFarm")
-                .AddItem(new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0],
+            {
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseQ", "Use Q").SetValue(true));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseW", "Use W").SetValue(true));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseE", "Use E").SetValue(true));
+                Config.SubMenu("JungleFarm")
+                    .AddItem(new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
-
-
+            }
             /* [ Extras ] */
             MenuExtras = new Menu("Extras", "Extras");
-            MenuExtras.AddItem(new MenuItem("ShieldSelf", "Sheild Self").SetValue(true));
-            MenuExtras.AddItem(new MenuItem("ShieldAlly", "Sheild Ally").SetValue(false));
-            Config.AddSubMenu(MenuExtras);
+            {
+                MenuExtras.AddItem(new MenuItem("ShieldSelf", "Sheild Self").SetValue(true));
+                MenuExtras.AddItem(new MenuItem("ShieldAlly", "Sheild Ally").SetValue(false));
+                Config.AddSubMenu(MenuExtras);
+            }
 
             /* [ Drawing ] */
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "W Available Range").SetValue(new Circle(true, Color.Pink)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawWAffectedRange", "W Affected Range").SetValue(new Circle(true, Color.Pink)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "E Range").SetValue(new Circle(true, Color.Pink)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "R Range").SetValue(new Circle(true, Color.Pink)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawAloneEnemy", "Q Alone Target").SetValue(new Circle(true, Color.Pink)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSlavePos", "Ult Slave Pos.").SetValue(new Circle(true, Color.Pink)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSlaveRange", "Ult Slave Range").SetValue(new Circle(true, Color.Pink)));
-
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawDisable", "Disable All").SetValue(false));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
-
-            /* [ Damage After Combo ] */
-            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
-            Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
-
-            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
-            Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
-            dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
             {
-                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
-            };
+                Config.SubMenu("Drawings")
+                    .AddItem(new MenuItem("DrawW", "W Available Range").SetValue(new Circle(true, Color.Pink)));
+                Config.SubMenu("Drawings")
+                    .AddItem(
+                        new MenuItem("DrawWAffectedRange", "W Affected Range").SetValue(new Circle(true, Color.Pink)));
+                Config.SubMenu("Drawings")
+                    .AddItem(new MenuItem("DrawE", "E Range").SetValue(new Circle(true, Color.Pink)));
+                Config.SubMenu("Drawings")
+                    .AddItem(new MenuItem("DrawR", "R Range").SetValue(new Circle(true, Color.Pink)));
 
+                Config.SubMenu("Drawings")
+                    .AddItem(new MenuItem("DrawAloneEnemy", "Q Alone Target").SetValue(new Circle(true, Color.Pink)));
+                Config.SubMenu("Drawings")
+                    .AddItem(new MenuItem("DrawSlavePos", "Ult Slave Pos.").SetValue(new Circle(true, Color.Pink)));
+                Config.SubMenu("Drawings")
+                    .AddItem(new MenuItem("DrawSlaveRange", "Ult Slave Range").SetValue(new Circle(true, Color.Pink)));
+
+                Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
+                Config.SubMenu("Drawings").AddItem(new MenuItem("DrawDisable", "Disable All").SetValue(false));
+                Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEmpty", ""));
+
+                /* [ Damage After Combo ] */
+                var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
+                Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
+
+                Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+                Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+                dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+                {
+                    Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+                };
+            }
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -199,9 +217,12 @@ namespace Mordekaiser
                     Render.Circle.DrawCircle(Player.Position, SlaveActivationRange, drawSlaveRange.Color);
 
                 if (!Config.Item("DrawSlavePos").GetValue<Circle>().Active) return;
-                var drawSlavePos = Config.Item("DrawSlavePos").GetValue<Circle>();    
+                var drawSlavePos = Config.Item("DrawSlavePos").GetValue<Circle>();
 
-                var xMinion = ObjectManager.Get<Obj_AI_Minion>().Where(minion => Player.Distance(minion) < SlaveActivationRange && Player.IsAlly && !Player.IsDead);
+                var xMinion =
+                    ObjectManager.Get<Obj_AI_Minion>()
+                        .Where(
+                            minion => Player.Distance(minion) < SlaveActivationRange && Player.IsAlly && !Player.IsDead);
                 var xEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy);
 
                 var xList = from xM in xMinion
@@ -233,7 +254,8 @@ namespace Mordekaiser
                 Combo();
             }
 
-            if (Config.Item("HarassActive").GetValue<KeyBind>().Active || Config.Item("HarassActiveT").GetValue<KeyBind>().Active)
+            if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
+                Config.Item("HarassActiveT").GetValue<KeyBind>().Active) 
                 Harass();
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
@@ -259,7 +281,8 @@ namespace Mordekaiser
             var useE = Config.Item("ComboUseE").GetValue<bool>();
             var useR = Config.Item("ComboUseR").GetValue<bool>();
 
-            if (useQ && Q.IsReady() && Player.Distance(wTarget) <= Orbwalking.GetRealAutoAttackRange(ObjectManager.Player))
+            if (useQ && Q.IsReady() &&
+                Player.Distance(wTarget) <= Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) 
                 Q.Cast();
 
             if (useW && wTarget != null && Player.Distance(wTarget) <= WDamageRange)
@@ -295,7 +318,8 @@ namespace Mordekaiser
             var useW = Config.Item("ComboUseW").GetValue<bool>();
             var useE = Config.Item("ComboUseE").GetValue<bool>();
 
-            if (useQ && Q.IsReady() && Player.Distance(wTarget) <= Orbwalking.GetRealAutoAttackRange(ObjectManager.Player))
+            if (useQ && Q.IsReady() &&
+                Player.Distance(wTarget) <= Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) 
                 Q.Cast();
 
             if (useW && wTarget != null && Player.Distance(wTarget) <= WDamageRange)

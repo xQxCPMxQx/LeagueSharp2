@@ -23,13 +23,12 @@ namespace Pantheon
         public static Spell R;
 
         private static SpellSlot IgniteSlot;
-        private static SpellSlot smiteSlot;
         private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
 
         public static float EDelay = 0;
         private static bool UsingE = false;
-        private static Spell[] junglerLevel = { E, Q, W, Q, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
-        private static Spell[] topLanerLevel = { Q, E, Q, W, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
+        private static Spell[] junglerLevel = {E, Q, W, Q, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W};
+        private static Spell[] topLanerLevel = {Q, E, Q, W, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W};
 
         public static int DelayTick = 0;
 
@@ -81,71 +80,110 @@ namespace Pantheon
             
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!")
-                .SetValue(new KeyBind("Z".ToCharArray()[0],KeyBindType.Press)));
-
-            // Harass
+            {
+                Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+                Config.SubMenu("Combo")
+                    .AddItem(
+                        new MenuItem("ComboActive", "Combo!").SetValue(
+                            new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+            }
+            
             Config.AddSubMenu(new Menu("Harass", "Harass"));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
-
-            // Lane Clear
+            {
+                Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
+                Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(true));
+                Config.SubMenu("Harass")
+                    .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(new KeyBind("H".ToCharArray()[0],
+                            KeyBindType.Toggle)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0],
+                            KeyBindType.Press)));
+            }
+            
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear")
+                .AddItem(
+                    new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0],
+                        KeyBindType.Press)));
 
             // Jungling Farm
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(new KeyBind("V".ToCharArray()[0],KeyBindType.Press)));
-
-            // Extras -> Use Items 
+            {
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
+                Config.SubMenu("JungleFarm")
+                    .AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
+                Config.SubMenu("JungleFarm")
+                    .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(new KeyBind("V".ToCharArray()[0],
+                            KeyBindType.Press)));
+            }
+            
             MenuExtras = new Menu("Extras", "Extras");
-            Config.AddSubMenu(MenuExtras);
-            MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
-            MenuExtras.AddItem(new MenuItem("AutoLevelUp", "Auto Level Up").SetValue(true));
+            {
+                Config.AddSubMenu(MenuExtras);
+                MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
+                MenuExtras.AddItem(new MenuItem("AutoLevelUp", "Auto Level Up").SetValue(true));
+            }
 
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
-            Config.SubMenu("Extras").AddSubMenu(menuUseItems);
+            {
+                Config.SubMenu("Extras").AddSubMenu(menuUseItems);
 
-            // Extras -> Use Items -> Targeted Items
-            MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
-            menuUseItems.AddSubMenu(MenuTargetedItems);
-            MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
-
-            // Extras -> Use Items -> AOE Items
-            MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
-            menuUseItems.AddSubMenu(MenuNonTargetedItems);
-            MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
-
+                // Extras -> Use Items -> Targeted Items
+                MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
+                {
+                    menuUseItems.AddSubMenu(MenuTargetedItems);
+                    MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
+                    MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
+                    MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
+                    MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
+                    MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
+                }
+                // Extras -> Use Items -> AOE Items
+                MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
+                {
+                    menuUseItems.AddSubMenu(MenuNonTargetedItems);
+                    MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
+                    MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
+                    MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
+                    MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
+                    MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
+                }
+            }
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("WRange", "W Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("SmiteRange", "Smite Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-
+            {
+                Config.SubMenu("Drawings")
+                    .AddItem(
+                        new MenuItem("QRange", "Q Range").SetValue(new Circle(false,
+                            System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                Config.SubMenu("Drawings")
+                    .AddItem(
+                        new MenuItem("WRange", "W Range").SetValue(new Circle(false,
+                            System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                Config.SubMenu("Drawings")
+                    .AddItem(
+                        new MenuItem("ERange", "E Range").SetValue(new Circle(false,
+                            System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                Config.SubMenu("Drawings")
+                    .AddItem(
+                        new MenuItem("RRange", "R Range").SetValue(new Circle(false,
+                            System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            }
             new PotionManager();
             Config.AddToMainMenu();
 
@@ -168,13 +206,6 @@ namespace Pantheon
                     Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color);
             }
 
-            var drawSmite = Config.Item("SmiteRange").GetValue<Circle>();
-            if (Config.Item("AutoSmite").GetValue<KeyBind>().Active && drawSmite.Active)
-            {
-                Render.Circle.DrawCircle(Player.Position, smiteRange, drawSmite.Color);
-            }
-
-            //Vector2 pos = Drawing.WorldToMinimap(Player.Position);
             Render.Circle.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 1, true);
         }
 
@@ -196,13 +227,6 @@ namespace Pantheon
         {
             if (sender.NetworkId != Player.NetworkId)
                 return;
-
-            if (!Config.Item("AutoLevelUp").GetValue<bool>())
-                return;
-
-            Player.Spellbook.LevelUpSpell(smiteSlot != SpellSlot.Unknown
-                ? junglerLevel[args.NewLevel - 1].Slot
-                : topLanerLevel[args.NewLevel - 1].Slot);
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -222,37 +246,29 @@ namespace Pantheon
                 Combo();
             }
 
-            if (Config.Item("HarassActive").GetValue<KeyBind>().Active || Config.Item("HarassActiveT").GetValue<KeyBind>().Active)
+            if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
+                Config.Item("HarassActiveT").GetValue<KeyBind>().Active) 
             {
-                var existsMana = Player.MaxMana / 100 * Config.Item("HarassMana").GetValue<Slider>().Value;
-                if (Player.Mana >= existsMana)
+                var existsMana = Config.Item("HarassMana").GetValue<Slider>().Value;
+                if (Player.ManaPercentage() >= existsMana)
                     Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana / 100 * Config.Item("LaneClearMana").GetValue<Slider>().Value;
-                if (Player.Mana >= existsMana)
+                var existsMana = Config.Item("LaneClearMana").GetValue<Slider>().Value;
+                if (Player.ManaPercentage() >= existsMana)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-                if (Player.Mana >= existsMana)
+                var existsMana = Config.Item("JungleFarmMana").GetValue<Slider>().Value;
+                if (Player.ManaPercentage() >= existsMana)
                     JungleFarm();
             }
         }
 
-        private static void CassSpellE()
-        {
-            if (E.IsReady() && (!Q.IsReady() || !W.IsReady()))
-            {
-                
-
-            }
-
-        }
         private static void Combo()
         {
             if (SoundActive()) return;
@@ -357,11 +373,8 @@ namespace Pantheon
                 foreach (Obj_AI_Base vMinion in
                     from vMinion in minionsQ
                     let vMinionEDamage = Player.GetSpellDamage(vMinion, SpellSlot.Q)
-                    //where vMinion.Health <= vMinionEDamage && vMinion.Health > Player.GetAutoAttackDamage(vMinion) 
-                    
                     select vMinion)
                 {
-
                     Q.CastOnUnit(vMinion);
                 }
             }
@@ -401,7 +414,7 @@ namespace Pantheon
         private static InventorySlot GetInventorySlot(int id)
         {
             return ObjectManager.Player.InventoryItems.FirstOrDefault(
-                item => (item.Id == (ItemId)id && item.Stacks >= 1) || (item.Id == (ItemId)id && item.Charges >= 1));
+                item => (item.Id == (ItemId) id && item.Stacks >= 1) || (item.Id == (ItemId) id && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero vTarget)
@@ -428,27 +441,6 @@ namespace Pantheon
         }
         private static void UseSummoners()
         {
-            if (smiteSlot == SpellSlot.Unknown)
-                return;
-
-            if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active) return;
-
-            string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-            var firstOrDefault = Player.Spellbook.Spells.FirstOrDefault(
-                spell => spell.Name.Contains("mite"));
-            if (firstOrDefault == null) return;
-
-            var vMinions = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-            foreach (var vMinion in vMinions.Where(vMinion => vMinion != null
-                                                              && !vMinion.IsDead
-                                                              && !Player.IsDead
-                                                              && !Player.IsStunned
-                                                              && smiteSlot != SpellSlot.Unknown
-                                                              && Player.Spellbook.CanUseSpell(smiteSlot) == SpellState.Ready)
-                                                              .Where(vMinion => (vMinion.Health < Player.GetSummonerSpellDamage(vMinion, Damage.SummonerSpell.Smite)) && (monsterNames.Any(name => vMinion.BaseSkinName.StartsWith(name)))))
-            {
-                Player.Spellbook.CastSpell(smiteSlot, vMinion);
-            }
         }
         private static void WelcomeMessage()
         {
