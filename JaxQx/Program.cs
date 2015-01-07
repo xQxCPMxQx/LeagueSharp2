@@ -208,26 +208,26 @@ namespace JaxQx
             var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
             if (drawQRange.Active)
             {
-                Utility.DrawCircle(Player.Position, Q.Range, drawQRange.Color, 1, 15);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, drawQRange.Color);
             }
 
             var drawWard = Config.Item("DrawWard").GetValue<Circle>();
             if (drawWard.Active)
             {
-                Utility.DrawCircle(Player.Position, wardRange, drawWard.Color, 1, 15);
+                Render.Circle.DrawCircle(Player.Position, wardRange, drawWard.Color);
             }
 
             var drawSmiteRange = Config.Item("DrawSmiteRange").GetValue<Circle>();
             if (drawSmiteRange.Active && Config.Item("AutoSmite").GetValue<KeyBind>().Active)
             {
-                Utility.DrawCircle(Player.Position, SmiteRange, drawWard.Color, 1, 15);
+                Render.Circle.DrawCircle(Player.Position, SmiteRange, drawWard.Color);
             }
 
             var drawMinQRange = Config.Item("DrawQMinRange").GetValue<Circle>();
             if (drawMinQRange.Active)
             {
                 var minQRange = Config.Item("ComboUseQMinRange").GetValue<Slider>().Value;
-                Utility.DrawCircle(Player.Position, minQRange, drawMinQRange.Color, 1, 15);
+                Render.Circle.DrawCircle(Player.Position, minQRange, drawMinQRange.Color);
             }
 
         }
@@ -370,7 +370,7 @@ namespace JaxQx
             {
                 if (Player.Distance(t) < Player.AttackRange)
                 {
-                    if (Utility.CountEnemysInRange((int) Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2 ||
+                    if (ObjectManager.Player.CountEnemysInRange((int) Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2 ||
                         t.Health > Player.Health) 
                     {
                         R.CastOnUnit(Player);

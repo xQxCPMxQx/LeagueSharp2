@@ -184,7 +184,7 @@ namespace MasterYiQx
             var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
             if (drawQRange.Active)
             {
-                Utility.DrawCircle(Player.Position, Q.Range, drawQRange.Color);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, drawQRange.Color);
             } 
         }
 
@@ -315,7 +315,7 @@ namespace MasterYiQx
 
             if (R.IsReady() && useR && t != null)
             {
-                if (Utility.CountEnemysInRange((int)Q.Range) >= 2)
+                if (ObjectManager.Player.CountEnemysInRange((int)Q.Range) >= 2)
                 { 
                     R.CastOnUnit(Player);
                 }

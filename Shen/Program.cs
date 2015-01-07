@@ -268,11 +268,11 @@ namespace Shen
         {
             var drawQ = Config.Item("DrawQ").GetValue<Circle>();
             if (drawQ.Active && Q.Level > 0)
-                Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, drawQ.Color);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, drawQ.Color);
 
             var drawE = Config.Item("DrawE").GetValue<Circle>();
             if (drawE.Active && Q.Level > 0)
-                Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, drawE.Color);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, drawE.Color);
         }
 
         static void DrawHelplessAllies()

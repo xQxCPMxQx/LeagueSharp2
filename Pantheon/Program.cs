@@ -165,17 +165,17 @@ namespace Pantheon
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1, 5);
+                    Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color);
             }
 
             var drawSmite = Config.Item("SmiteRange").GetValue<Circle>();
             if (Config.Item("AutoSmite").GetValue<KeyBind>().Active && drawSmite.Active)
             {
-                Utility.DrawCircle(Player.Position, smiteRange, drawSmite.Color, 1, 5);
+                Render.Circle.DrawCircle(Player.Position, smiteRange, drawSmite.Color);
             }
 
             //Vector2 pos = Drawing.WorldToMinimap(Player.Position);
-            Utility.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 2, 2, true);
+            Render.Circle.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 1, true);
         }
 
         private static void Game_OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs spell)

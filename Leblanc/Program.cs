@@ -479,13 +479,41 @@ namespace Leblanc
             }
         }
 
-        private static void Combo(Obj_AI_Hero vTarget)
+        static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
-            if (vTarget == null)
-                vTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            if (vDefaultRange == 0)
+                vDefaultRange = Q.Range;
 
-            if (vTarget == null)
-                return;
+            if (!TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+
+            var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+            var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
+                .Where(
+                    enemy =>
+                        enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
+                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                        ObjectManager.Player.Distance(enemy) < assassinRange);
+
+            if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+            {
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+            }
+
+            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            Obj_AI_Hero t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
+        }
+
+        private static void Combo()
+        {
+            var t = GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("ComboUseQ").GetValue<bool>();
             var useW = Config.Item("ComboUseW").GetValue<bool>();
@@ -498,8 +526,8 @@ namespace Leblanc
             var cdQ = Game.Time < cdQEx ? cdQEx - Game.Time : 0;
             var cdW = Game.Time < cdWEx ? cdWEx - Game.Time : 0;
 
-            useR = (Config.Item("DontCombo" + vTarget.BaseSkinName) != null &&
-                    Config.Item("DontCombo" + vTarget.BaseSkinName).GetValue<bool>() == false) && useR;
+            useR = (Config.Item("DontCombo" + t.BaseSkinName) != null &&
+                    Config.Item("DontCombo" + t.BaseSkinName).GetValue<bool>() == false) && useR;
             
             if (R.IsReady() || Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSlideM")
             {
@@ -508,52 +536,52 @@ namespace Leblanc
                 switch (DefaultCombo)
                 {
                     case "Auto":
-                        if (W.IsReady() && !LeBlancStillJumped && Player.Distance(vTarget) <= W.Range)
+                        if (W.IsReady() && !LeBlancStillJumped && Player.Distance(t) <= W.Range)
                         { 
-                            W.Cast(vTarget.Position);
-                            if (Player.Distance(vTarget) <= W.Range)
-                                R.Cast(vTarget.Position);
-                        } else if (Q.IsReady() && Player.Distance(vTarget) <= Q.Range)
+                            W.Cast(t.Position);
+                            if (Player.Distance(t) <= W.Range)
+                                R.Cast(t.Position);
+                        } else if (Q.IsReady() && Player.Distance(t) <= Q.Range)
                         {
-                            Q.CastOnUnit(vTarget, true);
-                            if (Player.Distance(vTarget) <= Q.Range && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM")
-                                R.CastOnUnit(vTarget, true);
+                            Q.CastOnUnit(t, true);
+                            if (Player.Distance(t) <= Q.Range && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM")
+                                R.CastOnUnit(t, true);
                         }
                         break; 
                     case "W-R":
-                        if (W.IsReady() && !LeBlancStillJumped && Player.Distance(vTarget) <= W.Range)
-                            W.Cast(vTarget.Position);
-                        if (Player.Distance(vTarget) <= W.Range)
-                            R.Cast(vTarget.Position);
+                        if (W.IsReady() && !LeBlancStillJumped && Player.Distance(t) <= W.Range)
+                            W.Cast(t.Position);
+                        if (Player.Distance(t) <= W.Range)
+                            R.Cast(t.Position);
                         break;
 
                     case "Q-R":
-                        if (Q.IsReady() && Player.Distance(vTarget) <= Q.Range)
-                            Q.CastOnUnit(vTarget, true);
-                        if (Player.Distance(vTarget) <= Q.Range && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM")
-                            R.CastOnUnit(vTarget, true);
+                        if (Q.IsReady() && Player.Distance(t) <= Q.Range)
+                            Q.CastOnUnit(t, true);
+                        if (Player.Distance(t) <= Q.Range && Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM")
+                            R.CastOnUnit(t, true);
                         break;
                 }
             }
             else
             {
-                if (Q.IsReady() && useQ && Player.Distance(vTarget) <= Q.Range)
+                if (Q.IsReady() && useQ && Player.Distance(t) <= Q.Range)
                 {
-                    Q.CastOnUnit(vTarget);
+                    Q.CastOnUnit(t);
                 }
 
-                if (W.IsReady() && useW && Player.Distance(vTarget) <= W.Range)
+                if (W.IsReady() && useW && Player.Distance(t) <= W.Range)
                 {
-                    W.Cast(vTarget);
+                    W.Cast(t);
                 }
 
-                if (E.IsReady() && useE && Player.Distance(vTarget) <= E.Range)
+                if (E.IsReady() && useE && Player.Distance(t) <= E.Range)
                 {
-                    E.CastIfHitchanceEquals(vTarget, DefaultEHitChance);
+                    E.CastIfHitchanceEquals(t, DefaultEHitChance);
                 }
             }
 
-            UserSummoners(vTarget);
+            UserSummoners(t);
         }
 
         private static void Harass()
@@ -670,7 +698,7 @@ namespace Leblanc
                             //    Game.PrintChat(enemy.ChampionName);
                         //}
 
-                        //Utility.DrawCircle(enemy.Position, 75f, Color.GreenYellow);
+                        //Render.Circle.DrawCircle(enemy.Position, 75f, Color.GreenYellow);
 
                         if (E.IsReady() && Player.Distance(enemy) < E.Range)
                         {
@@ -779,7 +807,7 @@ namespace Leblanc
 
                 }
                 Game.PrintChat(slide.Position.ToString());
-                Utility.DrawCircle(slide.Position, 400f, Color.Red);
+                Render.Circle.DrawCircle(slide.Position, 400f, Color.Red);
 
                 Game.PrintChat("Slide Pos. Enemy Count: " + onSlidePositionEnemyCount);
                 Game.PrintChat("Player Pos. Enemy Count: " + onPlayerPositionEnemyCount);
@@ -818,7 +846,7 @@ namespace Leblanc
             
             var minionsW = W.GetCircularFarmLocation(rangedMinionsW, W.Width * 0.75f);
             
-            if (minionsW.MinionsHit < 2 || !W.InRange(minionsW.Position.To3D())) 
+            if (minionsW.MinionsHit < 2 || !W.IsInRange(minionsW.Position.To3D())) 
                 return;
             
             W.Cast(minionsW.Position);
@@ -869,21 +897,7 @@ namespace Leblanc
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                var assassinRange = MenuPlayOptions.Item("AssassinRange").GetValue<Slider>().Value;
-                Obj_AI_Hero vTarget = null;
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(enemy => enemy.Team != Player.Team
-                        && !enemy.IsDead && enemy.IsVisible
-                        && MenuPlayOptions.Item("Assassin" + enemy.ChampionName) != null
-                        && MenuPlayOptions.Item("Assassin" + enemy.ChampionName).GetValue<bool>())
-                        .OrderBy(enemy => enemy.Distance(Game.CursorPos))
-                        )
-                {
-
-                    vTarget = Player.Distance(enemy) < assassinRange ? enemy : null;
-
-                }
-                Combo(vTarget);
+                Combo();
             }
             else
             {
@@ -924,7 +938,7 @@ namespace Leblanc
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1, 15);
+                    Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color);
             }
 
             var wObjPosition = Config.Item("WObjPosition").GetValue<Circle>();
@@ -934,19 +948,19 @@ namespace Leblanc
             var wqRange = Config.Item("WQRange").GetValue<Circle>();
             if (wqRange.Active && Q.IsReady() && W.IsReady())
             {
-                Utility.DrawCircle(Player.Position, W.Range + Q.Range, wqRange.Color, 1, 15);
+                Render.Circle.DrawCircle(Player.Position, W.Range + Q.Range, wqRange.Color);
             }
             
             var ActiveERange = Config.Item("ActiveERange").GetValue<Circle>();
             if (ActiveERange.Active && EnemyHaveSoulShackle != null)
             {
-                Utility.DrawCircle(Player.Position, 1100f, ActiveERange.Color, 1, 15);
+                Render.Circle.DrawCircle(Player.Position, 1100f, ActiveERange.Color);
             }
 
             foreach (var existingSlide in ExistingSlide)
             {
                 if (wObjPosition.Active)
-                    Utility.DrawCircle(existingSlide.Position, 110f, wObjPosition.Color, 1, 15);
+                    Render.Circle.DrawCircle(existingSlide.Position, 110f, wObjPosition.Color);
 
                 if (!wObjTimeTick) continue;
                 if (!(existingSlide.ExpireTime > Game.Time)) continue;
@@ -968,7 +982,7 @@ namespace Leblanc
             {
                 
 
-                Utility.DrawCircle(enemy.Position, 75f, Color.GreenYellow, 1, 10);
+                Render.Circle.DrawCircle(enemy.Position, 75f, Color.GreenYellow);
 
             }
         }

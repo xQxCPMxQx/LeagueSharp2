@@ -216,19 +216,19 @@ namespace Vi
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
+                    Render.Circle.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
 
             var drawFqCombo = Config.Item("FQRange").GetValue<Circle>();
             if (drawFqCombo.Active)
             {
-                Utility.DrawCircle(vPlayer.Position, Q.Range + FlashRange, drawFqCombo.Color);
+                Render.Circle.DrawCircle(vPlayer.Position, Q.Range + FlashRange, drawFqCombo.Color);
             }
 
             var drawSmite = Config.Item("SmiteRange").GetValue<Circle>();
             if (Config.Item("AutoSmite").GetValue<KeyBind>().Active && drawSmite.Active)
             {
-                Utility.DrawCircle(vPlayer.Position, SmiteRange, drawSmite.Color);
+                Render.Circle.DrawCircle(vPlayer.Position, SmiteRange, drawSmite.Color);
             }
         }
 

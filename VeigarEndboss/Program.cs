@@ -129,21 +129,21 @@ namespace VeigarEndboss
                 if (E.IsReady() && useE && eResult.Valid)
                     E.Cast(eResult.CastPosition);
 
-                if (W.IsReady() && useW && W.InRange(target.ServerPosition))
+                if (W.IsReady() && useW && W.IsInRange(target.ServerPosition))
                     W.Cast(target.Position);
 
-                if (Q.IsReady() && useQ && Q.InRange(target.ServerPosition))
+                if (Q.IsReady() && useQ && Q.IsInRange(target.ServerPosition))
                     Q.CastOnUnit(target);
 
-                if (R.IsReady() && useR && R.InRange(target.ServerPosition))
+                if (R.IsReady() && useR && R.IsInRange(target.ServerPosition))
                     R.CastOnUnit(target);
             }
             else
             {
-                if (Q.IsReady() && useQ && Q.InRange(target.ServerPosition))
+                if (Q.IsReady() && useQ && Q.IsInRange(target.ServerPosition))
                     Q.CastOnUnit(target);
 
-                if (W.IsReady() && useW && W.InRange(target.ServerPosition))
+                if (W.IsReady() && useW && W.IsInRange(target.ServerPosition))
                     W.Cast(target.Position);
 
                 if (E.IsReady() && useE && eResult.Valid)
@@ -162,7 +162,7 @@ namespace VeigarEndboss
                 return;
 
             // Q
-            if (menu.SubMenu("harass").Item("harassUseQ").GetValue<bool>() && Q.IsReady() && Q.InRange(target.ServerPosition))
+            if (menu.SubMenu("harass").Item("harassUseQ").GetValue<bool>() && Q.IsReady() && Q.IsInRange(target.ServerPosition))
             {
                 Q.CastOnUnit(target);
             }
@@ -192,7 +192,7 @@ namespace VeigarEndboss
             {
                 var circleEntry = menu.SubMenu("drawings").Item("drawRange" + spell.Slot.ToString()).GetValue<Circle>();
                 if (circleEntry.Active)
-                    Utility.DrawCircle(Player.Position, spell.Range, circleEntry.Color);
+                    Render.Circle.DrawCircle(Player.Position, spell.Range, circleEntry.Color);
             }
         }
 

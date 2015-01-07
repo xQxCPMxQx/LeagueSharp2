@@ -114,15 +114,15 @@ namespace XinZhao
         {
             var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
             if (drawQRange.Active)
-                Utility.DrawCircle(Player.Position, E.Range, drawQRange.Color);
+                Render.Circle.DrawCircle(Player.Position, E.Range, drawQRange.Color);
 
             var drawERange = Config.Item("DrawERange").GetValue<Circle>();
             if (drawERange.Active)
-                Utility.DrawCircle(Player.Position, R.Range, drawERange.Color);
+                Render.Circle.DrawCircle(Player.Position, R.Range, drawERange.Color);
 
             var drawRRange = Config.Item("DrawRRange").GetValue<Circle>();
             if (drawRRange.Active)
-                Utility.DrawCircle(Player.Position, R.Range, drawRRange.Color);
+                Render.Circle.DrawCircle(Player.Position, R.Range, drawRRange.Color);
 
             /* [ Draw Can Be Thrown Enemy ] */
             var drawThrownEnemy = Config.SubMenu("Drawings").Item("DrawThrown").GetValue<Circle>();
@@ -139,8 +139,8 @@ namespace XinZhao
                         from buff in enemy.Buffs.Where(buff => !buff.Name.Contains("xenzhaointimidate"))
                         select enemy) 
                 {
-                    Utility.DrawCircle(enemy.Position, 90f, Color.White, 1, 5);
-                    Utility.DrawCircle(enemy.Position, 95f, drawThrownEnemy.Color, 1, 5);
+                    Render.Circle.DrawCircle(enemy.Position, 90f, Color.White);
+                    Render.Circle.DrawCircle(enemy.Position, 95f, drawThrownEnemy.Color);
                 }
             }
         }

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{75D183B9-7E0E-4A77-AC07-127C56FF5D77}</ProjectGuid>
+    <ProjectGuid>{51A53DE8-252A-40A1-82FA-BE27D482D856}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ShowMySupportItems</RootNamespace>

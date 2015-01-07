@@ -145,7 +145,7 @@ namespace JaxQx
             var drawSearchRange = Program.TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
             if (drawSearch.Active)
             {
-                Utility.DrawCircle(ObjectManager.Player.Position, drawSearchRange, drawSearch.Color);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, drawSearchRange, drawSearch.Color);
             }
 
             foreach (
@@ -163,13 +163,13 @@ namespace JaxQx
                 if (ObjectManager.Player.Distance(enemy) < drawSearchRange)
                 {
                     if (drawActive.Active)
-                        Utility.DrawCircle(enemy.Position, 85f, drawActive.Color);
+                        Render.Circle.DrawCircle(enemy.Position, 85f, drawActive.Color);
                 }
                 else if (ObjectManager.Player.Distance(enemy) > drawSearchRange &&
                          ObjectManager.Player.Distance(enemy) < drawSearchRange + 400) 
                 {
                     if (drawNearest.Active)
-                        Utility.DrawCircle(enemy.Position, 85f, drawNearest.Color);
+                        Render.Circle.DrawCircle(enemy.Position, 85f, drawNearest.Color);
                 }
             }
         }

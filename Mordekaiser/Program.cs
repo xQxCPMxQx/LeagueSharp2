@@ -182,14 +182,11 @@ namespace Mordekaiser
             if (Config.Item("DrawDisable").GetValue<bool>())
                 return;
 
-            var drawThickness = 3;//Config.Item("DrawThickness" ).GetValue<Slider>().Value;
-            var drawQuality = 15;//Config.Item("DrawQuality").GetValue<Slider>().Value;
-
             foreach (var spell in SpellList.Where(spell => spell != Q && spell != W))
             {
                 var menuItem = Config.Item("Draw" + spell.Slot).GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color, drawThickness, drawQuality);
+                    Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color);
             }
 
             var drawSlaveRange = Config.Item("DrawSlaveRange").GetValue<Circle>();
@@ -199,7 +196,7 @@ namespace Mordekaiser
                 MordekaiserHaveSlave2();
 
                 if (drawSlaveRange.Active)
-                    Utility.DrawCircle(Player.Position, SlaveActivationRange, drawSlaveRange.Color, drawThickness, drawQuality);
+                    Render.Circle.DrawCircle(Player.Position, SlaveActivationRange, drawSlaveRange.Color);
 
                 if (!Config.Item("DrawSlavePos").GetValue<Circle>().Active) return;
                 var drawSlavePos = Config.Item("DrawSlavePos").GetValue<Circle>();    
@@ -215,9 +212,9 @@ namespace Mordekaiser
                 foreach (var xL in xList)
                 {
                  //   Game.PrintChat(xL.BaseSkinName);
-                    Utility.DrawCircle(xL.Position, 70f, Color.White, drawThickness, drawQuality);
-                    Utility.DrawCircle(xL.Position, 75f, drawSlavePos.Color, drawThickness, drawQuality);
-                    Utility.DrawCircle(xL.Position, 80f, Color.White, drawThickness, drawQuality);
+                    Render.Circle.DrawCircle(xL.Position, 70f, Color.White);
+                    Render.Circle.DrawCircle(xL.Position, 75f, drawSlavePos.Color);
+                    Render.Circle.DrawCircle(xL.Position, 80f, Color.White);
                 }
             }
         }
@@ -331,7 +328,7 @@ namespace Mordekaiser
             {
                 var rangedMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range);
                 var minionsW = W.GetCircularFarmLocation(rangedMinionsW, W.Range * 0.3f);
-                if (minionsW.MinionsHit < 1 || !W.InRange(minionsW.Position.To3D()))
+                if (minionsW.MinionsHit < 1 || !W.IsInRange(minionsW.Position.To3D()))
                     return;
                 W.CastOnUnit(Player);
             }
@@ -340,7 +337,7 @@ namespace Mordekaiser
             {
                 var rangedMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
                 var minionsE = E.GetCircularFarmLocation(rangedMinionsE, E.Range);
-                if (minionsE.MinionsHit < 1 || !E.InRange(minionsE.Position.To3D()))
+                if (minionsE.MinionsHit < 1 || !E.IsInRange(minionsE.Position.To3D()))
                     return;
                 E.Cast(minionsE.Position);
             }

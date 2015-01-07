@@ -118,22 +118,22 @@ namespace BrandSharp
             {
                 var menuItem = Config.SubMenu("Drawings").Item("DrawRange" + spell.Slot).GetValue<Circle>();
                 if (menuItem.Active)
-                    Utility.DrawCircle(Player.Position, spell.Range, menuItem.Color);
+                    Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color);
             }
 
             var drawBurningEnemy = Config.SubMenu("Drawings").Item("DrawBurningEnemy").GetValue<Circle>();
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => !enemy.IsDead && enemy.IsEnemy && IsAblazed(enemy) && enemy.IsVisible))
             {
-                Utility.DrawCircle(enemy.Position, 90f, Color.White);
-                Utility.DrawCircle(enemy.Position, 95f, drawBurningEnemy.Color);
-                Utility.DrawCircle(enemy.Position, 100f, Color.Wheat);
+                Render.Circle.DrawCircle(enemy.Position, 90f, Color.White);
+                Render.Circle.DrawCircle(enemy.Position, 95f, drawBurningEnemy.Color);
+                Render.Circle.DrawCircle(enemy.Position, 100f, Color.Wheat);
             }
 
             var drawBurningMinions = Config.SubMenu("Drawings").Item("DrawBurningMinions").GetValue<Circle>();
             foreach (var enemy in ObjectManager.Get<Obj_AI_Minion>().Where(enemy => !enemy.IsDead && enemy.IsEnemy && IsAblazed(enemy) && Player.Distance(enemy) < E.Range && E.IsReady()))
             {
-                Utility.DrawCircle(enemy.Position, 50f, Color.White);
-                Utility.DrawCircle(enemy.Position, 55f, drawBurningMinions.Color);
+                Render.Circle.DrawCircle(enemy.Position, 50f, Color.White);
+                Render.Circle.DrawCircle(enemy.Position, 55f, drawBurningMinions.Color);
             }
         }
 

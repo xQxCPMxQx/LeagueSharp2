@@ -188,7 +188,7 @@ namespace Irelia
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
+                    Render.Circle.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
         }
 

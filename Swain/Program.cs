@@ -392,12 +392,12 @@ namespace Swain
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Utility.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color, 1, 10);
+                    Render.Circle.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
         }
-        private static InventorySlot GetInventorySlot(int ID)
+        private static InventorySlot GetInventorySlot(int id)
         {
-            return ObjectManager.Player.InventoryItems.FirstOrDefault(item => (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
+            return ObjectManager.Player.InventoryItems.FirstOrDefault(item => (item.Id == (ItemId)id && item.Stacks >= 1) || (item.Id == (ItemId)id && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero vTarget)

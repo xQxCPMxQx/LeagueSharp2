@@ -39,7 +39,7 @@ namespace ShowMySupportItems
             var drawControlRange = Config.Item("DrawStackRange").GetValue<Circle>();
             if (drawControlRange.Active)
             {
-                Utility.DrawCircle(Player.Position, stackRange, drawControlRange.Color);
+                Render.Circle.DrawCircle(Player.Position, stackRange, drawControlRange.Color);
             }
             
             var drawStack = Config.Item("ShowRelic").GetValue<Circle>();
@@ -59,7 +59,7 @@ namespace ShowMySupportItems
                     hpBarPosition.X += 20;
                     hpBarPosition.Y -= 20;
                     Drawing.DrawText(hpBarPosition.X, hpBarPosition.Y, drawStack.Color, "Relic Stack: " + talentStack.ToString());
-                    Utility.DrawCircle(ally.Position, 100f, drawStack.Color);
+                    Render.Circle.DrawCircle(ally.Position, 100f, drawStack.Color);
                 }
 
                 
