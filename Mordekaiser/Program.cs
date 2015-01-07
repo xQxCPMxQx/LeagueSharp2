@@ -50,7 +50,7 @@ namespace Mordekaiser
             ItemList.Add(Hex);
 
             /* [ Set Spells ]*/
-            Q = new Spell(SpellSlot.Q, 300);
+            Q = new Spell(SpellSlot.Q);
             SpellList.Add(Q);
 
             W = new Spell(SpellSlot.W, 780);
