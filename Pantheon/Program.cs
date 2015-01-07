@@ -32,8 +32,6 @@ namespace Pantheon
 
         public static int DelayTick = 0;
 
-        private static readonly float smiteRange = 700f;
-
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
@@ -67,7 +65,6 @@ namespace Pantheon
             SpellList.Add(R);
 
             IgniteSlot = Player.GetSpellSlot("SummonerDot");
-            smiteSlot = Player.GetSpellSlot("SummonerSmite");
             
             Config = new Menu("xQx | Pantheon", "Pantheon", true);
 
@@ -122,8 +119,6 @@ namespace Pantheon
             {
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
                 Config.SubMenu("JungleFarm")
                     .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
                 Config.SubMenu("JungleFarm")
@@ -183,6 +178,17 @@ namespace Pantheon
                     .AddItem(
                         new MenuItem("RRange", "R Range").SetValue(new Circle(false,
                             System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+
+                var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
+                Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
+
+                Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+                Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+                dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+                {
+                    Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+                };
+
             }
             new PotionManager();
             Config.AddToMainMenu();
@@ -267,6 +273,28 @@ namespace Pantheon
                 if (Player.ManaPercentage() >= existsMana)
                     JungleFarm();
             }
+        }
+
+        private static float GetComboDamage(Obj_AI_Hero t)
+        {
+            var fComboDamage = 0d;
+
+            if (Q.IsReady())
+                fComboDamage += Player.GetSpellDamage(t, SpellSlot.Q);
+
+            if (W.IsReady())
+                fComboDamage += Player.GetSpellDamage(t, SpellSlot.W);
+
+            if (E.IsReady())
+                fComboDamage += Player.GetSpellDamage(t, SpellSlot.E);
+
+            if (R.IsReady())
+                fComboDamage += Player.GetSpellDamage(t, SpellSlot.R);
+
+            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                fComboDamage += Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
+
+            return (float)fComboDamage;
         }
 
         private static void Combo()
