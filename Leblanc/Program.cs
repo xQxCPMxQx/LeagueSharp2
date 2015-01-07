@@ -456,7 +456,6 @@ namespace Leblanc
             { return !W.IsReady() || Player.Spellbook.GetSpell(SpellSlot.W).Name == "leblancslidereturn";}
         }
 
-
         private static void UserSummoners(Obj_AI_Base target)
         {
             if (Dfg.IsReady())
