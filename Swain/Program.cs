@@ -167,6 +167,17 @@ namespace Swain
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
 
+            /* [ Damage After Combo ] */
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
+            Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
+
+            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+            dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
             new PotionManager();
             Config.AddToMainMenu();
 
@@ -177,7 +188,10 @@ namespace Swain
             GameObject.OnDelete += OnDeleteObject;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
 
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>",
+                    ChampionName));
         }
 
         private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
@@ -223,29 +237,27 @@ namespace Swain
                 );
         }
 
-        private static float GetComboDamage(Obj_AI_Base vTarget)
+        private static float GetComboDamage(Obj_AI_Base t)
         {
             var fComboDamage = 0d;
 
             if (Q.IsReady())
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.Q);
+                fComboDamage += vPlayer.GetSpellDamage(t, SpellSlot.Q);
 
             if (W.IsReady())
-                fComboDamage += W.Instance.Ammo *
-                            vPlayer.GetSpellDamage(vTarget, SpellSlot.W);
+                fComboDamage += W.Instance.Ammo*vPlayer.GetSpellDamage(t, SpellSlot.W);
    
-
             if (E.IsReady())
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E);
+                fComboDamage += vPlayer.GetSpellDamage(t, SpellSlot.E);
 
-            //if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-            //    fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.IGNITE);
+            if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
 
             //if (Config.Item("item3128").GetValue<bool>() && Items.CanUseItem(3128))
             //    fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.DFG);
 
             if (R.IsReady() && !UltiActive)
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R) * 3;
+                fComboDamage += vPlayer.GetSpellDamage(t, SpellSlot.R) * 3;
 
             return (float)fComboDamage;
         }
