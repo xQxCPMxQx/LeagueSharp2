@@ -194,7 +194,7 @@ namespace Irelia
 
         static Obj_AI_Hero GetEnemy(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
-            if (vDefaultRange == 0)
+            if (Math.Abs(vDefaultRange) < 0.00001)
                 vDefaultRange = Q.Range;
 
             if (!TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
