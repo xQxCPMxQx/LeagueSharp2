@@ -337,11 +337,7 @@ namespace Irelia
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
             if (t != null)
             {
-                if (BladesSpellCount < 3 && BladesSpellCount > 0)
-                {
-                    R.Cast(t, false, true);
-                }
-                else if (R.IsReady() && GetComboDamage(t) > t.Health)
+                if (R.IsReady() && (GetComboDamage(t) > t.Health || BladesSpellCount > 0)) 
                 {
                     R.Cast(t, false, true);
                 }
