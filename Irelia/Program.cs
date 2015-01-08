@@ -132,7 +132,7 @@ namespace Irelia
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
             Config.SubMenu("LaneClear")
-                .AddItem(new MenuItem("QFarmDelay", "Q Farm Delay").SetValue(new Slider(200, 500, 0)));
+                .AddItem(new MenuItem("QFarmDelay", "Q Farm Delay (Default: 300)").SetValue(new Slider(200, 500, 0)));
             Config.SubMenu("LaneClear")
                 .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
@@ -338,7 +338,7 @@ namespace Irelia
 
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
-                    if (t.Health < GetComboDamage(t))
+                    if (t.Health < GetComboDamage(t) || t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                         Q.CastOnUnit(t);
 
                     if (ObjectManager.Player.Distance(t) > E.Range)
@@ -354,7 +354,7 @@ namespace Irelia
             {
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
-                    if (t.Health < GetComboDamage(t))
+                    if (t.Health < GetComboDamage(t) || t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                         Q.CastOnUnit(t);
 
                     if (ObjectManager.Player.Distance(t) > E.Range)
@@ -519,7 +519,7 @@ namespace Irelia
 
                     var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
 
-                    if (useQ && vMinion.Health <= vMinionQDamage)
+                    if (useQ && vMinion.Health <= vMinionQDamage - 20)
                     {
                         CastSpellQ(vMinion);
                     }
