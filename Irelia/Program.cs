@@ -168,6 +168,16 @@ namespace Irelia
             Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false,
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
+            Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
+    
+            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+                Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+                dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+                {
+                    Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+                };
+
             
             new PotionManager();
             new AssassinManager();
@@ -457,6 +467,9 @@ namespace Irelia
             if (Q.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.Q); 
             
+            if (W.IsReady())
+                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.W); 
+
             if (E.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E); 
             
@@ -466,8 +479,8 @@ namespace Irelia
             if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
-        //    if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3153))
-        //        fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.BOTRK);
+            if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3153))
+                fComboDamage += ObjectManager.Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
 
             return (float)fComboDamage;
         }
@@ -482,7 +495,10 @@ namespace Irelia
             Vector2 checkPos = predPos + newPos * (vSpell.Range - Vector2.Distance(predPos, myPos));
             Obj_Turret closestTower = null;
 
-            foreach (Obj_Turret tower in ObjectManager.Get<Obj_Turret>().Where(tower => tower.IsValid && !tower.IsDead && tower.Health != 0 && tower.IsEnemy))
+            foreach (
+                Obj_Turret tower in
+                    ObjectManager.Get<Obj_Turret>()
+                        .Where(tower => tower.IsValid && !tower.IsDead && tower.Health != 0 && tower.IsEnemy))
             {
                 if (Vector3.Distance(tower.Position, ObjectManager.Player.Position) < 1450)
                     closestTower = tower;
@@ -529,7 +545,8 @@ namespace Irelia
                     {
                         if (forceInterrupt || vPlayer.Distance(vTarget) >= E.Range || vPlayer.Distance(vTarget) <= Q.Range + E.Range)
                         {
-                            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All,
+                                MinionTeam.NotAlly);
                             foreach (var vMinion in vMinions)
                             {
                                 if (vMinion.Distance(vTarget) <= E.Range || vMinion.Distance(vPlayer) <= Q.Range) // Choose best minnion 
@@ -562,7 +579,10 @@ namespace Irelia
 
         private static InventorySlot GetInventorySlot(int ID)
         {
-            return ObjectManager.Player.InventoryItems.FirstOrDefault(item => (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
+            return
+                ObjectManager.Player.InventoryItems.FirstOrDefault(
+                    item =>
+                        (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero vTarget)
@@ -597,8 +617,9 @@ namespace Irelia
         public static void smartFollow()
         {
             var vTarget = TargetSelector.GetTarget(Q.Range * 2 - 30, TargetSelector.DamageType.Physical);
-            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-            var vMobs = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
+            var vMobs = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
+                MinionOrderTypes.MaxHealth);
 
         }
     }
