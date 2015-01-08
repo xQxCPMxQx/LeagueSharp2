@@ -47,7 +47,7 @@ namespace Irelia
             if (vPlayer.IsDead) return;
             
             Q = new Spell(SpellSlot.Q, 650f);
-            W = new Spell(SpellSlot.W, 0);
+            W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 325);
             R = new Spell(SpellSlot.R, 1000f);
 
@@ -126,36 +126,38 @@ namespace Irelia
                         KeyBindType.Press)));
 
             // Extras
-            Config.AddSubMenu(new Menu("Extras", "Extras"));
-            Config.SubMenu("Extras").AddItem(new MenuItem("StopUlties", "Interrupt Ulti With E").SetValue(true));
-            Config.SubMenu("Extras").AddItem(new MenuItem("ForceInterruptUlties", "Force Interrupt Ulti With Q+E").SetValue(true));
+            
+//            Config.AddSubMenu(new Menu("Extras", "Extras"));
+ //           Config.SubMenu("Extras").AddItem(new MenuItem("StopUlties", "Interrupt Ulti With E").SetValue(true));
+  //          Config.SubMenu("Extras").AddItem(new MenuItem("ForceInterruptUlties", "Force Interrupt Ulti With Q+E").SetValue(true));
 
             // Extras -> Use Items 
             MenuExtras = new Menu("Extras", "Extras");
             Config.AddSubMenu(MenuExtras);
-            MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
-
-            Menu menuUseItems = new Menu("Use Items", "menuUseItems");
+            MenuExtras.AddItem(new MenuItem("InterruptSpells", "InterruptSpells").SetValue(true));
+            MenuExtras.AddItem(new MenuItem("StopUlties", "Interrupt Ulti With E").SetValue(true));
+            MenuExtras.AddItem(new MenuItem("ForceInterruptUlties", "Force Interrupt Ulti With Q+E").SetValue(true));
+            var menuUseItems = new Menu("Use Items", "menuUseItems");
             Config.SubMenu("Extras").AddSubMenu(menuUseItems);
             // Extras -> Use Items -> Targeted Items
+            
             MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
-            menuUseItems.AddSubMenu(MenuTargetedItems);
-
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
+            menuUseItems.AddSubMenu(MenuTargetedItems);
 
             // Extras -> Use Items -> AOE Items
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
-            menuUseItems.AddSubMenu(MenuNonTargetedItems);
             MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
+            menuUseItems.AddSubMenu(MenuNonTargetedItems);
+            
 
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
@@ -226,27 +228,23 @@ namespace Irelia
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            //if (!Orbwalking.CanMove(50)) return;
+            if (!Orbwalking.CanMove(50)) return;
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
-            {
                 Combo();
-            }
-            else
+
+            if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
+                Harass();
+
+            if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
-                if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
-                    Harass();
-
-                if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
-                {
-                   // var existsMana = ObjectManager.Player.MaxMana * (Config.Item("LaneClearMana").GetValue<Slider>().Value / 100.0);
-                   // if (vPlayer.Mana > existsMana)
-                        LaneClear();
-                }
-
-                if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
-                    JungleFarm();
+                var existsMana = Config.Item("LaneClearMana").GetValue<Slider>().Value;
+                if (vPlayer.ManaPercentage() >= existsMana)
+                    LaneClear();
             }
+
+            if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
+                JungleFarm();
         }
 
         private static bool canUseQ()
@@ -255,20 +253,17 @@ namespace Irelia
             return (Game.Time * 1000 - QUsedTime) > qFarmDelay * 3;
         }
 
-        private static void CastSpellQ(Obj_AI_Base vTarget, bool dontUnderTurret = false)
+        private static void CastSpellQ(Obj_AI_Base t, bool dontUnderTurret = false)
         {
-//            var vTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-
-            if (vTarget == null) return;
             var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
 
             if (dontUnderTurret)
             {
-                if (!Utility.UnderTurret(vTarget))
+                if (!Utility.UnderTurret(t))
                 {
                     if (canUseQ())
                     {
-                        Q.CastOnUnit(vTarget);
+                        Q.CastOnUnit(t);
                         QUsedTime = Game.Time * 1000;
                     }
                 }
@@ -277,7 +272,7 @@ namespace Irelia
             {
                 if (canUseQ())
                 {
-                    Q.CastOnUnit(vTarget);
+                    Q.CastOnUnit(t);
                     QUsedTime = Game.Time * 1000;
                 }
             }
@@ -292,20 +287,10 @@ namespace Irelia
 
         private static void CastSpellW()
         {
-            var vTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.True);
-            if (vTarget != null && Vector3.Distance(vTarget.ServerPosition, vPlayer.Position) <=
-                vPlayer.AttackRange)
+            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.True);
+            if (t != null && ObjectManager.Player.Distance(t) <= vPlayer.AttackRange + 30)
             {
-                if (R.IsReady()) /* Protect the mana for the Spell R. */
-                {
-                    if (vPlayer.Mana >= vPlayer.Spellbook.GetSpell(SpellSlot.W).ManaCost +
-                            vPlayer.Spellbook.GetSpell(SpellSlot.E).ManaCost)
-                        W.Cast();
-                }
-                else
-                {
-                    W.Cast();
-                }
+                W.Cast();
             }
         }
         private static void CastSpellR()
@@ -325,11 +310,11 @@ namespace Irelia
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
 
-            var vTarget = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
+            var t = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
             if (Q.IsReady() && useQ)
-                CastSpellQ(vTarget, useQDontUnderTurret);
+                CastSpellQ(t, useQDontUnderTurret);
 
             if (E.IsReady() && useE)
                 CastSpellE();
@@ -339,6 +324,13 @@ namespace Irelia
 
             if (R.IsReady() && useR)
                 CastSpellR();
+            
+            if (ObjectManager.Player.Distance(t) < 650 &&
+                ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) >=
+                t.Health)
+            {
+                ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, t);
+            }
         }
 
 
@@ -471,8 +463,8 @@ namespace Irelia
             if (R.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R) *4;
 
-        //    if (IgniteSlot != SpellSlot.Unknown && vPlayer.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-        //        fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.IGNITE);
+            if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
         //    if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3153))
         //        fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.BOTRK);
