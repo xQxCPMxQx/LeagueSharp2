@@ -62,7 +62,7 @@ namespace Irelia
             IgniteSlot = vPlayer.GetSpellSlot("SummonerDot");
             
             //Create the menu
-            Config = new Menu("Irelia", "Irelia", true);
+            Config = new Menu("xQx | Irelia", "Irelia", true);
 
             var TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(TargetSelectorMenu);
@@ -128,9 +128,7 @@ namespace Irelia
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Menu laneClearUseQ = new Menu("Use Q", "laneClearUseQ");
-            Config.SubMenu("LaneClear").AddSubMenu(laneClearUseQ);
-                laneClearUseQ.AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(true));
-            laneClearUseQ.AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
             Config.SubMenu("LaneClear")
@@ -167,12 +165,11 @@ namespace Irelia
             
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q range").SetValue(new Circle(true,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q range").SetValue(new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("ERange", "E range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true, System.Drawing.Color.GreenYellow)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(new Circle(true, System.Drawing.Color.Gray)));
 
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
             Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
@@ -196,17 +193,42 @@ namespace Irelia
 
             QUsedTime = Game.Time;
 
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx:</font> <font color='#FFFFFF'>{0} Loaded!</font>", ChampionName));
-
+            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx:</font> <font color='#FFFFFF'>{0} Loaded!</font>",
+                ChampionName));
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            foreach (var spell in SpellList)
+            foreach (var spell in SpellList.Where(xSlot => xSlot != W))
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
                     Render.Circle.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
+            }
+
+            var drawMinionLastHit = Config.Item("drawMinionLastHit").GetValue<Circle>();
+            var drawMinionNearKill = Config.Item("drawMinionNearKill").GetValue<Circle>();
+            if (drawMinionLastHit.Active || drawMinionNearKill.Active)
+            {
+                
+                var xMinions =
+                    MinionManager.GetMinions(ObjectManager.Player.Position,
+                        ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius + 300, MinionTypes.All,
+                        MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+
+                foreach (var xMinion in xMinions)
+                {
+                    if (drawMinionLastHit.Active && ObjectManager.Player.GetAutoAttackDamage(xMinion, true) >=
+                        xMinion.Health)
+                    {
+                        Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionLastHit.Color);
+                    }
+                    else if (drawMinionNearKill.Active &&
+                             ObjectManager.Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health) 
+                    {
+                        Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionNearKill.Color);
+                    }
+                }
             }
         }
 
@@ -312,21 +334,36 @@ namespace Irelia
 
             if (dontUnderTurret)
             {
-                if (!Utility.UnderTurret(t))
+                if (Utility.UnderTurret(t)) return;
+
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
-                    if (canUseQ())
-                    {
+                    if (t.Health < GetComboDamage(t))
                         Q.CastOnUnit(t);
-                        QUsedTime = Game.Time * 1000;
-                    }
+
+                    if (ObjectManager.Player.Distance(t) > E.Range)
+                        Q.CastOnUnit(t);
+                }
+
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+                {
+                    Utility.DelayAction.Add(qFarmDelay, () => Q.CastOnUnit(t));
                 }
             }
             else
             {
-                if (canUseQ())
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
-                    Q.CastOnUnit(t);
-                    QUsedTime = Game.Time * 1000;
+                    if (t.Health < GetComboDamage(t))
+                        Q.CastOnUnit(t);
+
+                    if (ObjectManager.Player.Distance(t) > E.Range)
+                        Q.CastOnUnit(t);
+                }
+
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+                {
+                    Utility.DelayAction.Add(qFarmDelay, () => Q.CastOnUnit(t));
                 }
             }
         }
@@ -473,7 +510,6 @@ namespace Irelia
                 var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
                 var useW = Config.Item("UseWLaneClear").GetValue<bool>();
                 var useE = Config.Item("UseELaneClear").GetValue<bool>();
-                var useQDontUnderTurret = Config.Item("UseQLaneClearDontUnderTurret").GetValue<bool>();
 
                 var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in vMinions)
@@ -485,7 +521,7 @@ namespace Irelia
 
                     if (useQ && vMinion.Health <= vMinionQDamage)
                     {
-                        CastSpellQ(vMinion, useQDontUnderTurret);
+                        CastSpellQ(vMinion);
                     }
 
                     if (useW && W.IsReady())
