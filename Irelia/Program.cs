@@ -278,7 +278,7 @@ namespace Irelia
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(50)) return;
-
+            /*
             foreach (
                 var xEnemy in
                     ObjectManager.Get<Obj_AI_Hero>()
@@ -295,7 +295,7 @@ namespace Irelia
                     E.CastOnUnit(xEnemy, true);
                 }
             }
-
+            */
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
                 Combo();
