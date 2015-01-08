@@ -18,20 +18,37 @@ namespace Irelia
             Program.Config.AddSubMenu(new Menu("Assassin Manager", "MenuAssassin"));
             Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinActive", "Active").SetValue(true));
             Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("Ax", ""));
-            Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinSelectOption", "Set: ").SetValue(new StringList(new[] { "Single Select", "Multi Select" })));
+            Program.Config.SubMenu("MenuAssassin")
+                .AddItem(
+                    new MenuItem("AssassinSelectOption", "Set: ").SetValue(
+                        new StringList(new[] {"Single Select", "Multi Select"})));
             Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("Ax", ""));
-            Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinSetClick", "Add/Remove with click").SetValue(true));
-            Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinReset", "Reset List").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+            Program.Config.SubMenu("MenuAssassin")
+                .AddItem(new MenuItem("AssassinSetClick", "Add/Remove with click").SetValue(true));
+            Program.Config.SubMenu("MenuAssassin")
+                .AddItem(
+                    new MenuItem("AssassinReset", "Reset List").SetValue(new KeyBind("T".ToCharArray()[0],
+                        KeyBindType.Press)));
 
             Program.Config.SubMenu("MenuAssassin").AddSubMenu(new Menu("Draw:", "Draw"));
 
-            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, Color.GreenYellow)));
-            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)));
-            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
+            Program.Config.SubMenu("MenuAssassin")
+                .SubMenu("Draw")
+                .AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, Color.GreenYellow)));
+            Program.Config.SubMenu("MenuAssassin")
+                .SubMenu("Draw")
+                .AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)));
+            Program.Config.SubMenu("MenuAssassin")
+                .SubMenu("Draw")
+                .AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
+            Program.Config.SubMenu("MenuAssassin")
+                .SubMenu("Draw")
+                .AddItem(new MenuItem("DrawStatus", "Show Status").SetValue(true));
 
 
             Program.Config.SubMenu("MenuAssassin").AddSubMenu(new Menu("Assassin List:", "AssassinMode"));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
+            foreach (
+                var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
             {
                 Program.Config.SubMenu("MenuAssassin")
                     .SubMenu("AssassinMode")
@@ -122,6 +139,22 @@ namespace Irelia
         {
             if (!Program.Config.Item("AssassinActive").GetValue<bool>())
                 return;
+
+            if (Program.Config.Item("DrawStatus").GetValue<bool>())
+            {
+                var enemies = ObjectManager.Get<Obj_AI_Hero>().Where(xEnemy => xEnemy.IsEnemy);
+                var objAiHeroes = enemies as Obj_AI_Hero[] ?? enemies.ToArray();
+                Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.58f, Color.GreenYellow, "Assassin Status");
+                Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.58f, Color.GhostWhite, "_____________");
+                for (int i = 0; i < objAiHeroes.Count(); i++)
+                {
+                    var xCaption = objAiHeroes[i].ChampionName + ": ";
+                    if (Program.Config.Item("Assassin" + objAiHeroes[i].ChampionName).GetValue<bool>())
+                        xCaption += "Added";
+                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.58f + (float) (i + 1)*15, Color.Gainsboro,
+                        xCaption);
+                }
+            }
 
             var drawSearch = Program.Config.Item("DrawSearch").GetValue<Circle>();
             var drawActive = Program.Config.Item("DrawActive").GetValue<Circle>();
