@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.XPath;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+
 #endregion
 
 namespace Irelia
@@ -256,6 +256,24 @@ namespace Irelia
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(50)) return;
+
+            foreach (
+                var xEnemy in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(
+                            xEnemy =>
+                                Q.IsInRange(xEnemy) && xEnemy.IsEnemy && xEnemy.HasBuff("teleport_target", true) &&
+                                xEnemy.Health < ObjectManager.Player.Health)) 
+            {
+                if (E.IsReady() && E.IsInRange(xEnemy))
+                    E.CastOnUnit(xEnemy, true);
+                else if (Q.IsReady() && E.IsReady())
+                {
+                    Q.CastOnUnit(xEnemy, true);
+                    E.CastOnUnit(xEnemy, true);
+                }
+            }
+
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
                 Combo();
