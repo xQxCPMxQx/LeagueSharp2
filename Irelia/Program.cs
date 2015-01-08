@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.XPath;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -43,7 +44,6 @@ namespace Irelia
         private static void Game_OnGameLoad(EventArgs args)
         {
             if (vPlayer.BaseSkinName != "Irelia") return;
-            if (vPlayer.IsDead) return;
             
             Q = new Spell(SpellSlot.Q, 650f);
             W = new Spell(SpellSlot.W);
@@ -242,8 +242,23 @@ namespace Irelia
             return t;
         }
 
+        static int BladesSpellCount 
+        {
+            get
+            {
+                return
+                    ObjectManager.Player.Buffs.Where(
+                        buff => buff.Name.ToLower() == "ireliatranscendentbladesspell")
+                        .Select(buff => buff.Count).FirstOrDefault();
+            }
+        }
+
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            var x1 = BladesSpellCount;
+            if (x1 > 0)
+                Game.PrintChat(x1.ToString());
+
             if (!Orbwalking.CanMove(50)) return;
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
@@ -319,13 +334,18 @@ namespace Irelia
         }
         private static void CastSpellR()
         {
-            var vTarget = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-            if (vTarget != null)
-                if (R.IsReady() && GetComboDamage(vTarget) > vTarget.Health)
+            var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+            if (t != null)
+            {
+                if (BladesSpellCount < 3 && BladesSpellCount > 0)
                 {
-                    R.Cast(vTarget, false, true);
-                    UseItems(vTarget);
+                    R.Cast(t, false, true);
                 }
+                else if (R.IsReady() && GetComboDamage(t) > t.Health)
+                {
+                    R.Cast(t, false, true);
+                }
+            }
         }
         private static void Combo()
         {
@@ -355,6 +375,8 @@ namespace Irelia
             {
                 ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, t);
             }
+            
+            UseItems(t);
         }
 
 
@@ -563,7 +585,7 @@ namespace Irelia
                                 MinionTeam.NotAlly);
                             foreach (var vMinion in vMinions)
                             {
-                                if (vMinion.Distance(vTarget) <= E.Range || vMinion.Distance(vPlayer) <= Q.Range) // Choose best minnion 
+                                if (vMinion.Distance(vTarget) <= E.Range || vMinion.Distance(vPlayer) <= Q.Range) 
                                 {
                                     Q.CastOnUnit(vMinion);
                                     if (vPlayer.Distance(vTarget) <= E.Range)
@@ -576,7 +598,7 @@ namespace Irelia
                     }
                 }
             }
-            /*    
+            /*
             if (stopUlties)
             {
                 foreach (string interruptSpellName in interruptSpells)
@@ -626,15 +648,6 @@ namespace Irelia
                 }
 
             }
-        }
-
-        public static void smartFollow()
-        {
-            var vTarget = TargetSelector.GetTarget(Q.Range * 2 - 30, TargetSelector.DamageType.Physical);
-            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
-            var vMobs = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
-                MinionOrderTypes.MaxHealth);
-
         }
     }
 }
