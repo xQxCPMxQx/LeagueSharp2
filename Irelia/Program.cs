@@ -255,10 +255,6 @@ namespace Irelia
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            var x1 = BladesSpellCount;
-            if (x1 > 0)
-                Game.PrintChat(x1.ToString());
-
             if (!Orbwalking.CanMove(50)) return;
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
