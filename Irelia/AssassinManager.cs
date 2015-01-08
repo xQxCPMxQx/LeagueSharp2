@@ -144,14 +144,19 @@ namespace Irelia
             {
                 var enemies = ObjectManager.Get<Obj_AI_Hero>().Where(xEnemy => xEnemy.IsEnemy);
                 var objAiHeroes = enemies as Obj_AI_Hero[] ?? enemies.ToArray();
-                Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.58f, Color.GreenYellow, "Assassin Status");
-                Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.58f, Color.GhostWhite, "_____________");
+                Drawing.DrawText(Drawing.Width*0.89f, Drawing.Height*0.58f, Color.GreenYellow, "Assassin Status");
+                Drawing.DrawText(Drawing.Width*0.89f, Drawing.Height*0.58f, Color.GhostWhite, "_____________");
                 for (int i = 0; i < objAiHeroes.Count(); i++)
                 {
-                    var xCaption = objAiHeroes[i].ChampionName + ": ";
+                    var xCaption = objAiHeroes[i].ChampionName;
+                    var xWidth = Drawing.Width*0.90f;
                     if (Program.Config.Item("Assassin" + objAiHeroes[i].ChampionName).GetValue<bool>())
-                        xCaption += "Added";
-                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.58f + (float) (i + 1)*15, Color.Gainsboro,
+                    {
+                        xCaption = "+ " + xCaption;
+                        xWidth = Drawing.Width*0.8910f;
+
+                    }
+                    Drawing.DrawText(xWidth, Drawing.Height*0.58f + (float) (i + 1)*15, Color.Gainsboro,
                         xCaption);
                 }
             }
