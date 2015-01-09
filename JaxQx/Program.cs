@@ -188,6 +188,17 @@ namespace JaxQx
                 .AddItem(
                     new MenuItem("DrawSmiteRange", "Smite Range").SetValue(new Circle(false, System.Drawing.Color.Indigo)));
 
+            /* [ Damage After Combo ] */
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
+            Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
+
+            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+            dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
             new PotionManager();
             new AssassinManager();
             Config.AddToMainMenu();
@@ -229,7 +240,28 @@ namespace JaxQx
                 var minQRange = Config.Item("ComboUseQMinRange").GetValue<Slider>().Value;
                 Render.Circle.DrawCircle(Player.Position, minQRange, drawMinQRange.Color);
             }
+        }
 
+        private static float GetComboDamage(Obj_AI_Base t)
+        {
+            var fComboDamage = 0d;
+
+            if (Q.IsReady())
+                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q);
+
+            if (W.IsReady())
+                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
+
+            if (E.IsReady())
+                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.E);
+
+            if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
+
+            if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3128))
+                fComboDamage += ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Botrk);
+
+            return (float)fComboDamage;
         }
         private static Obj_AI_Hero GetEnemy
         {
