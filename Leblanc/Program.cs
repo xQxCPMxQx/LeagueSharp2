@@ -569,7 +569,7 @@ namespace Leblanc
                     Q.CastOnUnit(t);
                 }
 
-                if (W.IsReady() && useW && Player.Distance(t) <= W.Range)
+                if (W.IsReady() && useW && Player.Distance(t) <= W.Range && !LeBlancStillJumped)
                 {
                     W.Cast(t);
                 }
