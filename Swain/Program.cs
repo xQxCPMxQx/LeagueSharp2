@@ -253,8 +253,8 @@ namespace Swain
             if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
 
-            //if (Config.Item("item3128").GetValue<bool>() && Items.CanUseItem(3128))
-            //    fComboDamage += DamageLib.getDmg(vTarget, DamageLib.SpellType.DFG);
+            if (Config.Item("item3128").GetValue<bool>() && Items.CanUseItem(3128))
+                fComboDamage += ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Dfg);
 
             if (R.IsReady() && !UltiActive)
                 fComboDamage += vPlayer.GetSpellDamage(t, SpellSlot.R) * 3;
@@ -300,19 +300,10 @@ namespace Swain
                 }
             }
 
-//            if (!Config.Item("UseAutoRCombo").GetValue<bool>())
-//            { 
-                if (useR && rTarget != null && R.IsReady() && !UltiActive)
-                {
-                    R.Cast();
-                }
-                /*
-                if (rTarget == null && UltiActive)
-                {
-                    R.Cast();
-                }
-                */
-//            }
+            if (useR && rTarget != null && R.IsReady() && !UltiActive)
+            {
+                R.Cast();
+            }
 
         }
 

@@ -302,6 +302,7 @@ namespace Leblanc
 
         private enum ComboType
         {
+            Auto,
             ComboQR,
             ComboWR
         }
