@@ -752,6 +752,10 @@ namespace Leblanc
                     xComboStr += "Q-R";
                     break;
 
+                case ComboType.ComboER: //W-R
+                    xComboStr += "E-R";
+                    break;
+
                 case ComboType.ComboWR: //W-R
                     xComboStr += "W-R";
                     break;
