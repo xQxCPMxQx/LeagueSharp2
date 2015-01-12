@@ -23,6 +23,8 @@ namespace Leblanc
 
         public static Spell Q, W, E, R, RW;
 
+        private static ComboType vComboType = ComboType.ComboQR;
+
         public static SpellSlot IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
         public static Items.Item Fqc = new Items.Item(3092, 750);
         public static Items.Item Dfg = new Items.Item(3128, 750);
@@ -95,13 +97,13 @@ namespace Leblanc
             {
                 Config.AddSubMenu(new Menu("Combo", "Combo"));
                 {
-                    Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetOption", "Combo").SetValue(new StringList(new[] {"Auto", "Q-R Combo", "W-R Combo"}, 1)));
+                    Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetOption", "Combo").SetValue(new StringList(new[] {"Auto", "Q-R Combo", "W-R Combo", "E-R Combo",}, 1)));
                     Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetEHitCh", "E Hit").SetValue(new StringList(new[] {"Low", "Medium", "High", "Very High", "Immobile"}, 2)));
                     Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetSmartW", "Smart W").SetValue(true));
                     
                     Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoQR", "Use Q-R Combo if enemy is alone").SetValue(false));
                     Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoWR", "Use W-R Combo if enemy count").SetValue(false));
-                    Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoWRSlide", " -> W-R Combo enemy count >= ").SetValue(new Slider(2, 5, 0)));
+                    Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoWRSlide", "  -> W-R Combo enemy count >= ").SetValue(new Slider(2, 5, 0)));
 
                     Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
                     {
@@ -308,36 +310,51 @@ namespace Leblanc
         {
             Auto,
             ComboQR,
-            ComboWR
+            ComboWR,
+            ComboER
         }
 
-        private static void CalCombo(ComboType comboType)
+        private static void ExecuteCombo()
         {
             var cdQEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).CooldownExpires;
             var cdWEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
+            var cdEEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
 
             var cdQ = Game.Time < cdQEx ? cdQEx - Game.Time : 0;
             var cdW = Game.Time < cdWEx ? cdWEx - Game.Time : 0;
+            var cdE = Game.Time < cdEEx ? cdEEx - Game.Time : 0;
 
-            if (comboType == ComboType.ComboQR)
+            if (vComboType == ComboType.ComboQR)
             {
                 var t = GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t == null)
                     return;
 
-                if (!Q.IsReady() && cdQ < 1) // wait for combo
+                if (!Q.IsReady() && cdQ < 0.5) // wait for combo
                     return;
                 if (Q.IsReady())
                     Q.CastOnUnit(t, true);
                 R.CastOnUnit(t, true);
             }
-            else if (comboType == ComboType.ComboWR)
+            else if (vComboType == ComboType.ComboER)
+            {
+                var t = GetTarget(E.Range, TargetSelector.DamageType.Magical);
+                if (t == null)
+                    return;
+
+                if (!E.IsReady() && cdE < 0.5) // wait for combo
+                    return;
+                if (E.IsReady())
+                    E.Cast(t);
+                RW.Cast(t);
+            }
+            else if (vComboType == ComboType.ComboWR)
             {
                 var t = GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (t == null)
                     return;
 
-                if (!W.IsReady() && cdW < 1) // wait for combo
+                if (!W.IsReady() && cdW < 0.5) // wait for combo
                     return;
                 if (W.IsReady() && !LeBlancStillJumped)
                     W.Cast(t, true, true);
@@ -357,55 +374,20 @@ namespace Leblanc
             var useR = (Config.Item("DontCombo" + t.BaseSkinName) != null &&
                     Config.Item("DontCombo" + t.BaseSkinName).GetValue<bool>() == false);
             
-
-            if (R.IsReady())
+            if (R.IsReady() && useR && (Q.IsReady() || W.IsReady()))
             {
-                if (!useR) return;
-
-                if (Config.Item("ComboAutoQR").GetValue<bool>() && ObjectManager.Player.CountEnemysInRange(Q.Range) == 1 &&
-                    Q.IsReady()) 
-                {
-                    CalCombo(ComboType.ComboQR);
-                    return;
-                }
-
-                if (Config.Item("ComboAutoWR").GetValue<bool>() &&
-                    ObjectManager.Player.CountEnemysInRange(W.Range) >=
-                    Config.Item("ComboAutoWRSlide").GetValue<Slider>().Value && W.IsReady()) 
-                {
-                    CalCombo(ComboType.ComboWR);
-                    return;
-                }
-
-                var xCombo = Config.Item("ComboSetOption").GetValue<StringList>().SelectedIndex;
-                switch (xCombo)
-                {
-                    case 0:
-                        CalCombo(Q.Level > W.Level ? ComboType.ComboQR : ComboType.ComboWR);
-                        break;
-                    case 1: //Q-R
-                        CalCombo(ComboType.ComboQR);
-                        break;
-
-                    case 2: //W-R
-                        CalCombo(ComboType.ComboWR);
-                        break;
-                }
+                ExecuteCombo();
             }
-
-            if (Q.IsReady() && ObjectManager.Player.Distance(t) <= Q.Range)
+            else
             {
-                Q.CastOnUnit(t);
-            }
+                if (E.IsReady() && t.IsValidTarget(E.Range))
+                    E.CastIfHitchanceEquals(t, GetEHitChance);
 
-            if (W.IsReady() && ObjectManager.Player.Distance(t) <= W.Range &&  !LeBlancStillJumped)
-            {
-                W.Cast(t, true, true);
-            }
+                if (Q.IsReady() && t.IsValidTarget(Q.Range))
+                    Q.CastOnUnit(t);
 
-            if (E.IsReady() && ObjectManager.Player.Distance(t) <= E.Range)
-            {
-                E.CastIfHitchanceEquals(t, GetEHitChance);
+                if (W.IsReady() && t.IsValidTarget(W.Range) &&  !LeBlancStillJumped)
+                    W.Cast(t, true, true);
             }
             UserSummoners(t);
         }
@@ -432,27 +414,39 @@ namespace Leblanc
 
         private static float GetComboDamage(Obj_AI_Hero t)
         {
-            var fComboDamage = 0d;
+            var fComboDamage = 0f;
             
-            fComboDamage += Q.IsReady() ? ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q) : 0;
+            fComboDamage += Q.IsReady() ? (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q) : 0;
 
-            fComboDamage += W.IsReady() ? ObjectManager.Player.GetSpellDamage(t, SpellSlot.W) : 0;
+            fComboDamage += W.IsReady() ? (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.W) : 0;
             
-            fComboDamage += E.IsReady() ? ObjectManager.Player.GetSpellDamage(t, SpellSlot.E) : 0;
+            fComboDamage += E.IsReady() ? (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.E) : 0;
 
-            fComboDamage += R.IsReady() ? ObjectManager.Player.GetSpellDamage(t, SpellSlot.R) : 0;
-            
+            if (vComboType == ComboType.ComboQR || vComboType == ComboType.ComboER)
+            {
+                var perDmg = new[] {100f, 200f, 300};
+                fComboDamage += (float) ObjectManager.Player.GetSpellDamage(t, (vComboType == ComboType.ComboQR ? SpellSlot.Q : SpellSlot.E));
+                fComboDamage += (ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod*.65f) + perDmg[R.Level];
+            }
+
+            if (vComboType == ComboType.ComboWR)
+            {
+                var perDmg = new[] {100f, 200f, 300};
+                fComboDamage += (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
+                fComboDamage += (ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod*.98f) + perDmg[R.Level];
+            }
+
             fComboDamage += IgniteSlot != SpellSlot.Unknown &&
                             ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready
-                ? ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite)
-                : 0;
+                ? (float) ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite)
+                : 0f;
 
             fComboDamage += Items.CanUseItem(3128) 
-                ? ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Dfg) 
+                ? (float) ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Dfg) 
                 : 0;
 
             fComboDamage += Items.CanUseItem(3092)
-                ? ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.FrostQueenClaim)
+                ? (float) ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.FrostQueenClaim)
                 : 0;
 
             return (float)fComboDamage;
@@ -659,17 +653,60 @@ namespace Leblanc
             }
         }
 
+        private static void RefreshComboType()
+        {
+            if (Config.Item("ComboAutoQR").GetValue<bool>() && ObjectManager.Player.CountEnemysInRange(Q.Range) == 1 &&
+                Q.IsReady())
+            {
+                vComboType = ComboType.ComboQR;
+                ExecuteCombo();
+                return;
+            }
+
+            if (Config.Item("ComboAutoWR").GetValue<bool>() &&
+                ObjectManager.Player.CountEnemysInRange(W.Range) >=
+                Config.Item("ComboAutoWRSlide").GetValue<Slider>().Value && W.IsReady())
+            {
+                vComboType = ComboType.ComboQR;
+                ExecuteCombo();
+                return;
+            }
+
+            var xCombo = Config.Item("ComboSetOption").GetValue<StringList>().SelectedIndex;
+            switch (xCombo)
+            {
+                case 0:
+                    vComboType = Q.Level > W.Level ? ComboType.ComboQR : ComboType.ComboWR;
+                    ExecuteCombo();
+                    break;
+                
+                case 1: //Q-R
+                    vComboType = ComboType.ComboQR;
+                    ExecuteCombo();
+                    break;
+
+                case 2: //W-R
+                    vComboType = ComboType.ComboWR;
+                    ExecuteCombo();
+                    break;
+
+                case 3: //E-R
+                    vComboType = ComboType.ComboER;
+                    ExecuteCombo();
+                    break;
+
+            }
+        }
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (ObjectManager.Player.IsDead) return;
+
+            RefreshComboType();
 
             var xMana = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
                         ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).ManaCost +
                         ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).ManaCost +
                         ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).ManaCost;
-
-            if (Config.Item("OptDoubleStun").GetValue<KeyBind>().Active && ObjectManager.Player.Mana <= xMana)
-                return;
 
             //Mode();
 //            if (Config.Item("ComboSmartW").GetValue<KeyBind>().Active)
@@ -712,16 +749,16 @@ namespace Leblanc
 
             var xCombo = Config.Item("ComboSetOption").GetValue<StringList>().SelectedIndex;
             var xComboStr = "Combo Mode: ";
-            switch (xCombo)
+            switch (vComboType)
             {
-                case 0:
+                case ComboType.Auto:
                     xComboStr += "Auto";
                     break;
-                case 1: //Q-R
+                case ComboType.ComboQR: //Q-R
                     xComboStr += "Q-R";
                     break;
 
-                case 2: //W-R
+                case ComboType.ComboWR: //W-R
                     xComboStr += "W-R";
                     break;
             }
