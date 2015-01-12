@@ -374,7 +374,7 @@ namespace Leblanc
             var useR = (Config.Item("DontCombo" + t.BaseSkinName) != null &&
                     Config.Item("DontCombo" + t.BaseSkinName).GetValue<bool>() == false);
             
-            if (R.IsReady() && useR && (Q.IsReady() || W.IsReady()))
+            if (R.IsReady() && useR && (Q.IsReady() || W.IsReady() || E.IsReady()))
             {
                 ExecuteCombo();
             }
