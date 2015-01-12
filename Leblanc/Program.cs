@@ -371,7 +371,7 @@ namespace Leblanc
 
                 if (Config.Item("ComboAutoWR").GetValue<bool>() &&
                     ObjectManager.Player.CountEnemysInRange(W.Range) >=
-                    Config.Item("ComboAutoWR").GetValue<Slider>().Value && W.IsReady()) 
+                    Config.Item("ComboAutoWRSlide").GetValue<Slider>().Value && W.IsReady()) 
                 {
                     CalCombo(ComboType.ComboWR);
                     return;
