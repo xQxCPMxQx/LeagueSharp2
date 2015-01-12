@@ -330,8 +330,6 @@ namespace Leblanc
                 if (t == null)
                     return;
 
-                if (!Q.IsReady() && cdQ < 0.5) // wait for combo
-                    return;
                 if (Q.IsReady())
                     Q.CastOnUnit(t, true);
                 R.CastOnUnit(t, true);
@@ -342,8 +340,6 @@ namespace Leblanc
                 if (t == null)
                     return;
 
-                if (!E.IsReady() && cdE < 0.5) // wait for combo
-                    return;
                 if (E.IsReady())
                     E.Cast(t);
                 RW.Cast(t);
@@ -354,8 +350,6 @@ namespace Leblanc
                 if (t == null)
                     return;
 
-                if (!W.IsReady() && cdW < 0.5) // wait for combo
-                    return;
                 if (W.IsReady() && !LeBlancStillJumped)
                     W.Cast(t, true, true);
                 RW.Cast(t, true, true);
