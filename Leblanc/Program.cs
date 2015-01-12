@@ -416,18 +416,26 @@ namespace Leblanc
             
             fComboDamage += E.IsReady() ? (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.E) : 0;
 
-            if (vComboType == ComboType.ComboQR || vComboType == ComboType.ComboER)
+            if (R.IsReady())
             {
-                var perDmg = new[] {100f, 200f, 300};
-                fComboDamage += (float) ObjectManager.Player.GetSpellDamage(t, (vComboType == ComboType.ComboQR ? SpellSlot.Q : SpellSlot.E));
-                fComboDamage += (ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod*.65f) + perDmg[R.Level];
-            }
+                if (vComboType == ComboType.ComboQR || vComboType == ComboType.ComboER)
+                {
+                    var perDmg = new[] {100f, 200f, 300};
+                    fComboDamage +=
+                        (float)
+                            ObjectManager.Player.GetSpellDamage(t,
+                                (vComboType == ComboType.ComboQR ? SpellSlot.Q : SpellSlot.E));
+                    fComboDamage += (ObjectManager.Player.BaseAbilityDamage +
+                                     ObjectManager.Player.FlatMagicDamageMod*.65f) + perDmg[R.Level];
+                }
 
-            if (vComboType == ComboType.ComboWR)
-            {
-                var perDmg = new[] {100f, 200f, 300};
-                fComboDamage += (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
-                fComboDamage += (ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod*.98f) + perDmg[R.Level];
+                if (vComboType == ComboType.ComboWR)
+                {
+                    var perDmg = new[] {100f, 200f, 300};
+                    fComboDamage += (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
+                    fComboDamage += (ObjectManager.Player.BaseAbilityDamage +
+                                     ObjectManager.Player.FlatMagicDamageMod*.98f) + perDmg[R.Level];
+                }
             }
 
             fComboDamage += IgniteSlot != SpellSlot.Unknown &&
