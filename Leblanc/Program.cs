@@ -503,29 +503,24 @@ namespace Leblanc
                     ExecuteCombo();
                 else
                 {
-                    t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-                    if (t.IsValidTarget(Q.Range))
-                        R.Cast(t);
-                    /*
                     if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM") // R-Q
                     {
                         t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-                        if (t.IsValidTarget(Q.Range) && t.Health < GetRQDamage)
+                        if (t.IsValidTarget(Q.Range) && t.Health < GetRQDamage + ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                             R.CastOnUnit(t);
                     }
                     if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSlideM") // R-W
                     {
                         t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
-                        if (t.IsValidTarget(W.Range) && t.Health < GetRQDamage)
+                        if (t.IsValidTarget(W.Range) && t.Health < GetRQDamage + ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                             R.Cast(t, false, true);
                     }
                     if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSoulShackleM") // R-E
                     {
                         t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-                        if (t.IsValidTarget(E.Range) && t.Health < GetRQDamage)
+                        if (t.IsValidTarget(E.Range) && t.Health < GetRQDamage + ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                             R.CastIfHitchanceEquals(t, GetEHitChance);
                     }
-                    */
                     isComboCompleted = true;
                 }
                 return;
