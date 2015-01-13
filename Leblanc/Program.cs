@@ -25,7 +25,7 @@ namespace Leblanc
 
         private static ComboType vComboType = ComboType.ComboQR;
         private static ComboKill vComboKill = ComboKill.FullCombo;
-        private static bool isComboCompleted = true;
+        private static bool _isComboCompleted = true;
 
         public static SpellSlot IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
         public static Items.Item Fqc = new Items.Item(3092, 750);
@@ -96,49 +96,23 @@ namespace Leblanc
 
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             {
-                Config.AddSubMenu(new Menu("Combo", "Combo"));
-                {
-                    Config.SubMenu("Combo")
-                        .AddItem(
-                            new MenuItem("ComboSetOption", "Combo").SetValue(
-                                new StringList(new[] {"Auto", "Q-R Combo", "W-R Combo", "E-R Combo",}, 1)));
-                    Config.SubMenu("Combo")
-                        .AddItem(
-                            new MenuItem("ComboSetEHitCh", "E Hit").SetValue(
-                                new StringList(new[] {"Low", "Medium", "High", "Very High", "Immobile"}, 2)));
-                    Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetSmartW", "Smart W").SetValue(true));
-                    Config.SubMenu("Combo")
-                        .AddItem(new MenuItem("ComboAutoQR", "Use Q-R Combo if enemy is alone").SetValue(false));
-                    Config.SubMenu("Combo")
-                        .AddItem(new MenuItem("ComboAutoWR", "Use W-R Combo if enemy count").SetValue(false));
-                    Config.SubMenu("Combo")
-                        .AddItem(
-                            new MenuItem("ComboAutoWRSlide", "  -> W-R Combo enemy count >= ").SetValue(
-                                new Slider(2, 5, 0)));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetOption", "Combo").SetValue(new StringList(new[] {"Auto", "Q-R Combo", "W-R Combo", "E-R Combo",}, 1)));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetEHitCh", "E Hit").SetValue(new StringList(new[] {"Low", "Medium", "High", "Very High", "Immobile"}, 2)));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetSmartW", "Smart W").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoQR", "Use Q-R Combo if enemy is alone").SetValue(false));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoWR", "Use W-R Combo if enemy count").SetValue(false));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoWRSlide", "  -> W-R Combo enemy count >= ").SetValue(new Slider(2, 5, 0)));
 
-                    Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
+                Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
+                {
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
                     {
-                        foreach (
-                            var enemy in
-                                ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team)
-                            )
-                        {
-                            Config.SubMenu("Combo")
-                                .SubMenu("DontCombo")
-                                .AddItem(
-                                    new MenuItem("DontCombo" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
-                        }
+                        Config.SubMenu("Combo").SubMenu("DontCombo").AddItem(new MenuItem("DontCombo" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
                     }
-                    Config.SubMenu("Combo")
-                        .AddItem(
-                            new MenuItem("ComboDblStun", "Double Stun!").SetValue(
-                                new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
-                    Config.SubMenu("Combo").AddItem(new MenuItem("ComboShowInfo", "Show Combo Status").SetValue(true));
-                    Config.SubMenu("Combo")
-                        .AddItem(
-                            new MenuItem("ComboActive", "Combo!").SetValue(
-                                new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
                 }
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboDblStun", "Double Stun!").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboShowInfo", "Show Combo Status").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
             }
 
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -176,29 +150,20 @@ namespace Leblanc
                 Config.SubMenu("Harass").AddItem(new MenuItem("xHx", ""));
 */
                 Config.SubMenu("Harass").AddSubMenu(new Menu("Q", "HarassQ"));
-                {
                     Config.SubMenu("Harass").SubMenu("HarassQ").AddItem(new MenuItem("HarassUseQ", "Use Q").SetValue(true));
                     Config.SubMenu("Harass").SubMenu("HarassQ").AddItem(new MenuItem("HarassManaQ", "Q Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
                     Config.SubMenu("Harass").SubMenu("HarassQ").AddItem(new MenuItem("HarassUseTQ", "Use Q (toggle)!").SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
-                }
                 Config.SubMenu("Harass").AddSubMenu(new Menu("W", "HarassW"));
-                {
                     Config.SubMenu("Harass").SubMenu("HarassW").AddItem(new MenuItem("HarassUseW", "Use W").SetValue(true));
                     Config.SubMenu("Harass").SubMenu("HarassW").AddItem(new MenuItem("HarassManaW", "W Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
                     Config.SubMenu("Harass").SubMenu("HarassW").AddItem(new MenuItem("HarassUseTW", "Use W (toggle)!").SetValue(new KeyBind("K".ToCharArray()[0], KeyBindType.Toggle)));
-                }
                 Config.SubMenu("Harass").AddSubMenu(new Menu("E", "HarassE"));
-                {
                     Config.SubMenu("Harass").SubMenu("HarassE").AddItem(new MenuItem("HarassUseE", "Use E").SetValue(true));
                     Config.SubMenu("Harass").SubMenu("HarassE").AddItem(new MenuItem("HarassManaE", "E Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
                     Config.SubMenu("Harass").SubMenu("HarassE").AddItem(new MenuItem("HarassUseTE", "Use E (toggle)!").SetValue(new KeyBind("L".ToCharArray()[0], KeyBindType.Toggle)));
-                }
+                
                 Config.SubMenu("Harass").AddItem(new MenuItem("HarassShowInfo", "Show Harass Toggle Status").SetValue(true));
-
-                Config.SubMenu("Harass")
-                    .AddItem(
-                        new MenuItem("HarassActive", "Harass!").SetValue(
-                            new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
             }
 
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
@@ -418,7 +383,7 @@ namespace Leblanc
             if (!R.IsReady())
                 return;
 
-            isComboCompleted = false;
+            _isComboCompleted = false;
 
             Obj_AI_Hero t;
             var cdQEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).CooldownExpires;
@@ -458,7 +423,7 @@ namespace Leblanc
                 E.Cast(t);
                 R.Cast(t);
             }
-            isComboCompleted = true;
+            _isComboCompleted = true;
 
             t = GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             UserSummoners(t);
@@ -525,12 +490,12 @@ namespace Leblanc
                             t.Health < GetRQDamage + ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                             R.CastIfHitchanceEquals(t, GetEHitChance);
                     }
-                    isComboCompleted = true;
+                    _isComboCompleted = true;
                 }
                 return;
             }
 
-            if (Q.IsReady() && t.IsValidTarget(Q.Range) && isComboCompleted)
+            if (Q.IsReady() && t.IsValidTarget(Q.Range) && _isComboCompleted)
             {
                 if (vComboType == ComboType.ComboQR)
                 {
@@ -543,7 +508,7 @@ namespace Leblanc
                 }
             }
 
-            if (W.IsReady() && t.IsValidTarget(W.Range) && !LeBlancStillJumped && isComboCompleted)
+            if (W.IsReady() && t.IsValidTarget(W.Range) && !LeBlancStillJumped && _isComboCompleted)
             {
                 if (vComboType == ComboType.ComboWR)
                 {
@@ -556,7 +521,7 @@ namespace Leblanc
                 }
             }
 
-            if (E.IsReady() && t.IsValidTarget(E.Range) && isComboCompleted)
+            if (E.IsReady() && t.IsValidTarget(E.Range) && _isComboCompleted)
             {
                 if (vComboType == ComboType.ComboER)
                 {
@@ -921,7 +886,7 @@ namespace Leblanc
         {
             if (ObjectManager.Player.IsDead)
                 return;
-
+            
             RefreshComboType();
             
             var t = TargetSelector.GetTarget(W.Range*2, TargetSelector.DamageType.Physical);
@@ -947,25 +912,20 @@ namespace Leblanc
                 }
             }
             
-            if (!R.IsReady())
-                isComboCompleted = true;
-            //Mode();
-//            if (Config.Item("ComboSmartW").GetValue<KeyBind>().Active)
-//                SmartW();
-
+            _isComboCompleted = !R.IsReady();
             
             if (Config.Item("ComboDblStun").GetValue<KeyBind>().Active)
                 DoubleStun();
-
+            
 
             if (Config.Item("RunActive").GetValue<KeyBind>().Active)
                 Run();
-
+            
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
                 Combo();
 
             DoToggleHarass();
-
+            
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
                 Harass();
 
@@ -1023,8 +983,14 @@ namespace Leblanc
 
                 if (Config.SubMenu("Harass").Item("HarassUseTE").GetValue<KeyBind>().Active)
                     xHarassInfo += "E - ";
-                if (xHarassInfo.Length > 1)
+                if (xHarassInfo.Length < 1)
+                {
+                    xHarassInfo = "Harass Toggle: OFF   ";
+                }
+                else
+                {
                     xHarassInfo = "Harass Toggle: " + xHarassInfo;
+                }
                 xHarassInfo = xHarassInfo.Substring(0, xHarassInfo.Length - 3);
                 Drawing.DrawText(Drawing.Width*0.44f, Drawing.Height*0.82f, Color.Wheat, xHarassInfo);
             }
@@ -1035,9 +1001,6 @@ namespace Leblanc
                 if (menuItem.Active && spell.Level > 0)
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
             }
-
-            var wObjPosition = Config.Item("WObjPosition").GetValue<Circle>();
-            var wObjTimeTick = Config.Item("WObjTimeTick").GetValue<bool>();
 
             var wqRange = Config.Item("WQRange").GetValue<Circle>();
             if (wqRange.Active && Q.IsReady() && W.IsReady())
@@ -1051,7 +1014,10 @@ namespace Leblanc
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, 1100f, activeERange.Color);
             }
             /*
-            foreach (var existingSlide in ExistingSlide)
+            var wObjPosition = Config.Item("WObjPosition").GetValue<Circle>();
+            var wObjTimeTick = Config.Item("WObjTimeTick").GetValue<bool>();
+
+             * foreach (var existingSlide in ExistingSlide)
             {
                 if (wObjPosition.Active)
                     Render.Circle.DrawCircle(existingSlide.Position, 110f, wObjPosition.Color);
