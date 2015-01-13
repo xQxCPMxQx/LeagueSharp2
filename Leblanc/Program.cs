@@ -379,19 +379,19 @@ namespace Leblanc
 
             if (E.IsReady() && t.IsValidTarget(E.Range) && isComboCompleted)
             {
-                if (vComboType != ComboType.ComboER && !R.IsReady())
+                //if (vComboType != ComboType.ComboER && !R.IsReady())
                     E.CastIfHitchanceEquals(t, GetEHitChance);
             }
 
             if (Q.IsReady() && t.IsValidTarget(Q.Range) && isComboCompleted)
             {
-                if (vComboType != ComboType.ComboQR && !R.IsReady())
+                //if (vComboType != ComboType.ComboQR && !R.IsReady())
                     Q.CastOnUnit(t);
             }
 
             if (W.IsReady() && t.IsValidTarget(W.Range) && !LeBlancStillJumped && isComboCompleted)
             {
-                if (vComboType != ComboType.ComboWR && !R.IsReady())
+                //if (vComboType != ComboType.ComboWR && !R.IsReady())
                     W.Cast(t, true, true);
             }
 
