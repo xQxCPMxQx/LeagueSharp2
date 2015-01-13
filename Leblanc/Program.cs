@@ -478,7 +478,7 @@ namespace Leblanc
             var useR = (Config.Item("DontCombo" + t.BaseSkinName) != null &&
                         Config.Item("DontCombo" + t.BaseSkinName).GetValue<bool>() == false);
 
-            if (vComboKill == ComboKill.WithoutW)
+            if (vComboKill == ComboKill.WithoutW && !LeBlancStillJumped)
             {
                 W.Cast(t.Position);
             }
@@ -923,7 +923,7 @@ namespace Leblanc
                 return;
 
             RefreshComboType();
-
+            
             var t = TargetSelector.GetTarget(W.Range*2, TargetSelector.DamageType.Physical);
             {
                 var xComboText = "Combo Kill";
@@ -946,18 +946,14 @@ namespace Leblanc
                     }
                 }
             }
-
+            
             if (!R.IsReady())
                 isComboCompleted = true;
-
-            var xMana = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
-                        ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).ManaCost +
-                        ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).ManaCost +
-                        ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).ManaCost;
             //Mode();
 //            if (Config.Item("ComboSmartW").GetValue<KeyBind>().Active)
 //                SmartW();
 
+            
             if (Config.Item("ComboDblStun").GetValue<KeyBind>().Active)
                 DoubleStun();
 
