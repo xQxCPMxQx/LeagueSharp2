@@ -478,7 +478,7 @@ namespace Leblanc
             var useR = (Config.Item("DontCombo" + t.BaseSkinName) != null &&
                         Config.Item("DontCombo" + t.BaseSkinName).GetValue<bool>() == false);
 
-            if (vComboKill == ComboKill.WithoutW)
+            if (vComboKill == ComboKill.WithoutW && !LeBlancStillJumped)
             {
                 W.Cast(t.Position);
             }
