@@ -66,7 +66,7 @@ namespace Leblanc
             Q = new Spell(SpellSlot.Q, 720);
             Q.SetTargetted(0.5f, 1500f);
 
-            W = new Spell(SpellSlot.W, 660);
+            W = new Spell(SpellSlot.W, 670);
             W.SetSkillshot(0.6f, 220f, 1900f, false, SkillshotType.SkillshotCircle);
 
             E = new Spell(SpellSlot.E, 900);
@@ -143,7 +143,6 @@ namespace Leblanc
 
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             {
-                Config.SubMenu("Harass").AddSubMenu(new Menu("Q", "HarassQ"));
                 {
                     Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseQ", "Q").SetValue(true));
                     Config.SubMenu("Harass")
@@ -387,13 +386,14 @@ namespace Leblanc
             }
         }
 
-        private static void UserSummoners(Obj_AI_Base target)
+        private static void UserSummoners(Obj_AI_Base t)
         {
+                
             if (Dfg.IsReady())
-                Dfg.Cast(target);
+                Dfg.Cast(t);
 
             if (Fqc.IsReady())
-                Fqc.Cast(target.ServerPosition);
+                Fqc.Cast(t.ServerPosition);
 
         }
 
@@ -562,6 +562,17 @@ namespace Leblanc
                 else
                 {
                     E.CastIfHitchanceEquals(t, GetEHitChance);
+                }
+            }
+
+            if (t != null && IgniteSlot != SpellSlot.Unknown &&
+                ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            {
+                if (ObjectManager.Player.Distance(t) < 650 &&
+                    ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) >=
+                    t.Health)
+                {
+                    ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, t);
                 }
             }
 
@@ -972,20 +983,22 @@ namespace Leblanc
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            
             if (Config.SubMenu("Harass").Item("HarassShowInfo").GetValue<bool>())
             {
-                var xHarassInfo = "Harass: ";
+                var xHarassInfo = "";
                 if (Config.SubMenu("Harass").Item("HarassUseTQ").GetValue<KeyBind>().Active)
-                    xHarassInfo += "Toggle Q: On, ";
+                    xHarassInfo += "Q - ";
 
                 if (Config.SubMenu("Harass").Item("HarassUseTW").GetValue<KeyBind>().Active)
-                    xHarassInfo += "Toggle W: On, ";
+                    xHarassInfo += "W - ";
 
                 if (Config.SubMenu("Harass").Item("HarassUseTE").GetValue<KeyBind>().Active)
-                    xHarassInfo += "Toggle E: On, ";
-
-                xHarassInfo = xHarassInfo.Substring(1, xHarassInfo.Length - 2);
-                Drawing.DrawText(Drawing.Width * 0.43f, Drawing.Height * 0.82f, Color.Wheat, xHarassInfo);
+                    xHarassInfo += "E - ";
+                if (xHarassInfo.Length > 1)
+                    xHarassInfo = "Harass Toggle: " + xHarassInfo;
+                xHarassInfo = xHarassInfo.Substring(0, xHarassInfo.Length - 3);
+                Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.82f, Color.Wheat, xHarassInfo);
             }
 
             if (Config.SubMenu("Combo").Item("ComboShowInfo").GetValue<bool>())
