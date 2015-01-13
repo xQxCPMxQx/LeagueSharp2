@@ -316,6 +316,8 @@ namespace Leblanc
             if (!R.IsReady())
                 return;
 
+            isComboCompleted = false;
+
             var cdQEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).CooldownExpires;
             var cdWEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
             var cdEEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
@@ -329,30 +331,9 @@ namespace Leblanc
                 var t = GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t == null)
                     return;
-
                 if (Q.IsReady())
-                {
-                    isComboCompleted = false;
                     Q.CastOnUnit(t, true);
-                }
                 R.CastOnUnit(t, true);
-                isComboCompleted = true;
-                return;
-            }
-            if (vComboType == ComboType.ComboER)
-            {
-                var t = GetTarget(E.Range, TargetSelector.DamageType.Magical);
-                if (t == null)
-                    return;
-
-                if (E.IsReady() && R.IsReady())
-                {
-                    isComboCompleted = false;
-                    E.Cast(t);
-                }
-                R.Cast(t);
-                isComboCompleted = true;
-                return;
             }
             if (vComboType == ComboType.ComboWR)
             {
@@ -360,15 +341,23 @@ namespace Leblanc
                 if (t == null)
                     return;
 
-                if (W.IsReady() && R.IsReady() && !LeBlancStillJumped)
-                {
-                    isComboCompleted = false;
+                isComboCompleted = false;
+                if (W.IsReady() && !LeBlancStillJumped)
                     W.Cast(t, true, true);
-                }
                 R.Cast(t, true, true);
-                isComboCompleted = true;
-                return;
             }
+            if (vComboType == ComboType.ComboER)
+            {
+                var t = GetTarget(E.Range, TargetSelector.DamageType.Magical);
+                if (t == null)
+                    return;
+
+                if (E.IsReady())
+                    E.Cast(t);
+
+                R.Cast(t);
+            }
+            isComboCompleted = true;
         }
 
         private static void Combo()
@@ -786,13 +775,14 @@ namespace Leblanc
                     xComboStr += "Q-R";
                     break;
 
-                case ComboType.ComboER: //W-R
-                    xComboStr += "E-R";
-                    break;
-
                 case ComboType.ComboWR: //W-R
                     xComboStr += "W-R";
                     break;
+
+                case ComboType.ComboER: //E-R
+                    xComboStr += "E-R";
+                    break;
+
             }
 
             Drawing.DrawText(Drawing.Width*0.45f, Drawing.Height*0.80f, Color.GreenYellow, xComboStr);
