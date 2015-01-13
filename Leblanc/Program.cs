@@ -24,7 +24,7 @@ namespace Leblanc
         public static Spell Q, W, E, R;
 
         private static ComboType vComboType = ComboType.ComboQR;
-        private static bool vComboCompleted = true;
+        private static bool isComboCompleted = true;
 
         public static SpellSlot IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
         public static Items.Item Fqc = new Items.Item(3092, 750);
@@ -329,11 +329,11 @@ namespace Leblanc
 
                 if (Q.IsReady())
                 {
-                    vComboCompleted = false;
+                    isComboCompleted = false;
                     Q.CastOnUnit(t, true);
                 }
                 R.CastOnUnit(t, true);
-                vComboCompleted = true;
+                isComboCompleted = true;
                 return;
             }
             if (vComboType == ComboType.ComboER)
@@ -344,11 +344,11 @@ namespace Leblanc
 
                 if (E.IsReady() && R.IsReady())
                 {
-                    vComboCompleted = false;
+                    isComboCompleted = false;
                     E.Cast(t);
                 }
                 R.Cast(t);
-                vComboCompleted = true;
+                isComboCompleted = true;
                 return;
             }
             if (vComboType == ComboType.ComboWR)
@@ -359,11 +359,11 @@ namespace Leblanc
 
                 if (W.IsReady() && R.IsReady() && !LeBlancStillJumped)
                 {
-                    vComboCompleted = false;
+                    isComboCompleted = false;
                     W.Cast(t, true, true);
                 }
                 R.Cast(t, true, true);
-                vComboCompleted = true;
+                isComboCompleted = true;
                 return;
             }
         }
@@ -385,19 +385,19 @@ namespace Leblanc
                 ExecuteCombo();
             }
 
-            if (E.IsReady() && t.IsValidTarget(E.Range) && vComboCompleted)
+            if (E.IsReady() && t.IsValidTarget(E.Range) && isComboCompleted)
             {
                 if (vComboType != ComboType.ComboER && !R.IsReady())
                     E.CastIfHitchanceEquals(t, GetEHitChance);
             }
 
-            if (Q.IsReady() && t.IsValidTarget(Q.Range) && vComboCompleted)
+            if (Q.IsReady() && t.IsValidTarget(Q.Range) && isComboCompleted)
             {
                 if (vComboType != ComboType.ComboQR && !R.IsReady())
                     Q.CastOnUnit(t);
             }
 
-            if (W.IsReady() && t.IsValidTarget(W.Range) && !LeBlancStillJumped && vComboCompleted)
+            if (W.IsReady() && t.IsValidTarget(W.Range) && !LeBlancStillJumped && isComboCompleted)
             {
                 if (vComboType != ComboType.ComboWR && !R.IsReady())
                     W.Cast(t, true, true);
@@ -724,7 +724,7 @@ namespace Leblanc
             if (ObjectManager.Player.IsDead) return;
 
             if (R.Level == 0 || !R.IsReady())
-                vComboCompleted = true;
+                isComboCompleted = true;
 
             RefreshComboType();
 
