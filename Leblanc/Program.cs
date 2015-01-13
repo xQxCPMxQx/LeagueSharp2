@@ -467,9 +467,11 @@ namespace Leblanc
         {
             var cdQEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).CooldownExpires;
             var cdWEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
+            var cdEEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
 
             var cdQ = Game.Time < cdQEx ? cdQEx - Game.Time : 0;
             var cdW = Game.Time < cdWEx ? cdWEx - Game.Time : 0;
+            var cdE = Game.Time < cdEEx ? cdEEx - Game.Time : 0;
 
             var t = GetTarget(Q.Range * 2, TargetSelector.DamageType.Magical);
             var useR = (Config.Item("DontCombo" + t.BaseSkinName) != null &&
@@ -480,9 +482,53 @@ namespace Leblanc
                 W.Cast(t.Position);
             }
 
-            if (R.IsReady() && useR && (Q.IsReady() || W.IsReady() || E.IsReady()))
+            if (R.IsReady())
             {
-                ExecuteCombo();
+                if (vComboType == ComboType.Auto)
+                {
+                    if (Q.Level > W.Level)
+                    {
+                        if (Q.IsReady())
+                            ExecuteCombo();
+                    }
+                    else
+                    {
+                        if (W.IsReady())
+                            ExecuteCombo();
+                    }
+                }
+                else if ((vComboType == ComboType.ComboQR && Q.IsReady()) ||
+                         (vComboType == ComboType.ComboWR && W.IsReady()) ||
+                         (vComboType == ComboType.ComboER && E.IsReady()))
+                    ExecuteCombo();
+                else
+                {
+                    t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                    if (t.IsValidTarget(Q.Range))
+                        R.Cast(t);
+                    /*
+                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM") // R-Q
+                    {
+                        t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                        if (t.IsValidTarget(Q.Range) && t.Health < GetRQDamage)
+                            R.CastOnUnit(t);
+                    }
+                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSlideM") // R-W
+                    {
+                        t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+                        if (t.IsValidTarget(W.Range) && t.Health < GetRQDamage)
+                            R.Cast(t, false, true);
+                    }
+                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSoulShackleM") // R-E
+                    {
+                        t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+                        if (t.IsValidTarget(E.Range) && t.Health < GetRQDamage)
+                            R.CastIfHitchanceEquals(t, GetEHitChance);
+                    }
+                    */
+                    isComboCompleted = true;
+                }
+                return;
             }
 
             if (Q.IsReady() && t.IsValidTarget(Q.Range) && isComboCompleted)
@@ -549,6 +595,27 @@ namespace Leblanc
                 E.CastIfHitchanceEquals(eTarget, GetEHitChance);
         }
 
+        static float GetRQDamage
+        {
+            get
+            {
+                var perDmg = new[] { 100f, 200f, 300 };
+                var xDmg = ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod) * .65f) +
+                           perDmg[R.Level];
+                return xDmg;
+            }
+        }
+        static float GetRWDamage
+        {
+            get
+            {
+                var perDmg = new[] { 150f, 300f, 450f };
+                var xDmg = ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod) * .98f) +
+                           perDmg[R.Level];
+                return xDmg;
+            }
+        }
+
         private static float GetComboDamage(Obj_AI_Hero t)
         {
             var fComboDamage = 0f;
@@ -563,16 +630,12 @@ namespace Leblanc
             {
                 if (vComboType == ComboType.ComboQR || vComboType == ComboType.ComboER)
                 {
-                    var perDmg = new[] { 100f, 200f, 300 };
-                    fComboDamage += ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod) *
-                                     .65f) + perDmg[R.Level];
+                    fComboDamage += GetRQDamage;
                 }
 
                 if (vComboType == ComboType.ComboWR)
                 {
-                    var perDmg = new[] { 150f, 300f, 450f };
-                    fComboDamage += ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod) *
-                                     .98f) + perDmg[R.Level];
+                    fComboDamage += GetRWDamage;
                 }
             }
 
