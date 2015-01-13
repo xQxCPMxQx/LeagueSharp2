@@ -98,11 +98,6 @@ namespace Leblanc
             {
                 Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetOption", "Combo").SetValue(new StringList(new[] {"Auto", "Q-R Combo", "W-R Combo", "E-R Combo",}, 1)));
                 Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetEHitCh", "E Hit").SetValue(new StringList(new[] {"Low", "Medium", "High", "Very High", "Immobile"}, 2)));
-                Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetSmartW", "Smart W").SetValue(true));
-                Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoQR", "Use Q-R Combo if enemy is alone").SetValue(false));
-                Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoWR", "Use W-R Combo if enemy count").SetValue(false));
-                Config.SubMenu("Combo").AddItem(new MenuItem("ComboAutoWRSlide", "  -> W-R Combo enemy count >= ").SetValue(new Slider(2, 5, 0)));
-
                 Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
@@ -862,22 +857,6 @@ namespace Leblanc
 
         private static void RefreshComboType()
         {
-            if (Config.Item("ComboAutoQR").GetValue<bool>() && ObjectManager.Player.CountEnemysInRange(Q.Range) == 1)
-            {
-                vComboType = ComboType.ComboQR;
-                ExecuteCombo();
-                return;
-            }
-
-            if (Config.Item("ComboAutoWR").GetValue<bool>() &&
-                ObjectManager.Player.CountEnemysInRange(W.Range) >=
-                Config.Item("ComboAutoWRSlide").GetValue<Slider>().Value)
-            {
-                vComboType = ComboType.ComboWR;
-                ExecuteCombo();
-                return;
-            }
-
             var xCombo = Config.Item("ComboSetOption").GetValue<StringList>().SelectedIndex;
             switch (xCombo)
             {
