@@ -574,9 +574,14 @@ namespace Leblanc
         {
             get
             {
+                var xDmg = 0f;
                 var perDmg = new[] {100f, 200f, 300};
-                var xDmg = ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod)*.65f) +
-                           perDmg[R.Level];
+                
+                xDmg += ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod)* .65f) +
+                           perDmg[R.Level -1];
+                var t = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
+                if (t.IsValidTarget(2000))
+                    xDmg += (float) ObjectManager.Player.GetSpellDamage(t, (vComboType == ComboType.ComboQR ? SpellSlot.Q : SpellSlot.E));
                 return xDmg;
             }
         }
@@ -585,9 +590,15 @@ namespace Leblanc
         {
             get
             {
+                var xDmg = 0f;
                 var perDmg = new[] {150f, 300f, 450f};
-                var xDmg = ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod)*.98f) +
-                           perDmg[R.Level];
+                xDmg += ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod)* .98f) +
+                           perDmg[R.Level -1];
+                
+                var t = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
+                if (t.IsValidTarget(2000))
+                    xDmg += (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
+                
                 return xDmg;
             }
         }
@@ -595,6 +606,9 @@ namespace Leblanc
         private static float GetComboDamage(Obj_AI_Hero t)
         {
             var fComboDamage = 0f;
+
+            if (!t.IsValidTarget(2000))
+                return 0f;
 
             fComboDamage += Q.IsReady() ? (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q) : 0;
 
