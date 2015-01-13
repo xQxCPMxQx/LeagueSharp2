@@ -453,14 +453,14 @@ namespace Leblanc
             {
                 if (vComboType == ComboType.ComboQR || vComboType == ComboType.ComboER)
                 {
-                    var perDmg = new[] {100f, 200f, 300};
+                    var perDmg = new[] {100f, 200f, 300f};
                     fComboDamage += ((ObjectManager.Player.BaseAbilityDamage +
                                      ObjectManager.Player.FlatMagicDamageMod)*.65f) + perDmg[R.Level];
                 }
 
                 if (vComboType == ComboType.ComboWR)
                 {
-                    var perDmg = new[] {100f, 200f, 300};
+                    var perDmg = new[] {150f, 300f, 450f};
                     fComboDamage += ((ObjectManager.Player.BaseAbilityDamage +
                                      ObjectManager.Player.FlatMagicDamageMod)*.98f) + perDmg[R.Level];
                 }
