@@ -313,6 +313,9 @@ namespace Leblanc
 
         private static void ExecuteCombo()
         {
+            if (!R.IsReady())
+                return;
+
             var cdQEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).CooldownExpires;
             var cdWEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
             var cdEEx = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).CooldownExpires;
