@@ -46,13 +46,13 @@ namespace Swain
             
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 625);
-            W = new Spell(SpellSlot.W, 900);
+             Q = new Spell(SpellSlot.Q, 625);
+            W = new Spell(SpellSlot.W, 820);
             E = new Spell(SpellSlot.E, 625);
             R = new Spell(SpellSlot.R, 650);
 
             Q.SetTargetted(0.5f, float.MaxValue);
-            W.SetSkillshot(0.75f, 150f, 1500f, false, SkillshotType.SkillshotCone);
+            W.SetSkillshot(1.2f, 125f, float.MaxValue, false, SkillshotType.SkillshotCone);
             E.SetTargetted(0.5f, float.MaxValue);
 
             SpellList.Add(Q);
