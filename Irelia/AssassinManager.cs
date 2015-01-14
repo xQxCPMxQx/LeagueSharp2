@@ -17,12 +17,22 @@ namespace Irelia
         {
             Program.Config.AddSubMenu(new Menu("Assassin Manager", "MenuAssassin"));
             Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinActive", "Active").SetValue(true));
-            Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("Ax", ""));
+            
+            foreach (
+                var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
+            {
+                Program.Config.SubMenu("MenuAssassin")
+                    
+                    .AddItem(
+                        new MenuItem("Assassin" + enemy.ChampionName, enemy.ChampionName).SetValue(
+                            TargetSelector.GetPriority(enemy) > 3));
+            }
+
+
             Program.Config.SubMenu("MenuAssassin")
                 .AddItem(
                     new MenuItem("AssassinSelectOption", "Set: ").SetValue(
                         new StringList(new[] {"Single Select", "Multi Select"})));
-            Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("Ax", ""));
             Program.Config.SubMenu("MenuAssassin")
                 .AddItem(new MenuItem("AssassinSetClick", "Add/Remove with click").SetValue(true));
             Program.Config.SubMenu("MenuAssassin")
@@ -46,16 +56,7 @@ namespace Irelia
                 .AddItem(new MenuItem("DrawStatus", "Show Status").SetValue(true));
 
 
-            Program.Config.SubMenu("MenuAssassin").AddSubMenu(new Menu("Assassin List:", "AssassinMode"));
-            foreach (
-                var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
-            {
-                Program.Config.SubMenu("MenuAssassin")
-                    .SubMenu("AssassinMode")
-                    .AddItem(
-                        new MenuItem("Assassin" + enemy.ChampionName, enemy.ChampionName).SetValue(
-                            TargetSelector.GetPriority(enemy) > 3));
-            }
+            
             Program.Config.SubMenu("MenuAssassin")
                 .AddItem(new MenuItem("AssassinSearchRange", "Search Range")).SetValue(new Slider(1000, 2000));
 
