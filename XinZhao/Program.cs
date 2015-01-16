@@ -40,8 +40,8 @@ namespace XinZhao
             if (Player.BaseSkinName != ChampionName) return;
             if (Player.IsDead) return;
 
-            Q = new Spell(SpellSlot.Q, 0);
-            W = new Spell(SpellSlot.W, 0);
+            Q = new Spell(SpellSlot.Q);
+            W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 600);
             R = new Spell(SpellSlot.R, 480);
 
@@ -124,6 +124,10 @@ namespace XinZhao
             if (drawRRange.Active)
                 Render.Circle.DrawCircle(Player.Position, R.Range, drawRRange.Color);
 
+            var drawEMinRange = Config.Item("EMinRange").GetValue<Circle>();
+            if (drawEMinRange.Active)
+                Render.Circle.DrawCircle(Player.Position, R.Range, drawEMinRange.Color);
+
             /* [ Draw Can Be Thrown Enemy ] */
             var drawThrownEnemy = Config.SubMenu("Drawings").Item("DrawThrown").GetValue<Circle>();
             if (drawThrownEnemy.Active)
@@ -149,16 +153,24 @@ namespace XinZhao
         {
            var t = GetEnemy(Q.Range, TargetSelector.DamageType.Magical);
 
-           if (t.IsValidTarget(E.Range) && Q.IsReady())
+            var useQ = Config.Item("ComboUseQ").GetValue<bool>();
+            var useW = Config.Item("ComboUseW").GetValue<bool>();
+            var useE = Config.Item("ComboUseE").GetValue<bool>();
+            
+            if (useQ && t.IsValidTarget(E.Range) && Q.IsReady())
                 Q.Cast();
 
-            if (t.IsValidTarget(E.Range) && W.IsReady())
+            if (useW && t.IsValidTarget(E.Range) && W.IsReady())
                 W.Cast();
 
-            if (t.IsValidTarget(E.Range) && E.IsReady())
-                E.CastOnUnit(t);
+            if (useE && t.IsValidTarget(E.Range) && E.IsReady())
+            {
+                var eMinRange = Config.Item("EMinRange").GetValue<Slider>().Value;
+                if (ObjectManager.Player.Distance(t) >= eMinRange)
+                    E.CastOnUnit(t);
+            }
 
-            if (Player.Distance(t) <= 400)
+            if (Player.Distance(t) <= E.Range)
                 UseItems(t);
 
             if (Player.Distance(t) <= E.Range)
@@ -319,6 +331,8 @@ namespace XinZhao
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(
+                new Slider(Q.Range, 200, Q.Range)));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!")
                 .SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
