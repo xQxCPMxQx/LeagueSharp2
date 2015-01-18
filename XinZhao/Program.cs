@@ -57,7 +57,7 @@ namespace XinZhao
         static Obj_AI_Hero GetEnemy(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
             if (vDefaultRange == 0)
-                vDefaultRange = Q.Range;
+                vDefaultRange = E.Range;
 
             if (!TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
                 return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
@@ -331,8 +331,7 @@ namespace XinZhao
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(
-                new Slider(Q.Range, 200, Q.Range)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(new Slider(600, 200, 600)));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!")
                 .SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
