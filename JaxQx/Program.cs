@@ -41,7 +41,6 @@ namespace JaxQx
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
-        public static Menu TargetSelectorMenu;
         
         private static void Main(string[] args)
         {
@@ -72,10 +71,12 @@ namespace JaxQx
             //Create the menu
             Config = new Menu("xQx | Jax", "Jax", true);
             
-            TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(TargetSelectorMenu);
-            Config.AddSubMenu(TargetSelectorMenu);
-            
+            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(targetSelectorMenu);
+            Config.AddSubMenu(targetSelectorMenu);
+
+            new AssassinManager();
+
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
@@ -200,7 +201,7 @@ namespace JaxQx
             };
 
             new PotionManager();
-            new AssassinManager();
+            
             Config.AddToMainMenu();
 
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -219,26 +220,26 @@ namespace JaxQx
             var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
             if (drawQRange.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Q.Range, drawQRange.Color);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, drawQRange.Color, 1);
             }
 
             var drawWard = Config.Item("DrawWard").GetValue<Circle>();
             if (drawWard.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, wardRange, drawWard.Color);
+                Render.Circle.DrawCircle(Player.Position, wardRange, drawWard.Color, 1);
             }
 
             var drawSmiteRange = Config.Item("DrawSmiteRange").GetValue<Circle>();
             if (drawSmiteRange.Active && Config.Item("AutoSmite").GetValue<KeyBind>().Active)
             {
-                Render.Circle.DrawCircle(Player.Position, SmiteRange, drawWard.Color);
+                Render.Circle.DrawCircle(Player.Position, SmiteRange, drawWard.Color, 1);
             }
 
             var drawMinQRange = Config.Item("DrawQMinRange").GetValue<Circle>();
             if (drawMinQRange.Active)
             {
                 var minQRange = Config.Item("ComboUseQMinRange").GetValue<Slider>().Value;
-                Render.Circle.DrawCircle(Player.Position, minQRange, drawMinQRange.Color);
+                Render.Circle.DrawCircle(Player.Position, minQRange, drawMinQRange.Color, 1);
             }
         }
 
@@ -263,33 +264,37 @@ namespace JaxQx
 
             return (float)fComboDamage;
         }
-        private static Obj_AI_Hero GetEnemy
+        private static Obj_AI_Hero GetEnemy(float vDefaultRange = 0,
+            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
-            get
+            if (Math.Abs(vDefaultRange) < 0.00001)
+                vDefaultRange = Q.Range;
+
+            if (!Config.Item("AssassinActive").GetValue<bool>())
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+
+            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+            var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
+                .Where(
+                    enemy =>
+                        enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                        Config.Item("Assassin" + enemy.ChampionName) != null &&
+                        Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                        ObjectManager.Player.Distance(enemy) < assassinRange);
+
+            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
-                var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
-
-                var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(
-                        enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                            TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
-                            TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
-
-                if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
-                {
-                    vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
-                }
-
-                Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
-
-                Obj_AI_Hero t = !objAiHeroes.Any()
-                    ? TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical)
-                    : objAiHeroes[0];
-
-                return t;
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
             }
+
+            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            Obj_AI_Hero t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
         }
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
@@ -323,12 +328,13 @@ namespace JaxQx
             
             if (Config.Item("Ward").GetValue<KeyBind>().Active)
             {
+                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 Jumper.wardJump(Game.CursorPos.To2D());
             }
             
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                Combo(GetEnemy);            
+                Combo();            
             }
             
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
@@ -353,8 +359,10 @@ namespace JaxQx
             }
         }
 
-        private static void Combo(Obj_AI_Hero t)
+        private static void Combo()
         {
+            var t = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
+
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useW = Config.Item("UseWCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
@@ -370,7 +378,7 @@ namespace JaxQx
 
                 if (useQDontUnderTurret)
                 {
-                    if (!Utility.UnderTurret(t))
+                    if (!t.UnderTurret())
                         Q.Cast(t);
                 }
                 else
@@ -402,7 +410,7 @@ namespace JaxQx
             {
                 if (Player.Distance(t) < Player.AttackRange)
                 {
-                    if (ObjectManager.Player.CountEnemysInRange((int) Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2 ||
+                    if (ObjectManager.Player.CountEnemiesInRange((int) Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2 ||
                         t.Health > Player.Health) 
                     {
                         R.CastOnUnit(Player);
