@@ -81,6 +81,8 @@ namespace Syndra
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
+			
+			new AssassinManager();
 
             //Load the orbwalker and add it to the menu as submenu.
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
