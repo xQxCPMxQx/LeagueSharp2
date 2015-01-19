@@ -325,6 +325,8 @@ namespace XinZhao
             TargetSelector.AddToMenu(TargetSelectorMenu);
             Config.AddSubMenu(TargetSelectorMenu);
 
+            new AssassinManager();
+
             /* [ Combo ] */
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
@@ -388,7 +390,6 @@ namespace XinZhao
             MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
 
             new PotionManager();
-            new AssassinManager();
             Config.AddToMainMenu();
         }
         private static void WelcomeMessage()
