@@ -25,7 +25,6 @@ namespace XinZhao
         public static Items.Item Hydra = new Items.Item(3074, 375); 
 
         public static Menu Config;
-        public static Menu TargetSelectorMenu;
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
@@ -54,25 +53,26 @@ namespace XinZhao
             WelcomeMessage();
         }
 
-        static Obj_AI_Hero GetEnemy(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        private static Obj_AI_Hero GetEnemy(float vDefaultRange = 0,
+            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
-            if (vDefaultRange < 0.00001)
-                vDefaultRange = E.Range;
+            if (Math.Abs(vDefaultRange) < 0.00001)
+                vDefaultRange = Q.Range;
 
-            if (!TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
+            if (!Config.Item("AssassinActive").GetValue<bool>())
                 return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
 
-            var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
 
             var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
                 .Where(
                     enemy =>
                         enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
-                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                        Config.Item("Assassin" + enemy.ChampionName) != null &&
+                        Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
                         ObjectManager.Player.Distance(enemy) < assassinRange);
 
-            if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
                 vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
             }
@@ -112,21 +112,20 @@ namespace XinZhao
 
         static void Drawing_OnDraw(EventArgs args)
         {
-            var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
-            if (drawQRange.Active)
-                Render.Circle.DrawCircle(Player.Position, E.Range, drawQRange.Color);
-
             var drawERange = Config.Item("DrawERange").GetValue<Circle>();
             if (drawERange.Active)
-                Render.Circle.DrawCircle(Player.Position, R.Range, drawERange.Color);
+                Render.Circle.DrawCircle(Player.Position, E.Range, drawERange.Color, 1);
 
             var drawRRange = Config.Item("DrawRRange").GetValue<Circle>();
             if (drawRRange.Active)
-                Render.Circle.DrawCircle(Player.Position, R.Range, drawRRange.Color);
+                Render.Circle.DrawCircle(Player.Position, R.Range, drawRRange.Color, 1);
 
-            var drawEMinRange = Config.Item("EMinRange").GetValue<Circle>();
+            var drawEMinRange = Config.Item("DrawEMinRange").GetValue<Circle>();
             if (drawEMinRange.Active)
-                Render.Circle.DrawCircle(Player.Position, R.Range, drawEMinRange.Color);
+            {
+                var eMinRange = Config.Item("EMinRange").GetValue<Slider>().Value;
+                Render.Circle.DrawCircle(Player.Position, eMinRange, drawEMinRange.Color, 1);
+            }
 
             /* [ Draw Can Be Thrown Enemy ] */
             var drawThrownEnemy = Config.SubMenu("Drawings").Item("DrawThrown").GetValue<Circle>();
@@ -143,15 +142,15 @@ namespace XinZhao
                         from buff in enemy.Buffs.Where(buff => !buff.Name.Contains("xenzhaointimidate"))
                         select enemy) 
                 {
-                    Render.Circle.DrawCircle(enemy.Position, 90f, Color.White);
-                    Render.Circle.DrawCircle(enemy.Position, 95f, drawThrownEnemy.Color);
+                    Render.Circle.DrawCircle(enemy.Position, 90f, Color.White, 1);
+                    Render.Circle.DrawCircle(enemy.Position, 95f, drawThrownEnemy.Color, 1);
                 }
             }
         }
 
         public static void Combo()
         {
-           var t = GetEnemy(Q.Range, TargetSelector.DamageType.Magical);
+           var t = GetEnemy(E.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("ComboUseQ").GetValue<bool>();
             var useW = Config.Item("ComboUseW").GetValue<bool>();
@@ -322,7 +321,7 @@ namespace XinZhao
             Config.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
 
-            TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            var TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(TargetSelectorMenu);
             Config.AddSubMenu(TargetSelectorMenu);
 
@@ -331,7 +330,7 @@ namespace XinZhao
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(new Slider(600, 200, 600)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(new Slider(300, 200, 500)));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!")
                 .SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
@@ -357,14 +356,10 @@ namespace XinZhao
 
             /* [ Drawing ] */
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawQRange", "Q Range").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawERange", "E Range").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawRRange", "R Range").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawERange", "E range").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEMinRange", "E min. range").SetValue(new Circle(false, Color.Aqua)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawRRange", "R range").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
 
             /* [  Extras -> Use Items ] */
             MenuExtras = new Menu("Extras", "Extras");
