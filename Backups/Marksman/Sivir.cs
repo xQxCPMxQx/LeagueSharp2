@@ -115,10 +115,9 @@ namespace Marksman
 
         public override bool MiscMenu(Menu config)
         {
-            config.AddItem(new MenuItem("AutoQ" + Id, "Auto Q on stunned targets").SetValue(true));
+            config.AddItem(new MenuItem("AutoQ" + Id, "Auto Q on Stunned/Slow/Fear/Taunt").SetValue(true));
 
-
-            MenuSupportedSpells = new Menu("Supported Spells", "suppspells");
+            MenuSupportedSpells = new Menu("E Supported Spells", "suppspells");
 
             foreach (var xEnemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
@@ -128,7 +127,7 @@ namespace Marksman
                     MenuSupportedSpells.AddItem(new MenuItem(ccList.BuffName, ccList.DisplayName)).SetValue(true);
                 }
             }
-            config.AddSubMenu(MenuSupportedSpells);
+            Program.Config.AddSubMenu(MenuSupportedSpells);
 
             return true;
         }
