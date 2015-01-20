@@ -127,7 +127,7 @@ namespace Marksman
                     MenuSupportedSpells.AddItem(new MenuItem(ccList.BuffName, ccList.DisplayName)).SetValue(true);
                 }
             }
-            Config.AddSubMenu(MenuSupportedSpells);
+            Program.Config.AddSubMenu(MenuSupportedSpells);
 
             return true;
         }
