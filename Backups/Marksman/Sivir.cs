@@ -117,6 +117,7 @@ namespace Marksman
         {
             config.AddItem(new MenuItem("AutoQ" + Id, "Auto Q on stunned targets").SetValue(true));
 
+
             MenuSupportedSpells = new Menu("Supported Spells", "suppspells");
 
             foreach (var xEnemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
@@ -127,7 +128,7 @@ namespace Marksman
                     MenuSupportedSpells.AddItem(new MenuItem(ccList.BuffName, ccList.DisplayName)).SetValue(true);
                 }
             }
-            Program.Config.AddSubMenu(MenuSupportedSpells);
+            config.AddSubMenu(MenuSupportedSpells);
 
             return true;
         }
