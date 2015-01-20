@@ -25,16 +25,29 @@ namespace Marksman
             W = new Spell(SpellSlot.W, 593);
 
             E = new Spell(SpellSlot.E);
-            //Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpellCast;
+            Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpellCast;
         }
 
         public override void Game_OnGameUpdate(EventArgs args)
         {
             if (GetValue<bool>("AutoQ"))
             {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget(Q.Range)))
+                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                if (Q.IsReady() && t.IsValidTarget())
                 {
-                    Q.CastIfHitchanceEquals(enemy, HitChance.Immobile);
+                    int xDelay = 0;
+                    if ((t.HasBuffOfType(BuffType.Slow) || t.HasBuffOfType(BuffType.Stun) ||
+                         t.HasBuffOfType(BuffType.Snare) || t.HasBuffOfType(BuffType.Fear) ||
+                         t.HasBuffOfType(BuffType.Taunt)))
+                    {
+                        xDelay = 50;
+                        Utility.DelayAction.Add(xDelay, () => Q.Cast(t, false, true));
+                    }
+
+                    if (t.HasBuffOfType(BuffType.Charm))
+                        xDelay = 200;
+                    
+                    Utility.DelayAction.Add(xDelay, () => Q.Cast(t, false, true));
                 }
             }
 
@@ -104,27 +117,24 @@ namespace Marksman
         {
             config.AddItem(new MenuItem("AutoQ" + Id, "Auto Q on stunned targets").SetValue(true));
 
-/*
             MenuSupportedSpells = new Menu("Supported Spells", "suppspells");
 
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+            foreach (var xEnemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
-                foreach (var ccList in SkillShotList.BuffList.Where(xEnemy => xEnemy.ChampionName == BuffList.ChampionName)
+                Obj_AI_Hero enemy = xEnemy;
+                foreach (var ccList in SpellList.BuffList.Where(xList => xList.ChampionName == enemy.ChampionName))
                 {
-                    MenuSupportedSpells.AddItem(new MenuItem(ccList.SDataName,
-                        enemy.ChampionName + " " + BuffList.DisplayName)).SetValue(true);
+                    MenuSupportedSpells.AddItem(new MenuItem(ccList.BuffName, ccList.DisplayName)).SetValue(true);
                 }
             }
             Config.AddSubMenu(MenuSupportedSpells);
-*/
 
             return true;
         }
 
         public override bool DrawingMenu(Menu config)
         {
-            config.AddItem(
-                new MenuItem("DrawQ" + Id, "Q range").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
+            config.AddItem(new MenuItem("DrawQ" + Id, "Q range").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
             return true;
         }
 
