@@ -153,6 +153,7 @@ namespace Marksman
                 new MenuItem("UseItemsMode", "Use items on").SetValue(
                     new StringList(new[] {"No", "Mixed mode", "Combo mode", "Both"}, 2)));
 
+            new PotionManager();
             
             //var Extras = Config.AddSubMenu(new Menu("Extras", "Extras"));
             //new PotionManager(Extras);
@@ -206,7 +207,6 @@ namespace Marksman
                 var extras = new Menu("Extras", "Extras");
                 if (CClass.ExtrasMenu(extras))
                 {
-                    new PotionManager(extras);
                     Config.AddSubMenu(extras);
                 }
 
