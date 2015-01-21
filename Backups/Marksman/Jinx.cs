@@ -1,5 +1,4 @@
 #region
-
 using System;
 using System.Drawing;
 using System.Linq;
@@ -19,16 +18,17 @@ namespace Marksman
         public static Spell W;
         public static Spell E;
         public static Spell R;
-        private readonly Font PlayerText;
+        public readonly Font PlayerText;
+
         public Jinx()
         {
             Q = new Spell(SpellSlot.Q);
-            W = new Spell(SpellSlot.W, 1500f);
-            E = new Spell(SpellSlot.E, 900f);
-            R = new Spell(SpellSlot.R, 1700f);
+            W = new Spell(SpellSlot.W, 1450f);
+            E = new Spell(SpellSlot.E, 835f);
+            R = new Spell(SpellSlot.R, 1500f);
 
             W.SetSkillshot(0.7f, 60f, 3300f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.7f, 120f, 1750f, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(0.7f, 120f, 1050f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.6f, 140f, 1700f, false, SkillshotType.SkillshotLine);
 
             Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
@@ -61,7 +61,7 @@ namespace Marksman
         public class JinxData
         {
             public static bool HassPowPowStack = false;
-            
+
 
             public class JinxSpells
             {
@@ -126,7 +126,7 @@ namespace Marksman
                 get { return QMiniGunRange + 50 + 25 * Q.Level; }
             }
 
-            public static bool HasEnemyBuffForCastE
+            public static bool EnemyHasBuffForCastE
             {
                 get
                 {
@@ -134,7 +134,7 @@ namespace Marksman
                     return t.HasBuffOfType(BuffType.Slow) || t.HasBuffOfType(BuffType.Stun) ||
                            t.HasBuffOfType(BuffType.Snare) || t.HasBuffOfType(BuffType.Charm) ||
                            t.HasBuffOfType(BuffType.Fear) || t.HasBuffOfType(BuffType.Taunt) ||
-                           t.HasBuff("zhonyasringshield") || t.HasBuff("Recall") || t.HasBuff("Teleport");
+                           t.HasBuff("zhonyasringshield") || t.HasBuff("Recall") || t.HasBuff("teleport_target", true);
                 }
             }
 
@@ -231,8 +231,25 @@ namespace Marksman
             {
                 if (JinxData.JinxSpells.CanCastQ)
                     HarassToggleQ();
+                else
+                {
+
+
+                }
                 if (JinxData.JinxSpells.CanCastW)
                     HarassToggleW();
+            }
+
+            public static void AlwaysChooseMiniGun()
+            {
+                if (Program.Config.SubMenu("Misc").Item("Swap2Mini").GetValue<bool>())
+                {
+                    if (JinxData.QGunType == JinxData.GunType.Mega &&
+                        ObjectManager.Player.CountEnemiesInRange(JinxData.QMegaGunRange) == 0)
+                    {
+                        Q.Cast();
+                    }
+                }
             }
 
             private static void UsePowPowStack()
@@ -295,6 +312,10 @@ namespace Marksman
                 if (!t.IsValidTarget())
                     return;
 
+                var swapDistance = Program.Config.SubMenu("Misc").Item("SwapDistance").GetValue<bool>();
+                if (!swapDistance)
+                    return;
+
                 if (JinxData.GetRealDistance(t) > JinxData.QMiniGunRange &&
                     JinxData.GetRealDistance(t) <= JinxData.QMegaGunRange)
                 {
@@ -306,7 +327,7 @@ namespace Marksman
                 else
                 {
                     if (JinxData.QGunType == JinxData.GunType.Mega)
-                        Q.Cast();
+                        Q.Cast(t);
                 }
             }
 
@@ -318,13 +339,14 @@ namespace Marksman
                     return;
 
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                
                 if (!t.IsValidTarget())
                     return;
 
                 var minW = Program.Config.Item("MinWRange").GetValue<Slider>().Value;
 
-                if (W.IsReady() && (t.IsValidTarget() && JinxData.GetRealDistance(t) >= minW) ||
-                    t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.W))
+                if (W.IsReady())// && (JinxData.GetRealDistance(t) >= minW) ||
+                    //t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.W))
                 {
                     W.CastIfHitchanceEquals(t, JinxData.GetWHitChance);
                 }
@@ -357,13 +379,9 @@ namespace Marksman
                 JinxData.HassPowPowStack = false;
             }
 
-            if (JinxData.HassPowPowStack)
-            {
-                
-            }
-
             JinxEvents.ExecuteToggle();
             JinxEvents.ExecutePowPowStack();
+            JinxEvents.AlwaysChooseMiniGun();
 
             if (E.IsReady() && JinxData.JinxSpells.CanCastE)
             {
@@ -378,7 +396,7 @@ namespace Marksman
                     E.CastIfHitchanceEquals(t, HitChance.Dashing);
                 }
 
-                if (GetValue<bool>("UseEC") || (GetValue<bool>("AutoES") && JinxData.HasEnemyBuffForCastE))
+                if (GetValue<bool>("UseEC") || (GetValue<bool>("AutoES") && JinxData.EnemyHasBuffForCastE))
                 {
                     E.CastIfHitchanceEquals(t, HitChance.High);
                 }
@@ -403,7 +421,8 @@ namespace Marksman
                     {
                         var xRKillNotice = String.Format(
                             "Killable Target: {0}, Distance: {1}", t.ChampionName, JinxData.GetRealDistance(t));
-                        Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.80f, System.Drawing.Color.Red, xRKillNotice);
+                        Drawing.DrawText(
+                            Drawing.Width * 0.44f, Drawing.Height * 0.80f, System.Drawing.Color.Red, xRKillNotice);
                     }
                 }
             }
@@ -416,8 +435,10 @@ namespace Marksman
                 if (useQ && JinxData.JinxSpells.CanCastQ && Q.IsReady())
                     JinxEvents.CastQ();
 
-                if (useW && JinxData.JinxSpells.CanCastW && W.IsReady())
+                if (useW && W.IsReady())
+                {
                     JinxEvents.CastW();
+                }
             }
         }
 
@@ -434,6 +455,9 @@ namespace Marksman
 
         public override void Drawing_OnDraw(EventArgs args)
         {
+            var xDraw = Program.Config.Item("CustomRange").GetValue<Slider>().Value;
+            Render.Circle.DrawCircle(ObjectManager.Player.Position, xDraw, System.Drawing.Color.Aqua);
+
             Spell[] spellList = { W, E };
             var drawQbound = GetValue<Circle>("DrawQBound");
 
@@ -456,7 +480,7 @@ namespace Marksman
                 }
                 var xText = xHarassStatus.Substring(0, xHarassStatus.Length - 3);
                 Vector2 pos = Drawing.WorldToScreen(ObjectManager.Player.Position);
-                Utils.DrawText(PlayerText, xText, (int)ObjectManager.Player.HPBarPosition.X + 185, (int)ObjectManager.Player.HPBarPosition.Y+ 5, SharpDX.Color.White);
+                Utils.DrawText(PlayerText, xText, (int)ObjectManager.Player.HPBarPosition.X + 185, (int)ObjectManager.Player.HPBarPosition.Y + 5, SharpDX.Color.White);
             }
 
             foreach (var spell in spellList)
@@ -505,7 +529,9 @@ namespace Marksman
             config.AddItem(new MenuItem("UseEC" + Id, "Use E").SetValue(true));
             config.AddItem(new MenuItem("UseRC" + Id, "Use R").SetValue(true));
 
-            config.AddItem(new MenuItem("UseQPowPowStackH", "Use Mega Q PowPow Stack").SetValue(new StringList(new[] { "Off", "Both", "Combo", "Harass" }, 1)));
+            config.AddItem(
+                new MenuItem("UseQPowPowStackH", "Use Mega Q PowPow Stack").SetValue(
+                    new StringList(new[] { "Off", "Both", "Combo", "Harass" }, 1)));
             return true;
         }
 
@@ -535,9 +561,9 @@ namespace Marksman
             var xQMenu = new Menu("Q Settings", "QSettings");
             {
                 xQMenu.AddItem(new MenuItem("UseQPowPowStack", "Use Q PowPow Stack").SetValue(true));
-                xQMenu.AddItem(new MenuItem("SwapDistance" + Id, "Swap Q for Distance").SetValue(true));
+                xQMenu.AddItem(new MenuItem("SwapDistance", "Swap Q for Distance").SetValue(true));
                 xQMenu.AddItem(new MenuItem("SwapAOE" + Id, "Swap Q for AOE Damage").SetValue(false));
-                xQMenu.AddItem(new MenuItem("Swap2Mini" + Id, "Always Swap to MiniGun If No Enemy").SetValue(true));
+                xQMenu.AddItem(new MenuItem("Swap2Mini", "Always Swap to MiniGun If No Enemy").SetValue(true));
                 config.AddSubMenu(xQMenu);
             }
 
@@ -571,9 +597,12 @@ namespace Marksman
 
         public override bool DrawingMenu(Menu config)
         {
-            config.AddItem(new MenuItem("DrawQBound" + Id, "Draw Q bound").SetValue(new Circle(true, System.Drawing.Color.Azure)));
-            config.AddItem(new MenuItem("DrawW" + Id, "W range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
-            config.AddItem(new MenuItem("DrawE" + Id, "E range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
+            config.AddItem(
+                new MenuItem("DrawQBound" + Id, "Draw Q bound").SetValue(new Circle(true, System.Drawing.Color.Azure)));
+            config.AddItem(
+                new MenuItem("DrawW" + Id, "W range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
+            config.AddItem(
+                new MenuItem("DrawE" + Id, "E range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
 
             config.AddItem(new MenuItem("DrawToggleStatus", "Show Toggle Status").SetValue(true));
 
@@ -582,7 +611,7 @@ namespace Marksman
 
         public override bool ExtrasMenu(Menu config)
         {
-
+            config.AddItem(new MenuItem("CustomRange", "Custom Range").SetValue(new Slider(100, 0, 4000)));
             return true;
         }
 
