@@ -11,7 +11,7 @@ namespace Marksman
 {
     internal class Lucian : Champion
     {
-        public static Spell Q, Q2, W, E, R;
+        public static Spell Q, Q2, W, E;
 
         public static bool DoubleHit = false;
         private static int xAttackLeft = 0;
@@ -51,9 +51,6 @@ namespace Marksman
 
             if (E.IsReady())
                 fComboDamage += xAttackDmg * 2;;
-
-            if (R.IsReady())
-                fComboDamage += (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.R) * 7;
 
             if (ObjectManager.Player.GetSpellSlot("summonerdot") != SpellSlot.Unknown &&
                 ObjectManager.Player.Spellbook.CanUseSpell(ObjectManager.Player.GetSpellSlot("summonerdot")) ==

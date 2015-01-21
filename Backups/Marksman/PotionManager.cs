@@ -8,7 +8,6 @@ namespace Marksman
 {
     internal class PotionManager
     {
-        private Menu ExtrasMenu;
         private enum PotionType
         {
             Health, Mana
@@ -96,9 +95,9 @@ namespace Marksman
                 
             try
             {
-                if (ExtrasMenu.Item("HealthPotion").GetValue<bool>())
+                if (Program.Config.Item("HealthPotion").GetValue<bool>())
                 {
-                    if (ObjectManager.Player.HealthPercentage() <= ExtrasMenu.Item("HealthPercent").GetValue<Slider>().Value)
+                    if (ObjectManager.Player.HealthPercentage() <= Program.Config.Item("HealthPercent").GetValue<Slider>().Value)
                     {
                         var healthSlot = GetPotionSlot(PotionType.Health);
                         if (!IsBuffActive(PotionType.Health))
@@ -106,9 +105,9 @@ namespace Marksman
                     }
                 }
 
-                if (ExtrasMenu.Item("ManaPotion").GetValue<bool>())
+                if (Program.Config.Item("ManaPotion").GetValue<bool>())
                 {
-                    if (ObjectManager.Player.ManaPercentage() <= ExtrasMenu.Item("ManaPercent").GetValue<Slider>().Value)
+                    if (ObjectManager.Player.ManaPercentage() <= Program.Config.Item("ManaPercent").GetValue<Slider>().Value)
                     {
                         var manaSlot = GetPotionSlot(PotionType.Mana);
                         if (!IsBuffActive(PotionType.Mana))

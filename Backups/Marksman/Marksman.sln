@@ -1,7 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marksman", "Marksman.csproj", "{4E9F7272-33F7-465C-8BD9-87F801222C9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KaiHelper", "..\..\..\KaiHelper\KaiHelper\KaiHelper.csproj", "{9F3BF4B3-6AA4-41B5-820E-4626FE088126}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +27,16 @@ Global
 		{4E9F7272-33F7-465C-8BD9-87F801222C9E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4E9F7272-33F7-465C-8BD9-87F801222C9E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4E9F7272-33F7-465C-8BD9-87F801222C9E}.Release|x86.ActiveCfg = Release|Any CPU
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Debug|x86.ActiveCfg = Debug|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Debug|x86.Build.0 = Debug|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Release|Any CPU.ActiveCfg = Release|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Release|Mixed Platforms.Build.0 = Release|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Release|x86.ActiveCfg = Release|x86
+		{9F3BF4B3-6AA4-41B5-820E-4626FE088126}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

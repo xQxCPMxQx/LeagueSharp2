@@ -3,10 +3,12 @@
 using System;
 using System.Drawing;
 using System.Linq;
-
+using System.Xml.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-
+using SharpDX;
+using SharpDX.Direct3D9;
+using Font = SharpDX.Direct3D9.Font;
 #endregion
 
 namespace Marksman
@@ -17,7 +19,7 @@ namespace Marksman
         public static Spell W;
         public static Spell E;
         public static Spell R;
-
+        private readonly Font PlayerText;
         public Jinx()
         {
             Q = new Spell(SpellSlot.Q);
@@ -32,6 +34,16 @@ namespace Marksman
             Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
 
             Utils.PrintMessage("Jinx loaded.");
+            PlayerText = new Font(
+                Drawing.Direct3DDevice,
+                new FontDescription
+                {
+                    FaceName = "Courier new",
+                    Height = 15,
+                    OutputPrecision = FontPrecision.Default,
+                    Quality = FontQuality.Default,
+                });
+            //PlayerText = new SharpDX.Direct3D9.Font(Drawing.Direct3DDevice, new System.Drawing.Font("Times New Roman", 20));
         }
 
 
@@ -40,7 +52,7 @@ namespace Marksman
             if (unit.IsMe)
                 if (JinxData.GetPowPowStacks > 2 && spell.SData.Name == "JinxQAttack")
                 {
-                    JinxData.UsedLastPowPowStack = true;
+                    JinxData.HassPowPowStack = true;
                 }
         }
 
@@ -48,12 +60,12 @@ namespace Marksman
 
         public class JinxData
         {
-            public static bool UsedLastPowPowStack = false;
-
-            public static bool UsedPowPowStack;
+            public static bool HassPowPowStack = false;
+            
 
             public class JinxSpells
             {
+
                 public static bool CanCastQ
                 {
                     get
@@ -106,7 +118,7 @@ namespace Marksman
 
             public static float QMiniGunRange
             {
-                get { return 600; }
+                get { return 650; }
             }
 
             public static float QMegaGunRange
@@ -144,7 +156,7 @@ namespace Marksman
 
             public static int CountEnemies(float range)
             {
-                return ObjectManager.Player.CountEnemysInRange(range);
+                return ObjectManager.Player.CountEnemiesInRange(range);
             }
 
             public static float GetRealPowPowRange(GameObject target)
@@ -154,8 +166,8 @@ namespace Marksman
 
             public static float GetRealDistance(GameObject target)
             {
-                return ObjectManager.Player.Position.Distance(target.Position) + ObjectManager.Player.BoundingRadius +
-                       target.BoundingRadius;
+                return ObjectManager.Player.Position.Distance(target.Position);
+                //+ ObjectManager.Player.BoundingRadius + target.BoundingRadius;
             }
 
             public static float GetSlowEndTime(Obj_AI_Base target)
@@ -229,7 +241,7 @@ namespace Marksman
                     return;
 
                 if (JinxData.QGunType == JinxData.GunType.Mini && JinxData.GetPowPowStacks > 2 &&
-                    !JinxData.UsedLastPowPowStack)
+                    JinxData.HassPowPowStack)
                 {
                     var t = TargetSelector.GetTarget(JinxData.QMegaGunRange, TargetSelector.DamageType.Physical);
                     if (t.IsValidTarget())
@@ -239,6 +251,12 @@ namespace Marksman
 
             public static void ExecutePowPowStack()
             {
+                var useQPow = Program.Config.SubMenu("Misc").Item("UseQPowPowStack").GetValue<bool>();
+                if (useQPow)
+                {
+                    UsePowPowStack();
+                }
+                return;
                 var useQPowPowStack = Program.Config.Item("UseQPowPowStackH").GetValue<StringList>().SelectedIndex;
                 switch (useQPowPowStack)
                 {
@@ -333,9 +351,15 @@ namespace Marksman
 
         public override void Game_OnGameUpdate(EventArgs args)
         {
+            //Drawing.DrawText(ObjectManager.Player.HPBarPosition.X + 145, ObjectManager.Player.HPBarPosition.Y + 20, System.Drawing.Color.White, time);
             if (JinxData.GetPowPowStacks < 3)
             {
-                JinxData.UsedLastPowPowStack = false;
+                JinxData.HassPowPowStack = false;
+            }
+
+            if (JinxData.HassPowPowStack)
+            {
+                
             }
 
             JinxEvents.ExecuteToggle();
@@ -379,7 +403,7 @@ namespace Marksman
                     {
                         var xRKillNotice = String.Format(
                             "Killable Target: {0}, Distance: {1}", t.ChampionName, JinxData.GetRealDistance(t));
-                        Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.80f, Color.Red, xRKillNotice);
+                        Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.80f, System.Drawing.Color.Red, xRKillNotice);
                     }
                 }
             }
@@ -415,7 +439,24 @@ namespace Marksman
 
             if (Program.Config.Item("DrawToggleStatus").GetValue<bool>())
             {
-                ShowToggleStatus();
+                var xHarassStatus = "";
+                if (Program.Config.Item("UseQTH").GetValue<KeyBind>().Active)
+                    xHarassStatus += "Q - ";
+
+                if (Program.Config.Item("UseWTH").GetValue<KeyBind>().Active)
+                    xHarassStatus += "W - ";
+
+                if (xHarassStatus.Length < 1)
+                {
+                    xHarassStatus = "Toggle: Off   ";
+                }
+                else
+                {
+                    xHarassStatus = "Toggle: " + xHarassStatus;
+                }
+                var xText = xHarassStatus.Substring(0, xHarassStatus.Length - 3);
+                Vector2 pos = Drawing.WorldToScreen(ObjectManager.Player.Position);
+                Utils.DrawText(PlayerText, xText, (int)ObjectManager.Player.HPBarPosition.X + 185, (int)ObjectManager.Player.HPBarPosition.Y+ 5, SharpDX.Color.White);
             }
 
             foreach (var spell in spellList)
@@ -454,7 +495,7 @@ namespace Marksman
                 xHarassStatus = "Toggle: " + xHarassStatus;
             }
             xHarassStatus = xHarassStatus.Substring(0, xHarassStatus.Length - 3);
-            Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.82f, Color.Wheat, xHarassStatus);
+            Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.82f, System.Drawing.Color.Wheat, xHarassStatus);
         }
 
         public override bool ComboMenu(Menu config)
@@ -464,9 +505,7 @@ namespace Marksman
             config.AddItem(new MenuItem("UseEC" + Id, "Use E").SetValue(true));
             config.AddItem(new MenuItem("UseRC" + Id, "Use R").SetValue(true));
 
-            config.AddItem(
-                new MenuItem("UseQPowPowStackH", "Use Mega Q PowPow Stack").SetValue(
-                    new StringList(new[] { "Off", "Both", "Combo", "Harass" }, 1)));
+            config.AddItem(new MenuItem("UseQPowPowStackH", "Use Mega Q PowPow Stack").SetValue(new StringList(new[] { "Off", "Both", "Combo", "Harass" }, 1)));
             return true;
         }
 
@@ -495,7 +534,7 @@ namespace Marksman
         {
             var xQMenu = new Menu("Q Settings", "QSettings");
             {
-                xQMenu.AddItem(new MenuItem("UseQPowPowStack" + Id, "Use Q PowPow Stack").SetValue(true));
+                xQMenu.AddItem(new MenuItem("UseQPowPowStack", "Use Q PowPow Stack").SetValue(true));
                 xQMenu.AddItem(new MenuItem("SwapDistance" + Id, "Swap Q for Distance").SetValue(true));
                 xQMenu.AddItem(new MenuItem("SwapAOE" + Id, "Swap Q for AOE Damage").SetValue(false));
                 xQMenu.AddItem(new MenuItem("Swap2Mini" + Id, "Always Swap to MiniGun If No Enemy").SetValue(true));
@@ -532,9 +571,9 @@ namespace Marksman
 
         public override bool DrawingMenu(Menu config)
         {
-            config.AddItem(new MenuItem("DrawQBound" + Id, "Draw Q bound").SetValue(new Circle(true, Color.Azure)));
-            config.AddItem(new MenuItem("DrawW" + Id, "W range").SetValue(new Circle(false, Color.Azure)));
-            config.AddItem(new MenuItem("DrawE" + Id, "E range").SetValue(new Circle(false, Color.Azure)));
+            config.AddItem(new MenuItem("DrawQBound" + Id, "Draw Q bound").SetValue(new Circle(true, System.Drawing.Color.Azure)));
+            config.AddItem(new MenuItem("DrawW" + Id, "W range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
+            config.AddItem(new MenuItem("DrawE" + Id, "E range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
 
             config.AddItem(new MenuItem("DrawToggleStatus", "Show Toggle Status").SetValue(true));
 
