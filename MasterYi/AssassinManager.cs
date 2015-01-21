@@ -15,31 +15,49 @@ namespace MasterYiQx
 
         private static void Load()
         {
-            Program.TargetSelectorMenu.AddSubMenu(new Menu("Assassin Manager", "MenuAssassin"));
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinActive", "Active").SetValue(true));
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").AddItem(new MenuItem("Ax", ""));
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinSelectOption", "Set: ").SetValue(new StringList(new[] { "Single Select", "Multi Select" })));
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").AddItem(new MenuItem("Ax", ""));
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinSetClick", "Add/Remove with click").SetValue(true));
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinReset", "Reset List").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+            Program.Config.AddSubMenu(new Menu("Assassin Manager", "MenuAssassin"));
+            Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinActive", "Active").SetValue(true));
 
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").AddSubMenu(new Menu("Draw:", "Draw"));
-
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, Color.GreenYellow)));
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)));
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
-
-
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin").AddSubMenu(new Menu("Assassin List:", "AssassinMode"));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
+            foreach (
+                var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
             {
-                Program.TargetSelectorMenu.SubMenu("MenuAssassin")
-                    .SubMenu("AssassinMode")
+                Program.Config.SubMenu("MenuAssassin")
+
                     .AddItem(
                         new MenuItem("Assassin" + enemy.ChampionName, enemy.ChampionName).SetValue(
                             TargetSelector.GetPriority(enemy) > 3));
             }
-            Program.TargetSelectorMenu.SubMenu("MenuAssassin")
+
+
+            Program.Config.SubMenu("MenuAssassin")
+                .AddItem(
+                    new MenuItem("AssassinSelectOption", "Set: ").SetValue(
+                        new StringList(new[] { "Single Select", "Multi Select" })));
+            Program.Config.SubMenu("MenuAssassin")
+                .AddItem(new MenuItem("AssassinSetClick", "Add/Remove with click").SetValue(true));
+            Program.Config.SubMenu("MenuAssassin")
+                .AddItem(
+                    new MenuItem("AssassinReset", "Reset List").SetValue(new KeyBind("T".ToCharArray()[0],
+                        KeyBindType.Press)));
+
+            Program.Config.SubMenu("MenuAssassin").AddSubMenu(new Menu("Draw:", "Draw"));
+
+            Program.Config.SubMenu("MenuAssassin")
+                .SubMenu("Draw")
+                .AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, Color.GreenYellow)));
+            Program.Config.SubMenu("MenuAssassin")
+                .SubMenu("Draw")
+                .AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)));
+            Program.Config.SubMenu("MenuAssassin")
+                .SubMenu("Draw")
+                .AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
+            Program.Config.SubMenu("MenuAssassin")
+                .SubMenu("Draw")
+                .AddItem(new MenuItem("DrawStatus", "Show Status").SetValue(true));
+
+
+
+            Program.Config.SubMenu("MenuAssassin")
                 .AddItem(new MenuItem("AssassinSearchRange", "Search Range")).SetValue(new Slider(1000, 2000));
 
             Game.OnGameUpdate += OnGameUpdate;
@@ -52,7 +70,7 @@ namespace MasterYiQx
             foreach (
                 var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
             {
-                Program.TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).SetValue(false);
+                Program.Config.Item("Assassin" + enemy.ChampionName).SetValue(false);
             }
         }
         private static void OnGameUpdate(EventArgs args)
@@ -62,7 +80,7 @@ namespace MasterYiQx
         private static void Game_OnWndProc(WndEventArgs args)
         {
 
-            if (Program.TargetSelectorMenu.Item("AssassinReset").GetValue<KeyBind>().Active && args.Msg == 257)
+            if (Program.Config.Item("AssassinReset").GetValue<KeyBind>().Active && args.Msg == 257)
             {
                 ClearAssassinList();
                 Game.PrintChat(
@@ -74,7 +92,7 @@ namespace MasterYiQx
                 return;
             }
 
-            if (Program.TargetSelectorMenu.Item("AssassinSetClick").GetValue<bool>())
+            if (Program.Config.Item("AssassinSetClick").GetValue<bool>())
             {
                 foreach (var objAiHero in from hero in ObjectManager.Get<Obj_AI_Hero>()
                                           where hero.IsValidTarget()
@@ -89,13 +107,13 @@ namespace MasterYiQx
                     if (objAiHero != null && objAiHero.IsVisible && !objAiHero.IsDead)
                     {
                         var xSelect =
-                            Program.TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex;
+                            Program.Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex;
 
                         switch (xSelect)
                         {
                             case 0:
                                 ClearAssassinList();
-                                Program.TargetSelectorMenu.Item("Assassin" + objAiHero.ChampionName).SetValue(true);
+                                Program.Config.Item("Assassin" + objAiHero.ChampionName).SetValue(true);
                                 Game.PrintChat(
                                     string.Format(
                                         "<font color='FFFFFF'>Added to Assassin List</font> <font color='#09F000'>{0} ({1})</font>",
@@ -103,9 +121,9 @@ namespace MasterYiQx
                                 break;
                             case 1:
                                 var menuStatus =
-                                    Program.TargetSelectorMenu.Item("Assassin" + objAiHero.ChampionName)
+                                    Program.Config.Item("Assassin" + objAiHero.ChampionName)
                                         .GetValue<bool>();
-                                Program.TargetSelectorMenu.Item("Assassin" + objAiHero.ChampionName)
+                                Program.Config.Item("Assassin" + objAiHero.ChampionName)
                                     .SetValue(!menuStatus);
                                 Game.PrintChat(
                                     string.Format("<font color='{0}'>{1}</font> <font color='#09F000'>{2} ({3})</font>",
@@ -120,14 +138,35 @@ namespace MasterYiQx
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (!Program.TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
+            if (!Program.Config.Item("AssassinActive").GetValue<bool>())
                 return;
 
-            var drawSearch = Program.TargetSelectorMenu.Item("DrawSearch").GetValue<Circle>();
-            var drawActive = Program.TargetSelectorMenu.Item("DrawActive").GetValue<Circle>();
-            var drawNearest = Program.TargetSelectorMenu.Item("DrawNearest").GetValue<Circle>();
+            if (Program.Config.Item("DrawStatus").GetValue<bool>())
+            {
+                var enemies = ObjectManager.Get<Obj_AI_Hero>().Where(xEnemy => xEnemy.IsEnemy);
+                var objAiHeroes = enemies as Obj_AI_Hero[] ?? enemies.ToArray();
+                Drawing.DrawText(Drawing.Width * 0.89f, Drawing.Height * 0.58f, Color.GreenYellow, "Assassin Status");
+                Drawing.DrawText(Drawing.Width * 0.89f, Drawing.Height * 0.58f, Color.GhostWhite, "_____________");
+                for (int i = 0; i < objAiHeroes.Count(); i++)
+                {
+                    var xCaption = objAiHeroes[i].ChampionName;
+                    var xWidth = Drawing.Width * 0.90f;
+                    if (Program.Config.Item("Assassin" + objAiHeroes[i].ChampionName).GetValue<bool>())
+                    {
+                        xCaption = "+ " + xCaption;
+                        xWidth = Drawing.Width * 0.8910f;
 
-            var drawSearchRange = Program.TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+                    }
+                    Drawing.DrawText(xWidth, Drawing.Height * 0.58f + (float)(i + 1) * 15, Color.Gainsboro,
+                        xCaption);
+                }
+            }
+
+            var drawSearch = Program.Config.Item("DrawSearch").GetValue<Circle>();
+            var drawActive = Program.Config.Item("DrawActive").GetValue<Circle>();
+            var drawNearest = Program.Config.Item("DrawNearest").GetValue<Circle>();
+
+            var drawSearchRange = Program.Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
             if (drawSearch.Active)
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, drawSearchRange, drawSearch.Color);
@@ -140,10 +179,10 @@ namespace MasterYiQx
                         .Where(
                             enemy =>
                                 enemy.IsVisible &&
-                                Program.TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
+                                Program.Config.Item("Assassin" + enemy.ChampionName) != null &&
                                 !enemy.IsDead)
                         .Where(
-                            enemy => Program.TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>()))
+                            enemy => Program.Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>()))
             {
                 if (ObjectManager.Player.Distance(enemy) < drawSearchRange)
                 {

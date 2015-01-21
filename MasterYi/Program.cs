@@ -24,7 +24,6 @@ namespace MasterYiQx
         public static Spell W;
         public static Spell R;
 
-        private static readonly SpellSlot SmiteSlot = Player.GetSpellSlot("SummonerSmite");
         private static readonly SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
         public static Items.Item Tiamat = new Items.Item(3077, 375);
@@ -33,14 +32,12 @@ namespace MasterYiQx
         public static int DelayTick = 0;
         //Menu
         public static Menu Config;
-        public static Menu TargetSelectorMenu;
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
         
         private static void Main(string[] args)
         {
-            
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
         
@@ -65,10 +62,11 @@ namespace MasterYiQx
             //Create the menu
             Config = new Menu("xQx | MasterYi", "MasterYi", true);
 
-            TargetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(TargetSelectorMenu);
-            Config.AddSubMenu(TargetSelectorMenu);
-            
+            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(targetSelectorMenu);
+            Config.AddSubMenu(targetSelectorMenu);
+
+            new AssassinManager();
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
@@ -76,30 +74,19 @@ namespace MasterYiQx
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q")
-                .SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-
-            Config.SubMenu("Combo")
-                  .AddItem(
-                       new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
-                           KeyBindType.Press)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],KeyBindType.Press)));
             
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q")
-                .SetValue(true));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-            Config.SubMenu("Harass")
-                .AddItem(
-                    new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] {"Q+W", "Q+E", "Default"})));
-            Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("Harass")
-                  .AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
-                      KeyBindType.Press)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] {"Q+W", "Q+E", "Default"})));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],KeyBindType.Press)));
             
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
@@ -168,7 +155,7 @@ namespace MasterYiQx
                 System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             new PotionManager();
-            new AssassinManager();
+            
             Config.AddToMainMenu();
 
 
@@ -188,25 +175,26 @@ namespace MasterYiQx
             } 
         }
 
-        static Obj_AI_Hero GetEnemy(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        private static Obj_AI_Hero GetEnemy(float vDefaultRange = 0,
+            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
-            if (vDefaultRange == 0)
+            if (Math.Abs(vDefaultRange) < 0.00001)
                 vDefaultRange = Q.Range;
 
-            if (!TargetSelectorMenu.Item("AssassinActive").GetValue<bool>())
+            if (!Config.Item("AssassinActive").GetValue<bool>())
                 return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
 
-            var assassinRange = TargetSelectorMenu.Item("AssassinSearchRange").GetValue<Slider>().Value;
+            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
 
             var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
                 .Where(
                     enemy =>
                         enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName) != null &&
-                        TargetSelectorMenu.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                        Config.Item("Assassin" + enemy.ChampionName) != null &&
+                        Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
                         ObjectManager.Player.Distance(enemy) < assassinRange);
 
-            if (TargetSelectorMenu.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
                 vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
             }
@@ -224,13 +212,6 @@ namespace MasterYiQx
         {
             if (!Orbwalking.CanMove(100))
                 return;
-
-            if (DelayTick - Environment.TickCount <= 250)
-            {
-                UseSummoners();
-                DelayTick = Environment.TickCount;
-            }
-
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
@@ -287,7 +268,7 @@ namespace MasterYiQx
             {
                 if (useQDontUnderTurret)
                 {
-                    if (!Utility.UnderTurret(t))
+                    if (!t.UnderTurret())
                         Q.CastOnUnit(t);
                 } else
                 {
@@ -444,36 +425,6 @@ namespace MasterYiQx
                                    select itemID)
             {
                 Items.UseItem(itemID);
-            }
-        }
-
-        private static void UseSummoners()
-        {
-            if (SmiteSlot == SpellSlot.Unknown)
-                return;
-
-            if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active) return;
-
-            string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-            var firstOrDefault = Player.Spellbook.Spells.FirstOrDefault(
-                spell => spell.Name.Contains("mite"));
-            if (firstOrDefault == null) return;
-
-            var vMonsters = MinionManager.GetMinions(Player.ServerPosition, firstOrDefault.SData.CastRange[0],
-                MinionTypes.All, MinionTeam.NotAlly);
-            foreach (
-                var vMonster in
-                    vMonsters.Where(
-                        vMonster =>
-                            vMonster != null && !vMonster.IsDead && !Player.IsDead && !Player.IsStunned &&
-                            SmiteSlot != SpellSlot.Unknown &&
-                            Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                        .Where(
-                            vMonster =>
-                                (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) &&
-                                (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name))))) 
-            {
-                Player.Spellbook.CastSpell(SmiteSlot, vMonster);
             }
         }
     }
