@@ -25,9 +25,8 @@ namespace Marksman
 
         private List<Potion> potions;
 
-        public PotionManager(Menu extrasMenu)
+        public PotionManager()
         {
-            ExtrasMenu = extrasMenu;
             potions = new List<Potion>
             {
                 new Potion
@@ -69,21 +68,21 @@ namespace Marksman
         private void Load()
         {
             potions = potions.OrderBy(x => x.Priority).ToList();
-            ExtrasMenu.AddSubMenu(new Menu("Potion Manager", "PotionManager"));
+            Program.Config.AddSubMenu(new Menu("Potion Manager", "PotionManager"));
 
-            ExtrasMenu.SubMenu("PotionManager").AddSubMenu(new Menu("Health", "Health"));
-            ExtrasMenu.SubMenu("PotionManager")
+            Program.Config.SubMenu("PotionManager").AddSubMenu(new Menu("Health", "Health"));
+            Program.Config.SubMenu("PotionManager")
                 .SubMenu("Health")
                 .AddItem(new MenuItem("HealthPotion", "Use Health Potion").SetValue(true));
-            ExtrasMenu.SubMenu("PotionManager")
+            Program.Config.SubMenu("PotionManager")
                 .SubMenu("Health")
                 .AddItem(new MenuItem("HealthPercent", "HP Trigger Percent").SetValue(new Slider(30)));
 
-            ExtrasMenu.SubMenu("PotionManager").AddSubMenu(new Menu("Mana", "Mana"));
-            ExtrasMenu.SubMenu("PotionManager")
+            Program.Config.SubMenu("PotionManager").AddSubMenu(new Menu("Mana", "Mana"));
+            Program.Config.SubMenu("PotionManager")
                 .SubMenu("Mana")
                 .AddItem(new MenuItem("ManaPotion", "Use Mana Potion").SetValue(true));
-            ExtrasMenu.SubMenu("PotionManager")
+            Program.Config.SubMenu("PotionManager")
                 .SubMenu("Mana")
                 .AddItem(new MenuItem("ManaPercent", "MP Trigger Percent").SetValue(new Slider(30)));
 
@@ -106,6 +105,7 @@ namespace Marksman
                             ObjectManager.Player.Spellbook.CastSpell(healthSlot.SpellSlot);
                     }
                 }
+
                 if (ExtrasMenu.Item("ManaPotion").GetValue<bool>())
                 {
                     if (ObjectManager.Player.ManaPercentage() <= ExtrasMenu.Item("ManaPercent").GetValue<Slider>().Value)

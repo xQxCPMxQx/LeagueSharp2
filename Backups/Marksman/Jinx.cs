@@ -221,23 +221,24 @@ namespace Marksman
             {
                 var existsManaPer = Program.Config.Item("UseQTHM").GetValue<Slider>().Value;
                 
-                if (!Program.Config.Item("SwapDistance").GetValue<bool>())
-                    return;
+//                if (!Program.Config.Item("SwapDistance").GetValue<bool>())
+//                    return;
 
                 if (checkPerMana && ObjectManager.Player.ManaPercentage() < existsManaPer)
                     return;
-
+                
                 var t = TargetSelector.GetTarget(
                     JinxData.QMegaGunRange + Q.Width / 2, TargetSelector.DamageType.Physical);
 
                 if (!t.IsValidTarget())
                     return;
 
-                if (ObjectManager.Player.Distance(t) > JinxData.QMiniGunRange &&
-                    ObjectManager.Player.Distance(t) < JinxData.QMegaGunRange)
+                if (ObjectManager.Player.Distance(t) > JinxData.QMiniGunRange && ObjectManager.Player.Distance(t) < JinxData.QMegaGunRange)
                 {
                     if (JinxData.QGunType == JinxData.GunType.Mini)
+                    {
                         Q.Cast();
+                    }
                 }
                 else
                 {
@@ -264,16 +265,18 @@ namespace Marksman
             private static void HarassToggleQ()
             {
                 var toggleActive = Program.Config.Item("UseQTH").GetValue<KeyBind>().Active;
-
-                if (toggleActive || !ObjectManager.Player.HasBuff("Recall"))
+                
+                if (toggleActive && !ObjectManager.Player.HasBuff("Recall"))
+                {
                     CastQ(true);
+                }
             }
 
             private static void HarassToggleW()
             {
-                var toggleActive = Program.Config.Item("UseQTH").GetValue<KeyBind>().Active;
+                var toggleActive = Program.Config.Item("UseWTH").GetValue<KeyBind>().Active;
 
-                if (toggleActive || !ObjectManager.Player.HasBuff("Recall"))
+                if (toggleActive && !ObjectManager.Player.HasBuff("Recall"))
                     CastW(true);
             }
         }
@@ -285,8 +288,9 @@ namespace Marksman
             var autoEd = GetValue<bool>("AutoED");
 
             JinxEvents.ExecuteToggle();
-            JinxEvents.ExecutePowPowStack();
-            if (W.IsReady())
+            //JinxEvents.ExecutePowPowStack();
+            /*
+            if (E.IsReady())
             {
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (autoEi)
@@ -310,15 +314,19 @@ namespace Marksman
                     }
                 }
             }
+             * */
 
-            if (GetValue<KeyBind>("CastR").Active && R.IsReady())
+            if (Program.Config.SubMenu("Misc").Item("ROverKill").GetValue<bool>() && R.IsReady())
             {
-                var target = TargetSelector.GetTarget(1500 + R.Width, TargetSelector.DamageType.Physical);
+                var target = TargetSelector.GetTarget(25000 + R.Width, TargetSelector.DamageType.Physical);
 
                 if (target.IsValidTarget())
                 {
                     if (ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
                     {
+                        if (ObjectManager.Player.Distance(target) > 1500) 
+                            Game.PrintChat("Kill " + target.ChampionName + " with R!");
+
                         R.Cast(target);
                     }
                 }
@@ -354,48 +362,6 @@ namespace Marksman
                     }
                 }
 
-                if (useQ)
-                {
-                    foreach (var t in
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(t => t.IsValidTarget(JinxData.GetRealPowPowRange(t) + JinxData.QMegaGunRange + 20f)))
-                    {
-                        var swapDistance = GetValue<bool>("SwapDistance");
-                        var swapAoe = GetValue<bool>("SwapAOE");
-                        var distance = JinxData.GetRealDistance(t);
-                        var powPowRange = JinxData.GetRealPowPowRange(t);
-
-                        if (swapDistance && Q.IsReady())
-                        {
-                            if (distance > powPowRange && JinxData.QGunType == JinxData.GunType.Mini)
-                            {
-                                if (Q.Cast())
-                                {
-                                    return;
-                                }
-                            }
-                            else if (distance < powPowRange && JinxData.QGunType == JinxData.GunType.Mega)
-                            {
-                                if (Q.Cast())
-                                {
-                                    return;
-                                }
-                            }
-                        }
-
-                        if (swapAoe && Q.IsReady())
-                        {
-                            if (distance > powPowRange && JinxData.GetPowPowStacks > 2 &&
-                                JinxData.QGunType == JinxData.GunType.Mini && JinxData.CountEnemies(150) > 1)
-                            {
-                                if (Q.Cast())
-                                {
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
 
@@ -420,19 +386,9 @@ namespace Marksman
 
             if (drawQbound.Active)
             {
-                if (JinxData.QGunType == JinxData.GunType.Mega)
-                {
-                    Render.Circle.DrawCircle(
-                        ObjectManager.Player.Position, 525f + ObjectManager.Player.BoundingRadius + 65f,
+                    Render.Circle.DrawCircle(ObjectManager.Player.Position,
+                        JinxData.QGunType == JinxData.GunType.Mini ? JinxData.QMegaGunRange : JinxData.QMiniGunRange,
                         drawQbound.Color);
-                }
-                else
-                {
-                    Render.Circle.DrawCircle(
-                        ObjectManager.Player.Position,
-                        525f + ObjectManager.Player.BoundingRadius + 65f + JinxData.QMegaGunRange + 20f,
-                        drawQbound.Color);
-                }
             }
         }
 
@@ -461,11 +417,10 @@ namespace Marksman
         {
             config.AddItem(new MenuItem("UseQC" + Id, "Use Q").SetValue(true));
             config.AddItem(new MenuItem("UseWC" + Id, "Use W").SetValue(true));
+            config.AddItem(new MenuItem("UseEC" + Id, "Use E").SetValue(true));
             config.AddItem(new MenuItem("UseRC" + Id, "Use R").SetValue(true));
 
-            config.AddItem(
-                new MenuItem("UseQPowPowStackH", "Use Q PowPow Stack").SetValue(
-                    new StringList(new[] { "Off", "Both", "Combo", "Harass" }, 1)));
+            config.AddItem(new MenuItem("UseQPowPowStackH", "Use Q PowPow Stack").SetValue(new StringList(new[] { "Off", "Both", "Combo", "Harass" }, 1)));
             return true;
         }
 
@@ -474,12 +429,10 @@ namespace Marksman
             config.AddItem(new MenuItem("UseQH" + Id, "Use Q").SetValue(true));
             config.AddItem(new MenuItem("UseWH" + Id, "Use W").SetValue(false));
 
-            config.AddItem(
-                new MenuItem("UseQTH", "Q (Toggle!)").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle)));
+            config.AddItem(new MenuItem("UseQTH", "Q (Toggle!)").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle)));
             config.AddItem(new MenuItem("UseQTHM", "Q Mana Per.").SetValue(new Slider(50, 100, 0)));
 
-            config.AddItem(
-                new MenuItem("UseWTH", "W (Toggle!)").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
+            config.AddItem(new MenuItem("UseWTH", "W (Toggle!)").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
             config.AddItem(new MenuItem("UseWTHM", "W Mana Per.").SetValue(new Slider(50, 100, 0)));
             return true;
         }
@@ -498,14 +451,14 @@ namespace Marksman
                 xQMenu.AddItem(new MenuItem("SwapDistance" + Id, "Swap Q for Distance").SetValue(true));
                 xQMenu.AddItem(new MenuItem("SwapAOE" + Id, "Swap Q for AOE Damage").SetValue(false));
                 xQMenu.AddItem(new MenuItem("Swap2Mini" + Id, "Always Swap to MiniGun If No Enemy").SetValue(true));
-                config.SubMenu("MiscMenu").AddSubMenu(xQMenu);
+                config.AddSubMenu(xQMenu);
             }
 
             var xWMenu = new Menu("W Settings", "WSettings");
             {
                 xWMenu.AddItem(new MenuItem("WHitChance", "W HitChance").SetValue(new StringList(new[] { "Low", "Medium", "High", "Very High", "Immobile" }, 2)));
                 xWMenu.AddItem(new MenuItem("MinWRange" + Id, "Min W range").SetValue(new Slider(525 + 65 * 2, 0, 1200)));
-                config.SubMenu("MiscMenu").AddSubMenu(xWMenu);
+                config.AddSubMenu(xWMenu);
             }
 
             var xEMenu = new Menu("E Settings", "ESettings");
@@ -513,17 +466,17 @@ namespace Marksman
                 xEMenu.AddItem(new MenuItem("AutoEI" + Id, "Auto-E -> Immobile").SetValue(true));
                 xEMenu.AddItem(new MenuItem("AutoES" + Id, "Auto-E -> Slowed/Stunned/Teleport/Snare").SetValue(true));
                 xEMenu.AddItem(new MenuItem("AutoED" + Id, "Auto-E -> Dashing").SetValue(false));
-                config.SubMenu("MiscMenu").AddSubMenu(xEMenu);
+                config.AddSubMenu(xEMenu);
             }
 
             var xRMenu = new Menu("R Settings", "RSettings");
             {
-                xRMenu.AddItem(new MenuItem("CastR" + Id, "Cast R (2000 Range)").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
-                xRMenu.AddItem(new MenuItem("ROverKill" + Id, "Check R Overkill").SetValue(true));
+                xRMenu.AddItem(new MenuItem("CastR", "Cast R (2000 Range)").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+                xRMenu.AddItem(new MenuItem("ROverKill", "Check R Overkill").SetValue(true));
                 xRMenu.AddItem(new MenuItem("MinRRange" + Id, "Min R range").SetValue(new Slider(300, 0, 1500)));
                 xRMenu.AddItem(new MenuItem("MaxRRange" + Id, "Max R range").SetValue(new Slider(1700, 0, 4000)));
                 xRMenu.AddItem(new MenuItem("ProtectUltMana", "Protect Mana for Ultimate").SetValue(true));
-                config.SubMenu("MiscMenu").AddSubMenu(xRMenu);
+                config.AddSubMenu(xRMenu);
             }
             return true;
         }
