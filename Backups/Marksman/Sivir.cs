@@ -13,7 +13,7 @@ namespace Marksman
         public Spell Q;
         public Spell W;
         public Spell E;
-        private Menu MenuSupportedSpells;
+        private Menu _menuSupportedSpells;
 
         public Sivir()
         {
@@ -46,7 +46,7 @@ namespace Marksman
 
                     if (t.HasBuffOfType(BuffType.Charm))
                         xDelay = 200;
-                    
+
                     Utility.DelayAction.Add(xDelay, () => Q.Cast(t, false, true));
                 }
             }
@@ -115,26 +115,27 @@ namespace Marksman
 
         public override bool MiscMenu(Menu config)
         {
-            config.AddItem(new MenuItem("AutoQ" + Id, "Auto Q on Stunned/Slow/Fear/Taunt").SetValue(true));
+            config.AddItem(new MenuItem("AutoQ" + Id, "Auto Q on Stun/Slow/Fear/Taunt/Snare").SetValue(true));
 
-            MenuSupportedSpells = new Menu("E Supported Spells", "suppspells");
+            _menuSupportedSpells = new Menu("E Supported Spells", "suppspells");
 
             foreach (var xEnemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
                 Obj_AI_Hero enemy = xEnemy;
                 foreach (var ccList in SpellList.BuffList.Where(xList => xList.ChampionName == enemy.ChampionName))
                 {
-                    MenuSupportedSpells.AddItem(new MenuItem(ccList.BuffName, ccList.DisplayName)).SetValue(true);
+                    _menuSupportedSpells.AddItem(new MenuItem(ccList.BuffName, ccList.DisplayName)).SetValue(true);
                 }
             }
-            Program.Config.AddSubMenu(MenuSupportedSpells);
+            Program.Config.AddSubMenu(_menuSupportedSpells);
 
             return true;
         }
 
         public override bool DrawingMenu(Menu config)
         {
-            config.AddItem(new MenuItem("DrawQ" + Id, "Q range").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
+            config.AddItem(
+                new MenuItem("DrawQ" + Id, "Q range").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
             return true;
         }
 
@@ -153,42 +154,43 @@ namespace Marksman
         {
             if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy)
             {
-                foreach (var t in MenuSupportedSpells.Items)
+                foreach (var spell in
+                    _menuSupportedSpells.Items.SelectMany(
+                        t =>
+                            SpellList.BuffList.Where(
+                                xSpell => xSpell.CanBlockWith.ToList().Contains(BlockableSpells.SivirE))
+                                .Where(
+                                    spell => t.Name == args.SData.Name && t.Name == spell.BuffName && t.GetValue<bool>()))
+                    )
                 {
-                    foreach (var spell in SpellList.BuffList.Where(xSpell => xSpell.CanBlockWith.ToList().Contains(BlockableSpells.SivirE)))
+                    switch (spell.SkillType)
                     {
-                        if (t.Name == args.SData.Name && t.Name == spell.BuffName && t.GetValue<bool>())
-                        {
-                            switch (spell.SkillType)
+                        case SkillShotType.SkillshotCircle:
+                            if (ObjectManager.Player.Distance(args.End) <= 250f)
                             {
-                                case SkillShotType.SkillshotCircle:
-                                    if (ObjectManager.Player.Distance(args.End) <= 250f)
-                                    {
-                                        if (E.IsReady())
-                                            E.Cast();
-                                    }
-                                    break;
-                                case SkillShotType.SkillshotLine:
-                                    if (ObjectManager.Player.Distance(args.End) <= 100f)
-                                    {
-                                        if (E.IsReady())
-                                            E.Cast();
-                                    }
-                                    break;
-                                case SkillShotType.SkillshotUnknown:
-                                    if (ObjectManager.Player.Distance(args.End) <= 500f ||
-                                        ObjectManager.Player.Distance(sender.Position) <= 500)
-                                    {
-                                        if (E.IsReady())
-                                            E.Cast();
-                                    }
-                                    break;
+                                if (E.IsReady())
+                                    E.Cast();
                             }
-                        }
+                            break;
+                        case SkillShotType.SkillshotLine:
+                            if (ObjectManager.Player.Distance(args.End) <= 100f)
+                            {
+                                if (E.IsReady())
+                                    E.Cast();
+                            }
+                            break;
+                        case SkillShotType.SkillshotUnknown:
+                            if (ObjectManager.Player.Distance(args.End) <= 500f ||
+                                ObjectManager.Player.Distance(sender.Position) <= 500)
+                            {
+                                if (E.IsReady())
+                                    E.Cast();
+                            }
+                            break;
                     }
                 }
             }
         }
-    
+
     }
 }
