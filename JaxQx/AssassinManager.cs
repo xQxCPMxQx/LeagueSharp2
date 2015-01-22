@@ -37,7 +37,7 @@ namespace JaxQx
                 .AddItem(new MenuItem("AssassinSetClick", "Add/Remove with click").SetValue(true));
             Program.Config.SubMenu("MenuAssassin")
                 .AddItem(
-                    new MenuItem("AssassinReset", "Reset List").SetValue(new KeyBind("T".ToCharArray()[0],
+                    new MenuItem("AssassinReset", "Reset List").SetValue(new KeyBind("J".ToCharArray()[0],
                         KeyBindType.Press)));
 
             Program.Config.SubMenu("MenuAssassin").AddSubMenu(new Menu("Draw:", "Draw"));
