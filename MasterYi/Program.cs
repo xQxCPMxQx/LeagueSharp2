@@ -13,10 +13,10 @@ namespace MasterYiQx
     {
         public const string ChampionName = "MasterYi";
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
-        
+
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
-        
+
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
@@ -27,7 +27,7 @@ namespace MasterYiQx
         private static readonly SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
         public static Items.Item Tiamat = new Items.Item(3077, 375);
-        public static Items.Item Hydra = new Items.Item(3074, 375); 
+        public static Items.Item Hydra = new Items.Item(3074, 375);
 
         public static int DelayTick = 0;
         //Menu
@@ -35,30 +35,32 @@ namespace MasterYiQx
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
-        
+
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
-        
+
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.BaseSkinName != "MasterYi") return;
-            if (Player.IsDead) return;
-            
+            if (Player.BaseSkinName != "MasterYi")
+                return;
+            if (Player.IsDead)
+                return;
+
             Q = new Spell(SpellSlot.Q, 600f);
             W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 200f);
             R = new Spell(SpellSlot.R);
-            
+
             Q.SetTargetted(0.50f, 75f);
-            
+
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
             SpellList.Add(R);
-            
-           
+
+
             //Create the menu
             Config = new Menu("xQx | MasterYi", "MasterYi", true);
 
@@ -70,36 +72,49 @@ namespace MasterYiQx
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
-            
+
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+            Config.SubMenu("Combo")
+                .AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],KeyBindType.Press)));
-            
+            Config.SubMenu("Combo")
+                .AddItem(
+                    new MenuItem("ComboActive", "Combo!").SetValue(
+                        new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+            Config.SubMenu("Harass")
+                .AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] {"Q+W", "Q+E", "Default"})));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],KeyBindType.Press)));
-            
+            Config.SubMenu("Harass")
+                .AddItem(
+                    new MenuItem("HarassMode", "Harass Mode: ").SetValue(
+                        new StringList(new[] { "Q+W", "Q+E", "Default" })));
+            Config.SubMenu("Harass")
+                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("Harass")
+                .AddItem(
+                    new MenuItem("HarassActive", "Harass").SetValue(
+                        new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Under Turret Q")
-                .SetValue(true));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
             Config.SubMenu("LaneClear")
                 .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
-                  .AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0],
-                      KeyBindType.Press)));
-            
+                .AddItem(
+                    new MenuItem("LaneClearActive", "LaneClear").SetValue(
+                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+
             // Jungling Farm
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
@@ -107,10 +122,12 @@ namespace MasterYiQx
             Config.SubMenu("JungleFarm")
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("JungleFarm")
-                .AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
+                .AddItem(
+                    new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
             Config.SubMenu("JungleFarm")
-                  .AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0],
-                      KeyBindType.Press)));
+                .AddItem(
+                    new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
+                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             Config.AddSubMenu(new Menu("HealSettings", "HealSettings"));
             Config.SubMenu("HealSettings").AddItem(new MenuItem("HealUseW", "Use W").SetValue(true));
@@ -120,8 +137,9 @@ namespace MasterYiQx
             Config.SubMenu("HealSettings")
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent:").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("HealSettings")
-                .AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
-            
+                .AddItem(
+                    new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
+
             // Extras
             MenuExtras = new Menu("Extras", "Extras");
             Config.AddSubMenu(MenuExtras);
@@ -138,7 +156,7 @@ namespace MasterYiQx
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
-            
+
             // Extras -> Use Items -> AOE Items
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
             menuUseItems.AddSubMenu(MenuNonTargetedItems);
@@ -146,33 +164,39 @@ namespace MasterYiQx
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
-            
+
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQRange", "Q range").SetValue(new Circle(true,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawSmite", "Smite Range").SetValue(new Circle(false,
-                System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawQRange", "Q range").SetValue(
+                        new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawSmite", "Smite Range").SetValue(
+                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             new PotionManager();
-            
+
             Config.AddToMainMenu();
 
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}" +
-                                         "</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
+
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}" +
+                    "</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
         }
-        
+
         private static void Drawing_OnDraw(EventArgs args)
         {
             var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
             if (drawQRange.Active)
             {
                 Render.Circle.DrawCircle(Player.Position, Q.Range, drawQRange.Color);
-            } 
+            }
         }
 
         private static Obj_AI_Hero GetEnemy(float vDefaultRange = 0,
@@ -186,13 +210,14 @@ namespace MasterYiQx
 
             var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
 
-            var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
-                .Where(
-                    enemy =>
-                        enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                        Config.Item("Assassin" + enemy.ChampionName) != null &&
-                        Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                        ObjectManager.Player.Distance(enemy) < assassinRange);
+            var vEnemy =
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        enemy =>
+                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            Config.Item("Assassin" + enemy.ChampionName) != null &&
+                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                            ObjectManager.Player.Distance(enemy) < assassinRange);
 
             if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
@@ -217,7 +242,7 @@ namespace MasterYiQx
             {
                 Combo();
             }
-            
+
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Player.MaxMana / 100 * Config.Item("HarassMana").GetValue<Slider>().Value;
@@ -254,7 +279,7 @@ namespace MasterYiQx
                     W.Cast(Player, true);
             }
         }
-        
+
         private static void Combo()
         {
             var t = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
@@ -270,7 +295,8 @@ namespace MasterYiQx
                 {
                     if (!t.UnderTurret())
                         Q.CastOnUnit(t);
-                } else
+                }
+                else
                 {
                     Q.CastOnUnit(t);
                 }
@@ -278,15 +304,14 @@ namespace MasterYiQx
 
             if (Player.Distance(t) <= E.Range + 50)
                 UseItems(t, true);
-            
+
             if (t != null)
                 UseItems(t);
 
             if (E.IsReady() && useE && Player.Distance(t) <= E.Range)
                 E.Cast();
 
-            if (IgniteSlot != SpellSlot.Unknown &&
-                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (t != null && Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
                 {
@@ -296,8 +321,8 @@ namespace MasterYiQx
 
             if (R.IsReady() && useR && t != null)
             {
-                if (ObjectManager.Player.CountEnemysInRange((int)Q.Range) >= 2)
-                { 
+                if (ObjectManager.Player.CountEnemysInRange((int) Q.Range) >= 2)
+                {
                     R.CastOnUnit(Player);
                 }
             }
@@ -309,11 +334,8 @@ namespace MasterYiQx
                 Tiamat.Cast();
 
         }
-        
-        private static void Harass()
-        {
-          
-        }
+
+        private static void Harass() {}
 
         private static void LaneClear()
         {
@@ -321,8 +343,8 @@ namespace MasterYiQx
             var useE = Config.Item("UseELaneClear").GetValue<bool>();
             var useQDontUnderTurret = Config.Item("UseQLaneClearDontUnderTurret").GetValue<bool>();
 
-            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All,
-                MinionTeam.NotAlly);
+            var allMinions = MinionManager.GetMinions(
+                ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
 
 
             if (allMinions.Count >= 2)
@@ -360,22 +382,25 @@ namespace MasterYiQx
 
         private static void JungleFarm()
         {
-            if (!Config.Item("JungleFarmActive").GetValue<KeyBind>().Active) return;
+            if (!Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
+                return;
 
             var useQ = Config.Item("UseQJungleFarm").GetValue<bool>();
             var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
 
-            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All,
-                MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(
+                ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
+                MinionOrderTypes.MaxHealth);
 
-            if (mobs.Count <= 0) return;
+            if (mobs.Count <= 0)
+                return;
 
             var mob = mobs[0];
             if (useE && E.IsReady() && Player.Distance(mob) < Orbwalking.GetRealAutoAttackRange(Player))
             {
                 E.Cast(mob);
             }
-            
+
             if (useQ && Q.IsReady())
             {
                 Q.Cast(mob);
@@ -401,14 +426,15 @@ namespace MasterYiQx
 
         public static void UseItems(Obj_AI_Hero vTarget, bool useNonTargetedItems = false)
         {
-            if (vTarget == null) return;
+            if (vTarget == null)
+                return;
             foreach (var itemID in from menuItem in MenuTargetedItems.Items
-                                   let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                                   where useItem
-                                   select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
-                                       into itemID
-                                       where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
-                                   select itemID)
+                let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
+                where useItem
+                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
+                into itemID
+                where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
+                select itemID)
             {
                 Items.UseItem(itemID, vTarget);
             }
@@ -416,13 +442,13 @@ namespace MasterYiQx
             if (!useNonTargetedItems)
                 return;
 
-            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items 
-                                   let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>() 
-                                   where useItem 
-                                   select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4)) 
-                                        into itemID 
-                                        where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null 
-                                   select itemID)
+            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items
+                let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
+                where useItem
+                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
+                into itemID
+                where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
+                select itemID)
             {
                 Items.UseItem(itemID);
             }

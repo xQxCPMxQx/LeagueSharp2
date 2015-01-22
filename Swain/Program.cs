@@ -24,7 +24,7 @@ namespace Swain
         public static Spell Q, W, E, R;
         public static SpellSlot IgniteSlot;
         private static bool UltiActive;
-        
+
 
         //Menu
         public static Menu Config;
@@ -41,12 +41,13 @@ namespace Swain
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (vPlayer.BaseSkinName != ChampionName) return;
+            if (vPlayer.BaseSkinName != ChampionName)
+                return;
 
-            
+
 
             //Create the spells
-             Q = new Spell(SpellSlot.Q, 625);
+            Q = new Spell(SpellSlot.Q, 625);
             W = new Spell(SpellSlot.W, 820);
             E = new Spell(SpellSlot.E, 625);
             R = new Spell(SpellSlot.R, 650);
@@ -95,7 +96,8 @@ namespace Swain
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(false));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(false));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("Harass")
+                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
 
             Config.SubMenu("Harass")
                 .AddItem(
@@ -103,14 +105,15 @@ namespace Swain
                         new KeyBind(Config.Item("Farm").GetValue<KeyBind>().Key, KeyBindType.Press)));
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(new KeyBind("Y".ToCharArray()[0],
-                        KeyBindType.Toggle)));
+                    new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(
+                        new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
 
             //Farming menu:
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
 
             Config.SubMenu("LaneClear")
                 .AddItem(
@@ -122,7 +125,8 @@ namespace Swain
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", "Use W").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "Use E").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("JungleFarm")
+                .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("JungleFarm")
                 .AddItem(
                     new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(
@@ -159,13 +163,16 @@ namespace Swain
             //Drawings menu:
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("QRange", "Q range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
+                .AddItem(
+                    new MenuItem("QRange", "Q range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("WRange", "W range").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
             Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("ERange", "E range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
+                .AddItem(
+                    new MenuItem("ERange", "E range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
             Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("RRange", "R range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
+                .AddItem(
+                    new MenuItem("RRange", "R range").SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
 
             /* [ Damage After Combo ] */
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
@@ -196,18 +203,22 @@ namespace Swain
 
         private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
         {
-            if (!Config.Item("InterruptSpells").GetValue<bool>()) return;
+            if (!Config.Item("InterruptSpells").GetValue<bool>())
+                return;
             E.Cast(unit);
         }
 
         private static void OnCreateObject(GameObject sender, EventArgs args)
         {
-            if (!(sender.Name.Contains("swain_demonForm"))) return;
+            if (!(sender.Name.Contains("swain_demonForm")))
+                return;
             UltiActive = true;
         }
+
         private static void OnDeleteObject(GameObject sender, EventArgs args)
         {
-            if (!(sender.Name.Contains("swain_demonForm"))) return;
+            if (!(sender.Name.Contains("swain_demonForm")))
+                return;
             UltiActive = false;
         }
 
@@ -215,26 +226,20 @@ namespace Swain
         {
             Orbwalker.SetAttack(!(Q.IsReady() || W.IsReady() || E.IsReady()));
             UseSpells(
-                Config.Item("UseQCombo").GetValue<bool>(), 
-                Config.Item("UseWCombo").GetValue<bool>(),
-                Config.Item("UseECombo").GetValue<bool>(), 
-                Config.Item("UseRCombo").GetValue<bool>(),
-                Config.Item("UseIgniteCombo").GetValue<bool>()
-                );
+                Config.Item("UseQCombo").GetValue<bool>(), Config.Item("UseWCombo").GetValue<bool>(),
+                Config.Item("UseECombo").GetValue<bool>(), Config.Item("UseRCombo").GetValue<bool>(),
+                Config.Item("UseIgniteCombo").GetValue<bool>());
         }
 
         private static void Harass()
         {
             var existsMana = vPlayer.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-            if (vPlayer.Mana <= existsMana) return;
+            if (vPlayer.Mana <= existsMana)
+                return;
 
             UseSpells(
-                Config.Item("UseQHarass").GetValue<bool>(), 
-                Config.Item("UseWHarass").GetValue<bool>(),
-                Config.Item("UseEHarass").GetValue<bool>(), 
-                false, 
-                false
-                );
+                Config.Item("UseQHarass").GetValue<bool>(), Config.Item("UseWHarass").GetValue<bool>(),
+                Config.Item("UseEHarass").GetValue<bool>(), false, false);
         }
 
         private static float GetComboDamage(Obj_AI_Base t)
@@ -245,8 +250,8 @@ namespace Swain
                 fComboDamage += vPlayer.GetSpellDamage(t, SpellSlot.Q);
 
             if (W.IsReady())
-                fComboDamage += W.Instance.Ammo*vPlayer.GetSpellDamage(t, SpellSlot.W);
-   
+                fComboDamage += W.Instance.Ammo * vPlayer.GetSpellDamage(t, SpellSlot.W);
+
             if (E.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(t, SpellSlot.E);
 
@@ -259,7 +264,7 @@ namespace Swain
             if (R.IsReady() && !UltiActive)
                 fComboDamage += vPlayer.GetSpellDamage(t, SpellSlot.R) * 3;
 
-            return (float)fComboDamage;
+            return (float) fComboDamage;
         }
 
         private static void UseSpells(bool useQ, bool useW, bool useE, bool useR, bool useIgnite)
@@ -309,26 +314,29 @@ namespace Swain
 
         private static void Farm()
         {
-            if (!Orbwalking.CanMove(40)) return;
+            if (!Orbwalking.CanMove(40))
+                return;
 
             var existsMana = vPlayer.MaxMana / 100 * Config.Item("LaneClearMana").GetValue<Slider>().Value;
-            if (vPlayer.Mana <= existsMana) return;
+            if (vPlayer.Mana <= existsMana)
+                return;
 
             var useW = Config.Item("UseWLaneClear").GetValue<bool>();
             var useE = Config.Item("UseELaneClear").GetValue<bool>();
 
             if (useW && W.IsReady())
             {
-                var minionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range + W.Width,
-                    MinionTypes.Ranged);
+                var minionsW = MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged);
                 var wPos = W.GetCircularFarmLocation(minionsW);
                 if (wPos.MinionsHit >= 3)
                     W.Cast(wPos.Position);
             }
-        
+
             if (useE && E.IsReady())
             {
-                var minionsE = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+                var minionsE = MinionManager.GetMinions(
+                    vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in minionsE)
                 {
                     var vMinionEDamage = vPlayer.GetSpellDamage(vMinion, SpellSlot.E);
@@ -342,14 +350,16 @@ namespace Swain
         private static void JungleFarm()
         {
             var existsMana = vPlayer.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-            if (vPlayer.Mana <= existsMana) return;
+            if (vPlayer.Mana <= existsMana)
+                return;
 
             var useQ = Config.Item("UseQJFarm").GetValue<bool>();
             var useW = Config.Item("UseWJFarm").GetValue<bool>();
             var useE = Config.Item("UseEJFarm").GetValue<bool>();
 
-            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range, MinionTypes.All,
-                MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(
+                ObjectManager.Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.Neutral,
+                MinionOrderTypes.MaxHealth);
 
             if (mobs.Count > 0)
             {
@@ -367,8 +377,9 @@ namespace Swain
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (vPlayer.IsDead) return;
-            
+            if (vPlayer.IsDead)
+                return;
+
             Orbwalker.SetAttack(true);
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
@@ -398,9 +409,13 @@ namespace Swain
                     Render.Circle.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color);
             }
         }
+
         private static InventorySlot GetInventorySlot(int id)
         {
-            return ObjectManager.Player.InventoryItems.FirstOrDefault(item => (item.Id == (ItemId)id && item.Stacks >= 1) || (item.Id == (ItemId)id && item.Charges >= 1));
+            return
+                ObjectManager.Player.InventoryItems.FirstOrDefault(
+                    item =>
+                        (item.Id == (ItemId) id && item.Stacks >= 1) || (item.Id == (ItemId) id && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero vTarget)
@@ -432,6 +447,6 @@ namespace Swain
             }
         }
 
-       
+
     }
 }

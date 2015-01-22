@@ -43,7 +43,8 @@ namespace Irelia
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (vPlayer.BaseSkinName != "Irelia") return;
+            if (vPlayer.BaseSkinName != "Irelia")
+                return;
 
             Q = new Spell(SpellSlot.Q, 650f);
             W = new Spell(SpellSlot.W);
@@ -105,8 +106,8 @@ namespace Irelia
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo")
                 .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0],
-                        KeyBindType.Press)));
+                    new MenuItem("ComboActive", "Combo!").SetValue(
+                        new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -117,13 +118,15 @@ namespace Irelia
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] {"Q", "E", "Q+E"})));
+                .AddItem(
+                    new MenuItem("HarassMode", "Harass Mode: ").SetValue(new StringList(new[] { "Q", "E", "Q+E" })));
             Config.SubMenu("Harass")
                 .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
 
             Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
-                    KeyBindType.Press)));
+                .AddItem(
+                    new MenuItem("HarassActive", "Harass").SetValue(
+                        new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
@@ -136,8 +139,9 @@ namespace Irelia
             Config.SubMenu("LaneClear")
                 .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
-                .AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0],
-                    KeyBindType.Press)));
+                .AddItem(
+                    new MenuItem("LaneClearActive", "LaneClear").SetValue(
+                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             // Jungling Farm
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
@@ -147,8 +151,9 @@ namespace Irelia
             Config.SubMenu("JungleFarm")
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("JungleFarm")
-                .AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0],
-                    KeyBindType.Press)));
+                .AddItem(
+                    new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
+                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             // Extras
 
@@ -167,28 +172,28 @@ namespace Irelia
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("QRange", "Q range").SetValue(new Circle(true,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                    new MenuItem("QRange", "Q range").SetValue(
+                        new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("ERange", "E range").SetValue(new Circle(false,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                    new MenuItem("ERange", "E range").SetValue(
+                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("RRange", "R range").SetValue(new Circle(false,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                    new MenuItem("RRange", "R range").SetValue(
+                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("drawQMinionKill", "Q Minion Kill").SetValue(new Circle(true,
-                        System.Drawing.Color.GreenYellow)));
+                    new MenuItem("drawQMinionKill", "Q Minion Kill").SetValue(
+                        new Circle(true, System.Drawing.Color.GreenYellow)));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(new Circle(true,
-                        System.Drawing.Color.GreenYellow)));
+                    new MenuItem("drawMinionLastHit", "Minion Last Hit").SetValue(
+                        new Circle(true, System.Drawing.Color.GreenYellow)));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(new Circle(true,
-                        System.Drawing.Color.Gray)));
+                    new MenuItem("drawMinionNearKill", "Minion Near Kill").SetValue(
+                        new Circle(true, System.Drawing.Color.Gray)));
 
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
             Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
@@ -212,8 +217,9 @@ namespace Irelia
 
             QUsedTime = Game.Time;
 
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx:</font> <font color='#FFFFFF'>{0} Loaded!</font>",
-                ChampionName));
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx:</font> <font color='#FFFFFF'>{0} Loaded!</font>", ChampionName));
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -229,20 +235,20 @@ namespace Irelia
             var drawMinionNearKill = Config.Item("drawMinionNearKill").GetValue<Circle>();
             if (drawMinionLastHit.Active || drawMinionNearKill.Active)
             {
-                var xMinions =
-                    MinionManager.GetMinions(ObjectManager.Player.Position,
-                        ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius + 300, MinionTypes.All,
-                        MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                var xMinions = MinionManager.GetMinions(
+                    ObjectManager.Player.Position,
+                    ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius + 300, MinionTypes.All,
+                    MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
 
                 foreach (var xMinion in xMinions)
                 {
-                    if (drawMinionLastHit.Active && ObjectManager.Player.GetAutoAttackDamage(xMinion, true) >=
-                        xMinion.Health)
+                    if (drawMinionLastHit.Active &&
+                        ObjectManager.Player.GetAutoAttackDamage(xMinion, true) >= xMinion.Health)
                     {
                         Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionLastHit.Color);
                     }
                     else if (drawMinionNearKill.Active &&
-                             ObjectManager.Player.GetAutoAttackDamage(xMinion, true)*2 >= xMinion.Health)
+                             ObjectManager.Player.GetAutoAttackDamage(xMinion, true) * 2 >= xMinion.Health)
                     {
                         Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawMinionNearKill.Color);
                     }
@@ -251,14 +257,13 @@ namespace Irelia
             var drawQMinionKill = Config.Item("drawQMinionKill").GetValue<Circle>();
             if (drawQMinionKill.Active)
             {
-                var xMinions = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range + 300, MinionTypes.All,
-                    MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                var xMinions = MinionManager.GetMinions(
+                    ObjectManager.Player.Position, Q.Range + 300, MinionTypes.All, MinionTeam.Enemy,
+                    MinionOrderTypes.MaxHealth);
 
-                foreach (
-                    var xMinion in
-                        xMinions.Where(
-                            xMinion => ObjectManager.Player.GetSpellDamage(xMinion, SpellSlot.Q) - 20 >= xMinion.Health)
-                    )
+                foreach (var xMinion in
+                    xMinions.Where(
+                        xMinion => ObjectManager.Player.GetSpellDamage(xMinion, SpellSlot.Q) - 20 >= xMinion.Health))
                 {
                     Render.Circle.DrawCircle(xMinion.Position, xMinion.BoundingRadius, drawQMinionKill.Color);
                 }
@@ -276,13 +281,14 @@ namespace Irelia
 
             var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
 
-            var vEnemy = ObjectManager.Get<Obj_AI_Hero>()
-                .Where(
-                    enemy =>
-                        enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                        Config.Item("Assassin" + enemy.ChampionName) != null &&
-                        Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                        ObjectManager.Player.Distance(enemy) < assassinRange);
+            var vEnemy =
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        enemy =>
+                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            Config.Item("Assassin" + enemy.ChampionName) != null &&
+                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                            ObjectManager.Player.Distance(enemy) < assassinRange);
 
             if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
@@ -303,15 +309,16 @@ namespace Irelia
             get
             {
                 return
-                    ObjectManager.Player.Buffs.Where(
-                        buff => buff.Name.ToLower() == "ireliatranscendentbladesspell")
-                        .Select(buff => buff.Count).FirstOrDefault();
+                    ObjectManager.Player.Buffs.Where(buff => buff.Name.ToLower() == "ireliatranscendentbladesspell")
+                        .Select(buff => buff.Count)
+                        .FirstOrDefault();
             }
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (!Orbwalking.CanMove(50)) return;
+            if (!Orbwalking.CanMove(50))
+                return;
             /*
             foreach (
                 var xEnemy in
@@ -359,7 +366,7 @@ namespace Irelia
         private static bool canUseQ()
         {
             var qFarmDelay = (Config.Item("QFarmDelay").GetValue<Slider>().Value);
-            return (Game.Time*1000 - QUsedTime) > qFarmDelay*3;
+            return (Game.Time * 1000 - QUsedTime) > qFarmDelay * 3;
         }
 
         private static void CastSpellQ(Obj_AI_Base t, bool dontUnderTurret = false)
@@ -368,7 +375,8 @@ namespace Irelia
 
             if (dontUnderTurret)
             {
-                if (Utility.UnderTurret(t)) return;
+                if (Utility.UnderTurret(t))
+                    return;
 
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
@@ -453,8 +461,7 @@ namespace Irelia
                 CastSpellR();
 
             if (ObjectManager.Player.Distance(t) < 650 &&
-                ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) >=
-                t.Health)
+                ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) >= t.Health)
             {
                 ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, t);
             }
@@ -472,8 +479,7 @@ namespace Irelia
             var useE = Config.Item("UseEHarass").GetValue<bool>();
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
-            var mana = ObjectManager.Player.MaxMana*(Config.Item("HarassMana")
-                .GetValue<Slider>().Value/100.0);
+            var mana = ObjectManager.Player.MaxMana * (Config.Item("HarassMana").GetValue<Slider>().Value / 100.0);
 
             int vHarassMode = Config.Item("HarassMode").GetValue<StringList>().SelectedIndex;
 
@@ -521,8 +527,8 @@ namespace Irelia
                 var useW = Config.Item("UseWJungleFarm").GetValue<bool>();
                 var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
 
-                var mobs = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range,
-                    MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                var mobs = MinionManager.GetMinions(
+                    vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
                 if (mobs.Count > 0)
                 {
@@ -547,8 +553,8 @@ namespace Irelia
                 var useW = Config.Item("UseWLaneClear").GetValue<bool>();
                 var useE = Config.Item("UseELaneClear").GetValue<bool>();
 
-                var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All,
-                    MinionTeam.NotAlly, MinionOrderTypes.Health);
+                var vMinions = MinionManager.GetMinions(
+                    vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
                 foreach (var vMinion in vMinions)
                 {
                     var vMinionQDamage = vPlayer.GetSpellDamage(vMinion, SpellSlot.Q);
@@ -572,10 +578,10 @@ namespace Irelia
 
         private static void LaneClearQ(int qFarmDelay, Obj_AI_Base vMinion)
         {
-            if ((Game.Time*1000 - QUsedTime) > qFarmDelay*3)
+            if ((Game.Time * 1000 - QUsedTime) > qFarmDelay * 3)
             {
                 Q.CastOnUnit(vMinion);
-                QUsedTime = Game.Time*1000;
+                QUsedTime = Game.Time * 1000;
             }
         }
 
@@ -593,7 +599,7 @@ namespace Irelia
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E);
 
             if (R.IsReady())
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R)*4;
+                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R) * 4;
 
             if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
@@ -611,13 +617,12 @@ namespace Irelia
             Vector2 newPos = (vTarget.Position.To2D() - myPos);
             newPos.Normalize();
 
-            Vector2 checkPos = predPos + newPos*(vSpell.Range - Vector2.Distance(predPos, myPos));
+            Vector2 checkPos = predPos + newPos * (vSpell.Range - Vector2.Distance(predPos, myPos));
             Obj_Turret closestTower = null;
 
-            foreach (
-                Obj_Turret tower in
-                    ObjectManager.Get<Obj_Turret>()
-                        .Where(tower => tower.IsValid && !tower.IsDead && tower.Health != 0 && tower.IsEnemy))
+            foreach (Obj_Turret tower in
+                ObjectManager.Get<Obj_Turret>()
+                    .Where(tower => tower.IsValid && !tower.IsDead && tower.Health != 0 && tower.IsEnemy))
             {
                 if (Vector3.Distance(tower.Position, ObjectManager.Player.Position) < 1450)
                     closestTower = tower;
@@ -637,24 +642,14 @@ namespace Irelia
             var stopUlties = Config.Item("StopUlties").GetValue<KeyBind>().Active;
             var forceInterrupt = Config.Item("ForceInterruptUlties").GetValue<KeyBind>().Active;
 
-            if (!stopUlties || forceInterrupt) return;
+            if (!stopUlties || forceInterrupt)
+                return;
 
             String[] interruptSpells =
             {
-                "AbsoluteZero",
-                "AlZaharNetherGrasp",
-                "CaitlynAceintheHole",
-                "Crowstorm",
-                "DrainChannel",
-                "FallenOne",
-                "GalioIdolOfDurand",
-                "InfiniteDuress",
-                "KatarinaR",
-                "MissFortuneBulletTime",
-                "Teleport",
-                "Pantheon_GrandSkyfall_Jump",
-                "ShenStandUnited",
-                "UrgotSwap2"
+                "AbsoluteZero", "AlZaharNetherGrasp", "CaitlynAceintheHole", "Crowstorm",
+                "DrainChannel", "FallenOne", "GalioIdolOfDurand", "InfiniteDuress", "KatarinaR", "MissFortuneBulletTime",
+                "Teleport", "Pantheon_GrandSkyfall_Jump", "ShenStandUnited", "UrgotSwap2"
             };
 
             foreach (string interruptSpellName in interruptSpells)
@@ -666,8 +661,8 @@ namespace Irelia
                         if (forceInterrupt || vPlayer.Distance(vTarget) >= E.Range ||
                             vPlayer.Distance(vTarget) <= Q.Range + E.Range)
                         {
-                            var vMinions = MinionManager.GetMinions(vPlayer.ServerPosition, Q.Range, MinionTypes.All,
-                                MinionTeam.NotAlly);
+                            var vMinions = MinionManager.GetMinions(
+                                vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
                             foreach (var vMinion in vMinions)
                             {
                                 if (vMinion.Distance(vTarget) <= E.Range || vMinion.Distance(vPlayer) <= Q.Range)
