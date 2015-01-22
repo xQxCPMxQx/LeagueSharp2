@@ -217,6 +217,10 @@ namespace Vi
             new PotionManager();
             Config.AddToMainMenu();
 
+            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = true;
+
+
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
@@ -314,7 +318,7 @@ namespace Vi
                 {
                     if (useQDontUnderTurret)
                     {
-                        if (!Utility.UnderTurret(qTarget))
+                        if (!qTarget.UnderTurret())
                             Q.Cast(qTarget);
                     }
                     else
@@ -351,7 +355,7 @@ namespace Vi
 
                 var rDamage = vPlayer.GetSpellDamage(rTarget, SpellSlot.R);
                 var qDamage = vPlayer.GetSpellDamage(rTarget, SpellSlot.Q);
-                var eDamage = vPlayer.GetSpellDamage(rTarget, SpellSlot.E); //* E.get .Instance.Ammo;
+                var eDamage = vPlayer.GetSpellDamage(rTarget, SpellSlot.E) * E.Instance.Ammo; //* E.get .Instance.Ammo;
 
                 if (qTarget != null && qTarget.IsValidTarget(Q.Range) && qTarget.Health < qDamage)
                     return;
@@ -387,7 +391,7 @@ namespace Vi
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 
-            var fqTarget = TargetSelector.GetTarget(Q.Range + FlashRange, TargetSelector.DamageType.Physical);
+            var fqTarget = TargetSelector.GetTarget(Q.Range + FlashRange - 50, TargetSelector.DamageType.Physical);
 
             if (vPlayer.Distance(fqTarget) > Q.Range && fqTarget != null)
             {
@@ -536,8 +540,10 @@ namespace Vi
             if (Q.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.Q);
 
+                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.W);
+
             if (E.IsReady())
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E);
+                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E) * E.Instance.Ammo;
 
             if (R.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R);
