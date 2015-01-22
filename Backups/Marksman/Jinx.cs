@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Xml.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -18,23 +19,25 @@ namespace Marksman
         public static Spell W;
         public static Spell E;
         public static Spell R;
-        public readonly Font PlayerText;
+        public readonly Font vText;
 
         public Jinx()
         {
             Q = new Spell(SpellSlot.Q);
-            W = new Spell(SpellSlot.W, 1450f);
-            E = new Spell(SpellSlot.E, 835f);
-            R = new Spell(SpellSlot.R, 1500f);
 
+            W = new Spell(SpellSlot.W, 1450f);
             W.SetSkillshot(0.7f, 60f, 3300f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.7f, 120f, 1050f, false, SkillshotType.SkillshotCircle);
+            
+            E = new Spell(SpellSlot.E, 900f);
+            E.SetSkillshot(0.9f, 60f, 1700f, false, SkillshotType.SkillshotCircle);
+            
+            R = new Spell(SpellSlot.R, 1500f);
             R.SetSkillshot(0.6f, 140f, 1700f, false, SkillshotType.SkillshotLine);
 
             Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
 
             Utils.PrintMessage("Jinx loaded.");
-            PlayerText = new Font(
+            vText = new Font(
                 Drawing.Direct3DDevice,
                 new FontDescription
                 {
@@ -43,24 +46,19 @@ namespace Marksman
                     OutputPrecision = FontPrecision.Default,
                     Quality = FontQuality.Default,
                 });
-            //PlayerText = new SharpDX.Direct3D9.Font(Drawing.Direct3DDevice, new System.Drawing.Font("Times New Roman", 20));
         }
 
 
         public void Game_OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs spell)
         {
-            if (unit.IsMe)
-                if (JinxData.GetPowPowStacks > 2 && spell.SData.Name == "JinxQAttack")
-                {
-                    JinxData.HassPowPowStack = true;
-                }
+            return;
         }
 
         #region JinxData
 
         public class JinxData
         {
-            public static bool HassPowPowStack = false;
+            public static bool CanUseFuckingPowPowStack = true;
 
 
             public class JinxSpells
@@ -118,12 +116,12 @@ namespace Marksman
 
             public static float QMiniGunRange
             {
-                get { return 650; }
+                get { return 600; }
             }
 
             public static float QMegaGunRange
             {
-                get { return QMiniGunRange + 50 + 25 * Q.Level; }
+                get { return QMiniGunRange + 50 + 100 + 50 + 25 * Q.Level; } // 600 + 50 = 650 real aa range
             }
 
             public static bool EnemyHasBuffForCastE
@@ -231,21 +229,34 @@ namespace Marksman
             {
                 if (JinxData.JinxSpells.CanCastQ)
                     HarassToggleQ();
-                else
-                {
 
-
-                }
                 if (JinxData.JinxSpells.CanCastW)
                     HarassToggleW();
+            }
+
+            public static int GetEnemiesArround
+            {
+                get
+                {
+                    var t = TargetSelector.GetTarget(JinxData.QMegaGunRange, TargetSelector.DamageType.Physical);
+
+                    var enemiesArround = 0;
+                        enemiesArround +=
+                            ObjectManager.Get<Obj_AI_Hero>()
+                                .Count(
+                                    xEnemy =>
+                                        xEnemy.IsEnemy && xEnemy.IsValidTarget(JinxData.QMegaGunRange) &&
+                                        xEnemy.Distance(t) < 185 && xEnemy.ChampionName != t.ChampionName);
+                    return enemiesArround + 1;
+
+                }
             }
 
             public static void AlwaysChooseMiniGun()
             {
                 if (Program.Config.SubMenu("Misc").Item("Swap2Mini").GetValue<bool>())
                 {
-                    if (JinxData.QGunType == JinxData.GunType.Mega &&
-                        ObjectManager.Player.CountEnemiesInRange(JinxData.QMegaGunRange) == 0)
+                    if (JinxData.QGunType == JinxData.GunType.Mega && GetEnemiesArround < 2)
                     {
                         Q.Cast();
                     }
@@ -257,8 +268,7 @@ namespace Marksman
                 if (!Q.IsReady())
                     return;
 
-                if (JinxData.QGunType == JinxData.GunType.Mini && JinxData.GetPowPowStacks > 2 &&
-                    JinxData.HassPowPowStack)
+                if (JinxData.QGunType == JinxData.GunType.Mini && JinxData.CanUseFuckingPowPowStack && JinxData.GetPowPowStacks == 3)
                 {
                     var t = TargetSelector.GetTarget(JinxData.QMegaGunRange, TargetSelector.DamageType.Physical);
                     if (t.IsValidTarget())
@@ -273,66 +283,53 @@ namespace Marksman
                 {
                     UsePowPowStack();
                 }
-                return;
-                var useQPowPowStack = Program.Config.Item("UseQPowPowStackH").GetValue<StringList>().SelectedIndex;
-                switch (useQPowPowStack)
-                {
-                    case 1:
-                    {
-                        UsePowPowStack();
-                        break;
-                    }
-
-                    case 2:
-                    {
-                        if (Program.CClass.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                            UsePowPowStack();
-                        break;
-                    }
-
-                    case 3:
-                    {
-                        if (Program.CClass.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
-                            UsePowPowStack();
-                        break;
-                    }
-                }
             }
 
             public static void CastQ(bool checkPerMana = false)
             {
-                var existsManaPer = Program.Config.Item("UseQTHM").GetValue<Slider>().Value;
-
-                if (checkPerMana && ObjectManager.Player.ManaPercentage() < existsManaPer)
+                if (!Q.IsReady())
                     return;
 
-                var t = TargetSelector.GetTarget(
-                    JinxData.QMegaGunRange + Q.Width / 2, TargetSelector.DamageType.Physical);
+                // Check Mana Per
+                if (checkPerMana &&
+                    ObjectManager.Player.ManaPercentage() < Program.Config.Item("UseQTHM").GetValue<Slider>().Value)
+                    return;
 
+
+                // Choose Target
+                var t = TargetSelector.GetTarget(JinxData.QMegaGunRange, TargetSelector.DamageType.Physical);
                 if (!t.IsValidTarget())
                     return;
 
-                var swapDistance = Program.Config.SubMenu("Misc").Item("SwapDistance").GetValue<bool>();
-                if (!swapDistance)
-                    return;
-
-                if (JinxData.GetRealDistance(t) > JinxData.QMiniGunRange &&
-                    JinxData.GetRealDistance(t) <= JinxData.QMegaGunRange)
+                // Check AOE Damage Status
+                var swapAoe = Program.Config.SubMenu("Misc").Item("SwapAOE").GetValue<Slider>().Value;
+                if (swapAoe > 1 && JinxData.QGunType == JinxData.GunType.Mini && GetEnemiesArround > swapAoe)
                 {
-                    if (JinxData.QGunType == JinxData.GunType.Mini)
-                    {
+                    Q.Cast();
+                    return;
+                }
+
+                if (!Program.Config.SubMenu("Misc").Item("SwapDistance").GetValue<bool>())
+                    return;
+                
+                if (JinxData.QGunType == JinxData.GunType.Mega)
+                {
+                    if (JinxData.GetRealDistance(t) <= JinxData.QMiniGunRange)
                         Q.Cast();
-                    }
                 }
                 else
                 {
-                    if (JinxData.QGunType == JinxData.GunType.Mega)
-                        Q.Cast(t);
+                    if (JinxData.GetRealDistance(t) > JinxData.QMiniGunRange)
+                        Q.Cast();
+                    
                 }
             }
 
             public static void CastW(bool checkPerMana = false)
             {
+                if (!W.IsReady())
+                    return;
+
                 var existsManaPer = Program.Config.Item("UseQTHM").GetValue<Slider>().Value;
 
                 if (checkPerMana && ObjectManager.Player.ManaPercentage() < existsManaPer)
@@ -345,17 +342,32 @@ namespace Marksman
 
                 var minW = Program.Config.Item("MinWRange").GetValue<Slider>().Value;
 
-                if (W.IsReady())// && (JinxData.GetRealDistance(t) >= minW) ||
-                    //t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.W))
+                if (JinxData.GetRealDistance(t) >= minW || t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.W))
                 {
                     W.CastIfHitchanceEquals(t, JinxData.GetWHitChance);
+                }
+            }
+
+            public static void CastE(HitChance hitChance)
+            {
+                if (!E.IsReady())
+                    return;
+
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+
+                if (!t.IsValidTarget())
+                    return;
+
+                if (t.GetWaypoints().Count == 1) return;
+                if (E.IsReady())
+                {
+                    E.CastIfHitchanceEquals(t, hitChance);
                 }
             }
 
             private static void HarassToggleQ()
             {
                 var toggleActive = Program.Config.Item("UseQTH").GetValue<KeyBind>().Active;
-
                 if (toggleActive && !ObjectManager.Player.HasBuff("Recall"))
                 {
                     CastQ(true);
@@ -373,34 +385,31 @@ namespace Marksman
 
         public override void Game_OnGameUpdate(EventArgs args)
         {
-            //Drawing.DrawText(ObjectManager.Player.HPBarPosition.X + 145, ObjectManager.Player.HPBarPosition.Y + 20, System.Drawing.Color.White, time);
-            if (JinxData.GetPowPowStacks < 3)
-            {
-                JinxData.HassPowPowStack = false;
-            }
-
             JinxEvents.ExecuteToggle();
-            JinxEvents.ExecutePowPowStack();
             JinxEvents.AlwaysChooseMiniGun();
 
-            if (E.IsReady() && JinxData.JinxSpells.CanCastE)
+            if (E.IsReady())
             {
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (GetValue<bool>("AutoEI"))
                 {
-                    E.CastIfHitchanceEquals(t, HitChance.Immobile);
+                    JinxEvents.CastE(HitChance.Immobile);
                 }
 
                 if (GetValue<bool>("AutoED"))
                 {
-                    E.CastIfHitchanceEquals(t, HitChance.Dashing);
+                    JinxEvents.CastE(HitChance.Dashing);
                 }
 
-                if (GetValue<bool>("UseEC") || (GetValue<bool>("AutoES") && JinxData.EnemyHasBuffForCastE))
+                if (GetValue<bool>("AutoES"))
                 {
-                    E.CastIfHitchanceEquals(t, HitChance.High);
+                    if (JinxData.EnemyHasBuffForCastE)
+                    {
+                        JinxEvents.CastE(HitChance.High);
+                    }
                 }
             }
+
 
             if (GetValue<bool>("UseRC") && R.IsReady())
             {
@@ -431,14 +440,21 @@ namespace Marksman
             {
                 var useQ = GetValue<bool>("UseQ" + (ComboActive ? "C" : "H"));
                 var useW = GetValue<bool>("UseW" + (ComboActive ? "C" : "H"));
+                var useE = GetValue<bool>("UseE" + (ComboActive ? "C" : "H"));
 
-                if (useQ && JinxData.JinxSpells.CanCastQ && Q.IsReady())
+                if (useQ && JinxData.JinxSpells.CanCastQ)
                     JinxEvents.CastQ();
 
-                if (useW && W.IsReady())
+                if (useW && JinxData.JinxSpells.CanCastW)
                 {
                     JinxEvents.CastW();
                 }
+
+                if (useE && JinxData.JinxSpells.CanCastE)
+                {
+                    JinxEvents.CastE(HitChance.High);
+                }
+
             }
         }
 
@@ -455,8 +471,26 @@ namespace Marksman
 
         public override void Drawing_OnDraw(EventArgs args)
         {
+
+            var t = TargetSelector.GetTarget(JinxData.QMegaGunRange + 500, TargetSelector.DamageType.Physical);
+            if (t != null)
+            { 
+                var enemiesArround = 0;
+                Render.Circle.DrawCircle(t.Position, 125f, System.Drawing.Color.Green);
+                foreach (var xEnemy in ObjectManager.Get<Obj_AI_Hero>())
+                {
+                    if (xEnemy.IsEnemy && xEnemy.IsValidTarget(JinxData.QMegaGunRange + 500) &&
+                        xEnemy.Distance(t) < 185f && xEnemy.ChampionName != t.ChampionName)
+                    {
+                        Render.Circle.DrawCircle(xEnemy.Position, 125f, System.Drawing.Color.Red);
+                        enemiesArround++;
+                    }
+                }
+            }
+                
+
             var xDraw = Program.Config.Item("CustomRange").GetValue<Slider>().Value;
-            Render.Circle.DrawCircle(ObjectManager.Player.Position, xDraw, System.Drawing.Color.Aqua);
+            Render.Circle.DrawCircle(ObjectManager.Player.Position, xDraw, System.Drawing.Color.Aqua, 1,true);
 
             Spell[] spellList = { W, E };
             var drawQbound = GetValue<Circle>("DrawQBound");
@@ -465,22 +499,34 @@ namespace Marksman
             {
                 var xHarassStatus = "";
                 if (Program.Config.Item("UseQTH").GetValue<KeyBind>().Active)
-                    xHarassStatus += "Q - ";
+                    xHarassStatus += "Q + ";
 
                 if (Program.Config.Item("UseWTH").GetValue<KeyBind>().Active)
-                    xHarassStatus += "W - ";
+                    xHarassStatus += "W + ";
 
-                if (xHarassStatus.Length < 1)
-                {
-                    xHarassStatus = "Toggle: Off   ";
-                }
-                else
-                {
-                    xHarassStatus = "Toggle: " + xHarassStatus;
-                }
+                xHarassStatus = xHarassStatus.Length < 1 ? "Toggle: Off   " : "Toggle: " + xHarassStatus;
+
                 var xText = xHarassStatus.Substring(0, xHarassStatus.Length - 3);
+                //xText += "Target: " + TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical).ChampionName;
+                
+
+                var vText1 = vText;
+                var vText2 = vText;
+
                 Vector2 pos = Drawing.WorldToScreen(ObjectManager.Player.Position);
-                Utils.DrawText(PlayerText, xText, (int)ObjectManager.Player.HPBarPosition.X + 185, (int)ObjectManager.Player.HPBarPosition.Y + 5, SharpDX.Color.White);
+                Utils.DrawText(
+                    vText1, xText, (int) ObjectManager.Player.HPBarPosition.X + 145,
+                    (int) ObjectManager.Player.HPBarPosition.Y + 5, SharpDX.Color.White);
+
+
+                t = TargetSelector.GetTarget(JinxData.QMegaGunRange + 200f, TargetSelector.DamageType.Physical);
+                if (t != null)
+                {
+                    var xString = "Target:" + t.ChampionName;
+                    Utils.DrawText(
+                        vText2, xString, (int) ObjectManager.Player.HPBarPosition.X + 145,
+                        (int) ObjectManager.Player.HPBarPosition.Y + 17, SharpDX.Color.White);
+                }
             }
 
             foreach (var spell in spellList)
@@ -528,10 +574,6 @@ namespace Marksman
             config.AddItem(new MenuItem("UseWC" + Id, "Use W").SetValue(true));
             config.AddItem(new MenuItem("UseEC" + Id, "Use E").SetValue(true));
             config.AddItem(new MenuItem("UseRC" + Id, "Use R").SetValue(true));
-
-            config.AddItem(
-                new MenuItem("UseQPowPowStackH", "Use Mega Q PowPow Stack").SetValue(
-                    new StringList(new[] { "Off", "Both", "Combo", "Harass" }, 1)));
             return true;
         }
 
@@ -560,10 +602,11 @@ namespace Marksman
         {
             var xQMenu = new Menu("Q Settings", "QSettings");
             {
-                xQMenu.AddItem(new MenuItem("UseQPowPowStack", "Use Q PowPow Stack").SetValue(true));
+                xQMenu.AddItem(new MenuItem("SwapAOE", "Swap Q for AOE Damage If will hit enemies >=").SetValue(new Slider(2, 0, 5)));
+                //xQMenu.AddItem(new MenuItem("UseQPowPowStack", "Use Q PowPow Stack").SetValue(true));
+
                 xQMenu.AddItem(new MenuItem("SwapDistance", "Swap Q for Distance").SetValue(true));
-                xQMenu.AddItem(new MenuItem("SwapAOE" + Id, "Swap Q for AOE Damage").SetValue(false));
-                xQMenu.AddItem(new MenuItem("Swap2Mini", "Always Swap to MiniGun If No Enemy").SetValue(true));
+                xQMenu.AddItem(new MenuItem("Swap2Mini", "Always Choose MiniGun If No Enemy").SetValue(true));
                 config.AddSubMenu(xQMenu);
             }
 

@@ -140,20 +140,6 @@ namespace Marksman
             if (!E.IsReady())
                 return 0f;
             return (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.E);
-            
-            /* I think this calculation working good but i cant check now. after I'll do */ 
-            var buff = t.Buffs.FirstOrDefault(xBuff => xBuff.DisplayName.ToLower() == "kalistaexpungemarker");
-            if (buff.Count == 0) 
-                return 0f;
-
-            double damage = ObjectManager.Player.FlatPhysicalDamageMod + ObjectManager.Player.BaseAttackDamage;
-            double eDmg = damage * 0.60 + new double[] {0, 20, 30, 40, 50, 60}[E.Level];
-            
-            if (buff.Count == 1) 
-                return (float)eDmg;
-            
-            damage += buff.Count * 0.003 * damage + eDmg;
-            return (float) ObjectManager.Player.CalcDamage(t, Damage.DamageType.Physical, damage);
         }
         
         public override void Game_OnGameUpdate(EventArgs args)

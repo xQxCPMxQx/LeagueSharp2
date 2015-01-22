@@ -336,19 +336,6 @@ namespace Marksman
             {
                 CClass.Drawing_OnDraw(args);
             }
-            return;
-
-            var y = 10;
-
-            foreach (
-                var t in
-                    ObjectManager.Player.Buffs.Select(
-                        b => b.DisplayName + " - " + b.IsActive + " - " + (b.EndTime > Game.Time) + " - " + b.IsPositive)
-                )
-            {
-                Drawing.DrawText(0, y, System.Drawing.Color.Wheat, t);
-                y = y + 16;
-            }
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
