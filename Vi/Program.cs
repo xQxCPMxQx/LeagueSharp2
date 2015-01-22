@@ -345,14 +345,23 @@ namespace Vi
                 if (qTarget != null && Q.IsReady() && E.IsReady() && qTarget.Health < qDamage + eDamage)
                     return;
 
-                if (useR && rTarget != null && rTarget.Health > rDamage)
+                if (useR)
                 {
-                    if (Q.IsReady() && E.IsReady() && rTarget.Health < rDamage + qDamage + eDamage)
-                        R.CastOnUnit(rTarget);
-                    if (E.IsReady() && rTarget.Health < rDamage + eDamage)
-                        R.CastOnUnit(rTarget);
-                    if (Q.IsReady() && rTarget.Health < rDamage + qDamage)
-                        R.CastOnUnit(rTarget);
+                    if (rTarget.Health > rDamage)
+                    {
+                        if (Q.IsReady() && E.IsReady() && rTarget.Health < rDamage + qDamage + eDamage)
+                            R.CastOnUnit(rTarget);
+                        else if (E.IsReady() && rTarget.Health < rDamage + eDamage)
+                            R.CastOnUnit(rTarget);
+                        else if (Q.IsReady() && rTarget.Health < rDamage + qDamage)
+                            R.CastOnUnit(rTarget);
+                    }
+                    else
+                    {
+                        if (ObjectManager.Player.Distance(rTarget) >
+                            ObjectManager.Player.GetAutoAttackDamage(rTarget, true))
+                            R.CastOnUnit(rTarget);
+                    }
                 }
             }
         }
