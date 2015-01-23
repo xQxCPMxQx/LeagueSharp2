@@ -74,9 +74,23 @@ namespace Marksman
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
             }
 
-            if (Program.Config.Item("HarassShowStatus").GetValue<bool>())
+            var drawRMin = Program.Config.SubMenu("Combo").Item("DrawRMin").GetValue<Circle>(); 
+            if (drawRMin.Active)
             {
-                ShowToggleStatus();
+                var minRRange = Program.Config.SubMenu("Combo").Item("UseRCMinRange").GetValue<Slider>().Value;
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, minRRange, drawRMin.Color, 2);
+            }
+
+            var drawRMax = Program.Config.SubMenu("Combo").Item("DrawRMax").GetValue<Circle>(); 
+            if (drawRMax.Active)
+            {
+                var maxRRange = Program.Config.SubMenu("Combo").Item("UseRCMaxRange").GetValue<Slider>().Value;
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, maxRRange, drawRMax.Color, 2);
+            }
+
+            if (Program.Config.Item("DrawHarassToggleStatus").GetValue<bool>())
+            {
+                DrawHarassToggleStatus();
             }
 
             if (Program.Config.Item("ShowKillableStatus").GetValue<bool>())
@@ -217,6 +231,9 @@ namespace Marksman
                 xRMenu.AddItem(new MenuItem("UseRC", "Use").SetValue(true));
                 xRMenu.AddItem(new MenuItem("UseRCMinRange", "Min. Range").SetValue(new Slider(200, 200, 1000)));
                 xRMenu.AddItem(new MenuItem("UseRCMaxRange", "Max. Range").SetValue(new Slider(500, 500, 2000)));
+                xRMenu.AddItem(new MenuItem("DrawRMin", "Draw Min. R Range").SetValue(new Circle(true, System.Drawing.Color.DarkRed)));
+                xRMenu.AddItem(new MenuItem("DrawRMax", "Draw Max. R Range").SetValue(new Circle(true, System.Drawing.Color.DarkMagenta)));
+
                 config.AddSubMenu(xRMenu);
             }
             return true;
@@ -247,6 +264,7 @@ namespace Marksman
                 new MenuItem("UseQTH", "Q (Toggle)").SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
             config.AddItem(
                 new MenuItem("UseWTH", "W (Toggle)").SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
+            config.AddItem(new MenuItem("DrawHarassToggleStatus", "Draw Toggle Status").SetValue(true));
             return true;
         }
 
@@ -258,7 +276,7 @@ namespace Marksman
             return true;
         }
 
-        private static void ShowToggleStatus()
+        private static void DrawHarassToggleStatus()
         {
             var xHarassStatus = "";
             if (Program.Config.Item("UseQTH").GetValue<KeyBind>().Active)
@@ -269,11 +287,11 @@ namespace Marksman
 
             if (xHarassStatus.Length < 1)
             {
-                xHarassStatus = "Harass Toggle: Off   ";
+                xHarassStatus = "";
             }
             else
             {
-                xHarassStatus = "Harass Toggle: " + xHarassStatus;
+                xHarassStatus = "Toggle: " + xHarassStatus;
             }
 
             xHarassStatus = xHarassStatus.Substring(0, xHarassStatus.Length - 3);
@@ -296,15 +314,9 @@ namespace Marksman
 
         public override bool DrawingMenu(Menu config)
         {
-            config.AddItem(
-                new MenuItem("DrawQ" + Id, "Q range").SetValue(
-                    new Circle(true, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
-            config.AddItem(
-                new MenuItem("DrawW" + Id, "W range").SetValue(
-                    new Circle(false, System.Drawing.Color.FromArgb(100, 255, 255, 255))));
-            config.AddItem(new MenuItem("HarassShowStatus", "Show Toggle Status").SetValue(true));
+            config.AddItem(new MenuItem("DrawQ" + Id, "Q range").SetValue(new Circle(true, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
+            config.AddItem(new MenuItem("DrawW" + Id, "W range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(100, 255, 255, 255))));
             config.AddItem(new MenuItem("ShowKillableStatus", "Show Killable Status").SetValue(true));
-
 
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
 
