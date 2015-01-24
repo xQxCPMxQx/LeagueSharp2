@@ -55,7 +55,7 @@ namespace Marksman
 
                 if (Q.IsReady() && useQ)
                 {
-                    Q.Cast(t);
+                    Q.CastIfHitchanceEquals(t, HitChance.VeryHigh);
                 }
                 else if (W.IsReady() && useW)
                 {
@@ -74,14 +74,14 @@ namespace Marksman
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
             }
 
-            var drawRMin = Program.Config.SubMenu("Combo").Item("DrawRMin").GetValue<Circle>(); 
+            var drawRMin = Program.Config.SubMenu("Combo").Item("DrawRMin").GetValue<Circle>();
             if (drawRMin.Active)
             {
                 var minRRange = Program.Config.SubMenu("Combo").Item("UseRCMinRange").GetValue<Slider>().Value;
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, minRRange, drawRMin.Color, 2);
             }
 
-            var drawRMax = Program.Config.SubMenu("Combo").Item("DrawRMax").GetValue<Circle>(); 
+            var drawRMax = Program.Config.SubMenu("Combo").Item("DrawRMax").GetValue<Circle>();
             if (drawRMax.Active)
             {
                 var maxRRange = Program.Config.SubMenu("Combo").Item("UseRCMaxRange").GetValue<Slider>().Value;
@@ -101,6 +101,14 @@ namespace Marksman
 
         public override void Game_OnGameUpdate(EventArgs args)
         {
+            /*
+            
+            var t1 = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var x1 = Q.GetPrediction(t1);
+            if (x1.CollisionObjects.GetType() == ObjectManager.Get<pb>())
+            Game.PrintChat(x1.CollisionObjects.GetType().ToString());
+            //Game.PrintChat(x1.CollisionObjects.Count.ToString());
+            */
             Obj_AI_Hero t;
 
             if (Q.IsReady() && Program.Config.Item("UseQTH").GetValue<KeyBind>().Active && ToggleActive)
@@ -159,7 +167,13 @@ namespace Marksman
                     {
                         var minRRange = Program.Config.SubMenu("Combo").Item("UseRCMinRange").GetValue<Slider>().Value;
                         var maxRRange = Program.Config.SubMenu("Combo").Item("UseRCMaxRange").GetValue<Slider>().Value;
+
                         t = TargetSelector.GetTarget(maxRRange, TargetSelector.DamageType.Physical);
+
+                        if (Q.IsReady() && t.IsValidTarget(Q.Range) && Q.GetPrediction(t).CollisionObjects.Count == 0 &&
+                            t.Health < ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
+                            return;
+                        
                         if (t.IsValidTarget() && ObjectManager.Player.Distance(t) >= minRRange &&
                             t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.R))
                         {
@@ -231,8 +245,12 @@ namespace Marksman
                 xRMenu.AddItem(new MenuItem("UseRC", "Use").SetValue(true));
                 xRMenu.AddItem(new MenuItem("UseRCMinRange", "Min. Range").SetValue(new Slider(200, 200, 1000)));
                 xRMenu.AddItem(new MenuItem("UseRCMaxRange", "Max. Range").SetValue(new Slider(500, 500, 2000)));
-                xRMenu.AddItem(new MenuItem("DrawRMin", "Draw Min. R Range").SetValue(new Circle(true, System.Drawing.Color.DarkRed)));
-                xRMenu.AddItem(new MenuItem("DrawRMax", "Draw Max. R Range").SetValue(new Circle(true, System.Drawing.Color.DarkMagenta)));
+                xRMenu.AddItem(
+                    new MenuItem("DrawRMin", "Draw Min. R Range").SetValue(
+                        new Circle(true, System.Drawing.Color.DarkRed)));
+                xRMenu.AddItem(
+                    new MenuItem("DrawRMax", "Draw Max. R Range").SetValue(
+                        new Circle(true, System.Drawing.Color.DarkMagenta)));
 
                 config.AddSubMenu(xRMenu);
             }
@@ -314,8 +332,12 @@ namespace Marksman
 
         public override bool DrawingMenu(Menu config)
         {
-            config.AddItem(new MenuItem("DrawQ" + Id, "Q range").SetValue(new Circle(true, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
-            config.AddItem(new MenuItem("DrawW" + Id, "W range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(100, 255, 255, 255))));
+            config.AddItem(
+                new MenuItem("DrawQ" + Id, "Q range").SetValue(
+                    new Circle(true, System.Drawing.Color.FromArgb(100, 255, 0, 255))));
+            config.AddItem(
+                new MenuItem("DrawW" + Id, "W range").SetValue(
+                    new Circle(false, System.Drawing.Color.FromArgb(100, 255, 255, 255))));
             config.AddItem(new MenuItem("ShowKillableStatus", "Show Killable Status").SetValue(true));
 
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
