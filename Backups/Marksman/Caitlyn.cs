@@ -77,8 +77,7 @@ namespace Marksman
                     W.Cast(t.Position);
                 }                
             }
-
-            if (Q.IsReady() && GetValue<bool>("AutoQI"))
+            else if (Q.IsReady() && GetValue<bool>("AutoQI"))
             {
                 t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget(Q.Range) &&
