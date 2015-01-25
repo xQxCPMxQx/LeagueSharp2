@@ -58,13 +58,19 @@ namespace Marksman
         {
             if (!Q.IsReady())
                 return;
-
+            
             var t = TargetSelector.GetTarget(Q.Range + 450, TargetSelector.DamageType.Physical);
+            /*
             if (t.IsValidTarget(Q.Range))
             {
                 Q.CastOnUnit(t);
                 return;
             }
+            */
+            if (!t.IsValidTarget())
+                return;
+            Q.CastOnUnit(t);
+            return;
 
             if (Program.CClass.Config.Item("UseQMC").GetValue<bool>())
             {

@@ -16,12 +16,12 @@ namespace Orianna
         internal static Vector3 CurrentBallDrawPosition;
         internal static bool IsBallMoving;
         internal static int QSpeed = 1200;
-        internal static int ESpeed = 1700;
+        internal static int ESpeed = 1700; 
 
         static BallManager()
         {
             Game.OnGameUpdate += Game_OnGameUpdate;
-            // Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+           // Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
         }
 
@@ -46,10 +46,10 @@ namespace Orianna
 
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            SpellSlot castedSlot = ObjectManager.Player.GetSpellSlot(args.SData.Name, false);
+            SpellSlot castedSlot = ObjectManager.Player.GetSpellSlot(args.SData.Name);
             if (!sender.IsMe) return;
 
-            if (castedSlot == SpellSlot.Q)
+            if(castedSlot == SpellSlot.Q)
             {
                 IsBallMoving = true;
                 Utility.DelayAction.Add((int)Math.Max(1, 1000 * (args.End.Distance(CurrentBallPosition) - Game.Ping - 0.1) / QSpeed), () =>
@@ -60,9 +60,9 @@ namespace Orianna
                 });
             }
 
-            if (castedSlot == SpellSlot.E)
+            if(castedSlot == SpellSlot.E)
             {
-                if (!args.Target.IsMe && args.Target.IsAlly)
+                if(!args.Target.IsMe && args.Target.IsAlly)
                 {
                     IsBallMoving = true;
                 }
