@@ -295,7 +295,7 @@ namespace Vi
             var useR = Config.Item("UseRCombo").GetValue<bool>();
             var comboDamage = GetComboDamage(t);
 
-            if (t != null && Q.IsReady() && useQ)
+            if (Q.IsReady() && useQ)
             {
                 if (Q.IsCharging)
                 {
@@ -325,15 +325,14 @@ namespace Vi
                 useR = (Config.Item("DontUlt" + t.BaseSkinName) != null &&
                         Config.Item("DontUlt" + t.BaseSkinName).GetValue<bool>() == false) && useR;
 
-                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
                 var qDamage = vPlayer.GetSpellDamage(t, SpellSlot.Q);
                 var eDamage = vPlayer.GetSpellDamage(t, SpellSlot.E) * E.Instance.Ammo;
+                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
 
-
-                if (t.IsValidTarget(Q.Range) && t.Health < qDamage)
+                if (Q.IsReady() && t.Health < qDamage)
                     return;
 
-                if (Orbwalking.InAutoAttackRange(t) && t.Health < eDamage)
+                if (E.IsReady() && Orbwalking.InAutoAttackRange(t) && t.Health < eDamage)
                     return;
 
                 if (Q.IsReady() && E.IsReady() && t.Health < qDamage + eDamage)
@@ -363,8 +362,10 @@ namespace Vi
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             var t = TargetSelector.GetTarget(Q.Range + FlashRange - 20, TargetSelector.DamageType.Physical);
-
-            if (vPlayer.Distance(t) > Q.Range && t != null)
+            if (!t.IsValidTarget())
+                return;
+                
+            if (vPlayer.Distance(t) > Q.Range)
             {
                 if (FlashSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                 {
@@ -429,7 +430,8 @@ namespace Vi
             {
                 E.Cast();
             }
-            else if (useQ && Q.IsReady())
+            
+            if (useQ && Q.IsReady())
             {
                 if (!Q.IsCharging)
                     Q.StartCharging();
