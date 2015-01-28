@@ -2,21 +2,29 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Xml.Linq;
+using System.Collections.Generic;
 using LeagueSharp;
+using SharpDX.Direct3D9;
+using Font = SharpDX.Direct3D9.Font;
 using LeagueSharp.Common;
 #endregion
 
 namespace Marksman
 {
+
     internal class Tristana : Champion
     {
-        public static Spell Q, E, R;
+        public static Spell Q, W, E, R;
+        public static Font vText;
 
+        
+        public static int LastTickTime;
         public Tristana()
         {
-            Utils.PrintMessage("Tristana loaded.");
             
             Q = new Spell(SpellSlot.Q, 703);
+            W = new Spell(SpellSlot.W, 703);
             E = new Spell(SpellSlot.E, 703);
             R = new Spell(SpellSlot.R, 703);
 
@@ -25,6 +33,18 @@ namespace Marksman
 
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+
+            vText = new Font(
+                Drawing.Direct3DDevice,
+                new FontDescription
+                {
+                    FaceName = "Courier new",
+                    Height = 15,
+                    OutputPrecision = FontPrecision.Default,
+                    Quality = FontQuality.Default,
+                });
+
+            Utils.PrintMessage("Tristana loaded.");
         }
 
         public void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -57,6 +77,24 @@ namespace Marksman
 
         public override void Drawing_OnDraw(EventArgs args)
         {
+            foreach (
+                var objAiHero in (from vEnemy in ObjectManager.Get<Obj_AI_Base>().Where(xT => xT.IsEnemy && !xT.IsDead)
+                    from xBuff in vEnemy.Buffs.Where(xBuff => xBuff.Name.ToLower().Contains("tristanae"))
+                    select vEnemy as Obj_AI_Hero).Where(objAiHero => objAiHero != null))
+            {
+                if (LastTickTime < Environment.TickCount)
+                    LastTickTime = Environment.TickCount + 5000;
+
+                var xBuffCount = objAiHero.Buffs.Count(xB => xB.Name.ToLower().Contains("tristanae"));
+
+                var xTime = LastTickTime - Environment.TickCount;
+
+                var timer = string.Format("0:{0:D2}", xTime / 1000);
+                Utils.DrawText(
+                    vText, timer + " : 4 / " + xBuffCount, (int) objAiHero.HPBarPosition.X + 145,
+                    (int) objAiHero.HPBarPosition.Y + 5, SharpDX.Color.White);
+            }
+
             Spell[] spellList = { E};
             foreach (var spell in spellList)
             {
@@ -66,6 +104,7 @@ namespace Marksman
             }
         }
 
+      
         public override void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100)) return;
