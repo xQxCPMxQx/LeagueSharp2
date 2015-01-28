@@ -33,7 +33,7 @@ namespace D_Kayle
 
         private static Spell _smite;
 
-        private static Items.Item _rand, _lotis, _dfg, _frostqueen, _mikael;
+        private static Items.Item _rand, _lotis, _frostqueen, _mikael;
         //Credits to Kurisu
         private static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };
         private static readonly int[] SmiteGrey = { 3711, 3722, 3721, 3720, 3719 };
@@ -66,10 +66,6 @@ namespace D_Kayle
             SpellList.Add(_e);
             SpellList.Add(_r);
 
-            _dfg = Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline ||
-                 Utility.Map.GetMap().Type == Utility.Map.MapType.CrystalScar
-              ? new Items.Item(3188, 750)
-              : new Items.Item(3128, 750);
             _rand = new Items.Item(3143, 490f);
             _lotis = new Items.Item(3190, 590f);
             _frostqueen = new Items.Item(3092, 800f);
@@ -102,7 +98,6 @@ namespace D_Kayle
 
             _config.AddSubMenu(new Menu("items", "items"));
             _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("usedfg", "Use DFG")).SetValue(true);
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("frostQ", "Use Frost Queen")).SetValue(true);
             _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
             _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("Omen", "Use Randuin Omen")).SetValue(true);
@@ -597,11 +592,6 @@ namespace D_Kayle
                 damage += _player.GetSpellDamage(enemy, SpellSlot.E);
                 damage = damage + _player.GetAutoAttackDamage(enemy, true)*4;
             }
-            if (Items.HasItem(3128) && Items.CanUseItem(3128))
-            {
-                damage += _player.GetItemDamage(enemy, Damage.DamageItems.Dfg);
-                damage = damage * 1.2;
-            }
             if (itemscheck &&
                 ObjectManager.Player.Spellbook.CanUseSpell(_smiteSlot) == SpellState.Ready)
             {
@@ -618,16 +608,10 @@ namespace D_Kayle
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(_r.Range + 200, TargetSelector.DamageType.Magical);
-            var usedfg = _config.Item("usedfg").GetValue<bool>();
             if (target != null)
             {
                 Smiteontarget();
                 UseItemes();
-                if (target.IsValidTarget(_dfg.Range) && usedfg &&
-                    _dfg.IsReady() && target.Health <= ComboDamage(target))
-                {
-                    _dfg.Cast(target);
-                }
                 if (target.IsValidTarget(600) && _config.Item("UseIgnitecombo").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
                _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
                 {
