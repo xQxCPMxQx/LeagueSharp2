@@ -18,7 +18,7 @@ namespace Mordekaiser
         public static Spell Q, W, E, R;
 
         public static List<Items.Item> ItemList = new List<Items.Item>();
-        public static Items.Item Dfg, Hex;
+        public static Items.Item Hex;
 
         public static Menu Config;
         public static Menu MenuExtras;
@@ -43,9 +43,6 @@ namespace Mordekaiser
 
             SlaveTimer = Game.Time;
             /* [ Set Items ]*/
-            Dfg = new Items.Item(3128, 750);
-            ItemList.Add(Dfg);
-            
             Hex = new Items.Item(3146, 750);
             ItemList.Add(Hex);
 
@@ -431,9 +428,6 @@ namespace Mordekaiser
             if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                 Player.Distance(vTarget) < R.Range) 
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
-
-            if (Items.CanUseItem(3128) && Player.Distance(vTarget) < R.Range)
-                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Dfg);
 
             if (Items.CanUseItem(3092) && Player.Distance(vTarget) < R.Range)
                 fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.FrostQueenClaim);

@@ -24,8 +24,6 @@ namespace D_Diana
 
         public static Menu TargetSelectorMenu;
 
-        private static Items.Item _dfg;
-
         private static Obj_AI_Hero _player;
 
         private static readonly List<Spell> SpellList = new List<Spell>();
@@ -69,8 +67,6 @@ namespace D_Diana
             _tiamat = new Items.Item(3077, 250f);
             _rand = new Items.Item(3143, 490f);
             _lotis = new Items.Item(3190, 590f);
-            _dfg = new Items.Item(3128, 750f);
-
             _igniteSlot = _player.GetSpellSlot("SummonerDot");
             SetSmiteSlot();
 
@@ -89,7 +85,6 @@ namespace D_Diana
             //Combo
             _config.AddSubMenu(new Menu("Combo", "Combo"));
             _config.SubMenu("Combo").AddItem(new MenuItem("UseIgnitecombo", "Use Ignite(rush for it)")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseItems", "Use DFG")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite in target")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W")).SetValue(true);
@@ -411,11 +406,7 @@ namespace D_Diana
             var rmana = _player.Spellbook.GetSpell(SpellSlot.R).ManaCost;
 
             Smiteontarget(target);
-            if (_player.Distance(target) <= _dfg.Range && _config.Item("UseItems").GetValue<bool>() &&
-                _dfg.IsReady() && target.Health <= ComboDamage(target))
-            {
-                _dfg.Cast(target);
-            }
+
             if (target != null && _igniteSlot != SpellSlot.Unknown && ignitecombo &&
                   _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {
@@ -457,11 +448,6 @@ namespace D_Diana
             var target = t;
             var ignitecombo = _config.Item("UseIgnitecombo").GetValue<bool>();
                 Smiteontarget(target);
-                if (_player.Distance(target) <= _dfg.Range && _config.Item("UseItems").GetValue<bool>() &&
-                    _dfg.IsReady() && target.Health <= ComboDamage(target))
-                {
-                    _dfg.Cast(target);
-                }
                 if (_igniteSlot != SpellSlot.Unknown && ignitecombo &&
                     _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
                 {
@@ -622,11 +608,6 @@ namespace D_Diana
                 dmg += _player.GetSpellDamage(hero, SpellSlot.W);
             if (_r.IsReady())
                 dmg += _player.GetSpellDamage(hero, SpellSlot.R);
-            if (Items.HasItem(3128))
-            {
-                dmg += _player.GetItemDamage(hero, Damage.DamageItems.Dfg);
-                dmg = dmg * 1.2;
-            }
             if (ObjectManager.Player.GetSpellSlot("SummonerIgnite") != SpellSlot.Unknown)
             {
                 dmg += _player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);

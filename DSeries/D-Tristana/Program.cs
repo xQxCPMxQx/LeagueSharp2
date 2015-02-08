@@ -23,7 +23,7 @@ namespace D_Tristana
 
         private static SpellSlot _igniteSlot;
 
-        private static Items.Item _youmuu, _dfg, _blade, _bilge, _hextech;
+        private static Items.Item _youmuu, _blade, _bilge, _hextech;
 
         //AP Style
         private static List<int> tristap = new List<int> {2, 1, 2, 1, 2, 3, 2, 1, 2, 1, 3, 1, 0, 0, 0, 3, 0, 0};
@@ -51,10 +51,6 @@ namespace D_Tristana
 
             _w.SetSkillshot(0.25f, 150, 1200, false, SkillshotType.SkillshotCircle);
 
-            _dfg = Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline ||
-                   Utility.Map.GetMap().Type == Utility.Map.MapType.CrystalScar
-                ? new Items.Item(3188, 750)
-                : new Items.Item(3128, 750);
             _hextech = new Items.Item(3146, 700);
             _youmuu = new Items.Item(3142, 10);
             _bilge = new Items.Item(3144, 450f);
@@ -152,7 +148,6 @@ namespace D_Tristana
             _config.SubMenu("items")
                 .SubMenu("Offensive")
                 .AddItem(new MenuItem("Hextechmyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("usedfg", "Use DFG")).SetValue(true);
             _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
             _config.SubMenu("items")
                 .SubMenu("Potions")
@@ -307,11 +302,6 @@ namespace D_Tristana
                 dmg += _player.GetItemDamage(hero, Damage.DamageItems.Botrk);
             if (Items.HasItem(3146) && Items.CanUseItem(3146))
                 dmg += _player.GetItemDamage(hero, Damage.DamageItems.Hexgun);
-            if (Items.HasItem(3128) && Items.CanUseItem(3128))
-            {
-                dmg += _player.GetItemDamage(hero, Damage.DamageItems.Dfg);
-                dmg = dmg*1.2;
-            }
             if (ObjectManager.Player.HasBuff("LichBane"))
             {
                 dmg += _player.BaseAttackDamage * 0.75 + _player.FlatMagicDamageMod * 0.5;
@@ -445,11 +435,6 @@ namespace D_Tristana
             if (eTarget != null)
             {
                 UseItemes(eTarget);
-                if (_player.Distance(eTarget) <= _dfg.Range && _config.Item("usedfg").GetValue<bool>() &&
-                    _dfg.IsReady() && eTarget.Health <= ComboDamage(eTarget))
-                {
-                    _dfg.Cast(eTarget);
-                }
                 if (_igniteSlot != SpellSlot.Unknown && ignitecombo &&
                     _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
                 {

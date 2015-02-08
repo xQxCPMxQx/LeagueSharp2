@@ -29,7 +29,6 @@ namespace Leblanc
 
         public static SpellSlot IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
         public static Items.Item Fqc = new Items.Item(3092, 750);
-        public static Items.Item Dfg = new Items.Item(3128, 750);
 
         //Menu
         public static Menu Config;
@@ -356,9 +355,6 @@ namespace Leblanc
         private static void UserSummoners(Obj_AI_Base t)
         {
 
-            if (Dfg.IsReady())
-                Dfg.Cast(t);
-
             if (Fqc.IsReady())
                 Fqc.Cast(t.ServerPosition);
 
@@ -639,10 +635,6 @@ namespace Leblanc
                             ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready
                 ? (float) ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite)
                 : 0f;
-
-            fComboDamage += Items.CanUseItem(3128)
-                ? (float) ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Dfg)
-                : 0;
 
             fComboDamage += Items.CanUseItem(3092)
                 ? (float) ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.FrostQueenClaim)

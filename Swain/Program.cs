@@ -32,7 +32,6 @@ namespace Swain
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
         public static Items.Item Fqc = new Items.Item(3188, 750); // Frost Queen's Claim; 
-        public static Items.Item Dfg = new Items.Item(3128, 750);
 
         private static void Main(string[] args)
         {
@@ -85,7 +84,6 @@ namespace Swain
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseAutoRCombo", "Auto R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use Deathfire Grasp").SetValue(true));
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboActive", "Combo!").SetValue(
@@ -258,9 +256,6 @@ namespace Swain
             if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
 
-            if (Config.Item("item3128").GetValue<bool>() && Items.CanUseItem(3128))
-                fComboDamage += ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Dfg);
-
             if (R.IsReady() && !UltiActive)
                 fComboDamage += vPlayer.GetSpellDamage(t, SpellSlot.R) * 3;
 
@@ -283,11 +278,6 @@ namespace Swain
             if (useQ && qTarget != null && Q.IsReady())
             {
                 Q.Cast(qTarget);
-            }
-
-            if (qTarget != null && Dfg.IsReady())
-            {
-                Dfg.Cast(qTarget);
             }
 
             if (useW && wTarget != null && W.IsReady())

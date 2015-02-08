@@ -75,7 +75,7 @@ namespace D_Warwick
             _orbwalker = new Orbwalking.Orbwalker(_config.SubMenu("Orbwalking"));
 
 
-            //Combo usedfg, useignite
+            //Combo useignite
             _config.AddSubMenu(new Menu("Combo", "Combo"));
             _config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite in target")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("useignite", "Use Ignite")).SetValue(true);

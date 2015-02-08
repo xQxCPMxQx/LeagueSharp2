@@ -30,7 +30,7 @@ namespace D_Kogmaw
         private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
         private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
 
-        private static Items.Item _youmuu, _dfg, _blade, _bilge, _hextech;
+        private static Items.Item _youmuu, _blade, _bilge, _hextech;
 
         private static readonly List<string> Skins = new List<string>();
 
@@ -64,11 +64,6 @@ namespace D_Kogmaw
             _q.SetSkillshot(0.5f, 70f, 1650f, true, SkillshotType.SkillshotLine);
             _e.SetSkillshot(0.25f, 120f, 1400f, false, SkillshotType.SkillshotLine);
             _r.SetSkillshot(1.3f, 120f, float.MaxValue, false, SkillshotType.SkillshotCircle);
-
-            _dfg = Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline ||
-                   Utility.Map.GetMap().Type == Utility.Map.MapType.CrystalScar
-                ? new Items.Item(3188, 750)
-                : new Items.Item(3128, 750);
 
             _hextech = new Items.Item(3146, 700);
             _youmuu = new Items.Item(3142, 10);
@@ -125,7 +120,6 @@ namespace D_Kogmaw
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hextech", "Hextech Gunblade")).SetValue(true);
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("HextechEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hextechmyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("usedfg", "Use DFG")).SetValue(true);
             //Deffensive
             _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
             _config.SubMenu("items").SubMenu("Deffensive").AddSubMenu(new Menu("Cleanse", "Cleanse"));
@@ -448,11 +442,7 @@ namespace D_Kogmaw
                 dmg += _player.GetItemDamage(hero, Damage.DamageItems.Botrk);
             if (Items.HasItem(3146) && Items.CanUseItem(3146))
                 dmg += _player.GetItemDamage(hero, Damage.DamageItems.Hexgun);
-            if (Items.HasItem(3128) && Items.CanUseItem(3128))
-            {
-                dmg += _player.GetItemDamage(hero, Damage.DamageItems.Dfg);
-                dmg = dmg * 1.2;
-            }
+
             if (ObjectManager.Player.GetSpellSlot("SummonerIgnite") != SpellSlot.Unknown)
             {
                 dmg += _player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
@@ -495,11 +485,6 @@ namespace D_Kogmaw
             var ignitecombo = _config.Item("UseIgnitecombo").GetValue<bool>();
             var rLim = _config.Item("RlimC").GetValue<Slider>().Value;
             UseItemes();
-            if (etarget.IsValidTarget(_dfg.Range) && _config.Item("usedfg").GetValue<bool>() &&
-                _dfg.IsReady() && etarget.Health <= ComboDamage(etarget))
-            {
-                _dfg.Cast(etarget);
-            }
             if (_igniteSlot != SpellSlot.Unknown && ignitecombo &&
                 _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {

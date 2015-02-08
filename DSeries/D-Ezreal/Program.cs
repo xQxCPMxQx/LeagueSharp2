@@ -37,7 +37,7 @@ namespace D_Ezreal
         private static readonly int[] SmiteGrey = {3711, 3722, 3721, 3720, 3719};
         private static readonly int[] SmiteRed = {3715, 3718, 3717, 3716, 3714};
         private static readonly int[] SmiteBlue = {3706, 3710, 3709, 3708, 3707};
-        private static Items.Item _youmuu, _blade, _bilge, _dfg, _hextech;
+        private static Items.Item _youmuu, _blade, _bilge, _hextech;
 
         private static void Main(string[] args)
         {
@@ -76,10 +76,6 @@ namespace D_Ezreal
             _e.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotCircle);
             _r.SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
 
-            _dfg = Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline ||
-                   Utility.Map.GetMap().Type == Utility.Map.MapType.CrystalScar
-                ? new Items.Item(3188, 750)
-                : new Items.Item(3128, 750);
             _hextech = new Items.Item(3146, 700);
             _youmuu = new Items.Item(3142, 10);
             _bilge = new Items.Item(3144, 450f);
@@ -183,7 +179,6 @@ namespace D_Ezreal
             _config.SubMenu("items")
                 .SubMenu("Offensive")
                 .AddItem(new MenuItem("Hextechmyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("usedfg", "Use DFG")).SetValue(true);
 
             _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
             _config.SubMenu("items").SubMenu("Deffensive").AddSubMenu(new Menu("Cleanse", "Cleanse"));
@@ -488,11 +483,6 @@ namespace D_Ezreal
             var useW = _config.Item("UseWC").GetValue<bool>();
             var useR = _config.Item("UseRcombo").GetValue<bool>();
             if (target != null) UseItemes(target);
-            if (target != null && _player.Distance(target) <= _dfg.Range && _config.Item("usedfg").GetValue<bool>() &&
-                _dfg.IsReady() && target.Health <= ComboDamage(target))
-            {
-                _dfg.Cast(target);
-            }
             if (target != null && _igniteSlot != SpellSlot.Unknown && ignitecombo &&
                 _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {
@@ -585,11 +575,6 @@ namespace D_Ezreal
                 dmg += _player.GetItemDamage(hero, Damage.DamageItems.Botrk);
             if (Items.HasItem(3146) && Items.CanUseItem(3146))
                 dmg += _player.GetItemDamage(hero, Damage.DamageItems.Hexgun);
-            if (Items.HasItem(3128) && Items.CanUseItem(3128))
-            {
-                dmg += _player.GetItemDamage(hero, Damage.DamageItems.Dfg);
-                dmg = dmg*1.2;
-            }
             if (ObjectManager.Player.GetSpellSlot("SummonerIgnite") != SpellSlot.Unknown)
             {
                 dmg += _player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);

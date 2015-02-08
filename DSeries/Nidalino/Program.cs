@@ -24,7 +24,7 @@ namespace D_Nidalee
         private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
         private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
 
-        private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis, _zhonya, _dfg;
+        private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis, _zhonya;
 
         private static SpellSlot IgniteSlot;
 
@@ -88,7 +88,6 @@ namespace D_Nidalee
             _tiamat = new Items.Item(3077, 250f);
             _rand = new Items.Item(3143, 490f);
             _lotis = new Items.Item(3190, 590f);
-            _dfg = new Items.Item(3128, 750f);
             _zhonya = new Items.Item(3157, 10);
 
 
@@ -133,7 +132,6 @@ namespace D_Nidalee
 
             Config.AddSubMenu(new Menu("items", "items"));
             Config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
-            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("UseItemsdfg", "Use DFG")).SetValue(true);
             Config.SubMenu("items")
                 .SubMenu("Offensive")
                 .AddItem(new MenuItem("UseItemsignite", "Use Ignite"))
@@ -432,16 +430,9 @@ namespace D_Nidalee
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             Orbwalker.SetAttack((!Q.IsReady() || W.IsReady()));
-            var itemsDfg = Config.Item("UseItemsdfg").GetValue<bool>();
             var itemsIgnite = Config.Item("UseItemsignite").GetValue<bool>();
             if (target != null)
             {
-                if (_dfg.IsReady() && target.HasBuff("nidaleepassivehunted", true) &&
-                    Player.Distance(target) <= _dfg.Range && itemsDfg &&
-                    target.Health <= ComboDamage(target))
-                {
-                    _dfg.Cast(target);
-                }
                 if (itemsIgnite && IgniteSlot != SpellSlot.Unknown &&
                     Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
@@ -545,11 +536,6 @@ namespace D_Nidalee
             if (ObjectManager.Player.GetSpellSlot("SummonerIgnite") != SpellSlot.Unknown)
             {
                 dmg += Player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
-            }
-            if (Items.HasItem(3128) && Items.CanUseItem(3128))
-            {
-                dmg += Player.GetItemDamage(hero, Damage.DamageItems.Dfg);
-                dmg = dmg * 1.2;
             }
             if (Items.HasItem(3153) && Items.CanUseItem(3153))
                 dmg += Player.GetItemDamage(hero, Damage.DamageItems.Botrk);

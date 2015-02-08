@@ -172,7 +172,6 @@ namespace Vi
             menuUseItems.AddSubMenu(MenuTargetedItems);
 
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
 
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
@@ -181,6 +180,7 @@ namespace Vi
             // Extras -> Use Items -> AOE Items
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
             menuUseItems.AddSubMenu(MenuNonTargetedItems);
+            MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
@@ -295,7 +295,7 @@ namespace Vi
             var useR = Config.Item("UseRCombo").GetValue<bool>();
             var comboDamage = GetComboDamage(t);
 
-            if (t != null && Q.IsReady() && useQ)
+            if (Q.IsReady() && useQ)
             {
                 if (Q.IsCharging)
                 {
@@ -325,15 +325,14 @@ namespace Vi
                 useR = (Config.Item("DontUlt" + t.BaseSkinName) != null &&
                         Config.Item("DontUlt" + t.BaseSkinName).GetValue<bool>() == false) && useR;
 
-                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
                 var qDamage = vPlayer.GetSpellDamage(t, SpellSlot.Q);
                 var eDamage = vPlayer.GetSpellDamage(t, SpellSlot.E) * E.Instance.Ammo;
+                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
 
-
-                if (t.IsValidTarget(Q.Range) && t.Health < qDamage)
+                if (Q.IsReady() && t.Health < qDamage)
                     return;
 
-                if (Orbwalking.InAutoAttackRange(t) && t.Health < eDamage)
+                if (E.IsReady() && Orbwalking.InAutoAttackRange(t) && t.Health < eDamage)
                     return;
 
                 if (Q.IsReady() && E.IsReady() && t.Health < qDamage + eDamage)
@@ -363,8 +362,10 @@ namespace Vi
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             var t = TargetSelector.GetTarget(Q.Range + FlashRange - 20, TargetSelector.DamageType.Physical);
-
-            if (vPlayer.Distance(t) > Q.Range && t != null)
+            if (!t.IsValidTarget())
+                return;
+                
+            if (vPlayer.Distance(t) > Q.Range)
             {
                 if (FlashSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                 {
@@ -429,7 +430,8 @@ namespace Vi
             {
                 E.Cast();
             }
-            else if (useQ && Q.IsReady())
+            
+            if (useQ && Q.IsReady())
             {
                 if (!Q.IsCharging)
                     Q.StartCharging();
@@ -593,7 +595,8 @@ namespace Vi
                 where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
                 select itemId)
             {
-                Items.UseItem(itemID);
+                if (ObjectManager.Player.Distance(vTarget) <= 400)
+                    Items.UseItem(itemID);
             }
         }
     }

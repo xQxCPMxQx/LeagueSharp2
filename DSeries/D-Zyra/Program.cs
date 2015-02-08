@@ -23,7 +23,7 @@ namespace D_Zyra
 
         private static SpellSlot _igniteSlot;
 
-        private static Items.Item _rand, _lotis, _youmuu, _blade, _bilge, _dfg, _hextech, _frostqueen, _mikael;
+        private static Items.Item _rand, _lotis, _youmuu, _blade, _bilge, _hextech, _frostqueen, _mikael;
 
         private static SpellSlot _smiteSlot = SpellSlot.Unknown;
 
@@ -58,10 +58,6 @@ namespace D_Zyra
 
             _igniteSlot = _player.GetSpellSlot("SummonerDot");
 
-            _dfg = Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline ||
-                   Utility.Map.GetMap().Type == Utility.Map.MapType.CrystalScar
-                ? new Items.Item(3188, 750)
-                : new Items.Item(3128, 750);
             _hextech = new Items.Item(3146, 700);
             _youmuu = new Items.Item(3142, 10);
             _bilge = new Items.Item(3144, 450f);
@@ -86,7 +82,7 @@ namespace D_Zyra
             _orbwalker = new Orbwalking.Orbwalker(_config.SubMenu("Orbwalking"));
 
 
-            //Combo usedfg, useignite
+            //Combo useignite
             _config.AddSubMenu(new Menu("Combo", "Combo"));
             _config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("useignite", "Use Ignite")).SetValue(true);
@@ -114,7 +110,6 @@ namespace D_Zyra
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hextech", "Hextech Gunblade")).SetValue(true);
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("HextechEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hextechmyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("usedfg", "Use DFG")).SetValue(true);
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("frostQ", "Use Frost Queen")).SetValue(true);
 
             _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
@@ -336,11 +331,6 @@ namespace D_Zyra
                 dmg += _player.GetItemDamage(hero, Damage.DamageItems.Botrk);
             if (Items.HasItem(3146) && Items.CanUseItem(3146))
                 dmg += _player.GetItemDamage(hero, Damage.DamageItems.Hexgun);
-            if (Items.HasItem(3128) && Items.CanUseItem(3128))
-            {
-                dmg += _player.GetItemDamage(hero, Damage.DamageItems.Dfg);
-                dmg = dmg * 1.2;
-            }
             if (ObjectManager.Player.HasBuff("LichBane"))
             {
                 dmg += _player.BaseAttackDamage * 0.75 + _player.FlatMagicDamageMod * 0.5;
@@ -407,18 +397,12 @@ namespace D_Zyra
         }
         private static void Combo()
         {
-            var usedfg = _config.Item("usedfg").GetValue<bool>();
             var useignite = _config.Item("useignite").GetValue<bool>();
             var target = TargetSelector.GetTarget(_r.Range, TargetSelector.DamageType.Magical);
             if (_config.Item("UseRE").GetValue<bool>() || _config.Item("use_ulti").GetValue<bool>())
                 CastREnemy();
            UseItemes();
             Smiteontarget();
-            if (target.IsValidTarget(_dfg.Range) && usedfg &&
-                      _dfg.IsReady() && target.Health <= ComboDamage(target))
-            {
-                _dfg.Cast(target);
-            }
             if (useignite && _igniteSlot != SpellSlot.Unknown && target.IsValidTarget(600) &&
                    _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {
