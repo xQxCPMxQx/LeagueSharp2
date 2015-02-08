@@ -93,6 +93,16 @@ namespace Marksman
                 DrawHarassToggleStatus();
             }
 
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (t != null)
+            {
+                var vText2 = vText;
+                var xString = "Target:" + t.ChampionName;
+                Utils.DrawText(
+                    vText2, xString, (int)ObjectManager.Player.HPBarPosition.X + 145,
+                    (int)ObjectManager.Player.HPBarPosition.Y + 17, SharpDX.Color.White);
+            }
+
             if (Program.Config.Item("ShowKillableStatus").GetValue<bool>())
             {
                 ShowKillableStatus();

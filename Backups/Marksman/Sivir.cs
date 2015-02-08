@@ -35,7 +35,6 @@ namespace Marksman
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (Q.IsReady() && t.IsValidTarget())
                 {
-                    int xDelay = 0;
                     if ((t.HasBuffOfType(BuffType.Slow) || t.HasBuffOfType(BuffType.Stun) ||
                          t.HasBuffOfType(BuffType.Snare) || t.HasBuffOfType(BuffType.Fear) ||
                          t.HasBuffOfType(BuffType.Taunt)))

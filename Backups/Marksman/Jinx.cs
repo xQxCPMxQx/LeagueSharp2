@@ -16,7 +16,7 @@ namespace Marksman
         public static Spell W;
         public static Spell E;
         public static Spell R;
-        public readonly Font vText;
+        public static Font vText;
 
         public Jinx()
         {
@@ -56,53 +56,6 @@ namespace Marksman
         public class JinxData
         {
             public static bool CanUseFuckingPowPowStack = true;
-
-            public class JinxSpells
-            {
-
-                public static bool CanCastQ
-                {
-                    get
-                    {
-                        var protectManaForUlt =
-                            Program.Config.SubMenu("Misc").Item("ProtectManaForUlt").GetValue<bool>();
-
-                        var xMana = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
-                        var xRMana = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).ManaCost;
-
-                        return !protectManaForUlt || (!R.IsReady() || ObjectManager.Player.Mana >= xRMana + xMana);
-                    }
-                }
-
-                public static bool CanCastW
-                {
-                    get
-                    {
-                        var protectManaForUlt =
-                            Program.Config.SubMenu("Misc").Item("ProtectManaForUlt").GetValue<bool>();
-
-                        var xMana = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
-                        var xRMana = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).ManaCost;
-
-                        return !protectManaForUlt || (!R.IsReady() || ObjectManager.Player.Mana >= xRMana + xMana);
-                    }
-                }
-
-                public static bool CanCastE
-                {
-                    get
-                    {
-                        var protectManaForUlt =
-                            Program.Config.SubMenu("Misc").Item("ProtectManaForUlt").GetValue<bool>();
-
-                        var xMana = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost;
-                        var xRMana = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).ManaCost;
-
-                        return !protectManaForUlt || (!R.IsReady() || ObjectManager.Player.Mana >= xRMana + xMana);
-                    }
-                }
-
-            }
 
             internal enum GunType
             {
@@ -222,10 +175,8 @@ namespace Marksman
         {
             public static void ExecuteToggle()
             {
-                if (JinxData.JinxSpells.CanCastQ)
+                
                     HarassToggleQ();
-
-                if (JinxData.JinxSpells.CanCastW)
                     HarassToggleW();
             }
 
@@ -249,7 +200,7 @@ namespace Marksman
 
             public static void AlwaysChooseMiniGun()
             {
-                if (Program.Config.SubMenu("Misc").Item("Swap2Mini").GetValue<bool>())
+                if (Program.Config.SubMenu("Combo").Item("Swap2Mini").GetValue<bool>())
                 {
                     if (JinxData.QGunType == JinxData.GunType.Mega && GetEnemiesArround < 2)
                     {
@@ -304,14 +255,14 @@ namespace Marksman
                 if (!Program.Config.SubMenu("Misc").Item("SwapDistance").GetValue<bool>())
                     return;
 
-                if (JinxData.QGunType == JinxData.GunType.Mega)
+                if (JinxData.QGunType == JinxData.GunType.Mini)
                 {
-                    if (JinxData.GetRealDistance(t) <= JinxData.QMiniGunRange)
+                    if (JinxData.GetRealDistance(t) >= JinxData.QMegaGunRange)
                         Q.Cast();
                 }
                 else
                 {
-                    if (JinxData.GetRealDistance(t) > JinxData.QMiniGunRange)
+                    if (JinxData.GetRealDistance(t) < JinxData.QMiniGunRange)
                         Q.Cast();
 
                 }
@@ -322,10 +273,13 @@ namespace Marksman
                 if (!W.IsReady())
                     return;
 
-                var existsManaPer = Program.Config.Item("UseQTHM").GetValue<Slider>().Value;
+                if (checkPerMana)
+                {
+                    var existsManaPer = Program.Config.Item("UseQTHM").GetValue<Slider>().Value;
 
-                if (checkPerMana && ObjectManager.Player.ManaPercentage() < existsManaPer)
-                    return;
+                    if (ObjectManager.Player.ManaPercentage() < existsManaPer)
+                        return;
+                }
 
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
 
@@ -334,7 +288,8 @@ namespace Marksman
 
                 var minW = Program.Config.Item("MinWRange").GetValue<Slider>().Value;
 
-                if (JinxData.GetRealDistance(t) >= minW ||
+                if (JinxData.GetRealDistance(t) >= minW || 
+                    JinxData.EnemyHasBuffForCastE ||
                     t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.W))
                 {
                     W.CastIfHitchanceEquals(t, JinxData.GetWHitChance);
@@ -356,6 +311,28 @@ namespace Marksman
                 if (E.IsReady())
                 {
                     E.CastIfHitchanceEquals(t, hitChance);
+                }
+            }
+
+            public static void CastR()
+            {
+                var maxRRange = Program.Config.SubMenu("Combo").Item("MaxRRange").GetValue<Slider>().Value;
+                var t = TargetSelector.GetTarget(maxRRange, TargetSelector.DamageType.Physical);
+
+                if (W.IsReady() && t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.W) &&
+                    W.GetPrediction(t).CollisionObjects.Count == 0)
+                    return;
+
+                var aaDamage = Orbwalking.InAutoAttackRange(t)
+                    ? ObjectManager.Player.GetAutoAttackDamage(t, true) * JinxData.GetPowPowStacks
+                    : 0;
+
+                if (t.Health > aaDamage && t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.R))
+                {
+                    if (t.IsValidTarget(maxRRange))
+                    {
+                        R.Cast(t);
+                    }
                 }
             }
 
@@ -385,66 +362,52 @@ namespace Marksman
             if (E.IsReady())
             {
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                if (!t.IsValidTarget())
+                    return;
+
                 if (GetValue<bool>("AutoEI"))
-                {
                     JinxEvents.CastE(HitChance.Immobile);
-                }
 
                 if (GetValue<bool>("AutoED"))
-                {
                     JinxEvents.CastE(HitChance.Dashing);
-                }
 
-                if (GetValue<bool>("AutoES"))
+                if (GetValue<bool>("AutoES") && JinxData.EnemyHasBuffForCastE)
                 {
-                    if (JinxData.EnemyHasBuffForCastE)
-                    {
-                        JinxEvents.CastE(HitChance.High);
-                    }
+                    JinxEvents.CastE(HitChance.High);
                 }
             }
 
 
-            if (GetValue<bool>("UseRC") && R.IsReady())
+            if (R.IsReady() && Program.Config.SubMenu("Combo").Item("UserRC").GetValue<bool>())
             {
-                var maxRRange = GetValue<Slider>("MaxRRange").Value;
-                var t = TargetSelector.GetTarget(maxRRange, TargetSelector.DamageType.Physical);
-
-                var aaDamage = Orbwalking.InAutoAttackRange(t)
-                    ? ObjectManager.Player.GetAutoAttackDamage(t, true) * JinxData.GetPowPowStacks
-                    : 0;
-
-                if (t.Health > aaDamage && t.Health <= ObjectManager.Player.GetSpellDamage(t, SpellSlot.R))
-                {
-                    if (t.IsValidTarget(maxRRange))
-                    {
-                        R.Cast(t);
-                    }
-                    else
-                    {
-                        var xRKillNotice = String.Format(
-                            "Killable Target: {0}, Distance: {1}", t.ChampionName, JinxData.GetRealDistance(t));
-                        Drawing.DrawText(
-                            Drawing.Width * 0.44f, Drawing.Height * 0.80f, System.Drawing.Color.Red, xRKillNotice);
-                    }
-                }
+                JinxEvents.CastR();
             }
 
-            if ((!ComboActive && !HarassActive) || !Orbwalking.CanMove(100))
+            if (ComboActive || HarassActive)
             {
-                var useQ = GetValue<bool>("UseQ" + (ComboActive ? "C" : "H"));
-                var useW = GetValue<bool>("UseW" + (ComboActive ? "C" : "H"));
-                var useE = GetValue<bool>("UseE" + (ComboActive ? "C" : "H"));
-
-                if (useQ && JinxData.JinxSpells.CanCastQ)
+                var useQ =
+                    Program.Config.SubMenu(ComboActive ? "Combo" : "Harass")
+                        .Item("UseQ" + (ComboActive ? "C" : "H"))
+                        .GetValue<bool>();
+                if (useQ)
+                {
                     JinxEvents.CastQ();
+                }
 
-                if (useW && JinxData.JinxSpells.CanCastW)
+                var useW =
+                    Program.Config.SubMenu(ComboActive ? "Combo" : "Harass")
+                        .Item("UseW" + (ComboActive ? "C" : "H"))
+                        .GetValue<bool>();
+                if (useW)
                 {
                     JinxEvents.CastW();
                 }
 
-                if (useE && JinxData.JinxSpells.CanCastE)
+                var useE =
+                    Program.Config.SubMenu(ComboActive ? "Combo" : "Harass")
+                        .Item("UseE" + (ComboActive ? "C" : "H"))
+                        .GetValue<bool>();
+                if (useE)
                 {
                     JinxEvents.CastE(HitChance.High);
                 }
@@ -455,7 +418,10 @@ namespace Marksman
         {
             if ((ComboActive || HarassActive) && (unit.IsValid || unit.IsMe) && (target is Obj_AI_Hero))
             {
-                var useW = GetValue<bool>("UseW" + (ComboActive ? "C" : "H"));
+                var useW =
+                    Program.Config.SubMenu(ComboActive ? "Combo" : "Harass")
+                        .Item("UseW" + (ComboActive ? "C" : "H"))
+                        .GetValue<bool>();
 
                 if (useW && W.IsReady())
                     JinxEvents.CastW();
@@ -464,7 +430,6 @@ namespace Marksman
 
         public override void Drawing_OnDraw(EventArgs args)
         {
-
             var t = TargetSelector.GetTarget(JinxData.QMegaGunRange + 500, TargetSelector.DamageType.Physical);
             if (t != null)
             {
@@ -481,44 +446,17 @@ namespace Marksman
                 }
             }
 
-            Spell[] spellList = { W, E };
-            var drawQbound = GetValue<Circle>("DrawQBound");
-
             if (Program.Config.Item("DrawToggleStatus").GetValue<bool>())
             {
-                var xHarassStatus = "";
-                if (Program.Config.Item("UseQTH").GetValue<KeyBind>().Active)
-                    xHarassStatus += "Q + ";
-
-                if (Program.Config.Item("UseWTH").GetValue<KeyBind>().Active)
-                    xHarassStatus += "W + ";
-
-                xHarassStatus = xHarassStatus.Length < 1 ? "Toggle: Off   " : "Toggle: " + xHarassStatus;
-
-                var xText = xHarassStatus.Substring(0, xHarassStatus.Length - 3);
-
-                var vText1 = vText;
-                var vText2 = vText;
-
-                Vector2 pos = Drawing.WorldToScreen(ObjectManager.Player.Position);
-                Utils.DrawText(
-                    vText1, xText, (int) ObjectManager.Player.HPBarPosition.X + 145,
-                    (int) ObjectManager.Player.HPBarPosition.Y + 5, SharpDX.Color.White);
-
-
-                t = TargetSelector.GetTarget(JinxData.QMegaGunRange + 200f, TargetSelector.DamageType.Physical);
-                if (t != null)
-                {
-                    var xString = "Target:" + t.ChampionName;
-                    Utils.DrawText(
-                        vText2, xString, (int) ObjectManager.Player.HPBarPosition.X + 145,
-                        (int) ObjectManager.Player.HPBarPosition.Y + 17, SharpDX.Color.White);
-                }
+               ShowToggleStatus();
             }
+
+            Spell[] spellList = { W, E };
+            var drawQbound = Program.Config.Item("DrawQBound").GetValue<Circle>();
 
             foreach (var spell in spellList)
             {
-                var menuItem = GetValue<Circle>("Draw" + spell.Slot);
+                var menuItem = Program.Config.SubMenu("Combo").Item("Draw"+ spell.Slot).GetValue<Circle>();
                 if (menuItem.Active)
                 {
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
@@ -538,29 +476,74 @@ namespace Marksman
         {
             var xHarassStatus = "";
             if (Program.Config.Item("UseQTH").GetValue<KeyBind>().Active)
-                xHarassStatus += "Q - ";
+                xHarassStatus += "Q + ";
 
             if (Program.Config.Item("UseWTH").GetValue<KeyBind>().Active)
-                xHarassStatus += "W - ";
+                xHarassStatus += "W + ";
 
-            if (xHarassStatus.Length < 1)
+            xHarassStatus = xHarassStatus.Length < 1 ? "Toggle: Off   " : "Toggle: " + xHarassStatus;
+
+            var xText = xHarassStatus.Substring(0, xHarassStatus.Length - 3);
+
+            var vText1 = vText;
+            var vText2 = vText;
+
+            Vector2 pos = Drawing.WorldToScreen(ObjectManager.Player.Position);
+            Utils.DrawText(
+                vText1, xText, (int)ObjectManager.Player.HPBarPosition.X + 145,
+                (int)ObjectManager.Player.HPBarPosition.Y + 5, SharpDX.Color.White);
+
+
+            var t = TargetSelector.GetTarget(JinxData.QMegaGunRange + 200f, TargetSelector.DamageType.Physical);
+            if (t != null)
             {
-                xHarassStatus = "Toggle: Off   ";
+                var xString = "Target:" + t.ChampionName;
+                Utils.DrawText(
+                    vText2, xString, (int)ObjectManager.Player.HPBarPosition.X + 145,
+                    (int)ObjectManager.Player.HPBarPosition.Y + 17, SharpDX.Color.White);
             }
-            else
-            {
-                xHarassStatus = "Toggle: " + xHarassStatus;
-            }
-            xHarassStatus = xHarassStatus.Substring(0, xHarassStatus.Length - 3);
-            Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.82f, System.Drawing.Color.Wheat, xHarassStatus);
         }
 
         public override bool ComboMenu(Menu config)
         {
-            config.AddItem(new MenuItem("UseQC" + Id, "Use Q").SetValue(true));
-            config.AddItem(new MenuItem("UseWC" + Id, "Use W").SetValue(true));
-            config.AddItem(new MenuItem("UseEC" + Id, "Use E").SetValue(true));
-            config.AddItem(new MenuItem("UseRC" + Id, "Use R").SetValue(true));
+            var xQMenu = new Menu("Q Settings", "QSettings");
+            {
+                xQMenu.AddItem(new MenuItem("UseQC", "Use Q").SetValue(true));
+                xQMenu.AddItem(new MenuItem("SwapAOE", "Swap Q for AOE Damage If will hit enemies >=").SetValue(new Slider(2, 0, 5)));
+                xQMenu.AddItem(new MenuItem("SwapDistance", "Swap Q for Distance").SetValue(true));
+                xQMenu.AddItem(new MenuItem("Swap2Mini", "Always Choose MiniGun If No Enemy").SetValue(true));
+                xQMenu.AddItem(new MenuItem("DrawQBound" + Id, "Draw Q bound").SetValue(new Circle(true, System.Drawing.Color.Azure)));
+
+                config.AddSubMenu(xQMenu);
+            }
+            var xWMenu = new Menu("W Settings", "WSettings");
+            {
+                xWMenu.AddItem(new MenuItem("UseWC", "Use W").SetValue(true));
+                xWMenu.AddItem(new MenuItem("WHitChance", "W HitChance").SetValue(new StringList(new[] { "Low", "Medium", "High", "Very High", "Immobile" }, 2)));
+                xWMenu.AddItem(new MenuItem("MinWRange", "Min. W range").SetValue(new Slider(525 + 65 * 2, 0, 1200)));
+                xWMenu.AddItem(new MenuItem("DrawW", "Draw W range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
+                config.AddSubMenu(xWMenu);
+            }
+
+            var xEMenu = new Menu("E Settings", "ESettings");
+            {
+                xEMenu.AddItem(new MenuItem("UseEC", "Use E").SetValue(true));
+                xEMenu.AddItem(new MenuItem("AutoEI" + Id, "Auto-E -> Immobile").SetValue(true));
+                xEMenu.AddItem(new MenuItem("AutoES" + Id, "Auto-E -> Slowed/Stunned/Teleport/Snare").SetValue(true));
+                xEMenu.AddItem(new MenuItem("AutoED" + Id, "Auto-E -> Dashing").SetValue(false));
+                xEMenu.AddItem(new MenuItem("DrawE", "Draw E range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
+
+                config.AddSubMenu(xEMenu);
+            }
+
+            var xRMenu = new Menu("R Settings", "RSettings");
+            {
+                xRMenu.AddItem(new MenuItem("UseRC", "Use R").SetValue(true));
+                xRMenu.AddItem(new MenuItem("MaxRRange", "Max R range").SetValue(new Slider(1700, 0, 4000)));
+                xRMenu.AddItem(new MenuItem("DrawRMaxRange", "Draw R Max. Range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
+                config.AddSubMenu(xRMenu);
+            }
+
             return true;
         }
 
@@ -569,13 +552,12 @@ namespace Marksman
             config.AddItem(new MenuItem("UseQH" + Id, "Use Q").SetValue(true));
             config.AddItem(new MenuItem("UseWH" + Id, "Use W").SetValue(false));
 
-            config.AddItem(
-                new MenuItem("UseQTH", "Q (Toggle!)").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle)));
+            config.AddItem(new MenuItem("UseQTH", "Q (Toggle!)").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle)));
             config.AddItem(new MenuItem("UseQTHM", "Q Mana Per.").SetValue(new Slider(50, 100, 0)));
 
-            config.AddItem(
-                new MenuItem("UseWTH", "W (Toggle!)").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
+            config.AddItem(new MenuItem("UseWTH", "W (Toggle!)").SetValue(new KeyBind("Y".ToCharArray()[0], KeyBindType.Toggle)));
             config.AddItem(new MenuItem("UseWTHM", "W Mana Per.").SetValue(new Slider(50, 100, 0)));
+            config.AddItem(new MenuItem("DrawToggleStatus", "Show Toggle Status").SetValue(true));
             return true;
         }
 
@@ -587,52 +569,11 @@ namespace Marksman
 
         public override bool MiscMenu(Menu config)
         {
-            var xQMenu = new Menu("Q Settings", "QSettings");
-            {
-                xQMenu.AddItem(
-                    new MenuItem("SwapAOE", "Swap Q for AOE Damage If will hit enemies >=").SetValue(
-                        new Slider(2, 0, 5)));
-                xQMenu.AddItem(new MenuItem("SwapDistance", "Swap Q for Distance").SetValue(true));
-                xQMenu.AddItem(new MenuItem("Swap2Mini", "Always Choose MiniGun If No Enemy").SetValue(true));
-                config.AddSubMenu(xQMenu);
-            }
-
-            var xWMenu = new Menu("W Settings", "WSettings");
-            {
-                xWMenu.AddItem(
-                    new MenuItem("WHitChance", "W HitChance").SetValue(
-                        new StringList(new[] { "Low", "Medium", "High", "Very High", "Immobile" }, 2)));
-                xWMenu.AddItem(new MenuItem("MinWRange", "Min. W range").SetValue(new Slider(525 + 65 * 2, 0, 1200)));
-                config.AddSubMenu(xWMenu);
-            }
-
-            var xEMenu = new Menu("E Settings", "ESettings");
-            {
-                xEMenu.AddItem(new MenuItem("AutoEI" + Id, "Auto-E -> Immobile").SetValue(true));
-                xEMenu.AddItem(new MenuItem("AutoES" + Id, "Auto-E -> Slowed/Stunned/Teleport/Snare").SetValue(true));
-                xEMenu.AddItem(new MenuItem("AutoED" + Id, "Auto-E -> Dashing").SetValue(false));
-                config.AddSubMenu(xEMenu);
-            }
-
-            var xRMenu = new Menu("R Settings", "RSettings");
-            {
-                xRMenu.AddItem(new MenuItem("MaxRRange" + Id, "Max R range").SetValue(new Slider(1700, 0, 4000)));
-                xRMenu.AddItem(new MenuItem("ProtectManaForUlt", "Protect Mana for Ultimate").SetValue(true));
-                config.AddSubMenu(xRMenu);
-            }
             return true;
         }
 
         public override bool DrawingMenu(Menu config)
         {
-            config.AddItem(
-                new MenuItem("DrawQBound" + Id, "Draw Q bound").SetValue(new Circle(true, System.Drawing.Color.Azure)));
-            config.AddItem(
-                new MenuItem("DrawW" + Id, "W range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
-            config.AddItem(
-                new MenuItem("DrawE" + Id, "E range").SetValue(new Circle(false, System.Drawing.Color.Azure)));
-
-            config.AddItem(new MenuItem("DrawToggleStatus", "Show Toggle Status").SetValue(true));
 
             return true;
         }
