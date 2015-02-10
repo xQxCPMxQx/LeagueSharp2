@@ -24,14 +24,6 @@ namespace Pantheon
 
         private static SpellSlot IgniteSlot;
         private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
-
-        public static float EDelay = 0;
-        private static bool UsingE = false;
-        private static Spell[] junglerLevel = { E, Q, W, Q, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
-        private static Spell[] topLanerLevel = { Q, E, Q, W, Q, R, Q, E, Q, E, R, E, W, E, W, R, W, W };
-
-        public static int DelayTick = 0;
-
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
@@ -185,13 +177,9 @@ namespace Pantheon
                 Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
 
                 Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
-                Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
-                dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
-                {
-                    Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
-                };
-
+                Utility.HpBarDamageIndicator.Enabled = true;
             }
+
             new PotionManager();
             Config.AddToMainMenu();
 
@@ -224,13 +212,9 @@ namespace Pantheon
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            //if (!Orbwalking.CanMove(100)) return;
+            if (!Orbwalking.CanMove(100)) 
+                return;
 
-            if (DelayTick - Environment.TickCount <= 250)
-            {
-                UseSummoners();
-                DelayTick = Environment.TickCount;
-            }
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
@@ -309,7 +293,6 @@ namespace Pantheon
                 if (t.IsValidTarget())
                 {
                     E.Cast(t.Position);
-                    EDelay = Environment.TickCount + 1000;
                 }
             }
 
@@ -462,8 +445,6 @@ namespace Pantheon
                     Items.UseItem(itemID);
             }
         }
-
-        private static void UseSummoners() {}
 
         private static void WelcomeMessage()
         {
