@@ -287,7 +287,7 @@ namespace Pantheon
                     W.CastOnUnit(t);
             }
 
-            if (E.IsReady() && !Player.HasBuff("sound", true) && !W.IsReady() && !Q.IsReady())
+            if (useE && !Player.HasBuff("sound", true) && !Q.IsReady() && !W.IsReady())
             {
                 t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
@@ -310,20 +310,26 @@ namespace Pantheon
 
         private static void Harass()
         {
-            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
 
-            if (qTarget != null && Q.IsReady() && useQ)
+            Obj_AI_Hero t;
+            
+            if (useQ)
             {
-                Q.CastOnUnit(qTarget);
+                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                    Q.CastOnUnit(t);
             }
 
-            if (eTarget != null && E.IsReady() && useE && !W.IsReady())
+            if (useE && !Player.HasBuff("sound", true) && !Q.IsReady() && !W.IsReady())
             {
-                E.Cast(eTarget.Position);
+                t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                {
+                    E.Cast(t.Position);
+                }
             }
         }
 
@@ -359,21 +365,14 @@ namespace Pantheon
 
         private static void LaneClear()
         {
-            var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
-            var useE = Config.Item("UseELaneClear").GetValue<bool>();
-
-
-            if (useQ && Q.IsReady())
+            var useQ = Config.Item("UseQLaneClear").GetValue<bool>() && Q.IsReady();
+            if (useQ)
             {
-                var minionsQ = MinionManager.GetMinions(
-                    Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
-                foreach (Obj_AI_Base vMinion in
-                    from vMinion in minionsQ
-                    let vMinionEDamage = Player.GetSpellDamage(vMinion, SpellSlot.Q)
-                    select vMinion)
-                {
-                    Q.CastOnUnit(vMinion);
-                }
+                var vMinions = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range);
+                foreach (Obj_AI_Base minions in
+                    vMinions.Where(
+                        minions => minions.Health < ObjectManager.Player.GetSpellDamage(minions, SpellSlot.Q)))
+                    Q.Cast(minions);
             }
         }
 
