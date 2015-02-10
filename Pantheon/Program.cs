@@ -209,7 +209,7 @@ namespace Pantheon
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color);
+                    Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1);
             }
 
             Render.Circle.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 1, true);
@@ -299,11 +299,11 @@ namespace Pantheon
             if (useW)
             {
                 t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-                if (!t.UnderTurret() && t.IsValidTarget())
+                if (t.IsValidTarget())
                     W.CastOnUnit(t);
             }
 
-            if (E.IsReady() && !Player.HasBuff("sound", true) && !W.IsReady())
+            if (E.IsReady() && !Player.HasBuff("sound", true) && !W.IsReady() && !Q.IsReady())
             {
                 t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
@@ -312,6 +312,7 @@ namespace Pantheon
                     EDelay = Environment.TickCount + 1000;
                 }
             }
+
             t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() && !Player.HasBuff("sound", true))
                 UseItems(t);
