@@ -212,7 +212,7 @@ namespace Pantheon
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (!Orbwalking.CanMove(100)) 
+            if (!Orbwalking.CanMove(100))
                 return;
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
@@ -315,7 +315,7 @@ namespace Pantheon
             var useE = Config.Item("UseEHarass").GetValue<bool>();
 
             Obj_AI_Hero t;
-            
+
             if (useQ)
             {
                 t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
@@ -366,6 +366,8 @@ namespace Pantheon
         private static void LaneClear()
         {
             var useQ = Config.Item("UseQLaneClear").GetValue<bool>() && Q.IsReady();
+            var useE = Config.Item("UseELaneClear").GetValue<bool>() && E.IsReady();
+            
             if (useQ)
             {
                 var vMinions = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range);
@@ -373,6 +375,18 @@ namespace Pantheon
                     vMinions.Where(
                         minions => minions.Health < ObjectManager.Player.GetSpellDamage(minions, SpellSlot.Q)))
                     Q.Cast(minions);
+            }
+
+            if (useE)
+            {
+                var rangedMinionsE = MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, E.Range + E.Width + 30, MinionTypes.Ranged);
+
+                var locE = W.GetCircularFarmLocation(rangedMinionsE, W.Width * 0.75f);
+                if (locE.MinionsHit >= 3 && E.IsInRange(locE.Position.To3D()))
+                {
+                    E.Cast(locE.Position);
+                }
             }
         }
 
