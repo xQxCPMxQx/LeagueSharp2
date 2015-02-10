@@ -458,7 +458,8 @@ namespace Pantheon
                 where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
                 select itemId)
             {
-                Items.UseItem(itemID);
+                if (Player.Distance(vTarget) <= 350)
+                    Items.UseItem(itemID);
             }
         }
 
