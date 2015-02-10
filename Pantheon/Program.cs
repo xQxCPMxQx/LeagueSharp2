@@ -145,7 +145,6 @@ namespace Pantheon
                 {
                     menuUseItems.AddSubMenu(MenuTargetedItems);
                     MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-                    MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
                     MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
                     MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
                     MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
@@ -155,6 +154,7 @@ namespace Pantheon
                 {
                     menuUseItems.AddSubMenu(MenuNonTargetedItems);
                     MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
+                    MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
                     MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
                     MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
                     MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
@@ -197,8 +197,6 @@ namespace Pantheon
 
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
-            GameObject.OnDelete += Game_OnObjectDelete;
 
             CustomEvents.Unit.OnLevelUp += CustomEvents_Unit_OnLevelUp;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
@@ -217,23 +215,6 @@ namespace Pantheon
             Render.Circle.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 1, true);
         }
 
-        private static void Game_OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs spell)
-        {
-            if (!unit.IsMe)
-                return;
-            UsingE = false;
-            if (spell.SData.Name.ToLower() != "pantheone")
-                return;
-            UsingE = true;
-            Utility.DelayAction.Add(750, () => UsingE = false);
-        }
-
-        private static void Game_OnObjectDelete(GameObject sender, EventArgs args)
-        {
-            if (!sender.Name.Contains("Pantheon_") || !sender.Name.Contains("_E_cas.troy"))
-                return;
-            UsingE = false;
-        }
 
         public static void CustomEvents_Unit_OnLevelUp(Obj_AI_Base sender, CustomEvents.Unit.OnLevelUpEventArgs args)
         {
@@ -244,9 +225,6 @@ namespace Pantheon
         private static void Game_OnGameUpdate(EventArgs args)
         {
             //if (!Orbwalking.CanMove(100)) return;
-
-            Orbwalker.SetAttack(!SoundActive());
-            Orbwalker.SetMovement(!SoundActive());
 
             if (DelayTick - Environment.TickCount <= 250)
             {
@@ -305,50 +283,49 @@ namespace Pantheon
 
         private static void Combo()
         {
-            if (SoundActive())
-                return;
+            Obj_AI_Hero t;
 
-            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            var wTarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            var useQ = Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady();
+            var useW = Config.Item("UseWCombo").GetValue<bool>() && W.IsReady();
+            var useE = Config.Item("UseECombo").GetValue<bool>() && E.IsReady();
 
-            var useQ = Config.Item("UseQCombo").GetValue<bool>();
-            var useW = Config.Item("UseWCombo").GetValue<bool>();
-            var useE = Config.Item("UseECombo").GetValue<bool>();
-
-            if (Q.IsReady() && useQ && qTarget != null)
+            if (useQ)
             {
-                Q.CastOnUnit(qTarget);
+                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                    Q.CastOnUnit(t);
             }
 
-            if (W.IsReady() && useW && wTarget != null)
+            if (useW)
             {
-                if (!Utility.UnderTurret(wTarget, true))
-                    W.CastOnUnit(wTarget);
+                t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                if (!t.UnderTurret() && t.IsValidTarget())
+                    W.CastOnUnit(t);
             }
 
-            if (E.IsReady() && useE && eTarget != null && !Player.HasBuff("sound", true) && !W.IsReady())
+            if (E.IsReady() && !Player.HasBuff("sound", true) && !W.IsReady())
             {
-                E.Cast(eTarget.Position);
-                EDelay = Environment.TickCount + 1000;
+                t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                {
+                    E.Cast(t.Position);
+                    EDelay = Environment.TickCount + 1000;
+                }
             }
+            t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget() && !Player.HasBuff("sound", true))
+                UseItems(t);
 
-            if (eTarget != null && !Player.HasBuff("sound", true))
-                UseItems(eTarget);
-
-            if (qTarget != null && IgniteSlot != SpellSlot.Unknown &&
+            if (t != null && IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
-                Player.GetSummonerSpellDamage(qTarget, Damage.SummonerSpell.Ignite) > qTarget.Health)
+                Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
             {
-                Player.Spellbook.CastSpell(IgniteSlot, qTarget);
+                Player.Spellbook.CastSpell(IgniteSlot, t);
             }
         }
 
         private static void Harass()
         {
-            if (SoundActive())
-                return;
-
             var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
@@ -368,9 +345,6 @@ namespace Pantheon
 
         private static void JungleFarm()
         {
-            if (SoundActive())
-                return;
-
             var useQ = Config.Item("UseQJungleFarm").GetValue<bool>();
             var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
 
@@ -401,8 +375,6 @@ namespace Pantheon
 
         private static void LaneClear()
         {
-            if (SoundActive())
-                return;
             var useQ = Config.Item("UseQLaneClear").GetValue<bool>();
             var useE = Config.Item("UseELaneClear").GetValue<bool>();
 
@@ -498,13 +470,5 @@ namespace Pantheon
                     "<font color='#70DBDB'>xQx</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded!</font>",
                     ChampionName));
         }
-
-        public static bool SoundActive()
-        {
-            if (ObjectManager.Player.HasBuff("pantheonesound"))
-                UsingE = true;
-            return UsingE || ObjectManager.Player.IsChannelingImportantSpell();
-        }
-
     }
 }
