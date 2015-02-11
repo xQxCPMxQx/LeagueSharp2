@@ -267,40 +267,33 @@ namespace Pantheon
 
         private static void Combo()
         {
-            Obj_AI_Hero t;
-
+            Obj_AI_Hero t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
+                
             var useQ = Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady();
             var useW = Config.Item("UseWCombo").GetValue<bool>() && W.IsReady();
             var useE = Config.Item("UseECombo").GetValue<bool>() && E.IsReady();
 
             if (useQ)
             {
-                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    Q.CastOnUnit(t);
+                Q.CastOnUnit(t);
             }
 
             if (useW)
             {
-                t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    W.CastOnUnit(t);
+                W.CastOnUnit(t);
             }
 
             if (useE && !Player.HasBuff("sound", true) && !Q.IsReady() && !W.IsReady())
             {
-                t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                {
-                    E.Cast(t.Position);
-                }
+                E.Cast(t.Position);
             }
 
-            t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && !Player.HasBuff("sound", true))
+            if (!Player.HasBuff("sound", true))
                 UseItems(t);
 
-            if (t != null && IgniteSlot != SpellSlot.Unknown &&
+            if (IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                 Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
             {
@@ -310,33 +303,28 @@ namespace Pantheon
 
         private static void Harass()
         {
+            Obj_AI_Hero t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
 
-            var useQ = Config.Item("UseQHarass").GetValue<bool>();
-            var useE = Config.Item("UseEHarass").GetValue<bool>();
-
-            Obj_AI_Hero t;
+            var useQ = Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady();
+            var useE = Config.Item("UseEHarass").GetValue<bool>() && E.IsReady();
 
             if (useQ)
             {
-                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    Q.CastOnUnit(t);
+                Q.CastOnUnit(t);
             }
 
             if (useE && !Player.HasBuff("sound", true) && !Q.IsReady() && !W.IsReady())
             {
-                t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                {
-                    E.Cast(t.Position);
-                }
+                E.Cast(t.Position);
             }
         }
 
         private static void JungleFarm()
         {
-            var useQ = Config.Item("UseQJungleFarm").GetValue<bool>();
-            var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
+            var useQ = Config.Item("UseQJungleFarm").GetValue<bool>() && Q.IsReady();
+            var useE = Config.Item("UseEJungleFarm").GetValue<bool>() && E.IsReady();
 
             var mobs = MinionManager.GetMinions(
                 ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral,
@@ -346,10 +334,10 @@ namespace Pantheon
                 return;
 
             var mob = mobs[0];
-            if (useQ && Q.IsReady() && mobs.Count >= 1)
+            if (useQ && mobs.Count >= 1)
                 Q.CastOnUnit(mob);
 
-            if (useE && E.IsReady() && mobs.Count >= 2 &&
+            if (useE && mobs.Count >= 2 &&
                 (LastCastedSpell.LastCastPacketSent.Slot != SpellSlot.E ||
                  Environment.TickCount - LastCastedSpell.LastCastPacketSent.Tick > 150))
             {
