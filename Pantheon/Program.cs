@@ -16,13 +16,10 @@ namespace Pantheon
         public static Orbwalking.Orbwalker Orbwalker;
 
         //Spells
+        public static Spell Q, W, E, R;
+        public static SpellSlot IgniteSlot;
         public static List<Spell> SpellList = new List<Spell>();
-        public static Spell Q;
-        public static Spell E;
-        public static Spell W;
-        public static Spell R;
 
-        private static SpellSlot IgniteSlot;
         private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
         //Menu
         public static Menu Config;
@@ -39,19 +36,17 @@ namespace Pantheon
         {
             if (Player.BaseSkinName != "Pantheon")
                 return;
-            if (Player.IsDead)
-                return;
-
-
 
             Q = new Spell(SpellSlot.Q, 620f);
-            W = new Spell(SpellSlot.W, 620f);
-            E = new Spell(SpellSlot.E, 640f);
-            R = new Spell(SpellSlot.R, 2000f);
-
             Q.SetTargetted(0.2f, 1700f);
+
+            W = new Spell(SpellSlot.W, 620f);
             W.SetTargetted(0.2f, 1700f);
+
+            E = new Spell(SpellSlot.E, 640f);
             E.SetSkillshot(0.25f, 15f * 2 * (float) Math.PI / 180, 2000f, false, SkillshotType.SkillshotCone);
+
+            R = new Spell(SpellSlot.R, 2000f);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -61,7 +56,6 @@ namespace Pantheon
             IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
             Config = new Menu("xQx | Pantheon", "Pantheon", true);
-
             var targetSelectorMenu = new Menu("Target Selector", "TargetSelector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
@@ -99,6 +93,7 @@ namespace Pantheon
             }
 
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
+            {
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
             Config.SubMenu("LaneClear")
@@ -107,7 +102,7 @@ namespace Pantheon
                 .AddItem(
                     new MenuItem("LaneClearActive", "LaneClear!").SetValue(
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
-
+            }
             // Jungling Farm
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
             {
@@ -131,7 +126,6 @@ namespace Pantheon
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
             {
                 Config.SubMenu("Extras").AddSubMenu(menuUseItems);
-
                 // Extras -> Use Items -> Targeted Items
                 MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
                 {
@@ -186,7 +180,6 @@ namespace Pantheon
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
 
-            CustomEvents.Unit.OnLevelUp += CustomEvents_Unit_OnLevelUp;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
             WelcomeMessage();
         }
@@ -199,20 +192,25 @@ namespace Pantheon
                 if (menuItem.Active && spell.Level > 0)
                     Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1);
             }
-
             Render.Circle.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 1, true);
         }
 
-
-        public static void CustomEvents_Unit_OnLevelUp(Obj_AI_Base sender, CustomEvents.Unit.OnLevelUpEventArgs args)
+        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
         {
-            if (sender.NetworkId != Player.NetworkId)
+            var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
+            if (!interruptSpells)
                 return;
+
+            if (Player.Distance(vTarget) < Orbwalking.GetRealAutoAttackRange(ObjectManager.Player))
+            {
+                if (W.IsReady())
+                    W.Cast();
+            }
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (!Orbwalking.CanMove(100))
+            if (Player.IsDead || !Orbwalking.CanMove(100))
                 return;
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
@@ -395,19 +393,6 @@ namespace Pantheon
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float) fComboDamage;
-        }
-
-        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
-        {
-            var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
-            if (!interruptSpells)
-                return;
-
-            if (Player.Distance(vTarget) < Orbwalking.GetRealAutoAttackRange(ObjectManager.Player))
-            {
-                if (W.IsReady())
-                    W.Cast();
-            }
         }
 
         private static InventorySlot GetInventorySlot(int id)
