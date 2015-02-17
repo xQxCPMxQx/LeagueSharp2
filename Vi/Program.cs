@@ -172,6 +172,7 @@ namespace Vi
             menuUseItems.AddSubMenu(MenuTargetedItems);
 
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
+            MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
 
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
@@ -180,7 +181,6 @@ namespace Vi
             // Extras -> Use Items -> AOE Items
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
             menuUseItems.AddSubMenu(MenuNonTargetedItems);
-            MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
@@ -295,7 +295,7 @@ namespace Vi
             var useR = Config.Item("UseRCombo").GetValue<bool>();
             var comboDamage = GetComboDamage(t);
 
-            if (Q.IsReady() && useQ)
+            if (t != null && Q.IsReady() && useQ)
             {
                 if (Q.IsCharging)
                 {
@@ -325,14 +325,15 @@ namespace Vi
                 useR = (Config.Item("DontUlt" + t.BaseSkinName) != null &&
                         Config.Item("DontUlt" + t.BaseSkinName).GetValue<bool>() == false) && useR;
 
+                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
                 var qDamage = vPlayer.GetSpellDamage(t, SpellSlot.Q);
                 var eDamage = vPlayer.GetSpellDamage(t, SpellSlot.E) * E.Instance.Ammo;
-                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
 
-                if (Q.IsReady() && t.Health < qDamage)
+
+                if (t.IsValidTarget(Q.Range) && t.Health < qDamage)
                     return;
 
-                if (E.IsReady() && Orbwalking.InAutoAttackRange(t) && t.Health < eDamage)
+                if (Orbwalking.InAutoAttackRange(t) && t.Health < eDamage)
                     return;
 
                 if (Q.IsReady() && E.IsReady() && t.Health < qDamage + eDamage)
@@ -362,10 +363,8 @@ namespace Vi
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             var t = TargetSelector.GetTarget(Q.Range + FlashRange - 20, TargetSelector.DamageType.Physical);
-            if (!t.IsValidTarget())
-                return;
-                
-            if (vPlayer.Distance(t) > Q.Range)
+
+            if (vPlayer.Distance(t) > Q.Range && t != null)
             {
                 if (FlashSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                 {
@@ -426,11 +425,12 @@ namespace Vi
                 return;
 
             var mob = mobs[0];
+
             if (useE && E.IsReady())
             {
                 E.Cast();
             }
-            
+
             if (useQ && Q.IsReady())
             {
                 if (!Q.IsCharging)
@@ -472,17 +472,17 @@ namespace Vi
                 {
                     var locQ = Q.GetLineFarmLocation(allMinionsQ);
                     if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < Q.Range) &&
-                        locQ.MinionsHit > 2 && locQ.Position.IsValid())
+                        locQ.MinionsHit >= 2 && locQ.Position.IsValid())
                         Q.Cast(locQ.Position);
                 }
-                else if (allMinionsQ.Count > 2)
+                else if (allMinionsQ.Count >= 2)
                     Q.StartCharging();
             }
 
             if (useE && E.IsReady())
             {
                 var locE = E.GetLineFarmLocation(allMinionsE);
-                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 &&
+                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit >= 2 &&
                     locE.Position.IsValid())
                     E.Cast();
             }
@@ -595,8 +595,7 @@ namespace Vi
                 where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
                 select itemId)
             {
-                if (ObjectManager.Player.Distance(vTarget) <= 400)
-                    Items.UseItem(itemID);
+                Items.UseItem(itemID);
             }
         }
     }
