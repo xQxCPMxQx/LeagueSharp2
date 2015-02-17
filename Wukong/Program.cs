@@ -18,7 +18,11 @@ namespace Wukong
 
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
-        public static Spell Q, E, R;
+
+        public static Spell Q;
+        public static Spell E;
+        public static Spell R;
+
         private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
         private static readonly SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
@@ -40,9 +44,9 @@ namespace Wukong
             if (Player.IsDead)
                 return;
 
-            Q = new Spell(SpellSlot.Q);
+            Q = new Spell(SpellSlot.Q, 375f);
             E = new Spell(SpellSlot.E, 640f);
-            R = new Spell(SpellSlot.R, 355f);
+            R = new Spell(SpellSlot.R, 375f);
 
             E.SetTargetted(0.5f, 2000f);
 
@@ -71,7 +75,8 @@ namespace Wukong
             menuCombo.AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Min. Enemy Count : ").SetValue(new Slider(1, 5, 0)));
             menuCombo.AddItem(
-                new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
+                new MenuItem("ComboActive", "Combo!").SetValue(
+                    new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -181,7 +186,7 @@ namespace Wukong
             foreach (var spell in SpellList)
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
-                if (menuItem.Active && spell.Level > 0)
+                if (menuItem.Active)
                     Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1);
             }
         }
@@ -228,7 +233,9 @@ namespace Wukong
 
             if (useQ)
             {
-                Q.Cast();
+                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                    Q.Cast();
             }
 
             if (useE)
@@ -257,10 +264,7 @@ namespace Wukong
 
             if (useR)
             {
-                t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-                if (t.IsValidTarget() &&
-                    Player.CountEnemiesInRange((int) Orbwalking.GetRealAutoAttackRange(Player)) >=
-                    Config.Item("UserRComboEnemyCount").GetValue<Slider>().Value)
+                if (Player.CountEnemiesInRange(R.Range) >= Config.Item("UseRComboEnemyCount").GetValue<Slider>().Value)
                 {
                     R.Cast();
                 }
@@ -284,7 +288,8 @@ namespace Wukong
             {
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
-                    Q.CastOnUnit(Player);
+                    Q.Cast();
+
             }
 
             if (useE)
