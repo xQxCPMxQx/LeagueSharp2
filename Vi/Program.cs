@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -23,9 +24,23 @@ namespace Vi
         public static Spell E2;
         public static Spell R;
 
-        private static SpellSlot IgniteSlot;
-        private static SpellSlot SmiteSlot;
-        private static SpellSlot FlashSlot;
+        public static Items.Item ItemBlade;
+        public static Items.Item ItemBilge;
+        public static Items.Item ItemHydra;
+        public static Items.Item ItemLotis;
+        public static Items.Item ItemRand;
+        public static Items.Item ItemTiamat;
+
+        //Credits to Kurisu
+        private static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };
+        private static readonly int[] SmiteGrey = { 3711, 3722, 3721, 3720, 3719 };
+        private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
+        private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
+
+        private static SpellSlot IgniteSlot = SpellSlot.Unknown;
+        private static SpellSlot SmiteSlot = SpellSlot.Unknown;
+        private static SpellSlot FlashSlot = SpellSlot.Unknown;
+
 
         public static float FlashRange = 450f;
         public static float SmiteRange = 700f;
@@ -36,6 +51,8 @@ namespace Vi
         public static Menu MenuExtras;
         private static Menu MenuTargetedItems;
         private static Menu MenuNonTargetedItems;
+
+        private static bool xEnemyHaveKnockBack = false;
 
         private static void Main(string[] args)
         {
@@ -55,10 +72,10 @@ namespace Vi
             R = new Spell(SpellSlot.R, 800f);
 
             Q.SetSkillshot(0.5f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            Q.SetCharged("ViQ", "ViQ", 100, 860, 1f);
+
             E.SetSkillshot(0.15f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             R.SetTargetted(0.15f, 1500f);
-
-            Q.SetCharged("ViQ", "ViQ", 100, 860, 1f);
 
             SpellList.Add(Q);
             SpellList.Add(E);
@@ -68,12 +85,20 @@ namespace Vi
             SmiteSlot = vPlayer.GetSpellSlot("SummonerSmite");
             FlashSlot = vPlayer.GetSpellSlot("SummonerFlash");
 
+            ItemBilge = new Items.Item(3144, 450f);
+            ItemBlade = new Items.Item(3153, 450f);
+            ItemHydra = new Items.Item(3074, 250f);
+            ItemLotis = new Items.Item(3190, 590f);
+            ItemRand = new Items.Item(3143, 490f);
+            ItemTiamat = new Items.Item(3077, 250f);
+
             //Create the menu
             Config = new Menu("xQx | Vi", "Vi", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
+            new AssassinManager();
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -172,7 +197,6 @@ namespace Vi
             menuUseItems.AddSubMenu(MenuTargetedItems);
 
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
 
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
@@ -181,6 +205,7 @@ namespace Vi
             // Extras -> Use Items -> AOE Items
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
             menuUseItems.AddSubMenu(MenuNonTargetedItems);
+            MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
@@ -203,10 +228,6 @@ namespace Vi
                         new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("SmiteRange", "Smite Range").SetValue(
-                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(
                     new MenuItem("FQRange", "Flash+Q Range").SetValue(
                         new Circle(false, System.Drawing.Color.FromArgb(0xFF, 0xCC, 0x00))));
 
@@ -215,11 +236,10 @@ namespace Vi
 
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
-
-
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
 
             Game.PrintChat(
                 String.Format(
@@ -243,10 +263,19 @@ namespace Vi
             }
         }
 
+        public static void Game_OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs spell)
+        {
+            if (!unit.IsMe)
+                return;
+            //"ViBasicAttack"
+        }
+
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100))
                 return;
+
+
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
@@ -286,7 +315,7 @@ namespace Vi
 
         private static void Combo()
         {
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
 
@@ -295,7 +324,7 @@ namespace Vi
             var useR = Config.Item("UseRCombo").GetValue<bool>();
             var comboDamage = GetComboDamage(t);
 
-            if (t != null && Q.IsReady() && useQ)
+            if (Q.IsReady() && useQ && t.IsValidTarget(Q.Range))
             {
                 if (Q.IsCharging)
                 {
@@ -315,7 +344,7 @@ namespace Vi
                 vPlayer.Spellbook.CastSpell(IgniteSlot, t);
             }
 
-            if (E.IsReady() && useE)
+            if (E.IsReady() && useE && t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(vPlayer)))
             {
                 E.Cast();
             }
@@ -325,15 +354,14 @@ namespace Vi
                 useR = (Config.Item("DontUlt" + t.BaseSkinName) != null &&
                         Config.Item("DontUlt" + t.BaseSkinName).GetValue<bool>() == false) && useR;
 
-                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
                 var qDamage = vPlayer.GetSpellDamage(t, SpellSlot.Q);
                 var eDamage = vPlayer.GetSpellDamage(t, SpellSlot.E) * E.Instance.Ammo;
+                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
 
-
-                if (t.IsValidTarget(Q.Range) && t.Health < qDamage)
+                if (Q.IsReady() && t.Health < qDamage)
                     return;
 
-                if (Orbwalking.InAutoAttackRange(t) && t.Health < eDamage)
+                if (E.IsReady() && Orbwalking.InAutoAttackRange(t) && t.Health < eDamage)
                     return;
 
                 if (Q.IsReady() && E.IsReady() && t.Health < qDamage + eDamage)
@@ -362,9 +390,11 @@ namespace Vi
         private static void ComboFlashQ()
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-            var t = TargetSelector.GetTarget(Q.Range + FlashRange - 20, TargetSelector.DamageType.Physical);
+            var t = GetTarget(Q.Range + FlashRange - 20, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
 
-            if (vPlayer.Distance(t) > Q.Range && t != null)
+            if (vPlayer.Distance(t) > Q.Range)
             {
                 if (FlashSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                 {
@@ -383,7 +413,7 @@ namespace Vi
 
         private static void Harass()
         {
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             if (!t.IsValidTarget())
                 return;
@@ -425,7 +455,6 @@ namespace Vi
                 return;
 
             var mob = mobs[0];
-
             if (useE && E.IsReady())
             {
                 E.Cast();
@@ -472,17 +501,17 @@ namespace Vi
                 {
                     var locQ = Q.GetLineFarmLocation(allMinionsQ);
                     if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < Q.Range) &&
-                        locQ.MinionsHit >= 2 && locQ.Position.IsValid())
+                        locQ.MinionsHit > 2 && locQ.Position.IsValid())
                         Q.Cast(locQ.Position);
                 }
-                else if (allMinionsQ.Count >= 2)
+                else if (allMinionsQ.Count > 2)
                     Q.StartCharging();
             }
 
             if (useE && E.IsReady())
             {
                 var locE = E.GetLineFarmLocation(allMinionsE);
-                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit >= 2 &&
+                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 &&
                     locE.Position.IsValid())
                     E.Cast();
             }
@@ -505,7 +534,7 @@ namespace Vi
         {
             get
             {
-                var vTarget = TargetSelector.GetTarget(E2.Range, TargetSelector.DamageType.Physical);
+                var vTarget = GetTarget(E2.Range, TargetSelector.DamageType.Physical);
                 var vMinions = MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.NotAlly,
                     MinionOrderTypes.None);
@@ -595,8 +624,43 @@ namespace Vi
                 where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
                 select itemId)
             {
-                Items.UseItem(itemID);
+                if (ObjectManager.Player.Distance(vTarget) <= 400)
+                    Items.UseItem(itemID);
             }
+        }
+
+        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0,
+            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        {
+            if (Math.Abs(vDefaultRange) < 0.00001)
+                vDefaultRange = Q.Range;
+
+            if (!Config.Item("AssassinActive").GetValue<bool>())
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+
+            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+            var vEnemy =
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        enemy =>
+                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            Config.Item("Assassin" + enemy.ChampionName) != null &&
+                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                            ObjectManager.Player.Distance(enemy) < assassinRange);
+
+            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+            {
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+            }
+
+            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            Obj_AI_Hero t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
         }
     }
 }
