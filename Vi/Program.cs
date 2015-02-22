@@ -344,7 +344,7 @@ namespace Vi
                 vPlayer.Spellbook.CastSpell(IgniteSlot, t);
             }
 
-            if (E.IsReady() && useE && t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(vPlayer)) && !t.HasBuffOfType(BuffType.Knockback))
+            if (E.IsReady() && useE && t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(vPlayer)))
             {
                 E.Cast();
             }
