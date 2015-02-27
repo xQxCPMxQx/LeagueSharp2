@@ -43,18 +43,6 @@ namespace Swain
             if (vPlayer.BaseSkinName != ChampionName)
                 return;
 
-            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if (t.HasBuffOfType(BuffType.Slow) || t.HasBuffOfType(BuffType.Stun) || t.HasBuffOfType(BuffType.Snare) ||
-                t.HasBuffOfType(BuffType.Charm) || t.HasBuffOfType(BuffType.Fear) || t.HasBuffOfType(BuffType.Taunt) ||
-                t.HasBuffOfType(BuffType.Knockback) || t.HasBuff("Recall") || t.HasBuff("teleport_target", true))
-            {
-                if (W.IsReady() && t.IsValidTarget(W.Range + W.Width))
-                {
-                    W.Cast(t);
-                }
-            }
-
-
             //Create the spells
             Q = new Spell(SpellSlot.Q, 625);
             W = new Spell(SpellSlot.W, 820);
@@ -381,6 +369,17 @@ namespace Swain
                 return;
 
             Orbwalker.SetAttack(true);
+
+            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            if (t.HasBuffOfType(BuffType.Slow) || t.HasBuffOfType(BuffType.Stun) || t.HasBuffOfType(BuffType.Snare) ||
+                t.HasBuffOfType(BuffType.Charm) || t.HasBuffOfType(BuffType.Fear) || t.HasBuffOfType(BuffType.Taunt) ||
+                t.HasBuffOfType(BuffType.Knockback) || t.HasBuff("Recall") || t.HasBuff("teleport_target", true))
+            {
+                if (W.IsReady() && t.IsValidTarget(W.Range + W.Width))
+                {
+                    W.Cast(t);
+                }
+            }
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
