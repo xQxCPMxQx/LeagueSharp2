@@ -334,7 +334,6 @@ namespace JaxQx
 
             if (DelayTick - Environment.TickCount <= 250)
             {
-                UseSummoners();
                 DelayTick = Environment.TickCount;
             }
 
@@ -618,35 +617,5 @@ namespace JaxQx
                 Items.UseItem(itemID);
             }
         }
-
-        private static void UseSummoners()
-        {
-            if (SmiteSlot == SpellSlot.Unknown)
-                return;
-
-            if (!Config.Item("AutoSmite").GetValue<KeyBind>().Active)
-                return;
-
-            string[] monsterNames = { "LizardElder", "AncientGolem", "Worm", "Dragon" };
-            var firstOrDefault = Player.Spellbook.Spells.FirstOrDefault(spell => spell.Name.Contains("mite"));
-            if (firstOrDefault == null)
-                return;
-
-            var vMonsters = MinionManager.GetMinions(
-                Player.ServerPosition, firstOrDefault.SData.CastRange[0], MinionTypes.All, MinionTeam.NotAlly);
-            foreach (var vMonster in
-                vMonsters.Where(
-                    vMonster =>
-                        vMonster != null && !vMonster.IsDead && !Player.IsDead && !Player.IsStunned &&
-                        SmiteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
-                    .Where(
-                        vMonster =>
-                            (vMonster.Health < Player.GetSummonerSpellDamage(vMonster, Damage.SummonerSpell.Smite)) &&
-                            (monsterNames.Any(name => vMonster.BaseSkinName.StartsWith(name)))))
-            {
-                Player.Spellbook.CastSpell(SmiteSlot, vMonster);
-            }
-        }
-
     }
 }
