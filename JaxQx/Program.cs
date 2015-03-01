@@ -19,8 +19,8 @@ namespace JaxQx
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
-        public static Spell E;
         public static Spell W;
+        public static Spell E;
         public static Spell R;
 
         public static string[] xWards =
@@ -32,8 +32,6 @@ namespace JaxQx
         public static Map map;
 
         private static SpellSlot IgniteSlot;
-        private static SpellSlot SmiteSlot;
-        public static float SmiteRange = 700f;
         public static float wardRange = 600f;
         public static int DelayTick = 0;
         //Menu
@@ -57,7 +55,7 @@ namespace JaxQx
 
             Q = new Spell(SpellSlot.Q, 680f);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 190f);
+            E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R);
 
             Q.SetTargetted(0.50f, 75f);
@@ -68,7 +66,6 @@ namespace JaxQx
             SpellList.Add(R);
 
             IgniteSlot = Player.GetSpellSlot("SummonerDot");
-            SmiteSlot = Player.GetSpellSlot("SummonerSmite");
 
             //Create the menu
             Config = new Menu("xQx | Jax", "Jax", true);
@@ -137,8 +134,6 @@ namespace JaxQx
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
             Config.SubMenu("JungleFarm")
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("JungleFarm")
-                .AddItem(new MenuItem("AutoSmite", "Auto Smite").SetValue(new KeyBind('N', KeyBindType.Toggle)));
 
             Config.SubMenu("JungleFarm")
                 .AddItem(
@@ -191,10 +186,6 @@ namespace JaxQx
                 .AddItem(
                     new MenuItem("DrawWard", "Ward Range").SetValue(
                         new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(
-                    new MenuItem("DrawSmiteRange", "Smite Range").SetValue(
-                        new Circle(false, System.Drawing.Color.Indigo)));
 
             /* [ Damage After Combo ] */
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
@@ -234,12 +225,6 @@ namespace JaxQx
             if (drawWard.Active)
             {
                 Render.Circle.DrawCircle(Player.Position, wardRange, drawWard.Color, 1);
-            }
-
-            var drawSmiteRange = Config.Item("DrawSmiteRange").GetValue<Circle>();
-            if (drawSmiteRange.Active && Config.Item("AutoSmite").GetValue<KeyBind>().Active)
-            {
-                Render.Circle.DrawCircle(Player.Position, SmiteRange, drawWard.Color, 1);
             }
 
             var drawMinQRange = Config.Item("DrawQMinRange").GetValue<Circle>();
@@ -401,10 +386,12 @@ namespace JaxQx
             if (ObjectManager.Player.Distance(t) <= E.Range)
                 UseItems(t);
 
-            if (W.IsReady() && useW && ObjectManager.Player.Distance(t) <= W.Range)
+            if (W.IsReady() && useW &&
+                ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0)
                 W.Cast();
 
-            if (E.IsReady() && useE && ObjectManager.Player.Distance(t) <= E.Range)
+            if (E.IsReady() && useE &&
+                ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0)
                 E.Cast();
 
             if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
@@ -532,10 +519,10 @@ namespace JaxQx
                         Q.Cast(vMinion);
                 }
 
-                if (useW && W.IsReady() && Player.Distance(vMinion) < E.Range)
+                if (useW && W.IsReady())
                     W.Cast();
 
-                if (useE && E.IsReady() && Player.Distance(vMinion) < E.Range)
+                if (useE && E.IsReady())
                     E.CastOnUnit(Player);
             }
         }
@@ -562,7 +549,7 @@ namespace JaxQx
                 E.CastOnUnit(Player);
         }
 
-        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
+        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base t, InterruptableSpell args)
         {
             var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
             if (!interruptSpells)
@@ -570,13 +557,14 @@ namespace JaxQx
             if (!E.IsReady())
                 return;
 
-            if (Player.Distance(vTarget) < Q.Range && Player.Distance(vTarget) > E.Range && Q.IsReady())
+            if (Player.Distance(t) < Q.Range &&
+                ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0 && Q.IsReady())
             {
                 E.Cast();
-                Q.Cast(vTarget);
+                Q.Cast(t);
             }
 
-            if (Player.Distance(vTarget) <= E.Range)
+            if (Player.Distance(t) <= E.Range)
             {
                 E.Cast();
             }
