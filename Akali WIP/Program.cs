@@ -29,7 +29,7 @@ namespace Akali
 
         public static Menu Config;
 
-        private static Obj_AI_Hero Player = ObjectManager.Player;
+        public static Obj_AI_Hero Player = ObjectManager.Player;
 
         private static void Main(string[] args)
         {
@@ -161,22 +161,20 @@ namespace Akali
             var fComboDamage = 0d;
 
             if (Q.IsReady())
-                fComboDamage += ObjectManager.Player.GetSpellDamage(vTarget, SpellSlot.Q) +
-                                ObjectManager.Player.GetSpellDamage(vTarget, SpellSlot.Q, 1);
-
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.Q) +
+                                Player.GetSpellDamage(vTarget, SpellSlot.Q, 1);
             if (E.IsReady())
-                fComboDamage += ObjectManager.Player.GetSpellDamage(vTarget, SpellSlot.E);
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.E);
 
             if (R.IsReady())
-                fComboDamage += ObjectManager.Player.GetSpellDamage(vTarget, SpellSlot.R) * R.Instance.Ammo;
-            ;
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.R) * R.Instance.Ammo;
 
             if (Items.CanUseItem(3146))
-                fComboDamage += ObjectManager.Player.GetItemDamage(vTarget, Damage.DamageItems.Hexgun);
+                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Hexgun);
 
             if (IgniteSlot != SpellSlot.Unknown &&
-                ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float) fComboDamage;
         }
@@ -191,7 +189,7 @@ namespace Akali
                 }
             }
 
-            if (ObjectManager.Player.HasBuff("zedulttargetmark", true))
+            if (Player.HasBuff("zedulttargetmark", true))
             {
                 if (W.IsReady())
                 {
@@ -200,7 +198,7 @@ namespace Akali
             }
 
             /*
-            foreach (var t1 in ObjectManager.Player.Buffs)
+            foreach (var t1 in Player.Buffs)
             {
                 if (t1.Name.ToLower().Contains("zedulttargetmark"))
                 {
@@ -243,9 +241,9 @@ namespace Akali
             var motaEnemy = enemyHaveMota;
 
             if (GetComboDamage(t) > t.Health && IgniteSlot != SpellSlot.Unknown &&
-                ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, t);
+                Player.Spellbook.CastSpell(IgniteSlot, t);
             }
 
             if (Q.IsReady() && t.IsValidTarget(Q.Range))
@@ -388,10 +386,10 @@ namespace Akali
                 ObjectManager.Get<Obj_AI_Hero>()
                     .Where(
                         enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            enemy.Team != Player.Team && !enemy.IsDead && enemy.IsVisible &&
                             Config.Item("Assassin" + enemy.ChampionName) != null &&
                             Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
+                            Player.Distance(enemy) < assassinRange);
 
             if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
@@ -409,7 +407,7 @@ namespace Akali
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (ObjectManager.Player.IsDead)
+            if (Player.IsDead)
                 return;
 
             foreach (var spell in SpellList)
