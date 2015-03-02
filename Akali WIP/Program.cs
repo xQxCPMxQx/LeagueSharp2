@@ -6,8 +6,6 @@ using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX.Direct3D9;
-using Font = SharpDX.Direct3D9.Font;
 
 #endregion
 
@@ -22,7 +20,7 @@ namespace Akali
         public static Spell E;
         public static Spell R;
         public static List<Spell> SpellList = new List<Spell>();
-        
+
         public static SpellSlot IgniteSlot;
         public static Items.Item Hex;
         public static Items.Item Cutlass;
@@ -81,31 +79,56 @@ namespace Akali
             {
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-                Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
-                Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(
+                            new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassActive", "Harass!").SetValue(
+                            new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
             }
 
             Config.AddSubMenu(new Menu("Farm", "Farm"));
             {
-                Config.SubMenu("Farm").AddItem(new MenuItem("UseQFarm", "Use Q").SetValue(new StringList(new[] { "Freeze", "LaneClear", "Both", "No" }, 2)));
-                Config.SubMenu("Farm").AddItem(new MenuItem("UseEFarm", "Use E").SetValue(new StringList(new[] { "Freeze", "LaneClear", "Both", "No" }, 1)));
-                Config.SubMenu("Farm").AddItem(new MenuItem("FreezeActive", "Freeze!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
-                Config.SubMenu("Farm").AddItem(new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Farm")
+                    .AddItem(
+                        new MenuItem("UseQFarm", "Use Q").SetValue(
+                            new StringList(new[] { "Freeze", "LaneClear", "Both", "No" }, 2)));
+                Config.SubMenu("Farm")
+                    .AddItem(
+                        new MenuItem("UseEFarm", "Use E").SetValue(
+                            new StringList(new[] { "Freeze", "LaneClear", "Both", "No" }, 1)));
+                Config.SubMenu("Farm")
+                    .AddItem(
+                        new MenuItem("FreezeActive", "Freeze!").SetValue(
+                            new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Farm")
+                    .AddItem(
+                        new MenuItem("LaneClearActive", "LaneClear!").SetValue(
+                            new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             }
 
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
-            { 
+            {
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", "Use Q").SetValue(true));
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "Use E").SetValue(true));
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(
+                            new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             }
-            
+
             Config.AddSubMenu(new Menu("Misc", "Misc"));
             Config.SubMenu("Misc").AddItem(new MenuItem("KillstealR", "Killsteal R").SetValue(false));
 
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("QRange", "Q Range").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("RRange", "R Range").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
 
             Config.AddToMainMenu();
 
@@ -115,10 +138,12 @@ namespace Akali
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
 
-            Game.PrintChat(String.Format("<font color='#70DBDB'>xQx |</font> <font color='#FFFFFF'>{0} Loaded!</font>", ChampionName));
+            Game.PrintChat(
+                String.Format(
+                    "<font color='#70DBDB'>xQx |</font> <font color='#FFFFFF'>{0} Loaded!</font>", ChampionName));
         }
 
-        static Obj_AI_Hero enemyHaveMota
+        private static Obj_AI_Hero enemyHaveMota
         {
             get
             {
@@ -143,7 +168,8 @@ namespace Akali
                 fComboDamage += ObjectManager.Player.GetSpellDamage(vTarget, SpellSlot.E);
 
             if (R.IsReady())
-                fComboDamage += ObjectManager.Player.GetSpellDamage(vTarget, SpellSlot.R) * R.Instance.Ammo; ;
+                fComboDamage += ObjectManager.Player.GetSpellDamage(vTarget, SpellSlot.R) * R.Instance.Ammo;
+            ;
 
             if (Items.CanUseItem(3146))
                 fComboDamage += ObjectManager.Player.GetItemDamage(vTarget, Damage.DamageItems.Hexgun);
@@ -152,13 +178,11 @@ namespace Akali
                 ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
-            return (float)fComboDamage;
+            return (float) fComboDamage;
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-
-
             if (Player.CountEnemiesInRange(350) >= 2)
             {
                 if (W.IsReady())
@@ -167,6 +191,15 @@ namespace Akali
                 }
             }
 
+            if (ObjectManager.Player.HasBuff("zedulttargetmark", true))
+            {
+                if (W.IsReady())
+                {
+                    W.Cast(Player.Position);
+                }
+            }
+
+            /*
             foreach (var t1 in ObjectManager.Player.Buffs)
             {
                 if (t1.Name.ToLower().Contains("zedulttargetmark"))
@@ -178,8 +211,7 @@ namespace Akali
                     }
                 }
             }
-
-
+            */
             Orbwalker.SetAttack(true);
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
@@ -187,7 +219,7 @@ namespace Akali
                 Combo();
             }
             else if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
-                Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
+                     Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
                 Harass();
 
             var lc = Config.Item("LaneClearActive").GetValue<KeyBind>().Active;
@@ -219,20 +251,6 @@ namespace Akali
             if (Q.IsReady() && t.IsValidTarget(Q.Range))
             {
                 Q.CastOnUnit(t);
-
-            }
-            
-            if (motaEnemy != null && motaEnemy == t && t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(t)))
-                return;
-            
-            if (E.IsReady() && t.IsValidTarget(E.Range))
-            {
-                E.Cast();
-            }
-
-            if (R.IsReady() && t.IsValidTarget(R.Range))
-            {
-                R.CastOnUnit(t);
             }
 
             if (Hex.IsReady() && t.IsValidTarget(Hex.Range))
@@ -245,6 +263,18 @@ namespace Akali
                 Cutlass.Cast(t);
             }
 
+            if (motaEnemy != null && motaEnemy.IsValidTarget(Orbwalking.GetRealAutoAttackRange(t)))
+                return;
+
+            if (E.IsReady() && t.IsValidTarget(E.Range))
+            {
+                E.Cast();
+            }
+
+            if (R.IsReady() && t.IsValidTarget(R.Range))
+            {
+                R.CastOnUnit(t);
+            }
         }
 
         private static void Harass()
@@ -266,6 +296,7 @@ namespace Akali
         {
             if (!Orbwalking.CanMove(40))
                 return;
+
             var allMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
             var useQi = Config.Item("UseQFarm").GetValue<StringList>().SelectedIndex;
             var useEi = Config.Item("UseEFarm").GetValue<StringList>().SelectedIndex;
@@ -299,7 +330,6 @@ namespace Akali
                 }
             }
 
-
             if (laneClear)
             {
                 foreach (var minion in allMinions)
@@ -320,10 +350,10 @@ namespace Akali
             if (mobs.Count > 0)
             {
                 var mob = mobs[0];
-                
+
                 if (Q.IsReady())
                     Q.CastOnUnit(mob);
-                
+
                 if (E.IsReady())
                     E.Cast();
             }
