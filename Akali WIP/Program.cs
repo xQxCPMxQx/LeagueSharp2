@@ -79,14 +79,10 @@ namespace Akali
             {
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-                Config.SubMenu("Harass")
-                    .AddItem(
-                        new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(
-                            new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
-                Config.SubMenu("Harass")
-                    .AddItem(
-                        new MenuItem("HarassActive", "Harass!").SetValue(
-                            new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Harass").AddItem(new MenuItem("HarassEnergy", "Min. Energy Percent: ").SetValue(new Slider(50, 100, 0)));
+
+                Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
+                Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
             }
 
             Config.AddSubMenu(new Menu("Farm", "Farm"));
@@ -181,12 +177,9 @@ namespace Akali
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (Player.CountEnemiesInRange(350) >= 2)
+            if (W.IsReady() && Player.CountEnemiesInRange(W.Range / 2 + 100) >= 2)
             {
-                if (W.IsReady())
-                {
-                    W.Cast(Player.Position);
-                }
+                W.Cast(Player.Position);
             }
 
             if (Player.HasBuff("zedulttargetmark", true))
@@ -216,16 +209,26 @@ namespace Akali
             {
                 Combo();
             }
-            else if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
-                     Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
-                Harass();
+
+            if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
+                Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
+            {
+                var vEnergy = Config.Item("HarassEnergy").GetValue<Slider>().Value;
+                if (Player.ManaPercentage() >= vEnergy)
+                    Harass();
+            }
 
             var lc = Config.Item("LaneClearActive").GetValue<KeyBind>().Active;
             if (lc || Config.Item("FreezeActive").GetValue<KeyBind>().Active)
+            {
                 Farm(lc);
+            }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
+            {
                 JungleFarm();
+            }
+
             if (Config.Item("KillstealR").GetValue<bool>())
             {
                 Killsteal();
@@ -235,10 +238,6 @@ namespace Akali
         private static void Combo()
         {
             var t = GetTarget(R.Range, TargetSelector.DamageType.Magical);
-
-            Orbwalker.SetAttack(!R.IsReady() && !Q.IsReady() && !E.IsReady() && Geometry.Distance(Player, t) < 800f);
-
-            var motaEnemy = enemyHaveMota;
 
             if (GetComboDamage(t) > t.Health && IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
@@ -261,6 +260,7 @@ namespace Akali
                 Cutlass.Cast(t);
             }
 
+            var motaEnemy = enemyHaveMota;
             if (motaEnemy != null && motaEnemy.IsValidTarget(Orbwalking.GetRealAutoAttackRange(t)))
                 return;
 
@@ -277,14 +277,16 @@ namespace Akali
 
         private static void Harass()
         {
+            var useQ = Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady();
+            var useE = Config.Item("UseEHarass").GetValue<bool>() && E.IsReady();
             var t = GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            if (Q.IsReady() && t.IsValidTarget(Q.Range))
+            if (useQ && t.IsValidTarget(Q.Range))
             {
                 Q.CastOnUnit(t);
             }
 
-            if (E.IsReady() && t.IsValidTarget(E.Range))
+            if (useE && t.IsValidTarget(E.Range))
             {
                 E.Cast();
             }
@@ -315,13 +317,14 @@ namespace Akali
                 }
             }
 
-            else if (useE && E.IsReady())
+            if (useE && E.IsReady())
             {
                 if (
                     allMinions.Any(
                         minion =>
                             minion.IsValidTarget(E.Range) &&
-                            minion.Health < 0.75 * Player.GetSpellDamage(minion, SpellSlot.E)))
+                            minion.Health < 0.75 * Player.GetSpellDamage(minion, SpellSlot.E) &&
+                            minion.IsValidTarget(E.Range)))
                 {
                     E.Cast();
                     return;
@@ -335,7 +338,7 @@ namespace Akali
                     if (useQ)
                         Q.CastOnUnit(minion);
 
-                    if (useE)
+                    if (useE && minion.IsValidTarget(E.Range) )
                         E.Cast();
                 }
             }
