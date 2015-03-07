@@ -31,6 +31,7 @@ namespace Wukong
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
+        public static int ultUsed;
 
         private static void Main(string[] args)
         {
@@ -135,9 +136,7 @@ namespace Wukong
             menuUseItems.AddSubMenu(MenuTargetedItems);
 
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
 
@@ -145,6 +144,7 @@ namespace Wukong
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
             menuUseItems.AddSubMenu(MenuNonTargetedItems);
             MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
+            MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
@@ -174,6 +174,7 @@ namespace Wukong
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
 
             Game.PrintChat(
                 String.Format(
@@ -191,17 +192,25 @@ namespace Wukong
             }
         }
 
+
+        private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && args.SData.Name == "MonkeyKingSpinToWin")
+            {
+                ultUsed = (int) Game.Time;
+            }
+        }
+
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100))
                 return;
-
-            if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
+            if (Config.Item("ComboActive").GetValue<KeyBind>().Active && (int) Game.Time > ultUsed + 4)
             {
                 Combo();
             }
 
-            if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
+            if (Config.Item("HarassActive").GetValue<KeyBind>().Active && (int) Game.Time > ultUsed + 4)
             {
                 var vMana = Config.Item("HarassMana").GetValue<Slider>().Value;
                 if (Player.ManaPercentage() >= vMana)
