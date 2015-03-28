@@ -265,7 +265,6 @@ namespace Orianna
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameSendPacket += Game_OnSendPacket;
         }
 
         #endregion
@@ -672,29 +671,6 @@ namespace Orianna
                 return true;
             }
             return false;
-        }
-
-        private static void Game_OnSendPacket(GamePacketEventArgs args)
-        {
-            if (args.PacketData[0] == Packet.C2S.Cast.Header)
-            {
-                Packet.C2S.Cast.Struct decodedPacket = Packet.C2S.Cast.Decoded(args.PacketData);
-                if (decodedPacket.Slot == SpellSlot.R)
-                {
-                    if (target != null)
-                    {
-                        if (GetNumberHitByR(target) == 0)
-                        {
-                            //Block packet if enemies hit is 0
-                            args.Process = false;
-                        }
-                    }
-                    if (target == null)
-                    {
-                        args.Process = false;
-                    }
-                }
-            }
         }
 
         private static float GetComboDamage(Obj_AI_Base enemy)

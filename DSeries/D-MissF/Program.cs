@@ -173,7 +173,7 @@ namespace D_MissF
             Game.PrintChat("<font color='#881df2'>D-MissFortune by Diabaths</font> Loaded.");
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.OnGameSendPacket += GameOnOnGameSendPacket;
+            
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
@@ -334,14 +334,6 @@ namespace D_MissF
         {
             return (_config.Item("skinMiss").GetValue<Slider>().Value != _lastSkin);
         }
-        private static void GameOnOnGameSendPacket(GamePacketEventArgs args)
-        {
-            if (args.PacketData[0] == Packet.C2S.Move.Header && _player.HasBuff("missfortunebulletsound"))
-            {
-                args.Process = false;
-            }
-        }
-
         private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && args.SData.Name == "MissFortuneBulletTime")
