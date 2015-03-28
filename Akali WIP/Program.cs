@@ -132,7 +132,7 @@ namespace Akali
             Utility.HpBarDamageIndicator.Enabled = true;
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
 
             Game.PrintChat(
                 String.Format(
@@ -175,7 +175,7 @@ namespace Akali
             return (float) fComboDamage;
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (W.IsReady() && Player.CountEnemiesInRange(W.Range / 2 + 100) >= 2)
             {

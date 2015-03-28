@@ -211,7 +211,7 @@ namespace Irelia
 
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
 
@@ -315,7 +315,7 @@ namespace Irelia
             }
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(50))
                 return;

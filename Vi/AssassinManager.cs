@@ -86,7 +86,7 @@ namespace Vi
                 .SubMenu("Draw")
                 .AddItem(new MenuItem("DrawStatus", "Show status on the screen").SetValue(true));
 
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnWndProc += Game_OnWndProc;
         }
@@ -99,7 +99,7 @@ namespace Vi
                 Program.Config.Item("Assassin" + enemy.ChampionName).SetValue(false);
             }
         }
-        private static void OnGameUpdate(EventArgs args)
+        private static void OnUpdate(EventArgs args)
         {
         }
 

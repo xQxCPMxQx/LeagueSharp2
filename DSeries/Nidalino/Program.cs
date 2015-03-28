@@ -274,7 +274,7 @@ namespace D_Nidalee
 
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Hero.OnCreate += OnCreateObj;
             Obj_AI_Hero.OnDelete += OnDeleteObj;
             //Game_OnGameEnd += Game_OnGameEnd;
@@ -285,7 +285,7 @@ namespace D_Nidalee
                 "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (Config.Item("UseAutoE").GetValue<bool>())
             {

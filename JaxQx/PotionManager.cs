@@ -97,10 +97,10 @@ namespace JaxQx
             Program.MenuExtras.SubMenu("PotionManager").SubMenu("Mana").AddItem(new MenuItem("ManaPotion", "Use Mana Potion").SetValue(true));
             Program.MenuExtras.SubMenu("PotionManager").SubMenu("Mana").AddItem(new MenuItem("ManaPercent", "MP Trigger Percent").SetValue(new Slider(30)));
 
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnUpdate;
         }
 
-        private void OnGameUpdate(EventArgs args)
+        private void OnUpdate(EventArgs args)
         {
             if(ObjectManager.Player.HasBuff("Recall") || ObjectManager.Player.InFountain() || ObjectManager.Player.InShop())
                 return;

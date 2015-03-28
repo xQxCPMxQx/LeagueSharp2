@@ -254,7 +254,7 @@ namespace D_Kogmaw
 
             _config.AddToMainMenu();
             Game.PrintChat("<font color='#881df2'>D-Kogmaw by Diabaths</font> Loaded.");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
@@ -263,7 +263,7 @@ namespace D_Kogmaw
                 "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (_config.Item("ActiveCombo").GetValue<KeyBind>().Active)
             {

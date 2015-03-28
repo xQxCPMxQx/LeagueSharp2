@@ -42,7 +42,7 @@ namespace D_Diana
             Program.TargetSelectorMenu.SubMenu("MenuAssassin")
                 .AddItem(new MenuItem("AssassinSearchRange", "Search Range")).SetValue(new Slider(1000, 2000));
 
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnWndProc += Game_OnWndProc;
         }
@@ -57,7 +57,7 @@ namespace D_Diana
                 
             }
         }
-        private static void OnGameUpdate(EventArgs args)
+        private static void OnUpdate(EventArgs args)
         {
         }
 

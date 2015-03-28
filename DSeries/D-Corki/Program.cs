@@ -195,7 +195,7 @@ namespace D_Corki
             Game.PrintChat("<font color='#881df2'>D-Corki by Diabaths</font> Loaded.");
             Game.PrintChat(
                "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             if (_config.Item("skinC").GetValue<bool>())
@@ -205,7 +205,7 @@ namespace D_Corki
             }
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (_player.HasBuff("CorkiMissileBarrageCounterBig"))
                 _r.Range = _r2.Range;

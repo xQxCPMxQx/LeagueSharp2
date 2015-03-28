@@ -176,7 +176,7 @@ namespace Pantheon
             new PotionManager();
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
 
             CustomEvents.Unit.OnLevelUp += CustomEvents_Unit_OnLevelUp;
@@ -203,7 +203,7 @@ namespace Pantheon
                 return;
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100))
                 return;

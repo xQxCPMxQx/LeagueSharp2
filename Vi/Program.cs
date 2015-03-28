@@ -236,7 +236,7 @@ namespace Vi
 
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
             Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
@@ -270,7 +270,7 @@ namespace Vi
             //"ViBasicAttack"
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100))
                 return;

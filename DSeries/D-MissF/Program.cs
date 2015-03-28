@@ -174,7 +174,7 @@ namespace D_MissF
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Game.OnGameSendPacket += GameOnOnGameSendPacket;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             if (_config.Item("skinMF").GetValue<bool>())
@@ -186,7 +186,7 @@ namespace D_MissF
         
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (ObjectManager.Player.HasBuff("missfortunebulletsound"))
                 return;

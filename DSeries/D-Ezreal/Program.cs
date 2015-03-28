@@ -306,7 +306,7 @@ namespace D_Ezreal
                 GenModelPacket(_player.ChampionName, _config.Item("skinezreal").GetValue<Slider>().Value);
                 _lastSkin = _config.Item("skinezreal").GetValue<Slider>().Value;
             }
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             _config.Item("EZAutoLevel").ValueChanged += LevelUpMode;
@@ -322,7 +322,7 @@ namespace D_Ezreal
             AutoLevel.Enabled(e.GetNewValue<bool>());
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (_config.Item("pingulti").GetValue<bool>())
             {

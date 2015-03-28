@@ -185,7 +185,7 @@ namespace Swain
             Config.AddToMainMenu();
 
             //Add the events we are going to use:
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             GameObject.OnCreate += OnCreateObject;
             GameObject.OnDelete += OnDeleteObject;
@@ -363,7 +363,7 @@ namespace Swain
             }
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (vPlayer.IsDead)
                 return;

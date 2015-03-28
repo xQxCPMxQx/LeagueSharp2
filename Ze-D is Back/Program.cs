@@ -218,7 +218,7 @@ namespace Zed
 
                 new AssassinManager();
                 Drawing.OnDraw += Drawing_OnDraw;
-                Game.OnGameUpdate += Game_OnGameUpdate;
+                Game.OnUpdate += Game_OnUpdate;
                 Game.OnWndProc += OnWndProc;
                 Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
             }
@@ -272,7 +272,7 @@ namespace Zed
             }
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (_config.Item("ActiveCombo").GetValue<KeyBind>().Active)
             {          

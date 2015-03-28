@@ -263,7 +263,7 @@ namespace Orianna
             Config.SubMenu("Debug").AddItem(new MenuItem("DebugR", "Enable Debug Ult")).SetValue(false);
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameSendPacket += Game_OnSendPacket;
         }
@@ -295,9 +295,9 @@ namespace Orianna
 
         #endregion
 
-        #region OnGameUpdate
+        #region OnUpdate
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             //For Auto E Initiators 
             TickChecks();

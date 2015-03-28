@@ -221,7 +221,7 @@ namespace D_Udyr
 
             _config.AddToMainMenu();
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnUpdate;
             _config.Item("udAutoLevel").ValueChanged += LevelUpMode;
             if (_config.Item("udAutoLevel").GetValue<bool>())
             {
@@ -240,7 +240,7 @@ namespace D_Udyr
             AutoLevel.Enabled(e.GetNewValue<bool>());
         }
 
-        private static void OnGameUpdate(EventArgs args)
+        private static void OnUpdate(EventArgs args)
         {
 
             _player = ObjectManager.Player;

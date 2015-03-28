@@ -195,7 +195,7 @@ namespace Shen
             new PotionManager();
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
@@ -309,7 +309,7 @@ namespace Shen
                 }
             }            
         }
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             DrawHelplessAllies();
             if (!Orbwalking.CanMove(100)) return;

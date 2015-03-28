@@ -286,7 +286,7 @@ namespace D_Jarvan
 
             _config.AddToMainMenu();
             Game.PrintChat("<font color='#881df2'>D-Jarvan by Diabaths</font> Loaded.");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Hero.OnCreate += OnCreateObj;
             Obj_AI_Hero.OnDelete += OnDeleteObj;
@@ -301,7 +301,7 @@ namespace D_Jarvan
                 "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (_config.Item("Forest").GetValue<KeyBind>().Active)
             {

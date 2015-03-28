@@ -181,7 +181,7 @@ namespace MasterYiQx
             Config.AddToMainMenu();
 
 
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
 
             Game.PrintChat(
@@ -233,7 +233,7 @@ namespace MasterYiQx
             return t;
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100))
                 return;

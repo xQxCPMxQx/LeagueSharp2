@@ -174,7 +174,7 @@ namespace Mordekaiser
             }
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
 
             WelcomeMessage();
@@ -237,7 +237,7 @@ namespace Mordekaiser
             }
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (Player.IsDead) return;
 

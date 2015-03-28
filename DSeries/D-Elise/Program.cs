@@ -268,7 +268,7 @@ namespace D_Elise
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.PrintChat("<font color='#881df2'>D-Elise by Diabaths</font> Loaded.");
             Game.PrintChat(
@@ -286,7 +286,7 @@ namespace D_Elise
             if (e.GetNewValue<bool>())
                 _config.Item("smitecombo").SetValue(false);
         }
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             Cooldowns();
 

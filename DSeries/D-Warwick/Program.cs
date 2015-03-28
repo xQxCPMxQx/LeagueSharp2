@@ -217,11 +217,11 @@ namespace D_Warwick
 
             Game.PrintChat("<font color='#881df2'>D-Warwick by Diabaths</font> Loaded.");
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (_config.Item("Usesmite").GetValue<KeyBind>().Active)
             {

@@ -262,7 +262,7 @@ namespace D_Diana
             _config.AddToMainMenu();
 
             new AssassinManager();
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             GameObject.OnCreate += OnCreate;
             GameObject.OnDelete += OnDelete;
@@ -285,7 +285,7 @@ namespace D_Diana
             if (e.GetNewValue<bool>())
                 _config.Item("Normalcombo").SetValue(false);
         }
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             _player = ObjectManager.Player;
 

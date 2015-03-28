@@ -246,7 +246,7 @@ namespace D_Graves
 
             _config.AddToMainMenu();
             Game.PrintChat("<font color='#881df2'>D-Graves by Diabaths</font> Loaded.");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
@@ -259,7 +259,7 @@ namespace D_Graves
                 "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (_config.Item("skinG").GetValue<bool>() && SkinChanged())
             {

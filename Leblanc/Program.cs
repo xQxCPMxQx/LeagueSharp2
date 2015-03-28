@@ -242,7 +242,7 @@ namespace Leblanc
 
             Config.AddToMainMenu();
 
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             {
                 Drawing.OnDraw += Drawing_OnDraw;
                 GameObject.OnCreate += GameObject_OnCreate;
@@ -876,7 +876,7 @@ namespace Leblanc
             }
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (ObjectManager.Player.IsDead)
                 return;

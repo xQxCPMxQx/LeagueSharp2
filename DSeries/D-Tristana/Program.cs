@@ -237,7 +237,7 @@ namespace D_Tristana
 
             _config.AddToMainMenu();
             Game.PrintChat("<font color='#881df2'>D-Tristana by Diabaths (WIP)</font> Loaded.");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
@@ -245,7 +245,7 @@ namespace D_Tristana
             CustomEvents.Unit.OnLevelUp += OnLevelUp;
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
 
             if (_config.Item("ActiveJungle").GetValue<KeyBind>().Active &&
