@@ -21,6 +21,7 @@ namespace Vi
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
         public static Spell E;
+        public static Spell E2;
         public static Spell R;
 
         public static Items.Item ItemBlade;
@@ -30,19 +31,11 @@ namespace Vi
         public static Items.Item ItemRand;
         public static Items.Item ItemTiamat;
 
-        //Credits to Kurisu
-        private static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };
-        private static readonly int[] SmiteGrey = { 3711, 3722, 3721, 3720, 3719 };
-        private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
-        private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
-
         private static SpellSlot IgniteSlot = SpellSlot.Unknown;
-        private static SpellSlot SmiteSlot = SpellSlot.Unknown;
         private static SpellSlot FlashSlot = SpellSlot.Unknown;
 
 
         public static float FlashRange = 450f;
-        public static float SmiteRange = 700f;
         public static int DelayTick = 0;
 
         //Menu
@@ -67,6 +60,7 @@ namespace Vi
 
             Q = new Spell(SpellSlot.Q, 860f);
             E = new Spell(SpellSlot.E);
+            E2 = new Spell(SpellSlot.E, 600f);
             R = new Spell(SpellSlot.R, 800f);
 
             Q.SetSkillshot(0.5f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
@@ -80,7 +74,6 @@ namespace Vi
             SpellList.Add(R);
 
             IgniteSlot = vPlayer.GetSpellSlot("SummonerDot");
-            SmiteSlot = vPlayer.GetSpellSlot("SummonerSmite");
             FlashSlot = vPlayer.GetSpellSlot("SummonerFlash");
 
             ItemBilge = new Items.Item(3144, 450f);
@@ -444,7 +437,7 @@ namespace Vi
             var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
 
             var mobs = MinionManager.GetMinions(
-                ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral,
+                ObjectManager.Player.ServerPosition, E2.Range, MinionTypes.All, MinionTeam.Neutral,
                 MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0)
@@ -489,7 +482,7 @@ namespace Vi
             var useE = Config.Item("UseELaneClear").GetValue<bool>();
 
             var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.ChargedMaxRange);
-            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
+            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E2.Range);
 
             if (useQ && Q.IsReady())
             {
@@ -507,7 +500,7 @@ namespace Vi
             if (useE && E.IsReady())
             {
                 var locE = E.GetLineFarmLocation(allMinionsE);
-                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E.Range) && locE.MinionsHit > 2 &&
+                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 &&
                     locE.Position.IsValid())
                     E.Cast();
             }
@@ -530,7 +523,7 @@ namespace Vi
         {
             get
             {
-                var vTarget = GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                var vTarget = GetTarget(E2.Range, TargetSelector.DamageType.Physical);
                 var vMinions = MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.NotAlly,
                     MinionOrderTypes.None);
