@@ -239,7 +239,7 @@ namespace Vi
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
-            Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
+            //Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
 
             Game.PrintChat(
                 String.Format(
@@ -274,8 +274,6 @@ namespace Vi
         {
             if (!Orbwalking.CanMove(100))
                 return;
-
-
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
