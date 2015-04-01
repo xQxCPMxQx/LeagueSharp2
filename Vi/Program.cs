@@ -56,10 +56,10 @@ namespace Vi
 
         private static void Main(string[] args)
         {
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+            CustomEvents.Game.OnGameLoad += Game_OnLoad;
         }
 
-        private static void Game_OnGameLoad(EventArgs args)
+        private static void Game_OnLoad()
         {
             if (vPlayer.BaseSkinName != "Vi")
                 return;
