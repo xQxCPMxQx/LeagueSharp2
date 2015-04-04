@@ -1,0 +1,1646 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9F3BF4B3-6AA4-41B5-820E-4626FE088126}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KaiHelper</RootNamespace>
+    <AssemblyName>KaiHelper</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PreBuildEvent />
+    <PostBuildEvent />
+    <OutputPath>bin\Release</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LeagueSharp">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp.Common">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Activator\AutoPot.cs" />
+    <Compile Include="Champion.cs" />
+    <Compile Include="Misc\Vision.cs" />
+    <Compile Include="Potion.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ResourceImages.cs" />
+    <Compile Include="Tracker\LastPosition.cs" />
+    <Compile Include="Tracker\WayPoint.cs" />
+    <Compile Include="Tracker\GankDetector.cs" />
+    <Compile Include="Tracker\HealthTurret.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="Timer\JungleTimer.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tracker\SkillBar.cs" />
+    <Compile Include="Tracker\WardTracker.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\itemsmiteaoe.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\s5_summonersmiteduel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\s5_summonersmiteplayerganker.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\s5_summonersmitequick.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerbarrier.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerboost.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerclairvoyance.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerdot.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerexhaust.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerflash.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerhaste.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerheal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonermana.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerodinGarrison.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerpororecall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerporothrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerrevive.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonersmite.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\SSpell\summonerteleport.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Aatrox_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Aatrox_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Aatrox_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Aatrox_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ahri_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ahri_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ahri_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ahri_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Akali_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Akali_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Akali_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Akali_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Alistar_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Alistar_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Alistar_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Alistar_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Amumu_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Amumu_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Amumu_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Amumu_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Anivia_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Anivia_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Anivia_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Anivia_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Annie_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Annie_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Annie_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Annie_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ashe_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ashe_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ashe_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ashe_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Azir_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Azir_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Azir_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Azir_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Blitzcrank_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Blitzcrank_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Blitzcrank_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Blitzcrank_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Brand_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Brand_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Brand_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Brand_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Braum_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Braum_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Braum_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Braum_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Caitlyn_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Caitlyn_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Caitlyn_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Caitlyn_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Cassiopeia_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Cassiopeia_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Cassiopeia_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Cassiopeia_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Chogath_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Chogath_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Chogath_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Chogath_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Corki_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Corki_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Corki_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Corki_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Darius_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Darius_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Darius_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Darius_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Diana_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Diana_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Diana_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Diana_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Draven_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Draven_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Draven_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Draven_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\DrMundo_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\DrMundo_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\DrMundo_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\DrMundo_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Elise_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Elise_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Elise_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Elise_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Evelynn_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Evelynn_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Evelynn_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Evelynn_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ezreal_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ezreal_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ezreal_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ezreal_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\FiddleSticks_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\FiddleSticks_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\FiddleSticks_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\FiddleSticks_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Fiora_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Fiora_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Fiora_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Fiora_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Fizz_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Fizz_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Fizz_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Fizz_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Galio_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Galio_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Galio_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Galio_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gangplank_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gangplank_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gangplank_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gangplank_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Garen_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Garen_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Garen_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Garen_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gnar_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gnar_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gnar_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gnar_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gragas_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gragas_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gragas_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Gragas_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Graves_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Graves_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Graves_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Graves_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Hecarim_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Hecarim_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Hecarim_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Hecarim_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Heimerdinger_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Heimerdinger_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Heimerdinger_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Heimerdinger_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Irelia_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Irelia_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Irelia_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Irelia_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Janna_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Janna_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Janna_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Janna_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\JarvanIV_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\JarvanIV_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\JarvanIV_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\JarvanIV_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jax_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jax_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jax_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jax_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jayce_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jayce_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jayce_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jayce_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jinx_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jinx_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jinx_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Jinx_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kalista_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kalista_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kalista_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kalista_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Karma_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Karma_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Karma_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Karma_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Karthus_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Karthus_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Karthus_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Karthus_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kassadin_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kassadin_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kassadin_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kassadin_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Katarina_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Katarina_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Katarina_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Katarina_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kayle_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kayle_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kayle_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kayle_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kennen_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kennen_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kennen_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Kennen_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Khazix_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Khazix_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Khazix_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Khazix_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\KogMaw_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\KogMaw_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\KogMaw_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\KogMaw_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Leblanc_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Leblanc_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Leblanc_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Leblanc_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\LeeSin_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\LeeSin_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\LeeSin_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\LeeSin_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Leona_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Leona_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Leona_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Leona_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lissandra_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lissandra_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lissandra_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lissandra_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lucian_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lucian_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lucian_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lucian_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lulu_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lulu_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lulu_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lulu_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lux_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lux_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lux_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Lux_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Malphite_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Malphite_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Malphite_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Malphite_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Malzahar_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Malzahar_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Malzahar_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Malzahar_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Maokai_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Maokai_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Maokai_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Maokai_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MasterYi_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MasterYi_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MasterYi_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MasterYi_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MissFortune_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MissFortune_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MissFortune_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MissFortune_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MonkeyKing_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MonkeyKing_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MonkeyKing_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\MonkeyKing_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Mordekaiser_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Mordekaiser_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Mordekaiser_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Mordekaiser_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Morgana_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Morgana_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Morgana_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Morgana_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nami_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nami_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nami_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nami_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nasus_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nasus_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nasus_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nasus_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nautilus_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nautilus_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nautilus_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nautilus_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nidalee_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nidalee_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nidalee_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nidalee_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nocturne_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nocturne_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nocturne_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nocturne_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nunu_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nunu_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nunu_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Nunu_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Olaf_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Olaf_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Olaf_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Olaf_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Orianna_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Orianna_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Orianna_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Orianna_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Pantheon_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Pantheon_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Pantheon_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Pantheon_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Poppy_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Poppy_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Poppy_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Poppy_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Quinn_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Quinn_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Quinn_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Quinn_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rammus_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rammus_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rammus_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rammus_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\RekSai_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\RekSai_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\RekSai_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\RekSai_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Renekton_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Renekton_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Renekton_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Renekton_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rengar_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rengar_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rengar_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rengar_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Riven_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Riven_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Riven_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Riven_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rumble_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rumble_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rumble_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Rumble_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ryze_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ryze_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ryze_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ryze_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sejuani_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sejuani_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sejuani_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sejuani_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shaco_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shaco_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shaco_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shaco_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shen_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shen_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shen_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shen_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shyvana_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shyvana_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shyvana_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Shyvana_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Singed_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Singed_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Singed_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Singed_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sion_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sion_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sion_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sion_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sivir_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sivir_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sivir_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sivir_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Skarner_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Skarner_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Skarner_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Skarner_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sona_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sona_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sona_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Sona_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Soraka_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Soraka_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Soraka_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Soraka_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Swain_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Swain_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Swain_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Swain_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Syndra_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Syndra_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Syndra_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Syndra_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Talon_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Talon_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Talon_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Talon_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Taric_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Taric_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Taric_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Taric_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Teemo_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Teemo_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Teemo_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Teemo_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Thresh_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Thresh_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Thresh_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Thresh_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Tristana_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Tristana_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Tristana_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Tristana_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Trundle_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Trundle_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Trundle_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Trundle_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Tryndamere_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Tryndamere_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Tryndamere_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Tryndamere_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\TwistedFate_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\TwistedFate_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\TwistedFate_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\TwistedFate_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Twitch_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Twitch_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Twitch_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Twitch_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Udyr_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Udyr_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Udyr_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Udyr_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Unknown.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Urgot_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Urgot_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Urgot_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Urgot_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Varus_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Varus_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Varus_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Varus_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vayne_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vayne_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vayne_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vayne_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Veigar_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Veigar_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Veigar_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Veigar_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\VelKoz_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\VelKoz_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\VelKoz_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\VelKoz_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vi_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vi_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vi_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vi_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Viktor_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Viktor_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Viktor_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Viktor_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vladimir_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vladimir_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vladimir_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Vladimir_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Volibear_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Volibear_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Volibear_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Volibear_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Warwick_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Warwick_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Warwick_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Warwick_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Xerath_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Xerath_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Xerath_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Xerath_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\XinZhao_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\XinZhao_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\XinZhao_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\XinZhao_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Yasuo_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Yasuo_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Yasuo_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Yasuo_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Yorick_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Yorick_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Yorick_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Yorick_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zac_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zac_Q.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zac_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zac_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zed_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zed_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zed_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zed_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ziggs_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ziggs_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ziggs_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Ziggs_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zilean_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zilean_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zilean_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zilean_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zyra_E.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zyra_Q.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zyra_R.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Skills\Zyra_W.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\HUD\disable.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\HUD\main.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\HUD\spell_level.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Minimap\pink.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Minimap\ward.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
