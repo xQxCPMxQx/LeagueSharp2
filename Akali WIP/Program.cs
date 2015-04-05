@@ -237,7 +237,7 @@ namespace Akali
 
         private static void Combo()
         {
-            var t = GetTarget(R.Range, TargetSelector.DamageType.Magical);
+            var t = GetTarget((R.IsReady() ? R.Range: Q.Range), TargetSelector.DamageType.Magical);
 
             if (GetComboDamage(t) > t.Health && IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
@@ -374,8 +374,7 @@ namespace Akali
             }
         }
 
-        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0,
-            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
             if (Math.Abs(vDefaultRange) < 0.00001)
                 vDefaultRange = Q.Range;
