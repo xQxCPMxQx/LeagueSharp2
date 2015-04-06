@@ -18,7 +18,7 @@ namespace MasterYiQx
         public static Orbwalking.Orbwalker Orbwalker;
 
         //Spells
-        public static List<Spell> SpellList = new List<Spell>();
+        public static List<Spell> PlayerSpellList = new List<Spell>();
         public static Spell Q;
         public static Spell E;
         public static Spell W;
@@ -35,6 +35,7 @@ namespace MasterYiQx
         public static Menu MenuExtras;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
+        public static Menu MenuSupportedSpells;
 
         private static void Main(string[] args)
         {
@@ -55,10 +56,10 @@ namespace MasterYiQx
 
             Q.SetTargetted(0.50f, 75f);
 
-            SpellList.Add(Q);
-            SpellList.Add(W);
-            SpellList.Add(E);
-            SpellList.Add(R);
+            PlayerSpellList.Add(Q);
+            PlayerSpellList.Add(W);
+            PlayerSpellList.Add(E);
+            PlayerSpellList.Add(R);
 
 
             //Create the menu
@@ -92,10 +93,6 @@ namespace MasterYiQx
                 .AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass")
-                .AddItem(
-                    new MenuItem("HarassMode", "Harass Mode: ").SetValue(
-                        new StringList(new[] { "Q+W", "Q+E", "Default" })));
-            Config.SubMenu("Harass")
                 .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                 .AddItem(
@@ -123,9 +120,6 @@ namespace MasterYiQx
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("JungleFarm")
                 .AddItem(
-                    new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
-            Config.SubMenu("JungleFarm")
-                .AddItem(
                     new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
@@ -136,9 +130,6 @@ namespace MasterYiQx
 
             Config.SubMenu("HealSettings")
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent:").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("HealSettings")
-                .AddItem(
-                    new MenuItem("AutoSmite", "Auto Smite").SetValue<KeyBind>(new KeyBind('N', KeyBindType.Toggle)));
 
             // Extras
             MenuExtras = new Menu("Extras", "Extras");
@@ -152,7 +143,6 @@ namespace MasterYiQx
             MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
             menuUseItems.AddSubMenu(MenuTargetedItems);
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
@@ -161,9 +151,24 @@ namespace MasterYiQx
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
             menuUseItems.AddSubMenu(MenuNonTargetedItems);
             MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
+            MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
+
+
+            MenuSupportedSpells = new Menu("Q Dodge Spells", "suppspells");
+
+            foreach (var xEnemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+            {
+                Obj_AI_Hero enemy = xEnemy;
+                foreach (var ccList in SpellList.BuffList.Where(xList => xList.ChampionName == enemy.ChampionName))
+                {
+                    MenuSupportedSpells.AddItem(new MenuItem(ccList.BuffName, ccList.DisplayName)).SetValue(true);
+                }
+            }
+            Config.AddSubMenu(MenuSupportedSpells);
+
 
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
@@ -171,10 +176,6 @@ namespace MasterYiQx
                 .AddItem(
                     new MenuItem("DrawQRange", "Q range").SetValue(
                         new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(
-                    new MenuItem("DrawSmite", "Smite Range").SetValue(
-                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             new PotionManager();
 
@@ -183,11 +184,192 @@ namespace MasterYiQx
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpellCast;
 
             Game.PrintChat(
                 String.Format(
                     "<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}" +
                     "</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
+        }
+
+        private static void Game_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy)
+            {
+                foreach (var spell in
+                    MenuSupportedSpells.Items.SelectMany(
+                        t =>
+                            SpellList.BuffList.Where(
+                                xSpell => xSpell.CanBlockWith.ToList().Contains(CanBlockWith.MasterYiQ))
+                                .Where(
+                                    spell => t.Name == args.SData.Name && t.Name == spell.BuffName && t.GetValue<bool>()))
+                    )
+                {
+                    switch (spell.SkillType)
+                    {
+                        case SkillShotType.SkillshotTargeted:
+                            if (Q.IsReady())
+                            {
+                                Game.PrintChat("SkillShotType.SkillshotTargeted");
+                                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                                if (t.IsValidTarget())
+                                {
+                                    Q.CastOnUnit(t);
+                                }
+                                else
+                                {
+                                    var allMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range,
+                                        MinionTypes.All, MinionTeam.NotAlly);
+
+                                    var closestMinion = new Obj_AI_Base();
+                                    if (allMinions.Any())
+                                    {
+                                        foreach (var minion in allMinions)
+                                        {
+                                            if (allMinions.IndexOf(minion) == 0)
+                                            {
+                                                closestMinion = minion;
+                                            }
+                                            else if (Player.Distance(minion.Position) <
+                                                     Player.Distance(closestMinion.Position))
+                                            {
+                                                closestMinion = minion;
+                                            }
+                                        }
+                                        if (!closestMinion.IsValidTarget())
+                                            return;
+
+                                        Q.CastOnUnit(closestMinion);
+                                    }
+                                }
+                            }
+                            break;
+                        case SkillShotType.SkillshotCircle:
+                            if (ObjectManager.Player.Distance(args.End) <= 300f)
+                            {
+                                Game.PrintChat("SkillShotType.SkillshotCircle");
+                                if (Q.IsReady())
+                                {
+                                    var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                                    if (t.IsValidTarget())
+                                    {
+                                        Q.CastOnUnit(t);
+                                    }
+                                    else
+                                    {
+                                        var allMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range,
+                                            MinionTypes.All, MinionTeam.NotAlly);
+
+                                        var closestMinion = new Obj_AI_Base();
+                                        if (allMinions.Any())
+                                        {
+                                            foreach (var minion in allMinions)
+                                            {
+                                                if (allMinions.IndexOf(minion) == 0)
+                                                {
+                                                    closestMinion = minion;
+                                                }
+                                                else if (Player.Distance(minion.Position) <
+                                                         Player.Distance(closestMinion.Position))
+                                                {
+                                                    closestMinion = minion;
+                                                }
+                                            }
+                                            if (!closestMinion.IsValidTarget())
+                                                return;
+
+                                            Q.CastOnUnit(closestMinion);
+                                        }
+                                    }
+                                }
+
+                            }
+                            break;
+                        case SkillShotType.SkillshotLine:
+                            if (ObjectManager.Player.Distance(args.End) <= 100f)
+                            {
+                                Game.PrintChat("SkillShotType.SkillshotLine");
+                                if (Q.IsReady())
+                                {
+                                    var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                                    if (t.IsValidTarget())
+                                    {
+                                        Q.CastOnUnit(t);
+                                    }
+                                    else
+                                    {
+                                        var allMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range,
+                                            MinionTypes.All, MinionTeam.NotAlly);
+
+                                        var closestMinion = new Obj_AI_Base();
+                                        if (allMinions.Any())
+                                        {
+                                            foreach (var minion in allMinions)
+                                            {
+                                                if (allMinions.IndexOf(minion) == 0)
+                                                {
+                                                    closestMinion = minion;
+                                                }
+                                                else if (Player.Distance(minion.Position) <
+                                                         Player.Distance(closestMinion.Position))
+                                                {
+                                                    closestMinion = minion;
+                                                }
+                                            }
+                                            if (!closestMinion.IsValidTarget())
+                                                return;
+
+                                            Q.CastOnUnit(closestMinion);
+                                        }
+                                    }
+                                }
+
+                            }
+                            break;
+                        case SkillShotType.SkillshotUnknown:
+                            if (ObjectManager.Player.Distance(args.End) <= 500f ||
+                                ObjectManager.Player.Distance(sender.Position) <= 500)
+                            {
+                                Game.PrintChat("SkillShotType.SkillshotUnknown");
+                                if (Q.IsReady())
+                                {
+                                    var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                                    if (t.IsValidTarget())
+                                    {
+                                        Q.CastOnUnit(t);
+                                    }
+                                    else
+                                    {
+                                        var allMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range,
+                                            MinionTypes.All, MinionTeam.NotAlly);
+
+                                        var closestMinion = new Obj_AI_Base();
+                                        if (allMinions.Any())
+                                        {
+                                            foreach (var minion in allMinions)
+                                            {
+                                                if (allMinions.IndexOf(minion) == 0)
+                                                {
+                                                    closestMinion = minion;
+                                                }
+                                                else if (Player.Distance(minion.Position) <
+                                                         Player.Distance(closestMinion.Position))
+                                                {
+                                                    closestMinion = minion;
+                                                }
+                                            }
+                                            if (!closestMinion.IsValidTarget())
+                                                return;
+
+                                            Q.CastOnUnit(closestMinion);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -199,7 +381,7 @@ namespace MasterYiQx
             }
         }
 
-        private static Obj_AI_Hero GetEnemy(float vDefaultRange = 0,
+        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0,
             TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
             if (Math.Abs(vDefaultRange) < 0.00001)
@@ -214,10 +396,10 @@ namespace MasterYiQx
                 ObjectManager.Get<Obj_AI_Hero>()
                     .Where(
                         enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            enemy.Team != Player.Team && !enemy.IsDead && enemy.IsVisible &&
                             Config.Item("Assassin" + enemy.ChampionName) != null &&
                             Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
+                            Player.Distance(enemy) < assassinRange);
 
             if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
@@ -233,6 +415,7 @@ namespace MasterYiQx
             return t;
         }
 
+
         private static void Game_OnUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100))
@@ -245,21 +428,21 @@ namespace MasterYiQx
 
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana / 100 * Config.Item("HarassMana").GetValue<Slider>().Value;
+                var existsMana = Player.MaxMana/100*Config.Item("HarassMana").GetValue<Slider>().Value;
                 if (Player.Mana >= existsMana)
                     Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana / 100 * Config.Item("LaneClearMana").GetValue<Slider>().Value;
+                var existsMana = Player.MaxMana/100*Config.Item("LaneClearMana").GetValue<Slider>().Value;
                 if (Player.Mana >= existsMana)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
+                var existsMana = Player.MaxMana/100*Config.Item("JungleFarmMana").GetValue<Slider>().Value;
                 if (Player.Mana >= existsMana)
                     JungleFarm();
             }
@@ -274,7 +457,7 @@ namespace MasterYiQx
                         return;
                 }
 
-                var existsHp = Player.MaxMana / 100 * Config.Item("HealPercent").GetValue<Slider>().Value;
+                var existsHp = Player.MaxMana/100*Config.Item("HealPercent").GetValue<Slider>().Value;
                 if (Player.Health <= existsHp)
                     W.Cast(Player, true);
             }
@@ -282,7 +465,7 @@ namespace MasterYiQx
 
         private static void Combo()
         {
-            var t = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
+            var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
             var useE = Config.Item("UseECombo").GetValue<bool>();
@@ -321,7 +504,7 @@ namespace MasterYiQx
 
             if (R.IsReady() && useR && t != null)
             {
-                if (ObjectManager.Player.CountEnemysInRange((int) Q.Range) >= 2)
+                if (Player.CountEnemiesInRange((int) Q.Range) >= 2)
                 {
                     R.CastOnUnit(Player);
                 }
@@ -335,7 +518,9 @@ namespace MasterYiQx
 
         }
 
-        private static void Harass() {}
+        private static void Harass()
+        {
+        }
 
         private static void LaneClear()
         {
@@ -344,7 +529,7 @@ namespace MasterYiQx
             var useQDontUnderTurret = Config.Item("UseQLaneClearDontUnderTurret").GetValue<bool>();
 
             var allMinions = MinionManager.GetMinions(
-                ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
+                Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
 
 
             if (allMinions.Count >= 2)
@@ -389,7 +574,7 @@ namespace MasterYiQx
             var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
 
             var mobs = MinionManager.GetMinions(
-                ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
+                Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
                 MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0)
@@ -419,7 +604,7 @@ namespace MasterYiQx
         private static InventorySlot GetInventorySlot(int ID)
         {
             return
-                ObjectManager.Player.InventoryItems.FirstOrDefault(
+                Player.InventoryItems.FirstOrDefault(
                     item =>
                         (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
         }

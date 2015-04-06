@@ -55,8 +55,7 @@ namespace XinZhao
             WelcomeMessage();
         }
 
-        private static Obj_AI_Hero GetEnemy(float vDefaultRange = 0,
-            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
             if (Math.Abs(vDefaultRange) < 0.00001)
                 vDefaultRange = Q.Range;
@@ -70,10 +69,10 @@ namespace XinZhao
                 ObjectManager.Get<Obj_AI_Hero>()
                     .Where(
                         enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            enemy.Team != Player.Team && !enemy.IsDead && enemy.IsVisible &&
                             Config.Item("Assassin" + enemy.ChampionName) != null &&
                             Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
+                            Player.Distance(enemy) < assassinRange);
 
             if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
@@ -152,7 +151,7 @@ namespace XinZhao
 
         public static void Combo()
         {
-            var t = GetEnemy(E.Range, TargetSelector.DamageType.Magical);
+            var t = GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("ComboUseQ").GetValue<bool>();
             var useW = Config.Item("ComboUseW").GetValue<bool>();
