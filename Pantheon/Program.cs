@@ -165,6 +165,10 @@ namespace Pantheon
                     .AddItem(
                         new MenuItem("RRange", "R Range").SetValue(
                             new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                Config.SubMenu("Drawings")
+                    .AddItem(
+                        new MenuItem("RRange2", "R Range (minimap)").SetValue(new Circle(true,
+                            System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
                 var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
                 Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
@@ -178,6 +182,7 @@ namespace Pantheon
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnEndScene += DrawingOnOnEndScene;
 
             CustomEvents.Unit.OnLevelUp += CustomEvents_Unit_OnLevelUp;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
@@ -194,6 +199,15 @@ namespace Pantheon
             }
 
             Render.Circle.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 1, true);
+        }
+
+        private static void DrawingOnOnEndScene(EventArgs args)
+        {
+            var rCircle2 = Config.Item("RRange2").GetValue<Circle>();
+            if (rCircle2.Active)
+            {
+                Utility.DrawCircle(ObjectManager.Player.Position, 5500, rCircle2.Color, 1, 23, true);
+            }
         }
 
 
