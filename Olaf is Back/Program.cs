@@ -1,6 +1,7 @@
 #region
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -13,10 +14,21 @@ using Font = SharpDX.Direct3D9.Font;
 
 namespace Olafisback
 {
+    internal class OlafAxe
+    {
+        public GameObject Object { get; set; }
+        public float NetworkId { get; set; }
+        public Vector3 AxePos { get; set; }
+        public double ExpireTime { get; set; }
+    }
+
+
     internal class Program
     {
         public const string ChampionName = "Olaf";
         private static string space = "         ";
+
+        private static readonly OlafAxe olafAxe = new OlafAxe();
         public static Font vText;
         public static int LastTickTime;
         //Orbwalker instance
@@ -29,6 +41,8 @@ namespace Olafisback
         public static Spell Q2;
         public static Spell W;
         public static Spell E;
+        public static Spell R;
+
         public static SpellSlot IgniteSlot;
 
         //Items
@@ -60,6 +74,7 @@ namespace Olafisback
             Q2 = new Spell(SpellSlot.Q, 550);
             W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 325);
+            R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.25f, 75f, 1500f, false, SkillshotType.SkillshotLine);
             Q2.SetSkillshot(0.25f, 75f, 1600f, false, SkillshotType.SkillshotLine);
@@ -110,14 +125,13 @@ namespace Olafisback
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseQ2Harass", space + "Use Q (Short)").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", space + "Use E").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("Mana Settings", "Mana Settings:"));
-                Config.SubMenu("Harass")
-                    .AddItem(new MenuItem("Minman", space + "Q Harass Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("Harass").AddItem(new MenuItem("Harass.UseQ.MinMana", space + "Q Harass Min. Mana").SetValue(new Slider(30, 100, 0)));
 
                 Config.SubMenu("Harass").AddItem(new MenuItem("Toggle Settings", "Toggle Settings:"));
                 {
                     Config.SubMenu("Harass")
                         .AddItem(
-                            new MenuItem("HarassUseQT", space + "Toggle Q!").SetValue(new KeyBind("T".ToCharArray()[0],
+                            new MenuItem("Harass.UseQ.Toggle", space + "Toggle Q!").SetValue(new KeyBind("T".ToCharArray()[0],
                                 KeyBindType.Toggle)));
                 }
                 Config.SubMenu("Harass")
@@ -215,6 +229,7 @@ namespace Olafisback
             var menuMisc = new Menu("Misc", "Misc");
             {
                 menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto").SetValue(false));
+                menuMisc.AddItem(new MenuItem("Misc.AutoR", "Use R for Crowd Controls").SetValue(false));
                 Config.AddSubMenu(menuMisc);
             }
             /* [ Other ] */
@@ -222,26 +237,23 @@ namespace Olafisback
             new PotionManager();
 
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings")
-                .AddItem(
-                    new MenuItem("Draw.QRange", "Q range").SetValue(new Circle(true,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(
-                    new MenuItem("Draw.Q2Range", "Short Q range").SetValue(new Circle(true,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings")
-                .AddItem(
-                    new MenuItem("Draw.ERange", "E range").SetValue(new Circle(false,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.SpellDrawing", "Spell Drawing:"));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.QRange", space + "Q range").SetValue(new Circle(true,System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.Q2Range", space + "Short Q range").SetValue(new Circle(true,System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.ERange", space + "E range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeDrawing", "Axe Drawing:"));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxePosition", space + "Axe Position").SetValue(new Circle(true, System.Drawing.Color.GreenYellow)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeTime", space + "Axe Time Remaining").SetValue(true));
             Config.AddToMainMenu();
 
             vText = new Font(
                 Drawing.Direct3DDevice,
                 new FontDescription
                 {
-                    FaceName = "Courier new",
-                    Height = 15,
+                    FaceName = "Times New Roman",
+                    Height = 33,
                     OutputPrecision = FontPrecision.Default,
                     Quality = FontQuality.Default,
                 });
@@ -260,8 +272,12 @@ namespace Olafisback
         {
             if (obj.Name == "olaf_axe_totem_team_id_green.troy")
             {
-                _axeObj = obj;
-                LastTickTime = Environment.TickCount;
+                olafAxe.Object = obj;
+                olafAxe.ExpireTime = Game.Time + 8;
+                olafAxe.NetworkId = obj.NetworkId;
+                olafAxe.AxePos = obj.Position;
+                //_axeObj = obj;
+                //LastTickTime = Environment.TickCount;
             }
         }
 
@@ -269,17 +285,34 @@ namespace Olafisback
         {
             if (obj.Name == "olaf_axe_totem_team_id_green.troy")
             {
-                _axeObj = null;
+                olafAxe.Object = null;
+                //_axeObj = null;
                 LastTickTime = 0;
             }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            var drawAxePosition = Config.Item("Draw.AxePosition").GetValue<Circle>();
+            if (drawAxePosition.Active && olafAxe.Object != null)
+                Render.Circle.DrawCircle(olafAxe.Object.Position, 150, drawAxePosition.Color, 6);
+
+
+            if (Config.Item("Draw.AxeTime").GetValue<bool>() && olafAxe.Object != null)
+            {
+                var time = TimeSpan.FromSeconds(olafAxe.ExpireTime - Game.Time);
+                var pos = Drawing.WorldToScreen(olafAxe.AxePos);
+                var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds - 1);
+
+                Color vTimeColor = time.TotalSeconds > 4 ? Color.White : Color.Red;
+                DrawText(vText, display, (int)pos.X - display.Length * 3, (int)pos.Y - 65, vTimeColor);
+            }
+/*
             if (_axeObj != null)
             {
                 Render.Circle.DrawCircle(_axeObj.Position, 150, System.Drawing.Color.Yellow, 6);
             }
+ */
             //Draw the ranges of the spells.
             foreach (var spell in SpellList)
             {
@@ -298,7 +331,23 @@ namespace Olafisback
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
+            if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo || !Player.HasBuff("Recall"))
+            {
+                if (Config.Item("Harass.UseQ.Toggle").GetValue<KeyBind>().Active)
+                {
+                    CastQ();
+                }
+            }
+
+            if (E.IsReady() && Config.Item("Misc.AutoE").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                    E.CastOnUnit(t);
+            }
+
+
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 Combo();
             }
@@ -313,11 +362,6 @@ namespace Olafisback
                 JungleFarm();
             }
 
-            if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && !Player.HasBuff("Recall"))
-            {
-                if (Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
-                    CastQ();
-            }
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
             {
                 Harass();
@@ -326,11 +370,9 @@ namespace Olafisback
             if (Config.Item("Flee.Active").GetValue<KeyBind>().Active)
                 Flee();
 
-            if (E.IsReady() && Config.Item("Misc.AutoE").GetValue<bool>())
+            if (R.IsReady() && Config.Item("Misc.AutoR").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    E.CastOnUnit(t);
+                CastR();
             }
         }
 
@@ -398,18 +440,16 @@ namespace Olafisback
 
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            if (t.IsValidTarget() && Q.IsReady() &&
-                Player.Mana > Player.Mana/100*Config.Item("Minman").GetValue<Slider>().Value &&
-                Player.Distance(t.ServerPosition) <= Q2.Range)
+            if (t.IsValidTarget())
             {
-                PredictionOutput qPredict = Q.GetPrediction(t);
-                var hithere = qPredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
+                PredictionOutput Qpredict = Q.GetPrediction(t);
+                var hithere = Qpredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
                 if (Player.Distance(t.ServerPosition) >= 350)
                 {
                     Q.Cast(hithere);
                 }
                 else
-                    Q.Cast(qPredict.CastPosition);
+                    Q.Cast(Qpredict.CastPosition);
             }
         }
 
@@ -421,13 +461,35 @@ namespace Olafisback
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             if (t.IsValidTarget() && Q.IsReady() &&
-                Player.Mana > Player.Mana/100*Config.Item("Minman").GetValue<Slider>().Value &&
+                Player.Mana > Player.Mana/100*Config.Item("Harass.UseQ.MinMana").GetValue<Slider>().Value &&
                 Player.Distance(t.ServerPosition) <= Q2.Range)
             {
                 PredictionOutput q2Predict = Q2.GetPrediction(t);
                 var hithere = q2Predict.CastPosition.Extend(ObjectManager.Player.Position, -140);
                 if (q2Predict.Hitchance >= HitChance.High)
                     Q2.Cast(hithere);
+            }
+        }
+
+        private static void CastR()
+        {
+            BuffType[] buffList =
+            {
+                BuffType.Blind, 
+                BuffType.Charm, 
+                BuffType.Fear, 
+                BuffType.Knockback,
+                BuffType.Knockup, 
+                BuffType.Taunt, 
+                BuffType.Slow, 
+                BuffType.Silence, 
+                BuffType.Disarm,
+                BuffType.Snare
+            };
+
+            foreach (var b in buffList.Where(b => Player.HasBuffOfType(b)))
+            {
+                R.Cast();
             }
         }
 
@@ -456,7 +518,6 @@ namespace Olafisback
 
             if (allMinions.Count == 0)
                 return;
-
 
             if (Config.Item("LaneClearUseItems").GetValue<bool>())
             {
@@ -631,7 +692,7 @@ namespace Olafisback
                     itemYoumuu.Cast();
             }
         }
-
+        
         private static float GetComboDamage(Obj_AI_Base vTarget)
         {
             var fComboDamage = 0d;
