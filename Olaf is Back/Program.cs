@@ -206,7 +206,7 @@ namespace Olafisback
                 Config.SubMenu("JungleFarm")
                     .AddItem(new MenuItem("UseJFarmYoumuuForBlueRed", space + "Use Youmuu's Ghostblade").SetValue(false));
 
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe").SetValue(false));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe (Only Jungle)").SetValue(false));
 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseItems", "Use Items ").SetValue(true));
                 Config.SubMenu("JungleFarm")
@@ -228,7 +228,7 @@ namespace Olafisback
             /* [ Misc ] */
             var menuMisc = new Menu("Misc", "Misc");
             {
-                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto").SetValue(false));
+                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto (if possible hit to enemy)").SetValue(false));
                 menuMisc.AddItem(new MenuItem("Misc.AutoR", "Use R for Crowd Controls").SetValue(false));
                 Config.AddSubMenu(menuMisc);
             }
