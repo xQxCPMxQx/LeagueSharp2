@@ -125,14 +125,17 @@ namespace Olafisback
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseQ2Harass", space + "Use Q (Short)").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", space + "Use E").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("Mana Settings", "Mana Settings:"));
-                Config.SubMenu("Harass").AddItem(new MenuItem("Harass.UseQ.MinMana", space + "Q Harass Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("Harass.UseQ.MinMana", space + "Q Harass Min. Mana").SetValue(new Slider(30, 100, 0)));
 
                 Config.SubMenu("Harass").AddItem(new MenuItem("Toggle Settings", "Toggle Settings:"));
                 {
                     Config.SubMenu("Harass")
                         .AddItem(
-                            new MenuItem("Harass.UseQ.Toggle", space + "Toggle Q!").SetValue(new KeyBind("T".ToCharArray()[0],
-                                KeyBindType.Toggle)));
+                            new MenuItem("Harass.UseQ.Toggle", space + "Toggle Q!").SetValue(
+                                new KeyBind("T".ToCharArray()[0],
+                                    KeyBindType.Toggle)));
                 }
                 Config.SubMenu("Harass")
                     .AddItem(
@@ -206,7 +209,8 @@ namespace Olafisback
                 Config.SubMenu("JungleFarm")
                     .AddItem(new MenuItem("UseJFarmYoumuuForBlueRed", space + "Use Youmuu's Ghostblade").SetValue(false));
 
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe").SetValue(false));
+                Config.SubMenu("JungleFarm")
+                    .AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe (Only Jungle)").SetValue(false));
 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseItems", "Use Items ").SetValue(true));
                 Config.SubMenu("JungleFarm")
@@ -228,7 +232,7 @@ namespace Olafisback
             /* [ Misc ] */
             var menuMisc = new Menu("Misc", "Misc");
             {
-                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto").SetValue(false));
+                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto (if possible hit to enemy)").SetValue(false));
                 menuMisc.AddItem(new MenuItem("Misc.AutoR", "Use R for Crowd Controls").SetValue(false));
                 Config.AddSubMenu(menuMisc);
             }
@@ -239,13 +243,26 @@ namespace Olafisback
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
 
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.SpellDrawing", "Spell Drawing:"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.QRange", space + "Q range").SetValue(new Circle(true,System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.Q2Range", space + "Short Q range").SetValue(new Circle(true,System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.ERange", space + "E range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("Draw.QRange", space + "Q range").SetValue(new Circle(true,
+                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("Draw.Q2Range", space + "Short Q range").SetValue(new Circle(true,
+                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("Draw.ERange", space + "E range").SetValue(new Circle(false,
+                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeDrawing", "Axe Drawing:"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxePosition", space + "Axe Position").SetValue(new Circle(true, System.Drawing.Color.GreenYellow)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeTime", space + "Axe Time Remaining").SetValue(true));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("Draw.AxePosition", space + "Axe Position").SetValue(new Circle(true,
+                        System.Drawing.Color.GreenYellow)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("Draw.AxeTime", space + "Axe Time Remaining").SetValue(true));
             Config.AddToMainMenu();
 
             vText = new Font(
@@ -305,14 +322,14 @@ namespace Olafisback
                 var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds - 1);
 
                 Color vTimeColor = time.TotalSeconds > 4 ? Color.White : Color.Red;
-                DrawText(vText, display, (int)pos.X - display.Length * 3, (int)pos.Y - 65, vTimeColor);
+                DrawText(vText, display, (int) pos.X - display.Length*3, (int) pos.Y - 65, vTimeColor);
             }
-/*
-            if (_axeObj != null)
-            {
-                Render.Circle.DrawCircle(_axeObj.Position, 150, System.Drawing.Color.Yellow, 6);
-            }
- */
+            /*
+                        if (_axeObj != null)
+                        {
+                            Render.Circle.DrawCircle(_axeObj.Position, 150, System.Drawing.Color.Yellow, 6);
+                        }
+             */
             //Draw the ranges of the spells.
             foreach (var spell in SpellList)
             {
@@ -461,7 +478,7 @@ namespace Olafisback
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             if (t.IsValidTarget() && Q.IsReady() &&
-                Player.Mana > Player.Mana/100*Config.Item("Harass.UseQ.MinMana").GetValue<Slider>().Value &&
+                Player.Mana > Player.MaxMana/100*Config.Item("Harass.UseQ.MinMana").GetValue<Slider>().Value &&
                 Player.Distance(t.ServerPosition) <= Q2.Range)
             {
                 PredictionOutput q2Predict = Q2.GetPrediction(t);
@@ -475,14 +492,14 @@ namespace Olafisback
         {
             BuffType[] buffList =
             {
-                BuffType.Blind, 
-                BuffType.Charm, 
-                BuffType.Fear, 
+                BuffType.Blind,
+                BuffType.Charm,
+                BuffType.Fear,
                 BuffType.Knockback,
-                BuffType.Knockup, 
-                BuffType.Taunt, 
-                BuffType.Slow, 
-                BuffType.Silence, 
+                BuffType.Knockup,
+                BuffType.Taunt,
+                BuffType.Slow,
+                BuffType.Silence,
                 BuffType.Disarm,
                 BuffType.Snare
             };
@@ -535,19 +552,19 @@ namespace Olafisback
 
             if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady())
             {
-                if (Player.Mana < Player.Mana/100*Config.Item("UseQFarmMinMana").GetValue<Slider>().Value)
+                if (Player.Mana < Player.MaxMana/100*Config.Item("UseQFarmMinMana").GetValue<Slider>().Value)
                     return;
 
                 var vParamQMinionCount = Config.Item("UseQFarmMinCount").GetValue<Slider>().Value;
 
                 var objAiHero = from x1 in ObjectManager.Get<Obj_AI_Minion>()
                     where x1.IsValidTarget() && x1.IsEnemy
-                        select x1
-                            into h
-                        orderby h.Distance(Player) descending
-                            select h
-                                into x2
-                            where x2.Distance(Player) < Q.Range - 20 && !x2.IsDead
+                    select x1
+                    into h
+                    orderby h.Distance(Player) descending
+                    select h
+                    into x2
+                    where x2.Distance(Player) < Q.Range - 20 && !x2.IsDead
                     select x2;
 
                 var aiMinions = objAiHero as Obj_AI_Minion[] ?? objAiHero.ToArray();
@@ -568,7 +585,7 @@ namespace Olafisback
             if (Config.Item("UseEFarm").GetValue<bool>() && E.IsReady())
             {
 
-                if (Player.Health < Player.Health/100*Config.Item("UseEFarmMinHealth").GetValue<Slider>().Value)
+                if (Player.Health < Player.MaxHealth/100*Config.Item("UseEFarmMinHealth").GetValue<Slider>().Value)
                     return;
 
                 var eMinions = MinionManager.GetMinions(Player.ServerPosition, E.Range);
@@ -639,7 +656,7 @@ namespace Olafisback
 
             if (Config.Item("UseQJFarm").GetValue<bool>() && Q.IsReady())
             {
-                if (Player.Mana < Player.Mana/100*Config.Item("UseQJFarmMinMana").GetValue<Slider>().Value)
+                if (Player.Mana < Player.MaxMana/100*Config.Item("UseQJFarmMinMana").GetValue<Slider>().Value)
                     return;
 
                 if (Q.IsReady())
@@ -648,7 +665,7 @@ namespace Olafisback
 
             if (Config.Item("UseWJFarm").GetValue<bool>() && W.IsReady())
             {
-                if (Player.Mana < Player.Mana/100*Config.Item("UseWJFarmMinMana").GetValue<Slider>().Value)
+                if (Player.Mana < Player.MaxMana/100*Config.Item("UseWJFarmMinMana").GetValue<Slider>().Value)
                     return;
 
                 if (mobs.Count >= 2 || mob.Health > Player.TotalAttackDamage*2.5)
@@ -657,7 +674,7 @@ namespace Olafisback
 
             if (Config.Item("UseEJFarm").GetValue<bool>() && E.IsReady())
             {
-                if (Player.Health < Player.Health/100*Config.Item("UseEJFarmMinHealth").GetValue<Slider>().Value)
+                if (Player.Health < Player.MaxHealth/100*Config.Item("UseEJFarmMinHealth").GetValue<Slider>().Value)
                     return;
 
                 var vParamESettings = Config.Item("UseEJFarmSet").GetValue<StringList>().SelectedIndex;
@@ -692,7 +709,7 @@ namespace Olafisback
                     itemYoumuu.Cast();
             }
         }
-        
+
         private static float GetComboDamage(Obj_AI_Base vTarget)
         {
             var fComboDamage = 0d;
