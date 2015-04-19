@@ -30,7 +30,7 @@ namespace Olafisback
         public static Spell W;
         public static Spell E;
         public static SpellSlot IgniteSlot;
-        
+
         //Items
         private static Items.Item itemHydra;
         private static Items.Item itemBOTRK;
@@ -52,7 +52,7 @@ namespace Olafisback
         private static void Game_OnGameLoad(EventArgs args)
         {
             Player = ObjectManager.Player;
-            if (Player.BaseSkinName != ChampionName) 
+            if (Player.BaseSkinName != ChampionName)
                 return;
 
             /* [ Spells ] */
@@ -68,7 +68,7 @@ namespace Olafisback
             SpellList.Add(E);
 
             IgniteSlot = Player.GetSpellSlot("SummonerDot");
-            
+
             /* [ Items ] */
             itemBOTRK = new Items.Item(3153, 450f);
             itemBilgewaterCutlass = new Items.Item(3144, 450f);
@@ -101,7 +101,7 @@ namespace Olafisback
                         new MenuItem("ComboActive", "Combo!").SetValue(
                             new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
             }
-            
+
             /* [ Harass ] */
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             {
@@ -117,10 +117,6 @@ namespace Olafisback
                 {
                     Config.SubMenu("Harass")
                         .AddItem(
-                            new MenuItem("HarassUseShortQT", space + "Toggle Q (Short)!").SetValue(
-                                new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
-                    Config.SubMenu("Harass")
-                        .AddItem(
                             new MenuItem("HarassUseQT", space + "Toggle Q!").SetValue(new KeyBind("T".ToCharArray()[0],
                                 KeyBindType.Toggle)));
                 }
@@ -129,7 +125,7 @@ namespace Olafisback
                         new MenuItem("HarassActive", "Harass Active!").SetValue(new KeyBind("C".ToCharArray()[0],
                             KeyBindType.Press)));
             }
-            
+
             /* [ Lane Clear ] */
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             {
@@ -204,15 +200,22 @@ namespace Olafisback
                         new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0],
                             KeyBindType.Press)));
             }
-            
+
             /* [ Flee ] */
             var menuFlee = new Menu("Flee", "Flee");
             {
-                menuFlee.AddItem(new MenuItem("UseQFlee", "Use Q").SetValue(false));
-                menuFlee.AddItem(new MenuItem("UseYouFlee", "Use Youmuu's Ghostblade").SetValue(false));
+                menuFlee.AddItem(new MenuItem("Flee.UseQ", "Use Q").SetValue(false));
+                menuFlee.AddItem(new MenuItem("Flee.UseYou", "Use Youmuu's Ghostblade").SetValue(false));
                 menuFlee.AddItem(
-                    new MenuItem("FleeActive", "Flee!").SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("Flee.Active", "Flee!").SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Press)));
                 Config.AddSubMenu(menuFlee);
+            }
+
+            /* [ Misc ] */
+            var menuMisc = new Menu("Misc", "Misc");
+            {
+                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto").SetValue(false));
+                Config.AddSubMenu(menuMisc);
             }
             /* [ Other ] */
 
@@ -221,15 +224,15 @@ namespace Olafisback
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("QRange", "Q range").SetValue(new Circle(true,
+                    new MenuItem("Draw.QRange", "Q range").SetValue(new Circle(true,
                         System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Q2Range", "Short Q range").SetValue(new Circle(true,
+                    new MenuItem("Draw.Q2Range", "Short Q range").SetValue(new Circle(true,
                         System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("ERange", "E range").SetValue(new Circle(false,
+                    new MenuItem("Draw.ERange", "E range").SetValue(new Circle(false,
                         System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.AddToMainMenu();
 
@@ -242,8 +245,6 @@ namespace Olafisback
                     OutputPrecision = FontPrecision.Default,
                     Quality = FontQuality.Default,
                 });
-
-
 
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
@@ -282,13 +283,13 @@ namespace Olafisback
             //Draw the ranges of the spells.
             foreach (var spell in SpellList)
             {
-                var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
+                var menuItem = Config.Item("Draw." + spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active)
                 {
                     Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1);
                 }
             }
-            var Q2Range = Config.Item("Q2Range").GetValue<Circle>();
+            var Q2Range = Config.Item("Draw.Q2Range").GetValue<Circle>();
             if (Q2Range.Active)
             {
                 Render.Circle.DrawCircle(Player.Position, Q2.Range, Q2Range.Color, 1);
@@ -314,9 +315,7 @@ namespace Olafisback
 
             if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && !Player.HasBuff("Recall"))
             {
-                if (Config.Item("HarassUseShortQT").GetValue<KeyBind>().Active)
-                    CastShortQ();
-                else if (Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
+                if (Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
                     CastQ();
             }
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
@@ -324,9 +323,15 @@ namespace Olafisback
                 Harass();
             }
 
-            if (Config.Item("FleeActive").GetValue<KeyBind>().Active)
+            if (Config.Item("Flee.Active").GetValue<KeyBind>().Active)
                 Flee();
 
+            if (E.IsReady() && Config.Item("Misc.AutoE").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                    E.CastOnUnit(t);
+            }
         }
 
         private static void Combo()
@@ -384,27 +389,37 @@ namespace Olafisback
             {
                 Player.Spellbook.CastSpell(IgniteSlot, t);
             }
-
         }
 
         private static void CastQ()
         {
+            if (!Q.IsReady())
+                return;
+
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             if (t.IsValidTarget() && Q.IsReady() &&
                 Player.Mana > Player.Mana/100*Config.Item("Minman").GetValue<Slider>().Value &&
                 Player.Distance(t.ServerPosition) <= Q2.Range)
             {
-                PredictionOutput Qpredict = Q.GetPrediction(t);
-                var hithere = Qpredict.CastPosition.Extend(ObjectManager.Player.Position, -140);
-                if (Qpredict.Hitchance >= HitChance.High)
+                PredictionOutput qPredict = Q.GetPrediction(t);
+                var hithere = qPredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
+                if (Player.Distance(t.ServerPosition) >= 350)
+                {
                     Q.Cast(hithere);
+                }
+                else
+                    Q.Cast(qPredict.CastPosition);
             }
         }
 
         private static void CastShortQ()
         {
+            if (!Q.IsReady())
+                return;
+
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+
             if (t.IsValidTarget() && Q.IsReady() &&
                 Player.Mana > Player.Mana/100*Config.Item("Minman").GetValue<Slider>().Value &&
                 Player.Distance(t.ServerPosition) <= Q2.Range)
@@ -466,14 +481,13 @@ namespace Olafisback
 
                 var objAiHero = from x1 in ObjectManager.Get<Obj_AI_Minion>()
                     where x1.IsValidTarget() && x1.IsEnemy
-                    select x1
-                    into h
-                    orderby h.Distance(Player) descending
-                        select h
-                        into x2
+                        select x1
+                            into h
+                        orderby h.Distance(Player) descending
+                            select h
+                                into x2
                             where x2.Distance(Player) < Q.Range - 20 && !x2.IsDead
                     select x2;
-
 
                 var aiMinions = objAiHero as Obj_AI_Minion[] ?? objAiHero.ToArray();
 
@@ -606,12 +620,12 @@ namespace Olafisback
         private static void Flee()
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-            if (Config.Item("UseQFlee").GetValue<bool>())
+            if (Config.Item("Flee.UseQ").GetValue<bool>())
                 if (Q.IsReady())
                 {
                     CastQ();
                 }
-            if (Config.Item("UseYouFlee").GetValue<bool>())
+            if (Config.Item("Flee.UseYou").GetValue<bool>())
             {
                 if (itemYoumuu.IsReady())
                     itemYoumuu.Cast();
