@@ -348,17 +348,19 @@ namespace Olafisback
 
         private static void Game_OnUpdate(EventArgs args)
         {
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+
             if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo || !Player.HasBuff("Recall"))
             {
                 if (Config.Item("Harass.UseQ.Toggle").GetValue<KeyBind>().Active)
                 {
-                    CastQ();
+                    CastQ(t);
                 }
             }
 
             if (E.IsReady() && Config.Item("Misc.AutoE").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                
                 if (t.IsValidTarget())
                     E.CastOnUnit(t);
             }
@@ -399,16 +401,9 @@ namespace Olafisback
 
             if (t.IsValidTarget() && Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady() &&
                 Player.Distance(t.ServerPosition) <= Q.Range)
-            {
-                PredictionOutput Qpredict = Q.GetPrediction(t);
-                var hithere = Qpredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
-                if (Player.Distance(t.ServerPosition) >= 350)
-                {
-                    Q.Cast(hithere);
-                }
-                else
-                    Q.Cast(Qpredict.CastPosition);
-            }
+
+                CastQ(t);
+
 
             if (t.IsValidTarget() && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() &&
                 Player.Distance(t.ServerPosition) <= E.Range)
@@ -450,23 +445,34 @@ namespace Olafisback
             }
         }
 
-        private static void CastQ()
+        private static void CastQ(Obj_AI_Base t)
         {
             if (!Q.IsReady())
                 return;
 
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            float time = 0;
 
-            if (t.IsValidTarget())
+            if (t.IsValidTarget() && Player.Distance(t.ServerPosition) <= Q.Range)
             {
-                PredictionOutput Qpredict = Q.GetPrediction(t);
-                var hithere = Qpredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
+                time = 0.20f + t.Distance(Player.ServerPosition) / 1600f;
+                var dist = t.MoveSpeed * time;
+                var hithere = t.GetWaypoints().Count > 1
+                ? t.Position.Extend(t.GetWaypoints()[1].To3D(), dist)
+                : t.Position;
+                for (int i = 0; i < 3; i++)
+                {
+                    time = 0.20f + hithere.Distance(Player.ServerPosition) / 1600f;
+                    hithere = t.GetWaypoints().Count > 1
+                    ? t.Position.Extend(t.GetWaypoints()[1].To3D(), dist)
+                    : t.Position;
+                    dist = t.MoveSpeed * time;
+                }
+
                 if (Player.Distance(t.ServerPosition) >= 350)
                 {
-                    Q.Cast(hithere);
+                    hithere = hithere.Extend(ObjectManager.Player.Position, -120);
                 }
-                else
-                    Q.Cast(Qpredict.CastPosition);
+                    Q.Cast(hithere);
             }
         }
 
@@ -476,15 +482,29 @@ namespace Olafisback
                 return;
 
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            float time = 0;
+
 
             if (t.IsValidTarget() && Q.IsReady() &&
                 Player.Mana > Player.MaxMana/100*Config.Item("Harass.UseQ.MinMana").GetValue<Slider>().Value &&
                 Player.Distance(t.ServerPosition) <= Q2.Range)
             {
-                PredictionOutput q2Predict = Q2.GetPrediction(t);
-                var hithere = q2Predict.CastPosition.Extend(ObjectManager.Player.Position, -140);
-                if (q2Predict.Hitchance >= HitChance.High)
-                    Q2.Cast(hithere);
+                time = 0.15f + t.Distance(Player.ServerPosition) / 1550f;
+                var dist = t.MoveSpeed * time;
+                var hithere = t.GetWaypoints().Count > 1
+                ? t.Position.Extend(t.GetWaypoints()[1].To3D(), dist)
+                : t.Position;
+                for (int i = 0; i < 3; i++)
+                {
+                    time = 0.15f + hithere.Distance(Player.ServerPosition) / 1550f;
+                    hithere = t.GetWaypoints().Count > 1
+                    ? t.Position.Extend(t.GetWaypoints()[1].To3D(), dist)
+                    : t.Position;
+                    dist = t.MoveSpeed * time;
+                }
+                
+                hithere = hithere.Extend(ObjectManager.Player.Position, -140);
+                Q2.Cast(hithere);
             }
         }
 
@@ -515,7 +535,7 @@ namespace Olafisback
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (Config.Item("UseQHarass").GetValue<bool>())
             {
-                CastQ();
+                CastQ(t);
             }
 
             if (Config.Item("UseQ2Harass").GetValue<bool>())
@@ -698,10 +718,11 @@ namespace Olafisback
         private static void Flee()
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (Config.Item("Flee.UseQ").GetValue<bool>())
                 if (Q.IsReady())
                 {
-                    CastQ();
+                    CastQ(t);
                 }
             if (Config.Item("Flee.UseYou").GetValue<bool>())
             {
