@@ -866,6 +866,24 @@ namespace Zed
                     _q.UpdateSourcePosition(WShadow.ServerPosition, WShadow.ServerPosition);
                     _q.Cast(target);
                 }
+                else if (RShadow != null && RShadow.Distance(target.ServerPosition) <= _q.Range)
+                {
+                    _q.UpdateSourcePosition(RShadow.ServerPosition, RShadow.ServerPosition);
+                    _q.Cast(target);
+                }
+            }
+            
+         if (target.IsValidTarget() && _q.IsReady() && _config.Item("UseQM").GetValue<bool>() && _q.GetDamage(target) > target.Health)
+            {
+                if (_player.Distance(target.ServerPosition) <= _q.Range)
+                {
+                    _q.Cast(target);
+                }
+                else if (WShadow != null && WShadow.Distance(target.ServerPosition) <= _q.Range)
+                {
+                    _q.UpdateSourcePosition(WShadow.ServerPosition, WShadow.ServerPosition);
+                    _q.Cast(target);
+                }
             }
             if (_e.IsReady() && _config.Item("UseEM").GetValue<bool>())
             {
