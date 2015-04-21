@@ -184,7 +184,7 @@ namespace MasterYiQx
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpellCast;
+            //Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpellCast;
 
             Game.PrintChat(
                 String.Format(
