@@ -336,7 +336,7 @@ namespace Zed
             if (_q.IsReady())
                 damage += _player.GetSpellDamage(enemy, SpellSlot.Q);
             if (_w.IsReady() && _q.IsReady())
-                damage += _player.GetSpellDamage(enemy, SpellSlot.Q);
+                damage += _player.GetSpellDamage(enemy, SpellSlot.Q)/2;
             if (_e.IsReady())
                 damage += _player.GetSpellDamage(enemy, SpellSlot.E);
             if (_r.IsReady())
