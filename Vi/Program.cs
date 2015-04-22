@@ -325,7 +325,8 @@ namespace Vi
                 }
             }
 
-            UseItems(t);
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                UseItems(t);
 
             if (comboDamage > t.Health && IgniteSlot != SpellSlot.Unknown &&
                 vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
@@ -344,7 +345,7 @@ namespace Vi
                         Config.Item("DontUlt" + t.BaseSkinName).GetValue<bool>() == false) && useR;
 
                 var qDamage = vPlayer.GetSpellDamage(t, SpellSlot.Q);
-                var eDamage = vPlayer.GetSpellDamage(t, SpellSlot.E) * E.Instance.Ammo;
+                var eDamage = vPlayer.GetSpellDamage(t, SpellSlot.E)*E.Instance.Ammo;
                 var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
 
                 if (Q.IsReady() && t.Health < qDamage)
@@ -509,12 +510,12 @@ namespace Vi
         public static bool Intersection(Vector2 p1, Vector2 p2, Vector2 pC, float radius)
         {
             var p3 = new Vector2(pC.X + radius, pC.Y + radius);
-            var m = ((p2.Y - p1.Y) / (p2.X - p1.X));
-            var constant = (m * p1.X) - p1.Y;
-            var b = -(2f * ((m * constant) + p3.X + (m * p3.Y)));
-            var a = (1 + (m * m));
-            var c = ((p3.X * p3.X) + (p3.Y * p3.Y) - (radius * radius) + (2f * constant * p3.Y) + (constant * constant));
-            var d = ((b * b) - (4f * a * c));
+            var m = ((p2.Y - p1.Y)/(p2.X - p1.X));
+            var constant = (m*p1.X) - p1.Y;
+            var b = -(2f*((m*constant) + p3.X + (m*p3.Y)));
+            var a = (1 + (m*m));
+            var c = ((p3.X*p3.X) + (p3.Y*p3.Y) - (radius*radius) + (2f*constant*p3.Y) + (constant*constant));
+            var d = ((b*b) - (4f*a*c));
 
             return d > 0;
         }
@@ -536,7 +537,7 @@ namespace Vi
                     where
                         Intersection(
                             ObjectManager.Player.ServerPosition.To2D(), endPoint.To2D(), vTarget.ServerPosition.To2D(),
-                            vTarget.BoundingRadius + E.Width / 2)
+                            vTarget.BoundingRadius + E.Width/2)
                     select vMinion).FirstOrDefault();
             }
         }
@@ -551,7 +552,7 @@ namespace Vi
             fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.W);
 
             if (E.IsReady())
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E) * E.Instance.Ammo;
+                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E)*E.Instance.Ammo;
 
             if (R.IsReady())
                 fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R);
