@@ -229,7 +229,7 @@ namespace Vi
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
-            //Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
+            Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
 
             Game.PrintChat(
                 String.Format(
@@ -257,7 +257,22 @@ namespace Vi
         {
             if (!unit.IsMe)
                 return;
-            //"ViBasicAttack"
+            
+            var t = GetTarget(Orbwalking.GetRealAutoAttackRange(vPlayer) + 65, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
+
+            foreach (var xbuff in t.Buffs)
+            {
+                canUseE = !xbuff.Name.Contains("viq") && !xbuff.Name.Contains("knock");
+            }
+
+            var useE = canUseE && E.IsReady() && Config.Item("UseECombo").GetValue<bool>();
+
+            if (useE)
+            {
+                E.Cast(true);
+            }
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -331,11 +346,6 @@ namespace Vi
                 vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 vPlayer.Spellbook.CastSpell(IgniteSlot, t);
-            }
-
-            if (E.IsReady() && useE && t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(vPlayer)))
-            {
-                E.Cast();
             }
 
             if (R.IsReady())
