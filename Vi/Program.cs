@@ -15,7 +15,7 @@ namespace Vi
         private static readonly Obj_AI_Hero vPlayer = ObjectManager.Player;
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
-
+        private static bool canUseE;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
