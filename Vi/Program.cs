@@ -231,10 +231,7 @@ namespace Vi
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
             Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
 
-            Game.PrintChat(
-                String.Format(
-                    "<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>",
-                    ChampionName));
+            Notifications.AddNotification("xQx | Vi Loaded!", 4000);
         }
 
         private static void Drawing_OnDraw(EventArgs args)
