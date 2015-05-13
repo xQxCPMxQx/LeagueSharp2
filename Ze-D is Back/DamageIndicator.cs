@@ -17,7 +17,6 @@ namespace Zed
         private const int Height = 8;
         public static Color Color = Color.Lime;
         public static Color FillColor = Color.Goldenrod;
-        public static bool Fill = true;
         private static DamageToUnitDelegate _damageToUnit;
 
         private static readonly Render.Text Text = new Render.Text(
@@ -61,7 +60,7 @@ namespace Zed
 
                 Drawing.DrawLine(xPosDamage, yPos, xPosDamage, yPos + Height / 2, 2, Color);
 
-                if (Fill)
+                if (Program._config.Item("DrawHP").GetValue<bool>())
                 {
                     var differenceInHP = xPosCurrentHp - xPosDamage;
                     var pos1 = barPos.X + 9 + (107 * percentHealthAfterDamage);
