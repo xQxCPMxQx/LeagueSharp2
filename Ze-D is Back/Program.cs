@@ -25,7 +25,7 @@ namespace Zed
         private static List<Spell> SpellList = new List<Spell>();
         private static Spell _q, _w, _e, _r;
         private static Orbwalking.Orbwalker _orbwalker;
-        private static Menu _config;
+        public static Menu _config;
         public static Menu TargetSelectorMenu;
         private static Obj_AI_Hero _player;
         private static SpellSlot _igniteSlot;
@@ -200,6 +200,7 @@ namespace Zed
                 _config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
                 _config.SubMenu("Drawings").AddItem(new MenuItem("DrawQW", "Draw long harras")).SetValue(true);
                 _config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
+                _config.SubMenu("Drawings").AddItem(new MenuItem("DrawHP", "Draw HP bar")).SetValue(true);
                 _config.SubMenu("Drawings").AddItem(new MenuItem("shadowd", "Shadow Position")).SetValue(true);
                 _config.SubMenu("Drawings").AddItem(new MenuItem("damagetest", "Damage Text")).SetValue(true);
                 _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
@@ -465,8 +466,9 @@ namespace Zed
                 CastQ(target);
             }
 
-            if (target.IsValidTarget() && (ShadowStage != ShadowCastStage.First || !(_config.Item("UseWH").GetValue<bool>())) && _q.IsReady() &&
-                           (target.Distance(_player.Position) <= 900 || target.Distance(WShadow.ServerPosition) <= 900))
+            if (target.IsValidTarget() && (ShadowStage == ShadowCastStage.Second || ShadowStage == ShadowCastStage.Cooldown || !(_config.Item("UseWH").GetValue<bool>()))
+                            && _q.IsReady() &&
+                                (target.Distance(_player.Position) <= 900 || target.Distance(WShadow.ServerPosition) <= 900))
             {
                 CastQ(target);
             }
@@ -474,8 +476,10 @@ namespace Zed
             if (target.IsValidTarget() && _w.IsReady() && _q.IsReady() && _config.Item("UseWH").GetValue<bool>() &&
                 ObjectManager.Player.Mana >
                 ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
-                ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).ManaCost && target.Distance(_player.Position) < 850)
+                ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).ManaCost )
             {
+                if (target.Distance(_player.Position) < 750)
+
                 CastW(target);
             }
             
@@ -747,8 +751,10 @@ namespace Zed
             if (delayw >= Environment.TickCount - shadowdelay || ShadowStage != ShadowCastStage.First || 
                 ( target.HasBuff("zedulttargetmark", true) && LastCastedSpell.LastCastPacketSent.Slot == SpellSlot.R && UltStage == UltCastStage.Cooldown))
                 return;
+
+            var herew = target.Position.Extend(ObjectManager.Player.Position, -200);
         
-            _w.Cast(target.Position, true);
+            _w.Cast(herew, true);
             shadowdelay = Environment.TickCount;
 
         }
