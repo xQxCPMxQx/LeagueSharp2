@@ -134,9 +134,6 @@ namespace Akali
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate;
 
-            Game.PrintChat(
-                String.Format(
-                    "<font color='#70DBDB'>xQx |</font> <font color='#FFFFFF'>{0} Loaded!</font>", ChampionName));
         }
 
         private static Obj_AI_Hero enemyHaveMota
