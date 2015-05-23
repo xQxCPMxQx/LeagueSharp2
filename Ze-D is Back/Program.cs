@@ -463,7 +463,6 @@ namespace Zed
                 target.Distance(_player.Position) < 1400)
             {
                 CastW(target);
-                CastQ(target);
             }
 
             if (target.IsValidTarget() && (ShadowStage == ShadowCastStage.Second || ShadowStage == ShadowCastStage.Cooldown || !(_config.Item("UseWH").GetValue<bool>()))
