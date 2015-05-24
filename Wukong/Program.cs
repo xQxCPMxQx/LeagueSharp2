@@ -72,7 +72,7 @@ namespace Wukong
             menuCombo.AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
 
             menuCombo.AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
-            menuCombo.AddItem(new MenuItem("UseEComboTurret", "Don't Under Turret E").SetValue(true));
+            menuCombo.AddItem(new MenuItem("UseEComboTurret", "Don't Under Turret E").SetValue(false));
             menuCombo.AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Min. Enemy Count : ").SetValue(new Slider(1, 5, 0)));
             menuCombo.AddItem(
@@ -165,7 +165,7 @@ namespace Wukong
                     new MenuItem("RRange", "R Range").SetValue(
                         new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
-            // new PotionManager();
+            new PotionManager();
             Config.AddToMainMenu();
 
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
