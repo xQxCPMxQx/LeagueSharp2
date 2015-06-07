@@ -40,10 +40,8 @@ namespace Vi
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
-        private static Menu MenuTargetedItems;
-        private static Menu MenuNonTargetedItems;
-
-        private static bool xEnemyHaveKnockBack = false;
+        private static Menu _menuTargetedItems;
+        private static Menu _menuNonTargetedItems;
 
         private static void Main(string[] args)
         {
@@ -183,24 +181,24 @@ namespace Vi
             Menu menuUseItems = new Menu("Use Items", "menuUseItems");
             Config.SubMenu("Extras").AddSubMenu(menuUseItems);
             // Extras -> Use Items -> Targeted Items
-            MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
-            menuUseItems.AddSubMenu(MenuTargetedItems);
+            _menuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
+            menuUseItems.AddSubMenu(_menuTargetedItems);
 
-            MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
+            _menuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
+            _menuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
 
-            MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
+            _menuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
+            _menuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
 
             // Extras -> Use Items -> AOE Items
-            MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
-            menuUseItems.AddSubMenu(MenuNonTargetedItems);
-            MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
+            _menuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
+            menuUseItems.AddSubMenu(_menuNonTargetedItems);
+            _menuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
+            _menuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
+            _menuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
+            _menuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
+            _menuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
+            _menuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
 
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
@@ -228,7 +226,8 @@ namespace Vi
             Utility.HpBarDamageIndicator.Enabled = true;
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            //Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
 
             Notifications.AddNotification("xQx | Vi Loaded!", 4000);
@@ -290,21 +289,21 @@ namespace Vi
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("HarassMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercentage() >= existsMana)
+                if (vPlayer.ManaPercent >= existsMana)
                     Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("LaneClearMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercentage() >= existsMana)
+                if (vPlayer.ManaPercent >= existsMana)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercentage() >= existsMana)
+                if (vPlayer.ManaPercent >= existsMana)
                     JungleFarm();
             }
 
@@ -571,6 +570,21 @@ namespace Vi
 
             return (float) fComboDamage;
         }
+        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
+            if (!interruptSpells)
+                return;
+
+            if (vPlayer.Distance(unit) < Q.Range)
+            {
+                Q.Cast(unit);
+            }
+            else if (vPlayer.Distance(unit) < R.Range)
+            {
+                R.Cast(unit);
+            }
+        }
 
         private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
         {
@@ -601,8 +615,8 @@ namespace Vi
             if (vTarget == null)
                 return;
 
-            foreach (var itemID in from menuItem in MenuTargetedItems.Items
-                let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
+            foreach (var itemID in from menuItem in _menuTargetedItems.Items
+                let useItem = _menuTargetedItems.Item(menuItem.Name).GetValue<bool>()
                 where useItem
                 select Convert.ToInt16(menuItem.Name.Substring(4, 4))
                 into itemId
@@ -612,8 +626,8 @@ namespace Vi
                 Items.UseItem(itemID, vTarget);
             }
 
-            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items
-                let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
+            foreach (var itemID in from menuItem in _menuNonTargetedItems.Items
+                let useItem = _menuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
                 where useItem
                 select Convert.ToInt16(menuItem.Name.Substring(4, 4))
                 into itemId
