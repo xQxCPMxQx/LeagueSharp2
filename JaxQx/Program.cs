@@ -288,7 +288,12 @@ namespace JaxQx
                     arg.SData.Name.ToLower().Contains("jaxcounterstrike"))
                 {
                     canCastSpell = false;
-                    return;
+                 
+                }
+                
+                else if (arg.SData.Name.ToLower().Contains("attack"))
+                {
+                    canCastSpell = true;
                 }
             }
             else 
