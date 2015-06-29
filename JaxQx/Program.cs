@@ -280,7 +280,6 @@ namespace JaxQx
             if (!sender.IsMe)
                 return;
 
-            Console.WriteLine(arg.SData.Name);
             if (arg.SData.Name.ToLower().Contains("jaxleapstrike") ||
                 arg.SData.Name.ToLower().Contains("jaxempowertwo") ||
                 arg.SData.Name.ToLower().Contains("jaxcounterstrike"))
