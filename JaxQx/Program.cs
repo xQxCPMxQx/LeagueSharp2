@@ -16,7 +16,8 @@ namespace JaxQx
 
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
-        private static bool canCastSpell = true;
+        private static bool usedSpell = true;
+        private static bool shennBuffActive = false;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
@@ -279,23 +280,16 @@ namespace JaxQx
             if (!sender.IsMe)
                 return;
 
-            var t = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(null) + 65, TargetSelector.DamageType.Magical);
-            if (t.IsValidTarget())
+            Console.WriteLine(arg.SData.Name);
+            if (arg.SData.Name.ToLower().Contains("jaxleapstrike") ||
+                arg.SData.Name.ToLower().Contains("jaxempowertwo") ||
+                arg.SData.Name.ToLower().Contains("jaxcounterstrike"))
             {
-                if (arg.SData.Name.ToLower().Contains("jaxleapstrike") ||
-                    arg.SData.Name.ToLower().Contains("jaxcounterstrike"))
-                {
-                    canCastSpell = false;
-                }
-                else if (arg.SData.Name.ToLower().Contains("attack"))
-                {
-                    canCastSpell = true;
-                }
+                usedSpell = true;
             }
-            else 
+            else
             {
-                canCastSpell = true;
-                return;
+                usedSpell = false;
             }
 
             if (xWards.ToList().Contains(arg.SData.Name))
@@ -311,10 +305,8 @@ namespace JaxQx
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (!Orbwalking.CanMove(100))
-                return;
-
-
+            shennBuffActive = Player.HasBuff("Sheen", true);
+            
             if (DelayTick - Environment.TickCount <= 250)
             {
                 DelayTick = Environment.TickCount;
@@ -359,6 +351,9 @@ namespace JaxQx
             if (!t.IsValidTarget())
                 return;
 
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && (shennBuffActive || usedSpell))
+                return;
+                
             var minQRange = Config.Item("ComboUseQMinRange").GetValue<Slider>().Value;
 
             if (Q.IsReady() && Player.Distance(t) >= minQRange && ObjectManager.Player.Distance(t) <= Q.Range)
@@ -371,7 +366,7 @@ namespace JaxQx
             if (ObjectManager.Player.Distance(t) <= E.Range)
                 UseItems(t);
 
-            if (canCastSpell && W.IsReady() && 
+            if (W.IsReady() && 
                 ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0)
                 W.Cast();
 
