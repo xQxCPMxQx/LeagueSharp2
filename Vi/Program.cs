@@ -322,7 +322,7 @@ namespace Vi
             if (!t.IsValidTarget())
                 return;
 
-            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && shennBuffActive)
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && shennBuffActive)
                 return;
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
