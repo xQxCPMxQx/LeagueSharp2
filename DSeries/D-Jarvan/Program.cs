@@ -285,13 +285,15 @@ namespace D_Jarvan
 
             Config.AddToMainMenu();
             Sprite.Load();
-            Game.PrintChat("<font color='#881df2'>D-Jarvan by Diabaths</font> Loaded.");
+            
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             GameObject.OnCreate += OnCreateObj;
             GameObject.OnDelete += OnDeleteObj;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = true;
 
             Notifications.AddNotification(String.Format("{0} Loaded", ChampionName), 4000);
         }
