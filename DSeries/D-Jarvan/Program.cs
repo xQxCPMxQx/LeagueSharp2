@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Color = System.Drawing.Color;
 
 //gg
 
@@ -12,29 +12,22 @@ namespace D_Jarvan
     internal class Program
     {
         public const string ChampionName = "JarvanIV";
-
         private static Orbwalking.Orbwalker _orbwalker;
-
         public static Spell Q, W, E, R;
-
         private static SpellSlot _igniteSlot;
-
-        private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis;
-
+        public static Items.Item ItemTiamat;
+        public static Items.Item ItemHydra;
+        public static Items.Item ItemBlade;
+        public static Items.Item ItemBilge;
+        public static Items.Item ItemRand;
+        public static Items.Item ItemLotis;
         public static Menu Config;
-
-        private static Obj_AI_Hero _player;
-
+        public static Obj_AI_Hero Player;
         private static bool _haveulti;
-
         private static SpellSlot _smiteSlot = SpellSlot.Unknown;
-
         private static Spell _smite;
-
         private static SpellSlot _flashSlot;
-
         private static Vector3 _epos = default(Vector3);
-
         //Credits to Kurisu
         private static readonly int[] SmitePurple = {3713, 3726, 3725, 3726, 3723};
         private static readonly int[] SmiteGrey = {3711, 3722, 3721, 3720, 3719};
@@ -48,8 +41,9 @@ namespace D_Jarvan
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            _player = ObjectManager.Player;
-            if (ObjectManager.Player.BaseSkinName != ChampionName) return;
+            Player = ObjectManager.Player;
+            if (ObjectManager.Player.ChampionName != ChampionName) 
+                return;
 
             Q = new Spell(SpellSlot.Q, 770f);
             W = new Spell(SpellSlot.W, 300f);
@@ -59,16 +53,16 @@ namespace D_Jarvan
             Q.SetSkillshot(0.5f, 70f, float.MaxValue, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.5f, 70f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
-            _igniteSlot = _player.GetSpellSlot("SummonerDot");
-            _flashSlot = _player.GetSpellSlot("SummonerFlash");
+            _igniteSlot = Player.GetSpellSlot("SummonerDot");
+            _flashSlot = Player.GetSpellSlot("SummonerFlash");
             SetSmiteSlot();
 
-            _bilge = new Items.Item(3144, 450f);
-            _blade = new Items.Item(3153, 450f);
-            _hydra = new Items.Item(3074, 250f);
-            _tiamat = new Items.Item(3077, 250f);
-            _rand = new Items.Item(3143, 490f);
-            _lotis = new Items.Item(3190, 590f);
+            ItemBilge = new Items.Item(3144, 450f);
+            ItemBlade = new Items.Item(3153, 450f);
+            ItemHydra = new Items.Item(3074, 250f);
+            ItemTiamat = new Items.Item(3077, 250f);
+            ItemRand = new Items.Item(3143, 490f);
+            ItemLotis = new Items.Item(3190, 590f);
 
             //D Jarvan
             Config = new Menu("D-Jarvan", "D-Jarvan", true);
@@ -281,17 +275,19 @@ namespace D_Jarvan
                 .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
             Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
-            
+
 
             Config.AddToMainMenu();
             Sprite.Load();
-            
+
             Game.OnUpdate += Game_OnUpdate;
-            Drawing.OnDraw += Drawing_OnDraw;
             GameObject.OnCreate += OnCreateObj;
             GameObject.OnDelete += OnDeleteObj;
+
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            
+            Drawing.OnDraw += Drawing_OnDraw;
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 
@@ -314,23 +310,22 @@ namespace D_Jarvan
             }
             if ((Config.Item("ActiveHarass").GetValue<KeyBind>().Active ||
                  Config.Item("harasstoggle").GetValue<KeyBind>().Active) &&
-                (100*(_player.Mana/_player.MaxMana)) > Config.Item("harassmana").GetValue<Slider>().Value)
+                (100*(Player.Mana/Player.MaxMana)) > Config.Item("harassmana").GetValue<Slider>().Value)
             {
                 Harass();
-
             }
             if (Config.Item("Activelane").GetValue<KeyBind>().Active &&
-                (100*(_player.Mana/_player.MaxMana)) > Config.Item("lanemana").GetValue<Slider>().Value)
+                (100*(Player.Mana/Player.MaxMana)) > Config.Item("lanemana").GetValue<Slider>().Value)
             {
                 Laneclear();
             }
             if (Config.Item("ActiveJungle").GetValue<KeyBind>().Active &&
-                (100*(_player.Mana/_player.MaxMana)) > Config.Item("junglemana").GetValue<Slider>().Value)
+                (100*(Player.Mana/Player.MaxMana)) > Config.Item("junglemana").GetValue<Slider>().Value)
             {
                 JungleClear();
             }
             if (Config.Item("ActiveLast").GetValue<KeyBind>().Active &&
-                (100*(_player.Mana/_player.MaxMana)) > Config.Item("lastmana").GetValue<Slider>().Value)
+                (100*(Player.Mana/Player.MaxMana)) > Config.Item("lastmana").GetValue<Slider>().Value)
             {
                 LastHit();
             }
@@ -344,12 +339,11 @@ namespace D_Jarvan
                 ComboeqFlash();
             }
 
-            _player = ObjectManager.Player;
+            Player = ObjectManager.Player;
 
             _orbwalker.SetAttack(true);
 
             KillSteal();
-
         }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -378,7 +372,7 @@ namespace D_Jarvan
 
         private static void GenModelPacket(string champ, int skinId)
         {
-            Packet.S2C.UpdateModel.Encoded(new Packet.S2C.UpdateModel.Struct(_player.NetworkId, skinId, champ))
+            Packet.S2C.UpdateModel.Encoded(new Packet.S2C.UpdateModel.Struct(Player.NetworkId, skinId, champ))
                 .Process();
         }
 
@@ -386,25 +380,25 @@ namespace D_Jarvan
         {
             var damage = 0d;
             if (_igniteSlot != SpellSlot.Unknown &&
-                _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
                 damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
             if (Items.HasItem(3077) && Items.CanUseItem(3077))
-                damage += _player.GetItemDamage(enemy, Damage.DamageItems.Tiamat);
+                damage += Player.GetItemDamage(enemy, Damage.DamageItems.Tiamat);
             if (Items.HasItem(3074) && Items.CanUseItem(3074))
-                damage += _player.GetItemDamage(enemy, Damage.DamageItems.Hydra);
+                damage += Player.GetItemDamage(enemy, Damage.DamageItems.Hydra);
             if (Items.HasItem(3153) && Items.CanUseItem(3153))
-                damage += _player.GetItemDamage(enemy, Damage.DamageItems.Botrk);
+                damage += Player.GetItemDamage(enemy, Damage.DamageItems.Botrk);
             if (Items.HasItem(3144) && Items.CanUseItem(3144))
-                damage += _player.GetItemDamage(enemy, Damage.DamageItems.Bilgewater);
+                damage += Player.GetItemDamage(enemy, Damage.DamageItems.Bilgewater);
             if (Q.IsReady())
-                damage += _player.GetSpellDamage(enemy, SpellSlot.Q)*2*1.2;
+                damage += Player.GetSpellDamage(enemy, SpellSlot.Q)*2*1.2;
             if (E.IsReady())
-                damage += _player.GetSpellDamage(enemy, SpellSlot.E);
+                damage += Player.GetSpellDamage(enemy, SpellSlot.E);
             if (R.IsReady())
-                damage += _player.GetSpellDamage(enemy, SpellSlot.R);
+                damage += Player.GetSpellDamage(enemy, SpellSlot.R);
 
-            damage += _player.GetAutoAttackDamage(enemy, true)*1.1;
-            damage += _player.GetAutoAttackDamage(enemy, true);
+            damage += Player.GetAutoAttackDamage(enemy, true)*1.1;
+            damage += Player.GetAutoAttackDamage(enemy, true);
             return (float) damage;
         }
 
@@ -438,19 +432,19 @@ namespace D_Jarvan
                 ObjectManager.Get<Obj_AI_Hero>()
                     .Where(
                         enemy =>
-                            enemy.Team != _player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            enemy.Team != Player.Team && !enemy.IsDead && enemy.IsVisible &&
                             Config.Item("Assassin" + enemy.ChampionName) != null &&
                             Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            _player.Distance(enemy) < assassinRange);
+                            Player.Distance(enemy) < assassinRange);
 
             if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
             {
                 vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
             }
 
-            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+            var objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
 
-            Obj_AI_Hero t = !objAiHeroes.Any()
+            var t = !objAiHeroes.Any()
                 ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
                 : objAiHeroes[0];
 
@@ -470,11 +464,11 @@ namespace D_Jarvan
 
             Smiteontarget();
             if (t.IsValidTarget(600) && Config.Item("UseIgnite").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
-                _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {
                 if (ComboDamage(t) > t.Health)
                 {
-                    _player.Spellbook.CastSpell(_igniteSlot, t);
+                    Player.Spellbook.CastSpell(_igniteSlot, t);
                 }
             }
             if (useR && R.IsReady())
@@ -486,10 +480,10 @@ namespace D_Jarvan
             }
 
             if (useE && E.IsReady() &&
-                (t.Health <= _player.GetSpellDamage(t, SpellSlot.E) || t.IsValidTarget(Q.Range) && Q.IsReady()))
+                (t.Health <= Player.GetSpellDamage(t, SpellSlot.E) || t.IsValidTarget(Q.Range) && Q.IsReady()))
             {
                 //xsalice Code
-                var vec = t.ServerPosition - _player.ServerPosition;
+                var vec = t.ServerPosition - Player.ServerPosition;
                 var castBehind = E.GetPrediction(t).CastPosition + Vector3.Normalize(vec)*100;
                 E.Cast(castBehind, Packets());
             }
@@ -521,12 +515,12 @@ namespace D_Jarvan
 
         private static int GetNumberHitByR(Obj_AI_Hero target)
         {
-            int Enemys = 0;
-            foreach (Obj_AI_Hero enemys in ObjectManager.Get<Obj_AI_Hero>())
+            var Enemys = 0;
+            foreach (var enemys in ObjectManager.Get<Obj_AI_Hero>())
             {
                 var pred = R.GetPrediction(enemys, true);
                 if (pred.Hitchance >= HitChance.High && !enemys.IsMe && enemys.IsEnemy &&
-                    Vector3.Distance(_player.Position, pred.UnitPosition) <= R.Range)
+                    Vector3.Distance(Player.Position, pred.UnitPosition) <= R.Range)
                 {
                     Enemys = Enemys + 1;
                 }
@@ -536,18 +530,18 @@ namespace D_Jarvan
 
         private static void ComboEqr()
         {
-            var manacheck = _player.Mana >
-                            _player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
-                            _player.Spellbook.GetSpell(SpellSlot.E).ManaCost +
-                            _player.Spellbook.GetSpell(SpellSlot.R).ManaCost;
+            var manacheck = Player.Mana >
+                            Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
+                            Player.Spellbook.GetSpell(SpellSlot.E).ManaCost +
+                            Player.Spellbook.GetSpell(SpellSlot.R).ManaCost;
             var t = TargetSelector.GetTarget(Q.Range + R.Range, TargetSelector.DamageType.Magical);
             if (t == null)
             {
-                _player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             }
             else
             {
-                _player.IssueOrder(GameObjectOrder.AttackUnit, t);
+                Player.IssueOrder(GameObjectOrder.AttackUnit, t);
             }
             Smiteontarget();
             if (E.IsReady() && Q.IsReady() && manacheck && t.IsValidTarget(Q.Range))
@@ -556,11 +550,11 @@ namespace D_Jarvan
                 Q.Cast(t.ServerPosition, Packets());
             }
             if (t.IsValidTarget(600) && Config.Item("UseIgnite").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
-                _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {
                 if (ComboDamage(t) > t.Health)
                 {
-                    _player.Spellbook.CastSpell(_igniteSlot, t);
+                    Player.Spellbook.CastSpell(_igniteSlot, t);
                 }
             }
             if (R.IsReady() && !_haveulti && t.IsValidTarget(R.Range))
@@ -581,7 +575,7 @@ namespace D_Jarvan
             var useQ = Config.Item("UseQH").GetValue<bool>();
             var useE = Config.Item("UseEH").GetValue<bool>();
             var useEq = Config.Item("UseEQH").GetValue<bool>();
-            var useEqhp = (100*(_player.Health/_player.MaxHealth)) > Config.Item("UseEQHHP").GetValue<Slider>().Value;
+            var useEqhp = (100*(Player.Health/Player.MaxHealth)) > Config.Item("UseEQHHP").GetValue<Slider>().Value;
             var useItemsH = Config.Item("UseItemsharass").GetValue<bool>();
             if (useEqhp && useEq && Q.IsReady() && E.IsReady())
             {
@@ -603,33 +597,33 @@ namespace D_Jarvan
                     E.Cast(t, Packets());
             }
 
-            if (useItemsH && _tiamat.IsReady() && target.IsValidTarget(_tiamat.Range))
+            if (useItemsH && ItemTiamat.IsReady() && target.IsValidTarget(ItemTiamat.Range))
             {
-                _tiamat.Cast();
+                ItemTiamat.Cast();
             }
-            if (useItemsH && _hydra.IsReady() && target.IsValidTarget(_hydra.Range))
+            if (useItemsH && ItemHydra.IsReady() && target.IsValidTarget(ItemHydra.Range))
             {
-                _hydra.Cast();
+                ItemHydra.Cast();
             }
         }
 
         private static void ComboeqFlash()
         {
             var flashDista = Config.Item("FlashDista").GetValue<Slider>().Value;
-            var manacheck = _player.Mana >
-                            _player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
-                            _player.Spellbook.GetSpell(SpellSlot.E).ManaCost;
+            var manacheck = Player.Mana >
+                            Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
+                            Player.Spellbook.GetSpell(SpellSlot.E).ManaCost;
             var t = TargetSelector.GetTarget(Q.Range + 800, TargetSelector.DamageType.Magical);
             if (t == null)
             {
-                _player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             }
             else
             {
-                _player.IssueOrder(GameObjectOrder.AttackUnit, t);
+                Player.IssueOrder(GameObjectOrder.AttackUnit, t);
             }
             Smiteontarget();
-            if (_flashSlot != SpellSlot.Unknown && _player.Spellbook.CanUseSpell(_flashSlot) == SpellState.Ready)
+            if (_flashSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(_flashSlot) == SpellState.Ready)
             {
                 if (E.IsReady() && Q.IsReady() && manacheck && !t.IsValidTarget(Q.Range))
                 {
@@ -642,7 +636,7 @@ namespace D_Jarvan
 
                 if (t.IsValidTarget(flashDista) && !Q.IsReady())
                 {
-                    _player.Spellbook.CastSpell(_flashSlot, t.ServerPosition);
+                    Player.Spellbook.CastSpell(_flashSlot, t.ServerPosition);
                 }
             }
             UseItemes();
@@ -661,7 +655,7 @@ namespace D_Jarvan
             var useQl = Config.Item("UseQL").GetValue<bool>();
             var useEl = Config.Item("UseEL").GetValue<bool>();
             var useWl = Config.Item("UseWL").GetValue<bool>();
-            var usewhp = (100*(_player.Health/_player.MaxHealth)) < Config.Item("UseWLHP").GetValue<Slider>().Value;
+            var usewhp = (100*(Player.Health/Player.MaxHealth)) < Config.Item("UseWLHP").GetValue<Slider>().Value;
 
             if (Q.IsReady() && useQl)
             {
@@ -679,7 +673,7 @@ namespace D_Jarvan
                 else
                     foreach (var minion in allMinionsQ)
                         if (!Orbwalking.InAutoAttackRange(minion) &&
-                            minion.Health < 0.75*_player.GetSpellDamage(minion, SpellSlot.Q))
+                            minion.Health < 0.75*Player.GetSpellDamage(minion, SpellSlot.Q))
                             Q.Cast(minion);
             }
 
@@ -699,23 +693,22 @@ namespace D_Jarvan
                 else
                     foreach (var minion in allMinionsE)
                         if (!Orbwalking.InAutoAttackRange(minion) &&
-                            minion.Health < 0.75*_player.GetSpellDamage(minion, SpellSlot.E))
+                            minion.Health < 0.75*Player.GetSpellDamage(minion, SpellSlot.E))
                             E.Cast(minion);
             }
             if (usewhp && useWl && W.IsReady() && allMinionsQ.Count > 0)
             {
                 W.Cast();
-
             }
             foreach (var minion in allMinionsQ)
             {
-                if (useItemsl && _tiamat.IsReady() && _player.Distance(minion) < _tiamat.Range)
+                if (useItemsl && ItemTiamat.IsReady() && Player.Distance(minion) < ItemTiamat.Range)
                 {
-                    _tiamat.Cast();
+                    ItemTiamat.Cast();
                 }
-                if (useItemsl && _hydra.IsReady() && _player.Distance(minion) < _hydra.Range)
+                if (useItemsl && ItemHydra.IsReady() && Player.Distance(minion) < ItemHydra.Range)
                 {
-                    _hydra.Cast();
+                    ItemHydra.Cast();
                 }
             }
         }
@@ -726,31 +719,30 @@ namespace D_Jarvan
             var useQ = Config.Item("UseQLH").GetValue<bool>();
             var useW = Config.Item("UseWLH").GetValue<bool>();
             var useE = Config.Item("UseELH").GetValue<bool>();
-            var usewhp = (100*(_player.Health/_player.MaxHealth)) < Config.Item("UseWLHHP").GetValue<Slider>().Value;
+            var usewhp = (100*(Player.Health/Player.MaxHealth)) < Config.Item("UseWLHHP").GetValue<Slider>().Value;
             foreach (var minion in allMinions)
             {
-                if (useQ && Q.IsReady() && _player.Distance(minion) < Q.Range &&
-                    minion.Health < 0.95*_player.GetSpellDamage(minion, SpellSlot.Q))
+                if (useQ && Q.IsReady() && Player.Distance(minion) < Q.Range &&
+                    minion.Health < 0.95*Player.GetSpellDamage(minion, SpellSlot.Q))
                 {
                     Q.Cast(minion, Packets());
                 }
 
-                if (E.IsReady() && useE && _player.Distance(minion) < E.Range &&
-                    minion.Health < 0.95*_player.GetSpellDamage(minion, SpellSlot.E))
+                if (E.IsReady() && useE && Player.Distance(minion) < E.Range &&
+                    minion.Health < 0.95*Player.GetSpellDamage(minion, SpellSlot.E))
                 {
                     E.Cast(minion, Packets());
                 }
                 if (usewhp && useW && W.IsReady() && allMinions.Count > 0)
                 {
                     W.Cast();
-
                 }
             }
         }
 
         private static void JungleClear()
         {
-            var mobs = MinionManager.GetMinions(_player.ServerPosition, Q.Range,
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range,
                 MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             var useItemsJ = Config.Item("UseItemsjungle").GetValue<bool>();
@@ -758,48 +750,47 @@ namespace D_Jarvan
             var useW = Config.Item("UseWJ").GetValue<bool>();
             var useE = Config.Item("UseEJ").GetValue<bool>();
             var useEq = Config.Item(" UseEQJ").GetValue<bool>();
-            var usewhp = (100*(_player.Health/_player.MaxHealth)) < Config.Item("UseWJHP").GetValue<Slider>().Value;
+            var usewhp = (100*(Player.Health/Player.MaxHealth)) < Config.Item("UseWJHP").GetValue<Slider>().Value;
 
             if (mobs.Count > 0)
             {
                 var mob = mobs[0];
                 if (useEq)
                 {
-                    if (E.IsReady() && useE && _player.Distance(mob) < Q.Range)
+                    if (E.IsReady() && useE && Player.Distance(mob) < Q.Range)
                     {
                         E.Cast(mob, Packets());
                     }
-                    if (useQ && Q.IsReady() && _player.Distance(mob) < Q.Range)
+                    if (useQ && Q.IsReady() && Player.Distance(mob) < Q.Range)
                     {
                         Q.Cast(mob, Packets());
                     }
                 }
                 else
                 {
-                    if (useQ && Q.IsReady() && _player.Distance(mob) < Q.Range)
+                    if (useQ && Q.IsReady() && Player.Distance(mob) < Q.Range)
                     {
                         Q.Cast(mob, Packets());
                     }
-                    if (E.IsReady() && useE && _player.Distance(mob) < Q.Range)
+                    if (E.IsReady() && useE && Player.Distance(mob) < Q.Range)
                     {
                         E.Cast(mob, Packets());
                     }
                 }
-                if (W.IsReady() && useW && usewhp && _player.Distance(mob) < W.Range)
+                if (W.IsReady() && useW && usewhp && Player.Distance(mob) < W.Range)
                 {
                     W.Cast();
                 }
-                if (useItemsJ && _tiamat.IsReady() && _player.Distance(mob) < _tiamat.Range)
+                if (useItemsJ && ItemTiamat.IsReady() && Player.Distance(mob) < ItemTiamat.Range)
                 {
-                    _tiamat.Cast();
+                    ItemTiamat.Cast();
                 }
-                if (useItemsJ && _hydra.IsReady() && _player.Distance(mob) < _hydra.Range)
+                if (useItemsJ && ItemHydra.IsReady() && Player.Distance(mob) < ItemHydra.Range)
                 {
-                    _hydra.Cast();
+                    ItemHydra.Cast();
                 }
             }
         }
-
 
         //Credits to Kurisu
         private static string Smitetype()
@@ -823,7 +814,6 @@ namespace D_Jarvan
             return "summonersmite";
         }
 
-
         //Credits to metaphorce
         private static void SetSmiteSlot()
         {
@@ -845,8 +835,8 @@ namespace D_Jarvan
 
         private static int GetSmiteDmg()
         {
-            int level = _player.Level;
-            int index = _player.Level/5;
+            var level = Player.Level;
+            var index = Player.Level/5;
             float[] dmgs = {370 + 20*level, 330 + 30*level, 240 + 40*level, 100 + 50*level};
             return (int) dmgs[index];
         }
@@ -858,27 +848,27 @@ namespace D_Jarvan
             if (ObjectManager.Player.Spellbook.CanUseSpell(_smiteSlot) != SpellState.Ready) return;
             var useblue = Config.Item("Useblue").GetValue<bool>();
             var usered = Config.Item("Usered").GetValue<bool>();
-            var health = (100*(_player.Mana/_player.MaxMana)) < Config.Item("healthJ").GetValue<Slider>().Value;
-            var mana = (100*(_player.Mana/_player.MaxMana)) < Config.Item("manaJ").GetValue<Slider>().Value;
+            var health = (100*(Player.Mana/Player.MaxMana)) < Config.Item("healthJ").GetValue<Slider>().Value;
+            var mana = (100*(Player.Mana/Player.MaxMana)) < Config.Item("manaJ").GetValue<Slider>().Value;
             string[] jungleMinions;
             if (Utility.Map.GetMap().Type.Equals(Utility.Map.MapType.TwistedTreeline))
             {
-                jungleMinions = new string[] {"TT_Spiderboss", "TT_NWraith", "TT_NGolem", "TT_NWolf"};
+                jungleMinions = new[] {"TT_Spiderboss", "TT_NWraith", "TT_NGolem", "TT_NWolf"};
             }
             else
             {
-                jungleMinions = new string[]
+                jungleMinions = new[]
                 {
                     "SRU_Blue", "SRU_Gromp", "SRU_Murkwolf", "SRU_Razorbeak", "SRU_Red", "SRU_Krug", "SRU_Dragon",
                     "SRU_Baron", "Sru_Crab"
                 };
             }
-            var minions = MinionManager.GetMinions(_player.Position, 1000, MinionTypes.All, MinionTeam.Neutral);
+            var minions = MinionManager.GetMinions(Player.Position, 1000, MinionTypes.All, MinionTeam.Neutral);
             if (minions.Count() > 0)
             {
-                int smiteDmg = GetSmiteDmg();
+                var smiteDmg = GetSmiteDmg();
 
-                foreach (Obj_AI_Base minion in minions)
+                foreach (var minion in minions)
                 {
                     if (Utility.Map.GetMap().Type.Equals(Utility.Map.MapType.TwistedTreeline) &&
                         minion.Health <= smiteDmg &&
@@ -914,43 +904,38 @@ namespace D_Jarvan
                 var iBilge = Config.Item("Bilge").GetValue<bool>();
                 var iBilgeEnemyhp = hero.Health <=
                                     (hero.MaxHealth*(Config.Item("BilgeEnemyhp").GetValue<Slider>().Value)/100);
-                var iBilgemyhp = _player.Health <=
-                                 (_player.MaxHealth*(Config.Item("Bilgemyhp").GetValue<Slider>().Value)/100);
+                var iBilgemyhp = Player.Health <=
+                                 (Player.MaxHealth*(Config.Item("Bilgemyhp").GetValue<Slider>().Value)/100);
                 var iBlade = Config.Item("Blade").GetValue<bool>();
                 var iBladeEnemyhp = hero.Health <=
                                     (hero.MaxHealth*(Config.Item("BladeEnemyhp").GetValue<Slider>().Value)/100);
-                var iBlademyhp = _player.Health <=
-                                 (_player.MaxHealth*(Config.Item("Blademyhp").GetValue<Slider>().Value)/100);
+                var iBlademyhp = Player.Health <=
+                                 (Player.MaxHealth*(Config.Item("Blademyhp").GetValue<Slider>().Value)/100);
                 var iOmen = Config.Item("Omen").GetValue<bool>();
                 var iOmenenemys = hero.CountEnemiesInRange(350) >= Config.Item("Omenenemys").GetValue<Slider>().Value;
                 var iTiamat = Config.Item("Tiamat").GetValue<bool>();
                 var iHydra = Config.Item("Hydra").GetValue<bool>();
 
 
-                if (hero.IsValidTarget(450) && iBilge && (iBilgeEnemyhp || iBilgemyhp) && _bilge.IsReady())
+                if (hero.IsValidTarget(450) && iBilge && (iBilgeEnemyhp || iBilgemyhp) && ItemBilge.IsReady())
                 {
-                    _bilge.Cast(hero);
-
+                    ItemBilge.Cast(hero);
                 }
-                if (hero.IsValidTarget(450) && iBlade && (iBladeEnemyhp || iBlademyhp) && _blade.IsReady())
+                if (hero.IsValidTarget(450) && iBlade && (iBladeEnemyhp || iBlademyhp) && ItemBlade.IsReady())
                 {
-                    _blade.Cast(hero);
-
+                    ItemBlade.Cast(hero);
                 }
-                if (iTiamat && _tiamat.IsReady() && hero.IsValidTarget(_tiamat.Range))
+                if (iTiamat && ItemTiamat.IsReady() && hero.IsValidTarget(ItemTiamat.Range))
                 {
-                    _tiamat.Cast();
-
+                    ItemTiamat.Cast();
                 }
-                if (iHydra && _hydra.IsReady() && hero.IsValidTarget(_hydra.Range))
+                if (iHydra && ItemHydra.IsReady() && hero.IsValidTarget(ItemHydra.Range))
                 {
-                    _hydra.Cast();
-
+                    ItemHydra.Cast();
                 }
-                if (iOmenenemys && iOmen && _rand.IsReady())
+                if (iOmenenemys && iOmen && ItemRand.IsReady())
                 {
-                    _rand.Cast();
-
+                    ItemRand.Cast();
                 }
             }
             var ilotis = Config.Item("lotis").GetValue<bool>();
@@ -959,23 +944,23 @@ namespace D_Jarvan
                 foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly || hero.IsMe))
                 {
                     if (hero.Health <= (hero.MaxHealth*(Config.Item("lotisminhp").GetValue<Slider>().Value)/100) &&
-                        hero.Distance(_player.ServerPosition) <= _lotis.Range && _lotis.IsReady())
-                        _lotis.Cast();
+                        hero.Distance(Player.ServerPosition) <= ItemLotis.Range && ItemLotis.IsReady())
+                        ItemLotis.Cast();
                 }
             }
         }
 
         private static void Usepotion()
         {
-            var mobs = MinionManager.GetMinions(_player.ServerPosition, Q.Range,
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range,
                 MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             var iusehppotion = Config.Item("usehppotions").GetValue<bool>();
-            var iusepotionhp = _player.Health <=
-                               (_player.MaxHealth*(Config.Item("usepotionhp").GetValue<Slider>().Value)/100);
+            var iusepotionhp = Player.Health <=
+                               (Player.MaxHealth*(Config.Item("usepotionhp").GetValue<Slider>().Value)/100);
             var iusemppotion = Config.Item("usemppotions").GetValue<bool>();
-            var iusepotionmp = _player.Mana <=
-                               (_player.MaxMana*(Config.Item("usepotionmp").GetValue<Slider>().Value)/100);
+            var iusepotionmp = Player.Mana <=
+                               (Player.MaxMana*(Config.Item("usepotionmp").GetValue<Slider>().Value)/100);
             if (ObjectManager.Player.InFountain() || ObjectManager.Player.HasBuff("Recall")) return;
 
             if (ObjectManager.Player.CountEnemiesInRange(800) > 0 ||
@@ -1035,19 +1020,19 @@ namespace D_Jarvan
         {
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy))
             {
-                var igniteDmg = _player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
+                var igniteDmg = Player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
                 if (hero.IsValidTarget(600) && Config.Item("UseIgnitekill").GetValue<bool>() &&
                     _igniteSlot != SpellSlot.Unknown &&
-                    _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
+                    Player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
                 {
                     if (igniteDmg > hero.Health)
                     {
-                        _player.Spellbook.CastSpell(_igniteSlot, hero);
+                        Player.Spellbook.CastSpell(_igniteSlot, hero);
                     }
                 }
                 if (Q.IsReady() && Config.Item("UseQM").GetValue<bool>())
                 {
-                    if (hero != null && Q.GetDamage(hero) > hero.Health && _player.Distance(hero) <= Q.Range)
+                    if (hero != null && Q.GetDamage(hero) > hero.Health && Player.Distance(hero) <= Q.Range)
                     {
                         Q.Cast(hero, Packets());
                     }
@@ -1064,10 +1049,10 @@ namespace D_Jarvan
 
         private static void Forest()
         {
-            var manacheck = _player.Mana >
-                            _player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
-                            _player.Spellbook.GetSpell(SpellSlot.E).ManaCost;
-            _player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            var manacheck = Player.Mana >
+                            Player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
+                            Player.Spellbook.GetSpell(SpellSlot.E).ManaCost;
+            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             if (Config.Item("UseEQF").GetValue<bool>() && Q.IsReady() && E.IsReady() && manacheck)
@@ -1076,11 +1061,10 @@ namespace D_Jarvan
                 Q.Cast(Game.CursorPos, Packets());
             }
             if (Config.Item("UseWF").GetValue<bool>() && W.IsReady() && target != null &&
-                _player.Distance(target) < W.Range)
+                Player.Distance(target) < W.Range)
             {
                 W.Cast();
             }
-
         }
 
         private static void OnCreateObj(GameObject sender, EventArgs args)
@@ -1098,7 +1082,6 @@ namespace D_Jarvan
             {
                 // Game.PrintChat("Spell: " + name);
                 _haveulti = true;
-                return;
             }
         }
 
@@ -1113,7 +1096,6 @@ namespace D_Jarvan
             if (obj != null && obj.IsMe && obj.Name == "JarvanCataclysm_tar")
             {
                 _haveulti = false;
-                return;
             }
         }
 
@@ -1126,48 +1108,40 @@ namespace D_Jarvan
             {
                 if (Config.Item("Usesmite").GetValue<KeyBind>().Active)
                 {
-                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.68f, System.Drawing.Color.DarkOrange,
+                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.68f, Color.DarkOrange,
                         "Smite Is On");
                 }
                 else
-                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.68f, System.Drawing.Color.DarkRed,
+                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.68f, Color.DarkRed,
                         "Smite Is Off");
             }
 
             if (Config.Item("DrawQ").GetValue<bool>())
             {
-
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.White);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, Color.White);
             }
             if (Config.Item("DrawW").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.White);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, Color.White);
             }
             if (Config.Item("DrawE").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.White);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, Color.White);
             }
 
             if (Config.Item("DrawR").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.White);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, Color.White);
             }
             if (Config.Item("DrawQR").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range + R.Range, System.Drawing.Color.White);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range + R.Range, Color.White);
             }
             if (Config.Item("DrawEQF").GetValue<bool>())
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position,
-                    Q.Range + Config.Item("FlashDista").GetValue<Slider>().Value, System.Drawing.Color.White);
+                    Q.Range + Config.Item("FlashDista").GetValue<Slider>().Value, Color.White);
             }
         }
     }
 }
-     
-  
- 
-
-
-
-
