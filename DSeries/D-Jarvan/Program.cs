@@ -917,7 +917,7 @@ namespace D_Jarvan
                 var iBlademyhp = _player.Health <=
                                  (_player.MaxHealth*(Config.Item("Blademyhp").GetValue<Slider>().Value)/100);
                 var iOmen = Config.Item("Omen").GetValue<bool>();
-                var iOmenenemys = hero.CountEnemysInRange(450) >= Config.Item("Omenenemys").GetValue<Slider>().Value;
+                var iOmenenemys = hero.CountEnemiesInRange(350) >= Config.Item("Omenenemys").GetValue<Slider>().Value;
                 var iTiamat = Config.Item("Tiamat").GetValue<bool>();
                 var iHydra = Config.Item("Hydra").GetValue<bool>();
 
