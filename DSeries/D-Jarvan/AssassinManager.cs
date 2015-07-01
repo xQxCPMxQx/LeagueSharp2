@@ -43,7 +43,7 @@ namespace D_Jarvan
 
                 });
 
-            Program.Config.AddSubMenu(new Menu("Set Priority Targets", "MenuAssassin"));
+            Program.Config.AddSubMenu(new Menu(Program.ChampionName + " | Assassin Manager", "MenuAssassin"));
             Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("AssassinActive", "Active").SetValue(true));
             Program.Config.SubMenu("MenuAssassin")
                 .AddItem(new MenuItem("AssassinSearchRange", space + "Search Range"))
@@ -74,18 +74,11 @@ namespace D_Jarvan
 
             Program.Config.SubMenu("MenuAssassin").AddSubMenu(new Menu("Drawings", "Draw"));
 
-            Program.Config.SubMenu("MenuAssassin")
-                .SubMenu("Draw")
-                .AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, Color.GreenYellow)));
-            Program.Config.SubMenu("MenuAssassin")
-                .SubMenu("Draw")
-                .AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)));
-            Program.Config.SubMenu("MenuAssassin")
-                .SubMenu("Draw")
-                .AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
-            Program.Config.SubMenu("MenuAssassin")
-                .SubMenu("Draw")
-                .AddItem(new MenuItem("DrawStatus", "Show status on the screen").SetValue(true));
+            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, Color.GreenYellow)));
+            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)));
+            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
+            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawStatus", "Show status on the screen").SetValue(true));
+            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawSprite", "Show Selected Enemy").SetValue(true));
 
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
