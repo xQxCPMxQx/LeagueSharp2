@@ -46,7 +46,6 @@ namespace D_Jarvan
 
         internal static void Load()
         {
-            Notifications.AddNotification(String.Format("{0} Loaded", "sssss"), 4000);
             new Render.Sprite(Resources.selectedchampion, new Vector2())
             {
                 PositionUpdate = () => DrawPosition,
