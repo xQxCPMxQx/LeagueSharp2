@@ -23,7 +23,7 @@ namespace D_Jarvan
 
         private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis;
 
-        private static Menu _config;
+        public static Menu Config;
 
         private static Obj_AI_Hero _player;
 
@@ -73,218 +73,219 @@ namespace D_Jarvan
             _lotis = new Items.Item(3190, 590f);
 
             //D Jarvan
-            _config = new Menu("D-Jarvan", "D-Jarvan", true);
+            Config = new Menu("D-Jarvan", "D-Jarvan", true);
 
             //TargetSelector
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
-            _config.AddSubMenu(targetSelectorMenu);
+            Config.AddSubMenu(targetSelectorMenu);
 
+            new AssassinManager();
 
             //Orbwalker
-            _config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-            _orbwalker = new Orbwalking.Orbwalker(_config.SubMenu("Orbwalking"));
+            Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+            _orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
             //Combo
-            _config.AddSubMenu(new Menu("Combo", "Combo"));
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseIgnite", "Use Ignite")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite in target")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseQC", "Use Q")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseWC", "Use W")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseEC", "Use E")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseRC", "Use R(killable)")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseRE", "AutoR Min Targ")).SetValue(true);
-            _config.SubMenu("Combo")
+            Config.AddSubMenu(new Menu("Combo", "Combo"));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseIgnite", "Use Ignite")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite in target")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseQC", "Use Q")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseWC", "Use W")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseEC", "Use E")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseRC", "Use R(killable)")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseRE", "AutoR Min Targ")).SetValue(true);
+            Config.SubMenu("Combo")
                 .AddItem(new MenuItem("MinTargets", "Ult when>=min enemy(COMBO)").SetValue(new Slider(2, 1, 5)));
-            _config.SubMenu("Combo")
+            Config.SubMenu("Combo")
                 .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
-            _config.SubMenu("Combo")
+            Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ActiveComboEQR", "ComboEQ-R!").SetValue(new KeyBind("T".ToCharArray()[0],
                         KeyBindType.Press)));
-            _config.SubMenu("Combo")
+            Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboeqFlash", "ComboEQ- Flash!").SetValue(new KeyBind("H".ToCharArray()[0],
                         KeyBindType.Press)));
-            _config.SubMenu("Combo")
+            Config.SubMenu("Combo")
                 .AddItem(new MenuItem("FlashDista", "Flash Distance").SetValue(new Slider(700, 700, 1000)));
 
             //Items public static Int32 Tiamat = 3077, Hydra = 3074, Blade = 3153, Bilge = 3144, Rand = 3143, lotis = 3190;
-            _config.AddSubMenu(new Menu("items", "items"));
-            _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Tiamat", "Use Tiamat")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hydra", "Use Hydra")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
-            _config.SubMenu("items")
+            Config.AddSubMenu(new Menu("items", "items"));
+            Config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
+            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Tiamat", "Use Tiamat")).SetValue(true);
+            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hydra", "Use Hydra")).SetValue(true);
+            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
+            Config.SubMenu("items")
                 .SubMenu("Offensive")
                 .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items")
+            Config.SubMenu("items")
                 .SubMenu("Offensive")
                 .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
-            _config.SubMenu("items")
+            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
+            Config.SubMenu("items")
                 .SubMenu("Offensive")
                 .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items")
+            Config.SubMenu("items")
                 .SubMenu("Offensive")
                 .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
-            _config.SubMenu("items")
+            Config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
+            Config.SubMenu("items")
                 .SubMenu("Deffensive")
                 .AddItem(new MenuItem("Omen", "Use Randuin Omen"))
                 .SetValue(true);
-            _config.SubMenu("items")
+            Config.SubMenu("items")
                 .SubMenu("Deffensive")
                 .AddItem(new MenuItem("Omenenemys", "Randuin if enemys>").SetValue(new Slider(2, 1, 5)));
-            _config.SubMenu("items")
+            Config.SubMenu("items")
                 .SubMenu("Deffensive")
                 .AddItem(new MenuItem("lotis", "Use Iron Solari"))
                 .SetValue(true);
-            _config.SubMenu("items")
+            Config.SubMenu("items")
                 .SubMenu("Deffensive")
                 .AddItem(new MenuItem("lotisminhp", "Solari if Ally Hp<").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
-            _config.SubMenu("items")
+            Config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
+            Config.SubMenu("items")
                 .SubMenu("Potions")
                 .AddItem(new MenuItem("usehppotions", "Use Healt potion/Flask/Biscuit"))
                 .SetValue(true);
-            _config.SubMenu("items")
+            Config.SubMenu("items")
                 .SubMenu("Potions")
                 .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("items")
+            Config.SubMenu("items")
                 .SubMenu("Potions")
                 .AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit"))
                 .SetValue(true);
-            _config.SubMenu("items")
+            Config.SubMenu("items")
                 .SubMenu("Potions")
                 .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
 
             //Harass
-            _config.AddSubMenu(new Menu("Harass", "Harass"));
-            _config.SubMenu("Harass").AddItem(new MenuItem("UseQH", "Use Q")).SetValue(true);
-            _config.SubMenu("Harass").AddItem(new MenuItem("UseEH", "Use E")).SetValue(true);
-            _config.SubMenu("Harass").AddItem(new MenuItem("UseEQH", "Use EQ Combo")).SetValue(true);
-            _config.SubMenu("Harass")
+            Config.AddSubMenu(new Menu("Harass", "Harass"));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseQH", "Use Q")).SetValue(true);
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseEH", "Use E")).SetValue(true);
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseEQH", "Use EQ Combo")).SetValue(true);
+            Config.SubMenu("Harass")
                 .AddItem(new MenuItem("UseEQHHP", "EQ If Your Hp > ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("Harass").AddItem(new MenuItem("UseItemsharass", "Use Tiamat/Hydra")).SetValue(true);
-            _config.SubMenu("Harass")
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseItemsharass", "Use Tiamat/Hydra")).SetValue(true);
+            Config.SubMenu("Harass")
                 .AddItem(new MenuItem("harassmana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Harass")
+            Config.SubMenu("Harass")
                 .AddItem(
                     new MenuItem("harasstoggle", "AutoHarass (toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
-            _config.SubMenu("Harass")
+            Config.SubMenu("Harass")
                 .AddItem(
                     new MenuItem("ActiveHarass", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             //LaneClear
-            _config.AddSubMenu(new Menu("Farm", "Farm"));
-            _config.SubMenu("Farm").AddSubMenu(new Menu("LaneFarm", "LaneFarm"));
-            _config.SubMenu("Farm")
+            Config.AddSubMenu(new Menu("Farm", "Farm"));
+            Config.SubMenu("Farm").AddSubMenu(new Menu("LaneFarm", "LaneFarm"));
+            Config.SubMenu("Farm")
                 .SubMenu("LaneFarm")
                 .AddItem(new MenuItem("UseItemslane", "Use Items in LaneClear"))
                 .SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseQL", "Q LaneClear")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseEL", "E LaneClear")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseWL", "W LaneClear")).SetValue(true);
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseQL", "Q LaneClear")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseEL", "E LaneClear")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseWL", "W LaneClear")).SetValue(true);
+            Config.SubMenu("Farm")
                 .SubMenu("LaneFarm")
                 .AddItem(new MenuItem("UseWLHP", "use W if Hp% <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm")
                 .SubMenu("LaneFarm")
                 .AddItem(new MenuItem("lanemana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm")
                 .SubMenu("LaneFarm")
                 .AddItem(
                     new MenuItem("Activelane", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
-            _config.SubMenu("Farm").AddSubMenu(new Menu("LastHit", "LastHit"));
-            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseQLH", "Q LastHit")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseELH", "E LastHit")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseWLH", "W LaneClear")).SetValue(true);
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm").AddSubMenu(new Menu("LastHit", "LastHit"));
+            Config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseQLH", "Q LastHit")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseELH", "E LastHit")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseWLH", "W LaneClear")).SetValue(true);
+            Config.SubMenu("Farm")
                 .SubMenu("LastHit")
                 .AddItem(new MenuItem("UseWLHHP", "use W if Hp% <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm")
                 .SubMenu("LastHit")
                 .AddItem(new MenuItem("lastmana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm")
                 .SubMenu("LastHit")
                 .AddItem(
                     new MenuItem("ActiveLast", "LastHit!").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
 
-            _config.SubMenu("Farm").AddSubMenu(new Menu("Jungle", "Jungle"));
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm").AddSubMenu(new Menu("Jungle", "Jungle"));
+            Config.SubMenu("Farm")
                 .SubMenu("Jungle")
                 .AddItem(new MenuItem("UseItemsjungle", "Use Items in jungle"))
                 .SetValue(true);
 
-            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseQJ", "Q Jungle")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseEJ", "E Jungle")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseWJ", "W Jungle")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem(" UseEQJ", "EQ In Jungle")).SetValue(true);
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseQJ", "Q Jungle")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseEJ", "E Jungle")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseWJ", "W Jungle")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem(" UseEQJ", "EQ In Jungle")).SetValue(true);
+            Config.SubMenu("Farm")
                 .SubMenu("Jungle")
                 .AddItem(new MenuItem("UseWJHP", "use W if Hp% <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm")
                 .SubMenu("Jungle")
                 .AddItem(new MenuItem("junglemana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm")
+            Config.SubMenu("Farm")
                 .SubMenu("Jungle")
                 .AddItem(
                     new MenuItem("ActiveJungle", "Jungle!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             //Smite ActiveJungle
-            _config.AddSubMenu(new Menu("Smite", "Smite"));
-            _config.SubMenu("Smite")
+            Config.AddSubMenu(new Menu("Smite", "Smite"));
+            Config.SubMenu("Smite")
                 .AddItem(
                     new MenuItem("Usesmite", "Use Smite(toggle)").SetValue(new KeyBind("H".ToCharArray()[0],
                         KeyBindType.Toggle)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue Early ")).SetValue(true);
-            _config.SubMenu("Smite")
+            Config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue Early ")).SetValue(true);
+            Config.SubMenu("Smite")
                 .AddItem(new MenuItem("manaJ", "Smite Blue Early if MP% <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red Early ")).SetValue(true);
-            _config.SubMenu("Smite")
+            Config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red Early ")).SetValue(true);
+            Config.SubMenu("Smite")
                 .AddItem(new MenuItem("healthJ", "Smite Red Early if HP% <").SetValue(new Slider(35, 1, 100)));
 
             //Forest
-            _config.AddSubMenu(new Menu("Forest Gump", "Forest Gump"));
-            _config.SubMenu("Forest Gump").AddItem(new MenuItem("UseEQF", "Use EQ in Mouse ")).SetValue(true);
-            _config.SubMenu("Forest Gump").AddItem(new MenuItem("UseWF", "Use W ")).SetValue(true);
-            _config.SubMenu("Forest Gump")
+            Config.AddSubMenu(new Menu("Forest Gump", "Forest Gump"));
+            Config.SubMenu("Forest Gump").AddItem(new MenuItem("UseEQF", "Use EQ in Mouse ")).SetValue(true);
+            Config.SubMenu("Forest Gump").AddItem(new MenuItem("UseWF", "Use W ")).SetValue(true);
+            Config.SubMenu("Forest Gump")
                 .AddItem(
                     new MenuItem("Forest", "Active Forest Gump!").SetValue(new KeyBind("Z".ToCharArray()[0],
                         KeyBindType.Press)));
 
 
             //Misc
-            _config.AddSubMenu(new Menu("Misc", "Misc"));
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseIgnitekill", "Use Ignite KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseQM", "Use Q KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseRM", "Use R KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("Gap_W", "W GapClosers")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseEQInt", "EQ to Interrupt")).SetValue(true);
-            // _config.SubMenu("Misc").AddItem(new MenuItem("MinTargetsgap", "min enemy >=(GapClosers)").SetValue(new Slider(2, 1, 5)));
-            _config.SubMenu("Misc").AddItem(new MenuItem("skinjar", "Use Custom Skin").SetValue(false));
-            _config.SubMenu("Misc").AddItem(new MenuItem("skinjarvan", "Skin Changer").SetValue(new Slider(4, 1, 7)));
-            _config.SubMenu("Misc").AddItem(new MenuItem("usePackets", "Usepackes")).SetValue(true);
+            Config.AddSubMenu(new Menu("Misc", "Misc"));
+            Config.SubMenu("Misc").AddItem(new MenuItem("UseIgnitekill", "Use Ignite KillSteal")).SetValue(true);
+            Config.SubMenu("Misc").AddItem(new MenuItem("UseQM", "Use Q KillSteal")).SetValue(true);
+            Config.SubMenu("Misc").AddItem(new MenuItem("UseRM", "Use R KillSteal")).SetValue(true);
+            Config.SubMenu("Misc").AddItem(new MenuItem("Gap_W", "W GapClosers")).SetValue(true);
+            Config.SubMenu("Misc").AddItem(new MenuItem("UseEQInt", "EQ to Interrupt")).SetValue(true);
+            // Config.SubMenu("Misc").AddItem(new MenuItem("MinTargetsgap", "min enemy >=(GapClosers)").SetValue(new Slider(2, 1, 5)));
+            Config.SubMenu("Misc").AddItem(new MenuItem("skinjar", "Use Custom Skin").SetValue(false));
+            Config.SubMenu("Misc").AddItem(new MenuItem("skinjarvan", "Skin Changer").SetValue(new Slider(4, 1, 7)));
+            Config.SubMenu("Misc").AddItem(new MenuItem("usePackets", "Usepackes")).SetValue(true);
 
             //Drawings
-            _config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            _config.SubMenu("Drawings").AddItem(new MenuItem("DrawQ", "Draw Q")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("DrawQR", "Draw EQ-R")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("DrawEQF", "Draw EQ-Flash")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("Drawsmite", "Draw smite")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
-            _config.SubMenu("Drawings")
+            Config.AddSubMenu(new Menu("Drawings", "Drawings"));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQ", "Draw Q")).SetValue(true);
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQR", "Draw EQ-R")).SetValue(true);
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEQF", "Draw EQ-Flash")).SetValue(true);
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Drawsmite", "Draw smite")).SetValue(true);
+            Config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
+            Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
-            _config.SubMenu("Drawings")
+            Config.SubMenu("Drawings")
                 .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
 
-            _config.AddToMainMenu();
+            Config.AddToMainMenu();
             Game.PrintChat("<font color='#881df2'>D-Jarvan by Diabaths</font> Loaded.");
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -292,10 +293,10 @@ namespace D_Jarvan
             Obj_AI_Hero.OnDelete += OnDeleteObj;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
-            if (_config.Item("skinjar").GetValue<bool>())
+            if (Config.Item("skinjar").GetValue<bool>())
             {
-                GenModelPacket(_player.ChampionName, _config.Item("skinjarvan").GetValue<Slider>().Value);
-                _lastSkin = _config.Item("skinjarvan").GetValue<Slider>().Value;
+                GenModelPacket(_player.ChampionName, Config.Item("skinjarvan").GetValue<Slider>().Value);
+                _lastSkin = Config.Item("skinjarvan").GetValue<Slider>().Value;
             }
             Game.PrintChat(
                 "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
@@ -303,51 +304,51 @@ namespace D_Jarvan
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (_config.Item("Forest").GetValue<KeyBind>().Active)
+            if (Config.Item("Forest").GetValue<KeyBind>().Active)
             {
                 Forest();
             }
-            if (_config.Item("skinjar").GetValue<bool>() && SkinChanged())
+            if (Config.Item("skinjar").GetValue<bool>() && SkinChanged())
             {
-                GenModelPacket(_player.ChampionName, _config.Item("skinjarvan").GetValue<Slider>().Value);
-                _lastSkin = _config.Item("skinjarvan").GetValue<Slider>().Value;
+                GenModelPacket(_player.ChampionName, Config.Item("skinjarvan").GetValue<Slider>().Value);
+                _lastSkin = Config.Item("skinjarvan").GetValue<Slider>().Value;
             }
-            if (_config.Item("ActiveCombo").GetValue<KeyBind>().Active)
+            if (Config.Item("ActiveCombo").GetValue<KeyBind>().Active)
             {
                 Combo();
             }
-            if (_config.Item("ActiveComboEQR").GetValue<KeyBind>().Active)
+            if (Config.Item("ActiveComboEQR").GetValue<KeyBind>().Active)
             {
                 ComboEqr();
             }
-            if ((_config.Item("ActiveHarass").GetValue<KeyBind>().Active ||
-                 _config.Item("harasstoggle").GetValue<KeyBind>().Active) &&
-                (100*(_player.Mana/_player.MaxMana)) > _config.Item("harassmana").GetValue<Slider>().Value)
+            if ((Config.Item("ActiveHarass").GetValue<KeyBind>().Active ||
+                 Config.Item("harasstoggle").GetValue<KeyBind>().Active) &&
+                (100*(_player.Mana/_player.MaxMana)) > Config.Item("harassmana").GetValue<Slider>().Value)
             {
                 Harass();
 
             }
-            if (_config.Item("Activelane").GetValue<KeyBind>().Active &&
-                (100*(_player.Mana/_player.MaxMana)) > _config.Item("lanemana").GetValue<Slider>().Value)
+            if (Config.Item("Activelane").GetValue<KeyBind>().Active &&
+                (100*(_player.Mana/_player.MaxMana)) > Config.Item("lanemana").GetValue<Slider>().Value)
             {
                 Laneclear();
             }
-            if (_config.Item("ActiveJungle").GetValue<KeyBind>().Active &&
-                (100*(_player.Mana/_player.MaxMana)) > _config.Item("junglemana").GetValue<Slider>().Value)
+            if (Config.Item("ActiveJungle").GetValue<KeyBind>().Active &&
+                (100*(_player.Mana/_player.MaxMana)) > Config.Item("junglemana").GetValue<Slider>().Value)
             {
                 JungleClear();
             }
-            if (_config.Item("ActiveLast").GetValue<KeyBind>().Active &&
-                (100*(_player.Mana/_player.MaxMana)) > _config.Item("lastmana").GetValue<Slider>().Value)
+            if (Config.Item("ActiveLast").GetValue<KeyBind>().Active &&
+                (100*(_player.Mana/_player.MaxMana)) > Config.Item("lastmana").GetValue<Slider>().Value)
             {
                 LastHit();
             }
             Usepotion();
-            if (_config.Item("Usesmite").GetValue<KeyBind>().Active)
+            if (Config.Item("Usesmite").GetValue<KeyBind>().Active)
             {
                 Smiteuse();
             }
-            if (_config.Item("ComboeqFlash").GetValue<KeyBind>().Active)
+            if (Config.Item("ComboeqFlash").GetValue<KeyBind>().Active)
             {
                 ComboeqFlash();
             }
@@ -362,7 +363,7 @@ namespace D_Jarvan
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (_w.IsReady() && gapcloser.Sender.IsValidTarget(_w.Range) && _config.Item("Gap_W").GetValue<bool>())
+            if (_w.IsReady() && gapcloser.Sender.IsValidTarget(_w.Range) && Config.Item("Gap_W").GetValue<bool>())
             {
                 _w.Cast(gapcloser.Sender, Packets());
             }
@@ -370,7 +371,7 @@ namespace D_Jarvan
 
         private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
         {
-            if (unit.IsValidTarget(_q.Range) && _config.Item("UseEQInt").GetValue<bool>())
+            if (unit.IsValidTarget(_q.Range) && Config.Item("UseEQInt").GetValue<bool>())
             {
                 if (_e.IsReady() && _q.IsReady())
                 {
@@ -391,7 +392,7 @@ namespace D_Jarvan
 
         private static bool SkinChanged()
         {
-            return (_config.Item("skinjarvan").GetValue<Slider>().Value != _lastSkin);
+            return (Config.Item("skinjarvan").GetValue<Slider>().Value != _lastSkin);
         }
 
         private static float ComboDamage(Obj_AI_Base enemy)
@@ -424,7 +425,7 @@ namespace D_Jarvan
         {
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy))
             {
-                var usesmite = _config.Item("smitecombo").GetValue<bool>();
+                var usesmite = Config.Item("smitecombo").GetValue<bool>();
                 var itemscheck = SmiteBlue.Any(i => Items.HasItem(i)) || SmiteRed.Any(i => Items.HasItem(i));
                 if (itemscheck && usesmite &&
                     ObjectManager.Player.Spellbook.CanUseSpell(_smiteSlot) == SpellState.Ready &&
@@ -434,17 +435,52 @@ namespace D_Jarvan
                 }
             }
         }
+        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        {
+            if (Math.Abs(vDefaultRange) < 0.00001)
+                vDefaultRange = _e.Range;
+
+            if (!Config.Item("AssassinActive").GetValue<bool>())
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+
+            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+            var vEnemy =
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        enemy =>
+                            enemy.Team != _player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            Config.Item("Assassin" + enemy.ChampionName) != null &&
+                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                            _player.Distance(enemy) < assassinRange);
+
+            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+            {
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+            }
+
+            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            Obj_AI_Hero t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
+        }
 
         private static void Combo()
         {
-            var useQ = _config.Item("UseQC").GetValue<bool>();
-            var useW = _config.Item("UseWC").GetValue<bool>();
-            var useE = _config.Item("UseEC").GetValue<bool>();
-            var useR = _config.Item("UseRC").GetValue<bool>();
-            var autoR = _config.Item("UseRE").GetValue<bool>();
-            var t = TargetSelector.GetTarget(_e.Range, TargetSelector.DamageType.Magical);
+            var useQ = Config.Item("UseQC").GetValue<bool>();
+            var useW = Config.Item("UseWC").GetValue<bool>();
+            var useE = Config.Item("UseEC").GetValue<bool>();
+            var useR = Config.Item("UseRC").GetValue<bool>();
+            var autoR = Config.Item("UseRE").GetValue<bool>();
+            //var t = TargetSelector.GetTarget(_e.Range, TargetSelector.DamageType.Magical);
+            var t = GetTarget(_e.Range, TargetSelector.DamageType.Magical);
+
+
             Smiteontarget();
-            if (t.IsValidTarget(600) && _config.Item("UseIgnite").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
+            if (t.IsValidTarget(600) && Config.Item("UseIgnite").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
                 _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {
                 if (ComboDamage(t) > t.Health)
@@ -485,7 +521,7 @@ namespace D_Jarvan
             if (_r.IsReady() && autoR && !_haveulti)
             {
                 if (GetNumberHitByR(t) >=
-                    _config.Item("MinTargets").GetValue<Slider>().Value && t.IsValidTarget(_r.Range))
+                    Config.Item("MinTargets").GetValue<Slider>().Value && t.IsValidTarget(_r.Range))
                     _r.Cast(t, Packets(), true);
             }
             UseItemes();
@@ -524,7 +560,7 @@ namespace D_Jarvan
                 _e.Cast(t.ServerPosition, Packets());
                 _q.Cast(t.ServerPosition, Packets());
             }
-            if (t.IsValidTarget(600) && _config.Item("UseIgnite").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
+            if (t.IsValidTarget(600) && Config.Item("UseIgnite").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
                 _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {
                 if (ComboDamage(t) > t.Health)
@@ -547,11 +583,11 @@ namespace D_Jarvan
         private static void Harass()
         {
             var target = TargetSelector.GetTarget(_e.Range, TargetSelector.DamageType.Magical);
-            var useQ = _config.Item("UseQH").GetValue<bool>();
-            var useE = _config.Item("UseEH").GetValue<bool>();
-            var useEq = _config.Item("UseEQH").GetValue<bool>();
-            var useEqhp = (100*(_player.Health/_player.MaxHealth)) > _config.Item("UseEQHHP").GetValue<Slider>().Value;
-            var useItemsH = _config.Item("UseItemsharass").GetValue<bool>();
+            var useQ = Config.Item("UseQH").GetValue<bool>();
+            var useE = Config.Item("UseEH").GetValue<bool>();
+            var useEq = Config.Item("UseEQH").GetValue<bool>();
+            var useEqhp = (100*(_player.Health/_player.MaxHealth)) > Config.Item("UseEQHHP").GetValue<Slider>().Value;
+            var useItemsH = Config.Item("UseItemsharass").GetValue<bool>();
             if (useEqhp && useEq && _q.IsReady() && _e.IsReady())
             {
                 var t = TargetSelector.GetTarget(_e.Range, TargetSelector.DamageType.Magical);
@@ -584,7 +620,7 @@ namespace D_Jarvan
 
         private static void ComboeqFlash()
         {
-            var flashDista = _config.Item("FlashDista").GetValue<Slider>().Value;
+            var flashDista = Config.Item("FlashDista").GetValue<Slider>().Value;
             var manacheck = _player.Mana >
                             _player.Spellbook.GetSpell(SpellSlot.Q).ManaCost +
                             _player.Spellbook.GetSpell(SpellSlot.E).ManaCost;
@@ -626,11 +662,11 @@ namespace D_Jarvan
                 MinionTypes.Ranged);
             var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _e.Range + _e.Width,
                 MinionTypes.All);
-            var useItemsl = _config.Item("UseItemslane").GetValue<bool>();
-            var useQl = _config.Item("UseQL").GetValue<bool>();
-            var useEl = _config.Item("UseEL").GetValue<bool>();
-            var useWl = _config.Item("UseWL").GetValue<bool>();
-            var usewhp = (100*(_player.Health/_player.MaxHealth)) < _config.Item("UseWLHP").GetValue<Slider>().Value;
+            var useItemsl = Config.Item("UseItemslane").GetValue<bool>();
+            var useQl = Config.Item("UseQL").GetValue<bool>();
+            var useEl = Config.Item("UseEL").GetValue<bool>();
+            var useWl = Config.Item("UseWL").GetValue<bool>();
+            var usewhp = (100*(_player.Health/_player.MaxHealth)) < Config.Item("UseWLHP").GetValue<Slider>().Value;
 
             if (_q.IsReady() && useQl)
             {
@@ -692,10 +728,10 @@ namespace D_Jarvan
         private static void LastHit()
         {
             var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _q.Range, MinionTypes.All);
-            var useQ = _config.Item("UseQLH").GetValue<bool>();
-            var useW = _config.Item("UseWLH").GetValue<bool>();
-            var useE = _config.Item("UseELH").GetValue<bool>();
-            var usewhp = (100*(_player.Health/_player.MaxHealth)) < _config.Item("UseWLHHP").GetValue<Slider>().Value;
+            var useQ = Config.Item("UseQLH").GetValue<bool>();
+            var useW = Config.Item("UseWLH").GetValue<bool>();
+            var useE = Config.Item("UseELH").GetValue<bool>();
+            var usewhp = (100*(_player.Health/_player.MaxHealth)) < Config.Item("UseWLHHP").GetValue<Slider>().Value;
             foreach (var minion in allMinions)
             {
                 if (useQ && _q.IsReady() && _player.Distance(minion) < _q.Range &&
@@ -722,12 +758,12 @@ namespace D_Jarvan
             var mobs = MinionManager.GetMinions(_player.ServerPosition, _q.Range,
                 MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-            var useItemsJ = _config.Item("UseItemsjungle").GetValue<bool>();
-            var useQ = _config.Item("UseQJ").GetValue<bool>();
-            var useW = _config.Item("UseWJ").GetValue<bool>();
-            var useE = _config.Item("UseEJ").GetValue<bool>();
-            var useEq = _config.Item(" UseEQJ").GetValue<bool>();
-            var usewhp = (100*(_player.Health/_player.MaxHealth)) < _config.Item("UseWJHP").GetValue<Slider>().Value;
+            var useItemsJ = Config.Item("UseItemsjungle").GetValue<bool>();
+            var useQ = Config.Item("UseQJ").GetValue<bool>();
+            var useW = Config.Item("UseWJ").GetValue<bool>();
+            var useE = Config.Item("UseEJ").GetValue<bool>();
+            var useEq = Config.Item(" UseEQJ").GetValue<bool>();
+            var usewhp = (100*(_player.Health/_player.MaxHealth)) < Config.Item("UseWJHP").GetValue<Slider>().Value;
 
             if (mobs.Count > 0)
             {
@@ -809,7 +845,7 @@ namespace D_Jarvan
 
         private static bool Packets()
         {
-            return _config.Item("usePackets").GetValue<bool>();
+            return Config.Item("usePackets").GetValue<bool>();
         }
 
         private static int GetSmiteDmg()
@@ -823,12 +859,12 @@ namespace D_Jarvan
         //New map Monsters Name By SKO
         private static void Smiteuse()
         {
-            var jungle = _config.Item("ActiveJungle").GetValue<KeyBind>().Active;
+            var jungle = Config.Item("ActiveJungle").GetValue<KeyBind>().Active;
             if (ObjectManager.Player.Spellbook.CanUseSpell(_smiteSlot) != SpellState.Ready) return;
-            var useblue = _config.Item("Useblue").GetValue<bool>();
-            var usered = _config.Item("Usered").GetValue<bool>();
-            var health = (100 * (_player.Mana / _player.MaxMana)) < _config.Item("healthJ").GetValue<Slider>().Value;
-            var mana = (100 * (_player.Mana / _player.MaxMana)) < _config.Item("manaJ").GetValue<Slider>().Value;
+            var useblue = Config.Item("Useblue").GetValue<bool>();
+            var usered = Config.Item("Usered").GetValue<bool>();
+            var health = (100 * (_player.Mana / _player.MaxMana)) < Config.Item("healthJ").GetValue<Slider>().Value;
+            var mana = (100 * (_player.Mana / _player.MaxMana)) < Config.Item("manaJ").GetValue<Slider>().Value;
             string[] jungleMinions;
             if (Utility.Map.GetMap().Type.Equals(Utility.Map.MapType.TwistedTreeline))
             {
@@ -879,20 +915,20 @@ namespace D_Jarvan
         {
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy))
             {
-                var iBilge = _config.Item("Bilge").GetValue<bool>();
+                var iBilge = Config.Item("Bilge").GetValue<bool>();
                 var iBilgeEnemyhp = hero.Health <=
-                                    (hero.MaxHealth * (_config.Item("BilgeEnemyhp").GetValue<Slider>().Value) / 100);
+                                    (hero.MaxHealth * (Config.Item("BilgeEnemyhp").GetValue<Slider>().Value) / 100);
                 var iBilgemyhp = _player.Health <=
-                                 (_player.MaxHealth*(_config.Item("Bilgemyhp").GetValue<Slider>().Value)/100);
-                var iBlade = _config.Item("Blade").GetValue<bool>();
+                                 (_player.MaxHealth*(Config.Item("Bilgemyhp").GetValue<Slider>().Value)/100);
+                var iBlade = Config.Item("Blade").GetValue<bool>();
                 var iBladeEnemyhp = hero.Health <=
-                                    (hero.MaxHealth * (_config.Item("BladeEnemyhp").GetValue<Slider>().Value) / 100);
+                                    (hero.MaxHealth * (Config.Item("BladeEnemyhp").GetValue<Slider>().Value) / 100);
                 var iBlademyhp = _player.Health <=
-                                 (_player.MaxHealth*(_config.Item("Blademyhp").GetValue<Slider>().Value)/100);
-                var iOmen = _config.Item("Omen").GetValue<bool>();
-                var iOmenenemys = hero.CountEnemysInRange(450) >= _config.Item("Omenenemys").GetValue<Slider>().Value;
-                var iTiamat = _config.Item("Tiamat").GetValue<bool>();
-                var iHydra = _config.Item("Hydra").GetValue<bool>();
+                                 (_player.MaxHealth*(Config.Item("Blademyhp").GetValue<Slider>().Value)/100);
+                var iOmen = Config.Item("Omen").GetValue<bool>();
+                var iOmenenemys = hero.CountEnemysInRange(450) >= Config.Item("Omenenemys").GetValue<Slider>().Value;
+                var iTiamat = Config.Item("Tiamat").GetValue<bool>();
+                var iHydra = Config.Item("Hydra").GetValue<bool>();
 
 
                 if (hero.IsValidTarget(450) && iBilge && (iBilgeEnemyhp || iBilgemyhp) && _bilge.IsReady())
@@ -921,12 +957,12 @@ namespace D_Jarvan
 
                 }
             }
-            var ilotis = _config.Item("lotis").GetValue<bool>();
+            var ilotis = Config.Item("lotis").GetValue<bool>();
             if (ilotis)
             {
                 foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly || hero.IsMe))
                 {
-                    if (hero.Health <= (hero.MaxHealth*(_config.Item("lotisminhp").GetValue<Slider>().Value)/100) &&
+                    if (hero.Health <= (hero.MaxHealth*(Config.Item("lotisminhp").GetValue<Slider>().Value)/100) &&
                         hero.Distance(_player.ServerPosition) <= _lotis.Range && _lotis.IsReady())
                         _lotis.Cast();
                 }
@@ -937,16 +973,16 @@ namespace D_Jarvan
             var mobs = MinionManager.GetMinions(_player.ServerPosition, _q.Range,
                 MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-            var iusehppotion = _config.Item("usehppotions").GetValue<bool>();
+            var iusehppotion = Config.Item("usehppotions").GetValue<bool>();
             var iusepotionhp = _player.Health <=
-                               (_player.MaxHealth * (_config.Item("usepotionhp").GetValue<Slider>().Value) / 100);
-            var iusemppotion = _config.Item("usemppotions").GetValue<bool>();
+                               (_player.MaxHealth * (Config.Item("usepotionhp").GetValue<Slider>().Value) / 100);
+            var iusemppotion = Config.Item("usemppotions").GetValue<bool>();
             var iusepotionmp = _player.Mana <=
-                               (_player.MaxMana * (_config.Item("usepotionmp").GetValue<Slider>().Value) / 100);
+                               (_player.MaxMana * (Config.Item("usepotionmp").GetValue<Slider>().Value) / 100);
             if (ObjectManager.Player.InFountain() || ObjectManager.Player.HasBuff("Recall")) return;
 
             if (ObjectManager.Player.CountEnemiesInRange(800) > 0 ||
-                (mobs.Count > 0 && _config.Item("ActiveJungle").GetValue<KeyBind>().Active &&(Items.HasItem(1039) ||
+                (mobs.Count > 0 && Config.Item("ActiveJungle").GetValue<KeyBind>().Active &&(Items.HasItem(1039) ||
                   SmiteRed.Any(i => Items.HasItem(i)) || SmitePurple.Any(i => Items.HasItem(i)) ||
                   SmiteBlue.Any(i => Items.HasItem(i)) || SmiteGrey.Any(i => Items.HasItem(i))
                      )))
@@ -997,7 +1033,7 @@ namespace D_Jarvan
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy))
             {
                 var igniteDmg = _player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
-                if (hero.IsValidTarget(600) && _config.Item("UseIgnitekill").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
+                if (hero.IsValidTarget(600) && Config.Item("UseIgnitekill").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
                     _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
                 {
                     if (igniteDmg > hero.Health)
@@ -1005,14 +1041,14 @@ namespace D_Jarvan
                         _player.Spellbook.CastSpell(_igniteSlot, hero);
                     }
                 }
-                if (_q.IsReady() && _config.Item("UseQM").GetValue<bool>())
+                if (_q.IsReady() && Config.Item("UseQM").GetValue<bool>())
                 {
                     if (hero != null && _q.GetDamage(hero) > hero.Health && _player.Distance(hero) <= _q.Range)
                     {
                         _q.Cast(hero, Packets());
                     }
                 }
-                if (_r.IsReady() && _config.Item("UseRM").GetValue<bool>())
+                if (_r.IsReady() && Config.Item("UseRM").GetValue<bool>())
                 {
                     if (hero != null)
                         if (!hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("Undying Rage") &&
@@ -1030,12 +1066,12 @@ namespace D_Jarvan
             _player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             var target = TargetSelector.GetTarget(_e.Range, TargetSelector.DamageType.Magical);
 
-            if (_config.Item("UseEQF").GetValue<bool>() && _q.IsReady() && _e.IsReady() && manacheck)
+            if (Config.Item("UseEQF").GetValue<bool>() && _q.IsReady() && _e.IsReady() && manacheck)
             {
                 _e.Cast(Game.CursorPos, Packets());
                 _q.Cast(Game.CursorPos, Packets());
             }
-            if (_config.Item("UseWF").GetValue<bool>() && _w.IsReady() && target != null &&
+            if (Config.Item("UseWF").GetValue<bool>() && _w.IsReady() && target != null &&
                 _player.Distance(target) < _w.Range)
             {
                 _w.Cast();
@@ -1079,9 +1115,9 @@ namespace D_Jarvan
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (_config.Item("Drawsmite").GetValue<bool>())
+            if (Config.Item("Drawsmite").GetValue<bool>())
             {
-                if (_config.Item("Usesmite").GetValue<KeyBind>().Active)
+                if (Config.Item("Usesmite").GetValue<KeyBind>().Active)
                 {
                     Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.68f, System.Drawing.Color.DarkOrange,
                         "Smite Is On");
@@ -1090,73 +1126,73 @@ namespace D_Jarvan
                     Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.68f, System.Drawing.Color.DarkRed,
                         "Smite Is Off");
             }
-            if (_config.Item("CircleLag").GetValue<bool>())
+            if (Config.Item("CircleLag").GetValue<bool>())
             {
-                if (_config.Item("DrawEQF").GetValue<bool>())
+                if (Config.Item("DrawEQF").GetValue<bool>())
                 {
                     Utility.DrawCircle(ObjectManager.Player.Position,
-                        _q.Range + _config.Item("FlashDista").GetValue<Slider>().Value, System.Drawing.Color.Gray,
-                        _config.Item("CircleThickness").GetValue<Slider>().Value,
-                        _config.Item("CircleQuality").GetValue<Slider>().Value);
+                        _q.Range + Config.Item("FlashDista").GetValue<Slider>().Value, System.Drawing.Color.Gray,
+                        Config.Item("CircleThickness").GetValue<Slider>().Value,
+                        Config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
-                if (_config.Item("DrawQ").GetValue<bool>())
+                if (Config.Item("DrawQ").GetValue<bool>())
                 {
                     Utility.DrawCircle(ObjectManager.Player.Position, _q.Range, System.Drawing.Color.Gray,
-                        _config.Item("CircleThickness").GetValue<Slider>().Value,
-                        _config.Item("CircleQuality").GetValue<Slider>().Value);
+                        Config.Item("CircleThickness").GetValue<Slider>().Value,
+                        Config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
-                if (_config.Item("DrawW").GetValue<bool>())
+                if (Config.Item("DrawW").GetValue<bool>())
                 {
                     Utility.DrawCircle(ObjectManager.Player.Position, _w.Range, System.Drawing.Color.Gray,
-                        _config.Item("CircleThickness").GetValue<Slider>().Value,
-                        _config.Item("CircleQuality").GetValue<Slider>().Value);
+                        Config.Item("CircleThickness").GetValue<Slider>().Value,
+                        Config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
-                if (_config.Item("DrawE").GetValue<bool>())
+                if (Config.Item("DrawE").GetValue<bool>())
                 {
                     Utility.DrawCircle(ObjectManager.Player.Position, _e.Range, System.Drawing.Color.Gray,
-                        _config.Item("CircleThickness").GetValue<Slider>().Value,
-                        _config.Item("CircleQuality").GetValue<Slider>().Value);
+                        Config.Item("CircleThickness").GetValue<Slider>().Value,
+                        Config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
-                if (_config.Item("DrawR").GetValue<bool>())
+                if (Config.Item("DrawR").GetValue<bool>())
                 {
                     Utility.DrawCircle(ObjectManager.Player.Position, _r.Range, System.Drawing.Color.Gray,
-                        _config.Item("CircleThickness").GetValue<Slider>().Value,
-                        _config.Item("CircleQuality").GetValue<Slider>().Value);
+                        Config.Item("CircleThickness").GetValue<Slider>().Value,
+                        Config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
-                if (_config.Item("DrawQR").GetValue<bool>())
+                if (Config.Item("DrawQR").GetValue<bool>())
                 {
                     Utility.DrawCircle(ObjectManager.Player.Position, _q.Range + _r.Range, System.Drawing.Color.Gray,
-                        _config.Item("CircleThickness").GetValue<Slider>().Value,
-                        _config.Item("CircleQuality").GetValue<Slider>().Value);
+                        Config.Item("CircleThickness").GetValue<Slider>().Value,
+                        Config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
             }
             else
             {
-                if (_config.Item("DrawQ").GetValue<bool>())
+                if (Config.Item("DrawQ").GetValue<bool>())
                 {
                     Drawing.DrawCircle(ObjectManager.Player.Position, _q.Range, System.Drawing.Color.White);
                 }
-                if (_config.Item("DrawW").GetValue<bool>())
+                if (Config.Item("DrawW").GetValue<bool>())
                 {
                     Drawing.DrawCircle(ObjectManager.Player.Position, _w.Range, System.Drawing.Color.White);
                 }
-                if (_config.Item("DrawE").GetValue<bool>())
+                if (Config.Item("DrawE").GetValue<bool>())
                 {
                     Drawing.DrawCircle(ObjectManager.Player.Position, _e.Range, System.Drawing.Color.White);
                 }
 
-                if (_config.Item("DrawR").GetValue<bool>())
+                if (Config.Item("DrawR").GetValue<bool>())
                 {
                     Drawing.DrawCircle(ObjectManager.Player.Position, _r.Range, System.Drawing.Color.White);
                 }
-                if (_config.Item("DrawQR").GetValue<bool>())
+                if (Config.Item("DrawQR").GetValue<bool>())
                 {
                     Drawing.DrawCircle(ObjectManager.Player.Position, _q.Range + _r.Range, System.Drawing.Color.White);
                 }
-                if (_config.Item("DrawEQF").GetValue<bool>())
+                if (Config.Item("DrawEQF").GetValue<bool>())
                 {
                     Drawing.DrawCircle(ObjectManager.Player.Position,
-                        _q.Range + _config.Item("FlashDista").GetValue<Slider>().Value, System.Drawing.Color.White);
+                        _q.Range + Config.Item("FlashDista").GetValue<Slider>().Value, System.Drawing.Color.White);
                 }
             }
         }
