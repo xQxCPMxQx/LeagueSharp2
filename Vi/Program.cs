@@ -12,10 +12,11 @@ namespace Vi
     internal class Program
     {
         public const string ChampionName = "Vi";
-        private static readonly Obj_AI_Hero vPlayer = ObjectManager.Player;
+        private static readonly Obj_AI_Hero Player = ObjectManager.Player;
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
         private static bool canUseE;
+        private static bool shennBuffActive = false;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
@@ -50,9 +51,9 @@ namespace Vi
 
         private static void Game_OnLoad(EventArgs args)
         {
-            if (vPlayer.ChampionName != "Vi")
+            if (Player.ChampionName != "Vi")
                 return;
-            if (vPlayer.IsDead)
+            if (Player.IsDead)
                 return;
 
             Q = new Spell(SpellSlot.Q, 860f);
@@ -70,8 +71,8 @@ namespace Vi
             SpellList.Add(E);
             SpellList.Add(R);
 
-            IgniteSlot = vPlayer.GetSpellSlot("SummonerDot");
-            FlashSlot = vPlayer.GetSpellSlot("SummonerFlash");
+            IgniteSlot = Player.GetSpellSlot("SummonerDot");
+            FlashSlot = Player.GetSpellSlot("SummonerFlash");
 
             ItemBilge = new Items.Item(3144, 450f);
             ItemBlade = new Items.Item(3153, 450f);
@@ -97,7 +98,7 @@ namespace Vi
 
             /* [ Don't Use Ult ] */
             Config.SubMenu("Combo").AddSubMenu(new Menu("Don't use Ult on", "DontUlt"));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
             {
                 Config.SubMenu("Combo")
                     .SubMenu("DontUlt")
@@ -110,7 +111,7 @@ namespace Vi
                 .SubMenu("FindHim")
                 .AddItem(new MenuItem("ForceFocusActive", "Force Focus Active").SetValue(false));
 
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != vPlayer.Team))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
             {
                 Config.SubMenu("Combo")
                     .SubMenu("FindHim")
@@ -239,13 +240,13 @@ namespace Vi
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Render.Circle.DrawCircle(vPlayer.Position, spell.Range, menuItem.Color, 2);
+                    Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color, 2);
             }
 
             var drawFqCombo = Config.Item("FQRange").GetValue<Circle>();
             if (drawFqCombo.Active)
             {
-                Render.Circle.DrawCircle(vPlayer.Position, Q.Range + FlashRange, drawFqCombo.Color, 2);
+                Render.Circle.DrawCircle(Player.Position, Q.Range + FlashRange, drawFqCombo.Color, 2);
             }
         }
 
@@ -254,7 +255,7 @@ namespace Vi
             if (!unit.IsMe)
                 return;
             
-            var t = GetTarget(Orbwalking.GetRealAutoAttackRange(vPlayer) + 65, TargetSelector.DamageType.Physical);
+            var t = GetTarget(Orbwalking.GetRealAutoAttackRange(Player) + 65, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
 
@@ -276,6 +277,8 @@ namespace Vi
             if (!Orbwalking.CanMove(100))
                 return;
 
+            shennBuffActive = Player.HasBuff("Sheen", true);
+
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
@@ -289,21 +292,21 @@ namespace Vi
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("HarassMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercent >= existsMana)
+                if (Player.ManaPercent >= existsMana)
                     Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("LaneClearMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercent >= existsMana)
+                if (Player.ManaPercent >= existsMana)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercent >= existsMana)
+                if (Player.ManaPercent >= existsMana)
                     JungleFarm();
             }
 
@@ -314,8 +317,12 @@ namespace Vi
 
         private static void Combo()
         {
+
             var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
+                return;
+
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && shennBuffActive)
                 return;
 
             var useQ = Config.Item("UseQCombo").GetValue<bool>();
@@ -339,9 +346,9 @@ namespace Vi
                 UseItems(t);
 
             if (comboDamage > t.Health && IgniteSlot != SpellSlot.Unknown &&
-                vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                vPlayer.Spellbook.CastSpell(IgniteSlot, t);
+                Player.Spellbook.CastSpell(IgniteSlot, t);
             }
 
             if (R.IsReady())
@@ -349,9 +356,9 @@ namespace Vi
                 useR = (Config.Item("DontUlt" + t.BaseSkinName) != null &&
                         Config.Item("DontUlt" + t.BaseSkinName).GetValue<bool>() == false) && useR;
 
-                var qDamage = vPlayer.GetSpellDamage(t, SpellSlot.Q);
-                var eDamage = vPlayer.GetSpellDamage(t, SpellSlot.E)*E.Instance.Ammo;
-                var rDamage = vPlayer.GetSpellDamage(t, SpellSlot.R);
+                var qDamage = Player.GetSpellDamage(t, SpellSlot.Q);
+                var eDamage = Player.GetSpellDamage(t, SpellSlot.E)*E.Instance.Ammo;
+                var rDamage = Player.GetSpellDamage(t, SpellSlot.R);
 
                 if (Q.IsReady() && t.Health < qDamage)
                     return;
@@ -389,13 +396,13 @@ namespace Vi
             if (!t.IsValidTarget())
                 return;
 
-            if (vPlayer.Distance(t) > Q.Range)
+            if (Player.Distance(t) > Q.Range)
             {
-                if (FlashSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
+                if (FlashSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready)
                 {
                     if (Q.IsCharging && Q.Range >= Q.ChargedMaxRange)
                     {
-                        vPlayer.Spellbook.CastSpell(FlashSlot, t.ServerPosition);
+                        Player.Spellbook.CastSpell(FlashSlot, t.ServerPosition);
                         Q.Cast(t.ServerPosition);
                     }
                     else
@@ -495,7 +502,7 @@ namespace Vi
                 if (Q.IsCharging)
                 {
                     var locQ = Q.GetLineFarmLocation(allMinionsQ);
-                    if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < Q.Range) &&
+                    if (allMinionsQ.Count == allMinionsQ.Count(m => Player.Distance(m) < Q.Range) &&
                         locQ.MinionsHit > 2 && locQ.Position.IsValid())
                         Q.Cast(locQ.Position);
                 }
@@ -506,7 +513,7 @@ namespace Vi
             if (useE && E.IsReady())
             {
                 var locE = E.GetLineFarmLocation(allMinionsE);
-                if (allMinionsQ.Count == allMinionsQ.Count(m => vPlayer.Distance(m) < E2.Range) && locE.MinionsHit > 2 &&
+                if (allMinionsQ.Count == allMinionsQ.Count(m => Player.Distance(m) < E2.Range) && locE.MinionsHit > 2 &&
                     locE.Position.IsValid())
                     E.Cast();
             }
@@ -552,21 +559,21 @@ namespace Vi
             var fComboDamage = 0d;
 
             if (Q.IsReady())
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.Q);
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.Q);
 
-            fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.W);
+            fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.W);
 
             if (E.IsReady())
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.E)*E.Instance.Ammo;
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.E)*E.Instance.Ammo;
 
             if (R.IsReady())
-                fComboDamage += vPlayer.GetSpellDamage(vTarget, SpellSlot.R);
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.R);
 
             if (Items.CanUseItem(3128))
-                fComboDamage += vPlayer.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
+                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
 
-            if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                fComboDamage += vPlayer.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
+            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float) fComboDamage;
         }
@@ -576,11 +583,11 @@ namespace Vi
             if (!interruptSpells)
                 return;
 
-            if (vPlayer.Distance(unit) < Q.Range)
+            if (Player.Distance(unit) < Q.Range)
             {
                 Q.Cast(unit);
             }
-            else if (vPlayer.Distance(unit) < R.Range)
+            else if (Player.Distance(unit) < R.Range)
             {
                 R.Cast(unit);
             }
@@ -592,11 +599,11 @@ namespace Vi
             if (!interruptSpells)
                 return;
 
-            if (vPlayer.Distance(vTarget) < Q.Range)
+            if (Player.Distance(vTarget) < Q.Range)
             {
                 Q.Cast(vTarget);
             }
-            else if (vPlayer.Distance(vTarget) < R.Range)
+            else if (Player.Distance(vTarget) < R.Range)
             {
                 R.Cast(vTarget);
             }
