@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using D_Jarvan.Properties;
+﻿using D_Jarvan.Properties;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -12,7 +9,6 @@ namespace D_Jarvan
 {
     internal class Sprite
     {
-
         private static Vector2 DrawPosition
         {
             get
@@ -21,7 +17,7 @@ namespace D_Jarvan
                     !Program.Config.Item("DrawSprite").GetValue<bool>())
                     return new Vector2(0f, 0f);
 
-                return new Vector2(KillableEnemy.HPBarPosition.X + KillableEnemy.BoundingRadius / 2f,
+                return new Vector2(KillableEnemy.HPBarPosition.X + KillableEnemy.BoundingRadius/2f,
                     KillableEnemy.HPBarPosition.Y - 50);
             }
         }

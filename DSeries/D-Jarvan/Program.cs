@@ -47,7 +47,7 @@ namespace D_Jarvan
 
             Q = new Spell(SpellSlot.Q, 770f);
             W = new Spell(SpellSlot.W, 300f);
-            E = new Spell(SpellSlot.E, 830f);
+            E = new Spell(SpellSlot.E, 800f);
             R = new Spell(SpellSlot.R, 650f);
 
             Q.SetSkillshot(0.5f, 70f, float.MaxValue, false, SkillshotType.SkillshotLine);
