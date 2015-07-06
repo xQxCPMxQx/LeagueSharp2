@@ -1,9 +1,12 @@
 #region
+
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+
 #endregion
 
 namespace Wukong
@@ -12,34 +15,49 @@ namespace Wukong
     {
         public const string ChampionName = "MonkeyKing";
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
-
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
-
         //Spells
+        private static readonly string space = "    ";
         public static List<Spell> SpellList = new List<Spell>();
-
         public static Spell Q;
+        public static Spell W;
         public static Spell E;
         public static Spell R;
-
         public static SpellSlot SmiteSlot = SpellSlot.Unknown;
         public static Spell Smite;
-
         private static readonly int[] SmitePurple = {3713, 3726, 3725, 3726, 3723};
         private static readonly int[] SmiteGrey = {3711, 3722, 3721, 3720, 3719};
         private static readonly int[] SmiteRed = {3715, 3718, 3717, 3716, 3714};
         private static readonly int[] SmiteBlue = {3706, 3710, 3709, 3708, 3707};
-
         private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
         private static readonly SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
-
         //Menu
         public static Menu Config;
-        public static Menu MenuExtras;
+        public static Menu MenuMisc;
         public static Menu MenuTargetedItems;
         public static Menu MenuNonTargetedItems;
         public static int ultUsed;
+
+        private static string Smitetype
+        {
+            get
+            {
+                if (SmiteBlue.Any(i => Items.HasItem(i)))
+                    return "s5_summonersmiteplayerganker";
+
+                if (SmiteRed.Any(i => Items.HasItem(i)))
+                    return "s5_summonersmiteduel";
+
+                if (SmiteGrey.Any(i => Items.HasItem(i)))
+                    return "s5_summonersmitequick";
+
+                if (SmitePurple.Any(i => Items.HasItem(i)))
+                    return "itemsmiteaoe";
+
+                return "summonersmite";
+            }
+        }
 
         private static void Main(string[] args)
         {
@@ -48,12 +66,13 @@ namespace Wukong
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.BaseSkinName != "MonkeyKing")
+            if (Player.ChampionName != "MonkeyKing")
                 return;
             if (Player.IsDead)
                 return;
 
             Q = new Spell(SpellSlot.Q, 375f);
+            W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 640f);
             R = new Spell(SpellSlot.R, 375f);
 
@@ -65,7 +84,7 @@ namespace Wukong
 
             //Create the menu
             Config = new Menu("xQx | Monkey King", "MonkeyKing", true);
-
+            
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
@@ -76,33 +95,29 @@ namespace Wukong
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
 
+            SetSmiteSlot();
+
             var menuCombo = new Menu("Combo", "Combo");
             // Combo
             Config.AddSubMenu(menuCombo);
-            menuCombo.AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
+            menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Use R if enemy count >= (0 = off)").SetValue(new Slider(1, 5, 0)));
+            menuCombo.AddItem(new MenuItem("UseRForTheEnemy", "Force Ultimate For:"));
+            menuCombo.AddItem(new MenuItem("UseRForTheEnemyJust", space + "Use Just:").SetValue(
+                        new StringList(new[] { "Everytime", "If Enemy is Killable" })));
+            ;
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                menuCombo.AddItem(new MenuItem("forceUlti" + enemy.ChampionName, space + enemy.ChampionName).SetValue(false));
 
-            menuCombo.AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
-            menuCombo.AddItem(new MenuItem("UseEComboTurret", "Don't Under Turret E").SetValue(false));
-            menuCombo.AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
-            menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Min. Enemy Count : ").SetValue(new Slider(1, 5, 0)));
             if (SmiteSlot != SpellSlot.Unknown)
                 menuCombo.AddItem(new MenuItem("ComboSmite", "Use Smite").SetValue(true));
-
-            menuCombo.AddItem(
-                new MenuItem("ComboActive", "Combo!").SetValue(
-                    new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarassTurret", "Don't Under Turret E").SetValue(true));
-            Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("Harass")
-                .AddItem(
-                    new MenuItem("HarassActive", "Harass").SetValue(
-                        new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
@@ -110,11 +125,7 @@ namespace Wukong
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
             Config.SubMenu("LaneClear")
                 .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-
-            var menuLaneClearItems = new Menu("Use Items", "menuLaneClearItems");
-            Config.SubMenu("LaneClear").AddSubMenu(menuLaneClearItems);
-            menuLaneClearItems.AddItem(new MenuItem("LaneClearUseTiamat", "Tiamat").SetValue(true));
-
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseTiamat", "Tiamat").SetValue(true));
             Config.SubMenu("LaneClear")
                 .AddItem(
                     new MenuItem("LaneClearActive", "LaneClear").SetValue(
@@ -126,10 +137,7 @@ namespace Wukong
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
             Config.SubMenu("JungleFarm")
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-
-            var menuJungleFarmItems = new Menu("Use Items", "menuJungleFarmItems");
-            Config.SubMenu("JungleFarm").AddSubMenu(menuJungleFarmItems);
-            menuLaneClearItems.AddItem(new MenuItem("JungleFarmUseTiamat", "Tiamat").SetValue(true));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseTiamat", "Tiamat").SetValue(true));
 
             Config.SubMenu("JungleFarm")
                 .AddItem(
@@ -137,10 +145,10 @@ namespace Wukong
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             // Extras -> Use Items 
-            MenuExtras = new Menu("Extras", "Extras");
-            Config.AddSubMenu(MenuExtras);
-            MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
-            MenuExtras.AddItem(new MenuItem("AutoLevelUp", "Auto Level Up").SetValue(true));
+            MenuMisc = new Menu("Misc", "Misc");
+            Config.AddSubMenu(MenuMisc);
+            MenuMisc.AddItem(new MenuItem("Misc.UseQ", "Use Q if Possible to Attack!").SetValue(true));
+            MenuMisc.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
             var menuUseItems = new Menu("Use Items", "menuUseItems");
             Config.SubMenu("Extras").AddSubMenu(menuUseItems);
@@ -168,15 +176,26 @@ namespace Wukong
             Config.SubMenu("Drawings")
                 .AddItem(
                     new MenuItem("QRange", "Q Range").SetValue(
-                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                        new Circle(false, Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
                     new MenuItem("ERange", "E Range").SetValue(
-                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                        new Circle(false, Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
                     new MenuItem("RRange", "R Range").SetValue(
-                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                        new Circle(false, Color.FromArgb(255, 255, 255, 255))));
+
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
+            Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
+
+
+            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+            dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
 
             new PotionManager();
             Config.AddToMainMenu();
@@ -186,13 +205,10 @@ namespace Wukong
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
+            Notifications.AddNotification(string.Format("{0} Loaded", ChampionName));
 
-            Game.PrintChat(
-                String.Format(
-                    "<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>" +
-                    "{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -204,7 +220,6 @@ namespace Wukong
                     Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1);
             }
         }
-
 
         private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
@@ -219,9 +234,17 @@ namespace Wukong
             if (!Orbwalking.CanMove(100))
                 return;
 
-            SetSmiteSlot();
+            if (Config.Item("Misc.UseQ").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(Q.Range - 20f, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget() && Q.IsReady())
+                {
+                    Q.CastOnUnit(t);
+                    Player.IssueOrder(GameObjectOrder.AttackTo, t);
+                }
+            }
 
-            if (Config.Item("ComboActive").GetValue<KeyBind>().Active && (int) Game.Time > ultUsed + 4)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && (int) Game.Time > ultUsed + 4)
             {
                 Combo();
             }
@@ -229,71 +252,82 @@ namespace Wukong
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active && (int) Game.Time > ultUsed + 4)
             {
                 var vMana = Config.Item("HarassMana").GetValue<Slider>().Value;
-                if (Player.ManaPercentage() >= vMana)
+                if (Player.ManaPercent >= vMana)
                     Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
                 var vMana = Config.Item("LaneClearMana").GetValue<Slider>().Value;
-                if (Player.ManaPercentage() >= vMana)
+                if (Player.ManaPercent >= vMana)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
                 var vMana = Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-                if (Player.ManaPercentage() >= vMana)
+                if (Player.ManaPercent >= vMana)
                     JungleFarm();
             }
         }
 
         private static void Combo()
         {
-            var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
-            var useQ = Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady();
-            var useE = Config.Item("UseECombo").GetValue<bool>() && E.IsReady();
-            var useR = Config.Item("UseRCombo").GetValue<bool>() && R.IsReady();
 
-            var smiteReady = (SmiteSlot != SpellSlot.Unknown &&
-                              ObjectManager.Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready);
-
-            if (smiteReady && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                Smiteontarget(t as Obj_AI_Hero);
-
-            if (useQ)
+            if (E.IsReady() && t.IsValidTarget(E.Range))
             {
-
-                if (t.IsValidTarget())
-                    Q.Cast();
+                E.CastOnUnit(t);
             }
 
-            if (useE)
+            if (SmiteSlot != SpellSlot.Unknown &&
+                ObjectManager.Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)
             {
-                if (Config.Item("UseEComboTurret").GetValue<bool>())
-                {
-                    if (!t.UnderTurret())
-                        E.CastOnUnit(t);
-                }
-                else
-                    E.CastOnUnit(t);
+                Smiteontarget(t);
+            }
+
+            if (Q.IsReady() && t.IsValidTarget(Q.Range))
+            {
+                Q.Cast();
+            }
+
+            if (E.IsReady() && t.IsValidTarget(E.Range))
+            {
+                E.CastOnUnit(t);
             }
 
             if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
+                if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health && Player.Distance(t) <= 550)
                 {
                     Player.Spellbook.CastSpell(IgniteSlot, t);
                 }
             }
 
-            if (useR)
+            if (R.IsReady())
             {
-                if (Player.CountEnemiesInRange(R.Range) >= Config.Item("UseRComboEnemyCount").GetValue<Slider>().Value)
+                var valR = Config.Item("UseRComboEnemyCount").GetValue<Slider>().Value;
+                if (valR > 0 && Player.CountEnemiesInRange(R.Range) >= valR)
                 {
                     R.Cast();
+                }
+                else if (Config.Item("forceUlti" + t.ChampionName) != null && t.IsValidTarget(R.Range) &&
+                         Config.Item("forceUlti" + t.ChampionName).GetValue<bool>())
+                {
+                    switch (Config.Item("UseRForTheEnemyJust").GetValue<StringList>().SelectedIndex)
+                    {
+                        case 0:
+                            R.CastIfHitchanceEquals(t, HitChance.High);
+                            break;
+                        case 1:
+                            {
+                                if (t.Health < GetComboDamage(t))
+                                    R.CastIfHitchanceEquals(t, HitChance.High);
+                            }
+                            break;
+                    }
                 }
             }
 
@@ -302,32 +336,27 @@ namespace Wukong
 
         private static void Harass()
         {
-            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>() && Q.IsReady();
             var useE = Config.Item("UseEHarass").GetValue<bool>() && E.IsReady();
 
-            if (useQ)
+            if (useQ && t.IsValidTarget(Q.Range))
             {
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    Q.Cast();
-
+                Q.Cast();
             }
 
-            if (useE)
+            if (useE && t.IsValidTarget(E.Range))
             {
-                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
+                if (Config.Item("UseEHarassTurret").GetValue<bool>())
                 {
-                    if (Config.Item("UseEHarassTurret").GetValue<bool>())
-                    {
-                        if (!t.UnderTurret())
-                            E.CastOnUnit(eTarget);
-                    }
-                    else
-                        E.CastOnUnit(eTarget);
+                    if (!t.UnderTurret())
+                        E.CastOnUnit(t);
                 }
+                else
+                    E.CastOnUnit(t);
             }
         }
 
@@ -343,11 +372,14 @@ namespace Wukong
                 return;
 
             var mob = mobs[0];
-            if (useQ && Q.IsReady() && mobs.Count >= 1)
-                Q.Cast();
+            if (mobs.Count > 0)
+            {
+                if (useQ && Q.IsReady())
+                    Q.Cast();
 
-            if (useE && E.IsReady() && mobs.Count >= 2)
-                E.CastOnUnit(mob);
+                if (useE && E.IsReady())
+                    E.CastOnUnit(mob);
+            }
 
             if (Tiamat.IsReady() && Config.Item("JungleFarmUseTiamat").GetValue<bool>())
             {
@@ -414,19 +446,19 @@ namespace Wukong
 
             return (float) fComboDamage;
         }
-
-        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
+        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
         {
             var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
             if (!interruptSpells)
                 return;
 
-            if (Player.Distance(vTarget) < Orbwalking.GetRealAutoAttackRange(Player))
+            if (Player.Distance(unit) < Orbwalking.GetRealAutoAttackRange(Player) && R.IsReady())
             {
                 R.Cast();
             }
         }
 
+       
         private static InventorySlot GetInventorySlot(int id)
         {
             return
@@ -489,33 +521,13 @@ namespace Wukong
                 vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
             }
 
-            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+            var objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
 
-            Obj_AI_Hero t = !objAiHeroes.Any()
+            var t = !objAiHeroes.Any()
                 ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
                 : objAiHeroes[0];
 
             return t;
-        }
-
-        private static string Smitetype
-        {
-            get
-            {
-                if (SmiteBlue.Any(i => Items.HasItem(i)))
-                    return "s5_summonersmiteplayerganker";
-
-                if (SmiteRed.Any(i => Items.HasItem(i)))
-                    return "s5_summonersmiteduel";
-
-                if (SmiteGrey.Any(i => Items.HasItem(i)))
-                    return "s5_summonersmitequick";
-
-                if (SmitePurple.Any(i => Items.HasItem(i)))
-                    return "itemsmiteaoe";
-
-                return "summonersmite";
-            }
         }
 
         private static void SetSmiteSlot()
@@ -523,7 +535,7 @@ namespace Wukong
             foreach (
                 var spell in
                     ObjectManager.Player.Spellbook.Spells.Where(
-                        spell => String.Equals(spell.Name, Smitetype, StringComparison.CurrentCultureIgnoreCase)))
+                        spell => string.Equals(spell.Name, Smitetype, StringComparison.CurrentCultureIgnoreCase)))
             {
                 SmiteSlot = spell.Slot;
                 Smite = new Spell(SmiteSlot, 700);
