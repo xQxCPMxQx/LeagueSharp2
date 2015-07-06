@@ -23,6 +23,14 @@ namespace Wukong
         public static Spell E;
         public static Spell R;
 
+        public static SpellSlot SmiteSlot = SpellSlot.Unknown;
+        public static Spell Smite;
+
+        private static readonly int[] SmitePurple = {3713, 3726, 3725, 3726, 3723};
+        private static readonly int[] SmiteGrey = {3711, 3722, 3721, 3720, 3719};
+        private static readonly int[] SmiteRed = {3715, 3718, 3717, 3716, 3714};
+        private static readonly int[] SmiteBlue = {3706, 3710, 3709, 3708, 3707};
+
         private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
         private static readonly SpellSlot IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
@@ -77,6 +85,9 @@ namespace Wukong
             menuCombo.AddItem(new MenuItem("UseEComboTurret", "Don't Under Turret E").SetValue(false));
             menuCombo.AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Min. Enemy Count : ").SetValue(new Slider(1, 5, 0)));
+            if (SmiteSlot != SpellSlot.Unknown)
+                menuCombo.AddItem(new MenuItem("ComboSmite", "Use Smite").SetValue(true));
+
             menuCombo.AddItem(
                 new MenuItem("ComboActive", "Combo!").SetValue(
                     new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
@@ -207,6 +218,9 @@ namespace Wukong
         {
             if (!Orbwalking.CanMove(100))
                 return;
+
+            SetSmiteSlot();
+
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active && (int) Game.Time > ultUsed + 4)
             {
                 Combo();
@@ -236,18 +250,22 @@ namespace Wukong
 
         private static void Combo()
         {
-            Obj_AI_Hero t;
-
+            var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
             var useQ = Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady();
             var useE = Config.Item("UseECombo").GetValue<bool>() && E.IsReady();
             var useR = Config.Item("UseRCombo").GetValue<bool>() && R.IsReady();
-            t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            if (!t.IsValidTarget())
-                return;
+
+            var smiteReady = (SmiteSlot != SpellSlot.Unknown &&
+                              ObjectManager.Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready);
+
+            if (smiteReady && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                Smiteontarget(t as Obj_AI_Hero);
 
             if (useQ)
             {
-                
+
                 if (t.IsValidTarget())
                     Q.Cast();
             }
@@ -441,11 +459,13 @@ namespace Wukong
                 where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
                 select itemId)
             {
-                if (Player.Distance(vTarget)<350)
+                if (Player.Distance(vTarget) < 350)
                     Items.UseItem(itemId);
             }
         }
-        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+
+        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0,
+            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
             if (Math.Abs(vDefaultRange) < 0.00001)
                 vDefaultRange = Q.Range;
@@ -476,6 +496,50 @@ namespace Wukong
                 : objAiHeroes[0];
 
             return t;
+        }
+
+        private static string Smitetype
+        {
+            get
+            {
+                if (SmiteBlue.Any(i => Items.HasItem(i)))
+                    return "s5_summonersmiteplayerganker";
+
+                if (SmiteRed.Any(i => Items.HasItem(i)))
+                    return "s5_summonersmiteduel";
+
+                if (SmiteGrey.Any(i => Items.HasItem(i)))
+                    return "s5_summonersmitequick";
+
+                if (SmitePurple.Any(i => Items.HasItem(i)))
+                    return "itemsmiteaoe";
+
+                return "summonersmite";
+            }
+        }
+
+        private static void SetSmiteSlot()
+        {
+            foreach (
+                var spell in
+                    ObjectManager.Player.Spellbook.Spells.Where(
+                        spell => String.Equals(spell.Name, Smitetype, StringComparison.CurrentCultureIgnoreCase)))
+            {
+                SmiteSlot = spell.Slot;
+                Smite = new Spell(SmiteSlot, 700);
+            }
+        }
+
+        private static void Smiteontarget(Obj_AI_Hero t)
+        {
+            var useSmite = Config.Item("ComboSmite").GetValue<bool>();
+            var itemCheck = SmiteBlue.Any(i => Items.HasItem(i)) || SmiteRed.Any(i => Items.HasItem(i));
+            if (itemCheck && useSmite &&
+                ObjectManager.Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready &&
+                t.Distance(ObjectManager.Player.Position) < Smite.Range)
+            {
+                ObjectManager.Player.Spellbook.CastSpell(SmiteSlot, t);
+            }
         }
     }
 }
