@@ -8,40 +8,6 @@ namespace Wukong
 {
     internal class PotionManager
     {
-        private enum PotionType
-        {
-            Health, Mana
-        };
-
-        private class Potion
-        {
-            public string Name
-            {
-                get;
-                set;
-            }
-            public int MinCharges
-            {
-                get;
-                set;
-            }
-            public ItemId ItemId
-            {
-                get;
-                set;
-            }
-            public int Priority
-            {
-                get;
-                set;
-            }
-            public List<PotionType> TypeList
-            {
-                get;
-                set;
-            }
-        }
-
         private List<Potion> _potions;
 
         public PotionManager()
@@ -90,20 +56,28 @@ namespace Wukong
             Program.MenuExtras.AddSubMenu(new Menu("Potion Manager", "PotionManager"));
 
             Program.MenuExtras.SubMenu("PotionManager").AddSubMenu(new Menu("Health", "Health"));
-            Program.MenuExtras.SubMenu("PotionManager").SubMenu("Health").AddItem(new MenuItem("HealthPotion", "Use Health Potion").SetValue(true));
-            Program.MenuExtras.SubMenu("PotionManager").SubMenu("Health").AddItem(new MenuItem("HealthPercent", "HP Trigger Percent").SetValue(new Slider(30)));
+            Program.MenuExtras.SubMenu("PotionManager")
+                .SubMenu("Health")
+                .AddItem(new MenuItem("HealthPotion", "Use Health Potion").SetValue(true));
+            Program.MenuExtras.SubMenu("PotionManager")
+                .SubMenu("Health")
+                .AddItem(new MenuItem("HealthPercent", "HP Trigger Percent").SetValue(new Slider(30)));
 
             Program.MenuExtras.SubMenu("PotionManager").AddSubMenu(new Menu("Mana", "Mana"));
-            Program.MenuExtras.SubMenu("PotionManager").SubMenu("Mana").AddItem(new MenuItem("ManaPotion", "Use Mana Potion").SetValue(true));
-            Program.MenuExtras.SubMenu("PotionManager").SubMenu("Mana").AddItem(new MenuItem("ManaPercent", "MP Trigger Percent").SetValue(new Slider(30)));
+            Program.MenuExtras.SubMenu("PotionManager")
+                .SubMenu("Mana")
+                .AddItem(new MenuItem("ManaPotion", "Use Mana Potion").SetValue(true));
+            Program.MenuExtras.SubMenu("PotionManager")
+                .SubMenu("Mana")
+                .AddItem(new MenuItem("ManaPercent", "MP Trigger Percent").SetValue(new Slider(30)));
 
             Game.OnUpdate += OnUpdate;
         }
 
         private void OnUpdate(EventArgs args)
         {
-
-            if(ObjectManager.Player.HasBuff("Recall") || ObjectManager.Player.InFountain() || ObjectManager.Player.InShop())
+            if (ObjectManager.Player.HasBuff("Recall") || ObjectManager.Player.InFountain() ||
+                ObjectManager.Player.InShop())
                 return;
 
             try
@@ -130,36 +104,54 @@ namespace Wukong
 
             catch (Exception)
             {
-
             }
         }
 
         private InventorySlot GetPotionSlot(PotionType type)
         {
             return (from potion in _potions
-                    where potion.TypeList.Contains(type)
-                    from item in ObjectManager.Player.InventoryItems
-                    where item.Id == potion.ItemId && item.Charges >= potion.MinCharges
-                    select item).FirstOrDefault();
+                where potion.TypeList.Contains(type)
+                from item in ObjectManager.Player.InventoryItems
+                where item.Id == potion.ItemId && item.Charges >= potion.MinCharges
+                select item).FirstOrDefault();
         }
 
         private bool IsBuffActive(PotionType type)
         {
             return (from potion in _potions
-                    where potion.TypeList.Contains(type)
-                    from buff in ObjectManager.Player.Buffs
-                    where buff.Name == potion.Name && buff.IsActive
-                    select potion).Any();
+                where potion.TypeList.Contains(type)
+                from buff in ObjectManager.Player.Buffs
+                where buff.Name == potion.Name && buff.IsActive
+                select potion).Any();
         }
 
         private static float GetPlayerHealthPercentage()
         {
-            return ObjectManager.Player.Health * 100 / ObjectManager.Player.MaxHealth;
+            return ObjectManager.Player.Health*100/ObjectManager.Player.MaxHealth;
         }
 
         private static float GetPlayerManaPercentage()
         {
-            return ObjectManager.Player.Mana * 100 / ObjectManager.Player.MaxMana;
+            return ObjectManager.Player.Mana*100/ObjectManager.Player.MaxMana;
+        }
+
+        private enum PotionType
+        {
+            Health,
+            Mana
+        };
+
+        private class Potion
+        {
+            public string Name { get; set; }
+
+            public int MinCharges { get; set; }
+
+            public ItemId ItemId { get; set; }
+
+            public int Priority { get; set; }
+
+            public List<PotionType> TypeList { get; set; }
         }
     }
 }
