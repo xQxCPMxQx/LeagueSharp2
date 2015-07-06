@@ -62,6 +62,8 @@ namespace Wukong
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
+            AssassinManager.Load();
+
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
@@ -239,33 +241,31 @@ namespace Wukong
             var useQ = Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady();
             var useE = Config.Item("UseECombo").GetValue<bool>() && E.IsReady();
             var useR = Config.Item("UseRCombo").GetValue<bool>() && R.IsReady();
+            t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
 
             if (useQ)
             {
-                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                
                 if (t.IsValidTarget())
                     Q.Cast();
             }
 
             if (useE)
             {
-                t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
+                if (Config.Item("UseEComboTurret").GetValue<bool>())
                 {
-                    if (Config.Item("UseEComboTurret").GetValue<bool>())
-                    {
-                        if (!t.UnderTurret())
-                            E.CastOnUnit(t);
-                    }
-                    else
+                    if (!t.UnderTurret())
                         E.CastOnUnit(t);
                 }
+                else
+                    E.CastOnUnit(t);
             }
 
             if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                t = TargetSelector.GetTarget(500, TargetSelector.DamageType.Magical);
-                if (t.IsValidTarget() && Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
+                if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
                 {
                     Player.Spellbook.CastSpell(IgniteSlot, t);
                 }
@@ -279,11 +279,7 @@ namespace Wukong
                 }
             }
 
-            t = TargetSelector.GetTarget(500, TargetSelector.DamageType.Magical);
-            if (t.IsValidTarget())
-            {
-                UseItems(t);
-            }
+            UseItems(t);
         }
 
         private static void Harass()
@@ -445,8 +441,41 @@ namespace Wukong
                 where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
                 select itemId)
             {
-                Items.UseItem(itemId);
+                if (Player.Distance(vTarget)<350)
+                    Items.UseItem(itemId);
             }
+        }
+        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        {
+            if (Math.Abs(vDefaultRange) < 0.00001)
+                vDefaultRange = Q.Range;
+
+            if (!Config.Item("AssassinActive").GetValue<bool>())
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+
+            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
+
+            var vEnemy =
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        enemy =>
+                            enemy.Team != Player.Team && !enemy.IsDead && enemy.IsVisible &&
+                            Config.Item("Assassin" + enemy.ChampionName) != null &&
+                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
+                            Player.Distance(enemy) < assassinRange);
+
+            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
+            {
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+            }
+
+            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            Obj_AI_Hero t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
         }
     }
 }
