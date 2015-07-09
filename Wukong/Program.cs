@@ -97,16 +97,13 @@ namespace Wukong
 
             SetSmiteSlot();
 
-            var menuCombo = new Menu("Combo", "Combo");
+            var menuCombo = new Menu("R", "R");
             // Combo
             Config.AddSubMenu(menuCombo);
             menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Use R if enemy count >= (0 = off)").SetValue(new Slider(1, 5, 0)));
             menuCombo.AddItem(new MenuItem("UseRForTheEnemy", "Force Ultimate For:"));
-            menuCombo.AddItem(new MenuItem("UseRForTheEnemyJust", space + "Use Just:").SetValue(
-                        new StringList(new[] { "Everytime", "If Enemy is Killable" })));
-            ;
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                menuCombo.AddItem(new MenuItem("forceUlti" + enemy.ChampionName, space + enemy.ChampionName).SetValue(false));
+                menuCombo.AddItem(new MenuItem("forceUlti" + enemy.ChampionName, space + enemy.ChampionName).SetValue(new StringList(new[] { "Off", "Everytime", "Just Killable" })));
 
             if (SmiteSlot != SpellSlot.Unknown)
                 menuCombo.AddItem(new MenuItem("ComboSmite", "Use Smite").SetValue(true));
@@ -147,7 +144,8 @@ namespace Wukong
             // Extras -> Use Items 
             MenuMisc = new Menu("Misc", "Misc");
             Config.AddSubMenu(MenuMisc);
-            MenuMisc.AddItem(new MenuItem("Misc.UseQ", "Use Q if Possible to Attack!").SetValue(true));
+            MenuMisc.AddItem(new MenuItem("Misc.AutoQ", "Auto Q if it'll hit").SetValue(true));
+            MenuMisc.AddItem(new MenuItem("Misc.BlockR", "Block R if it won't hit").SetValue(false));
             MenuMisc.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
             var menuUseItems = new Menu("Use Items", "menuUseItems");
@@ -206,6 +204,7 @@ namespace Wukong
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
             Notifications.AddNotification(string.Format("{0} Loaded", ChampionName));
 
@@ -229,12 +228,26 @@ namespace Wukong
             }
         }
 
+        static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (!Config.Item("Misc.BlockR").GetValue<bool>())
+            {
+                return;
+            }
+
+            var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+            if (args.Slot == SpellSlot.R && !t.IsValidTarget())
+            {
+                args.Process = false;
+            }
+        }
+
         private static void Game_OnUpdate(EventArgs args)
         {
             if (!Orbwalking.CanMove(100))
                 return;
 
-            if (Config.Item("Misc.UseQ").GetValue<bool>())
+            if (Config.Item("Misc.AutoQ").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(Q.Range - 20f, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && Q.IsReady())
@@ -313,15 +326,14 @@ namespace Wukong
                 {
                     R.Cast();
                 }
-                else if (Config.Item("forceUlti" + t.ChampionName) != null && t.IsValidTarget(R.Range) &&
-                         Config.Item("forceUlti" + t.ChampionName).GetValue<bool>())
+                else if (Config.Item("forceUlti" + t.ChampionName) != null && t.IsValidTarget(R.Range))
                 {
-                    switch (Config.Item("UseRForTheEnemyJust").GetValue<StringList>().SelectedIndex)
+                    switch (Config.Item("forceUlti" + t.ChampionName).GetValue<StringList>().SelectedIndex)
                     {
-                        case 0:
+                        case 1:
                             R.CastIfHitchanceEquals(t, HitChance.High);
                             break;
-                        case 1:
+                        case 2:
                             {
                                 if (t.Health < GetComboDamage(t))
                                     R.CastIfHitchanceEquals(t, HitChance.High);
