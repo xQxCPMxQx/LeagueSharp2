@@ -1,9 +1,12 @@
 #region
+
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+
 #endregion
 
 namespace Pantheon
@@ -14,14 +17,13 @@ namespace Pantheon
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
-
+        private static bool usedSpell, shennBuffActive;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
         public static Spell E;
         public static Spell W;
         public static Spell R;
-
         private static SpellSlot IgniteSlot;
         private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
         //Menu
@@ -37,12 +39,8 @@ namespace Pantheon
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.BaseSkinName != "Pantheon")
+            if (Player.CharData.BaseSkinName != "Pantheon")
                 return;
-            if (Player.IsDead)
-                return;
-
-
 
             Q = new Spell(SpellSlot.Q, 620f);
             W = new Spell(SpellSlot.W, 620f);
@@ -51,7 +49,7 @@ namespace Pantheon
 
             Q.SetTargetted(0.2f, 1700f);
             W.SetTargetted(0.2f, 1700f);
-            E.SetSkillshot(0.25f, 15f * 2 * (float) Math.PI / 180, 2000f, false, SkillshotType.SkillshotCone);
+            E.SetSkillshot(0.25f, 15f*2*(float) Math.PI/180, 2000f, false, SkillshotType.SkillshotCone);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -72,10 +70,6 @@ namespace Pantheon
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             {
-                Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-                Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
-                Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
-                Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
                 Config.SubMenu("Combo")
                     .AddItem(
                         new MenuItem("ComboActive", "Combo!").SetValue(
@@ -86,9 +80,16 @@ namespace Pantheon
             {
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-                Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-                Config.SubMenu("Harass").AddItem(new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
-                Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Harass")
+                    .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(new KeyBind("H".ToCharArray()[0],
+                            KeyBindType.Toggle)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0],
+                            KeyBindType.Press)));
             }
 
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
@@ -121,7 +122,7 @@ namespace Pantheon
                 MenuExtras.AddItem(new MenuItem("AutoLevelUp", "Auto Level Up").SetValue(true));
             }
 
-            Menu menuUseItems = new Menu("Use Items", "menuUseItems");
+            var menuUseItems = new Menu("Use Items", "menuUseItems");
             {
                 Config.SubMenu("Extras").AddSubMenu(menuUseItems);
 
@@ -152,23 +153,23 @@ namespace Pantheon
                 Config.SubMenu("Drawings")
                     .AddItem(
                         new MenuItem("QRange", "Q Range").SetValue(
-                            new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                            new Circle(false, Color.FromArgb(255, 255, 255, 255))));
                 Config.SubMenu("Drawings")
                     .AddItem(
                         new MenuItem("WRange", "W Range").SetValue(
-                            new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                            new Circle(false, Color.FromArgb(255, 255, 255, 255))));
                 Config.SubMenu("Drawings")
                     .AddItem(
                         new MenuItem("ERange", "E Range").SetValue(
-                            new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                            new Circle(false, Color.FromArgb(255, 255, 255, 255))));
                 Config.SubMenu("Drawings")
                     .AddItem(
                         new MenuItem("RRange", "R Range").SetValue(
-                            new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                            new Circle(false, Color.FromArgb(255, 255, 255, 255))));
                 Config.SubMenu("Drawings")
                     .AddItem(
                         new MenuItem("RRange2", "R Range (minimap)").SetValue(new Circle(true,
-                            System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                            Color.FromArgb(255, 255, 255, 255))));
 
                 var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
                 Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
@@ -183,10 +184,29 @@ namespace Pantheon
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += DrawingOnOnEndScene;
-
-            CustomEvents.Unit.OnLevelUp += CustomEvents_Unit_OnLevelUp;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
-            WelcomeMessage();
+
+            Notifications.AddNotification(string.Format("{0} Loaded", ChampionName), 4000);
+        }
+
+        public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs arg)
+        {
+            if (!sender.IsMe)
+                return;
+
+            if (arg.SData.Name.ToLower().Contains("pantheonq") || arg.SData.Name.ToLower().Contains("pantheonw"))
+            {
+                usedSpell = true;
+            }
+            else if (arg.SData.Name.ToLower().Contains("pantheone") || Player.HasBuff("sound", true))
+            {
+                usedSpell = true;
+            }
+            else if (arg.SData.Name.ToLower().Contains("attack"))
+            {
+                usedSpell = false;
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -198,7 +218,7 @@ namespace Pantheon
                     Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1);
             }
 
-            Render.Circle.DrawCircle(Player.Position, 30f, System.Drawing.Color.Red, 1, true);
+            Render.Circle.DrawCircle(Player.Position, 30f, Color.Red, 1, true);
         }
 
         private static void DrawingOnOnEndScene(EventArgs args)
@@ -210,19 +230,14 @@ namespace Pantheon
             }
         }
 
-
-        public static void CustomEvents_Unit_OnLevelUp(Obj_AI_Base sender, CustomEvents.Unit.OnLevelUpEventArgs args)
-        {
-            if (sender.NetworkId != Player.NetworkId)
-                return;
-        }
-
         private static void Game_OnUpdate(EventArgs args)
         {
+            shennBuffActive = Player.HasBuff("Sheen", true);
+
             if (!Orbwalking.CanMove(100))
                 return;
 
-            if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 Combo();
             }
@@ -231,21 +246,21 @@ namespace Pantheon
                 Config.Item("HarassActiveT").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("HarassMana").GetValue<Slider>().Value;
-                if (Player.ManaPercentage() >= existsMana)
+                if (Player.ManaPercent >= existsMana)
                     Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("LaneClearMana").GetValue<Slider>().Value;
-                if (Player.ManaPercentage() >= existsMana)
+                if (Player.ManaPercent >= existsMana)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-                if (Player.ManaPercentage() >= existsMana)
+                if (Player.ManaPercent >= existsMana)
                     JungleFarm();
             }
         }
@@ -275,39 +290,29 @@ namespace Pantheon
         private static void Combo()
         {
             Obj_AI_Hero t;
-
-            var useQ = Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady();
-            var useW = Config.Item("UseWCombo").GetValue<bool>() && W.IsReady();
-            var useE = Config.Item("UseECombo").GetValue<bool>() && E.IsReady();
-
-            if (useQ)
-            {
-                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    Q.CastOnUnit(t);
-            }
-
-            if (useW)
-            {
-                t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    W.CastOnUnit(t);
-            }
-
-            if (useE && !Player.HasBuff("sound", true) && !Q.IsReady() && !W.IsReady())
-            {
-                t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                {
-                    E.Cast(t.Position);
-                }
-            }
-
             t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && !Player.HasBuff("sound", true))
-                UseItems(t);
+            if (!t.IsValidTarget())
+                return;
 
-            if (t != null && IgniteSlot != SpellSlot.Unknown &&
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && (shennBuffActive || usedSpell))
+                return;
+
+            if (W.IsReady())
+            {
+                W.CastOnUnit(t);
+            }
+            else if (Q.IsReady())
+            {
+                Q.CastOnUnit(t);
+            }
+            else if (E.IsReady() && !Player.HasBuff("sound", true) && !Q.IsReady() && !W.IsReady())
+            {
+                E.Cast(t.Position);
+            }
+
+            UseItems(t);
+
+            if (IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                 Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
             {
@@ -321,10 +326,9 @@ namespace Pantheon
             var useE = Config.Item("UseEHarass").GetValue<bool>() && E.IsReady();
 
             Obj_AI_Hero t;
-            
+
             if (useQ)
             {
-                
                 t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                     Q.CastOnUnit(t);
@@ -374,11 +378,11 @@ namespace Pantheon
         {
             var useQ = Config.Item("UseQLaneClear").GetValue<bool>() && Q.IsReady();
             var useE = Config.Item("UseELaneClear").GetValue<bool>() && E.IsReady();
-            
+
             if (useQ)
             {
                 var vMinions = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range);
-                foreach (Obj_AI_Base minions in
+                foreach (var minions in
                     vMinions.Where(
                         minions => minions.Health < ObjectManager.Player.GetSpellDamage(minions, SpellSlot.Q)))
                     Q.Cast(minions);
@@ -389,7 +393,7 @@ namespace Pantheon
                 var rangedMinionsE = MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, E.Range + E.Width + 30, MinionTypes.Ranged);
 
-                var locE = W.GetCircularFarmLocation(rangedMinionsE, W.Width * 0.75f);
+                var locE = W.GetCircularFarmLocation(rangedMinionsE, W.Width*0.75f);
                 if (locE.MinionsHit >= 3 && E.IsInRange(locE.Position.To3D()))
                 {
                     E.Cast(locE.Position);
@@ -464,14 +468,6 @@ namespace Pantheon
                 if (Player.Distance(vTarget) <= 350)
                     Items.UseItem(itemID);
             }
-        }
-
-        private static void WelcomeMessage()
-        {
-            Game.PrintChat(
-                String.Format(
-                    "<font color='#70DBDB'>xQx</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded!</font>",
-                    ChampionName));
         }
     }
 }
