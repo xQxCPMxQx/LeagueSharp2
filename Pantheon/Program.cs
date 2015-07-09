@@ -243,7 +243,7 @@ namespace Pantheon
             }
 
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
-                Config.Item("HarassActiveT").GetValue<KeyBind>().Active)
+               (Config.Item("HarassActiveT").GetValue<KeyBind>().Active && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo))
             {
                 var existsMana = Config.Item("HarassMana").GetValue<Slider>().Value;
                 if (Player.ManaPercent >= existsMana)
