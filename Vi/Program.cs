@@ -12,11 +12,11 @@ namespace Vi
     internal class Program
     {
         public const string ChampionName = "Vi";
-        private static readonly Obj_AI_Hero Player = ObjectManager.Player;
+        public static readonly Obj_AI_Hero Player = ObjectManager.Player;
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
         private static bool canUseE;
-        private static bool shennBuffActive = false;
+        private static bool shennBuffActive;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
@@ -31,10 +31,8 @@ namespace Vi
         public static Items.Item ItemRand;
         public static Items.Item ItemTiamat;
 
-        private static SpellSlot IgniteSlot = SpellSlot.Unknown;
         private static SpellSlot FlashSlot = SpellSlot.Unknown;
-
-
+        
         public static float FlashRange = 450f;
         public static int DelayTick = 0;
 
@@ -53,8 +51,6 @@ namespace Vi
         {
             if (Player.ChampionName != "Vi")
                 return;
-            if (Player.IsDead)
-                return;
 
             Q = new Spell(SpellSlot.Q, 860f);
             E = new Spell(SpellSlot.E);
@@ -71,7 +67,6 @@ namespace Vi
             SpellList.Add(E);
             SpellList.Add(R);
 
-            IgniteSlot = Player.GetSpellSlot("SummonerDot");
             FlashSlot = Player.GetSpellSlot("SummonerFlash");
 
             ItemBilge = new Items.Item(3144, 450f);
@@ -87,7 +82,7 @@ namespace Vi
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
-            new AssassinManager();
+            AssassinManager.Initiliaze();
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -102,8 +97,9 @@ namespace Vi
             {
                 Config.SubMenu("Combo")
                     .SubMenu("DontUlt")
-                    .AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                    .AddItem(new MenuItem("DontUlt" + enemy.CharData.BaseSkinName, enemy.CharData.BaseSkinName).SetValue(false));
             }
+            PlayerSpells.Initialize();
 
             /* [ Find Him in Team Fight ] */
             Config.SubMenu("Combo").AddSubMenu(new Menu("Focus in TF", "FindHim"));
@@ -115,12 +111,9 @@ namespace Vi
             {
                 Config.SubMenu("Combo")
                     .SubMenu("FindHim")
-                    .AddItem(new MenuItem("FindHim" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                    .AddItem(new MenuItem("FindHim" + enemy.CharData.BaseSkinName, enemy.CharData.BaseSkinName).SetValue(false));
             }
 
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo")
                 .AddItem(
                     new MenuItem("ComboFlashQActive", "Combo Flash+Q!").SetValue(
@@ -227,7 +220,6 @@ namespace Vi
             Utility.HpBarDamageIndicator.Enabled = true;
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            //Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Obj_AI_Base.OnProcessSpellCast += Game_OnProcessSpell;
 
@@ -255,7 +247,7 @@ namespace Vi
             if (!unit.IsMe)
                 return;
             
-            var t = GetTarget(Orbwalking.GetRealAutoAttackRange(Player) + 65, TargetSelector.DamageType.Physical);
+            var t = AssassinManager.GetTarget(Orbwalking.GetRealAutoAttackRange(Player) + 65, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
 
@@ -264,7 +256,7 @@ namespace Vi
                 canUseE = !xbuff.Name.Contains("viq") && !xbuff.Name.Contains("knock");
             }
 
-            var useE = canUseE && E.IsReady() && Config.Item("UseECombo").GetValue<bool>();
+            var useE = canUseE && E.IsReady();
 
             if (useE)
             {
@@ -274,12 +266,13 @@ namespace Vi
 
         private static void Game_OnUpdate(EventArgs args)
         {
+
             if (!Orbwalking.CanMove(100))
                 return;
 
             shennBuffActive = Player.HasBuff("Sheen", true);
 
-            if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 Combo();
             }
@@ -318,19 +311,16 @@ namespace Vi
         private static void Combo()
         {
 
-            var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
 
             if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && shennBuffActive)
                 return;
 
-            var useQ = Config.Item("UseQCombo").GetValue<bool>();
-            var useE = Config.Item("UseECombo").GetValue<bool>();
-            var useR = Config.Item("UseRCombo").GetValue<bool>();
             var comboDamage = GetComboDamage(t);
 
-            if (Q.IsReady() && useQ && t.IsValidTarget(Q.Range))
+            if (Q.IsReady() && t.IsValidTarget(Q.Range))
             {
                 if (Q.IsCharging)
                 {
@@ -345,16 +335,11 @@ namespace Vi
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 UseItems(t);
 
-            if (comboDamage > t.Health && IgniteSlot != SpellSlot.Unknown &&
-                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-            {
-                Player.Spellbook.CastSpell(IgniteSlot, t);
-            }
 
             if (R.IsReady())
             {
-                useR = (Config.Item("DontUlt" + t.BaseSkinName) != null &&
-                        Config.Item("DontUlt" + t.BaseSkinName).GetValue<bool>() == false) && useR;
+                var useR = (Config.Item("DontUlt" + t.CharData.BaseSkinName) != null &&
+                        Config.Item("DontUlt" + t.CharData.BaseSkinName).GetValue<bool>() == false);
 
                 var qDamage = Player.GetSpellDamage(t, SpellSlot.Q);
                 var eDamage = Player.GetSpellDamage(t, SpellSlot.E)*E.Instance.Ammo;
@@ -392,7 +377,7 @@ namespace Vi
         private static void ComboFlashQ()
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-            var t = GetTarget(Q.Range + FlashRange - 20, TargetSelector.DamageType.Physical);
+            var t = AssassinManager.GetTarget(Q.Range + FlashRange - 20, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
 
@@ -415,7 +400,7 @@ namespace Vi
 
         private static void Harass()
         {
-            var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             if (!t.IsValidTarget())
                 return;
@@ -536,7 +521,7 @@ namespace Vi
         {
             get
             {
-                var vTarget = GetTarget(E2.Range, TargetSelector.DamageType.Physical);
+                var vTarget = AssassinManager.GetTarget(E2.Range, TargetSelector.DamageType.Physical);
                 var vMinions = MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.NotAlly,
                     MinionOrderTypes.None);
@@ -572,11 +557,13 @@ namespace Vi
             if (Items.CanUseItem(3128))
                 fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
 
-            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (PlayerSpells.IgniteSlot != SpellSlot.Unknown &&
+                Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
             return (float) fComboDamage;
         }
+
         private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
         {
             var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
@@ -593,22 +580,6 @@ namespace Vi
             }
         }
 
-        private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
-        {
-            var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
-            if (!interruptSpells)
-                return;
-
-            if (Player.Distance(vTarget) < Q.Range)
-            {
-                Q.Cast(vTarget);
-            }
-            else if (Player.Distance(vTarget) < R.Range)
-            {
-                R.Cast(vTarget);
-            }
-        }
-
         private static InventorySlot GetInventorySlot(int id)
         {
             return
@@ -622,62 +593,29 @@ namespace Vi
             if (vTarget == null)
                 return;
 
-            foreach (var itemID in from menuItem in _menuTargetedItems.Items
+            foreach (var itemId in from menuItem in _menuTargetedItems.Items
                 let useItem = _menuTargetedItems.Item(menuItem.Name).GetValue<bool>()
                 where useItem
-                select Convert.ToInt16(menuItem.Name.Substring(4, 4))
+                    select Convert.ToInt16(menuItem.Name.Substring(4, 4))
                 into itemId
                 where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
-                select itemId)
+                    select itemId)
             {
-                Items.UseItem(itemID, vTarget);
+                Items.UseItem(itemId, vTarget);
             }
 
-            foreach (var itemID in from menuItem in _menuNonTargetedItems.Items
+            foreach (var itemId in (from menuItem in _menuNonTargetedItems.Items
                 let useItem = _menuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
                 where useItem
-                select Convert.ToInt16(menuItem.Name.Substring(4, 4))
+                    select Convert.ToInt16(menuItem.Name.Substring(4, 4))
                 into itemId
                 where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
-                select itemId)
+                    select itemId).Where(itemId => ObjectManager.Player.Distance(vTarget) <= 450))
             {
-                if (ObjectManager.Player.Distance(vTarget) <= 400)
-                    Items.UseItem(itemID);
+                Items.UseItem(itemId);
             }
         }
 
-        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0,
-            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
-        {
-            if (Math.Abs(vDefaultRange) < 0.00001)
-                vDefaultRange = Q.Range;
 
-            if (!Config.Item("AssassinActive").GetValue<bool>())
-                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
-
-            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
-
-            var vEnemy =
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(
-                        enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                            Config.Item("Assassin" + enemy.ChampionName) != null &&
-                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
-
-            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
-            {
-                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
-            }
-
-            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
-
-            Obj_AI_Hero t = !objAiHeroes.Any()
-                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
-                : objAiHeroes[0];
-
-            return t;
-        }
     }
 }
