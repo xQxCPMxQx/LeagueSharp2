@@ -19,7 +19,7 @@ namespace GamePing
             Drawing.OnDraw += (arg) =>
             {
                 if (Config.Item("Show").IsActive())
-                    Drawing.DrawText(Drawing.Width*0.94f, Drawing.Height*0.04f, Color.GreenYellow, "Ping: " + Game.Ping);
+                    Drawing.DrawText(Drawing.Width*0.94f, Drawing.Height*0.05f, Color.GreenYellow, "Ping: " + Game.Ping);
             };
         }
     }
