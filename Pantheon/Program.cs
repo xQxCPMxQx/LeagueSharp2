@@ -294,7 +294,8 @@ namespace Pantheon
             if (!t.IsValidTarget())
                 return;
 
-            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && (shennBuffActive || usedSpell))
+            //if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && (shennBuffActive || usedSpell))
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && (shennBuffActive))
                 return;
 
             if (W.IsReady())
