@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
-
 
 namespace Shen
 {
@@ -36,32 +35,36 @@ namespace Shen
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-
-            var allies = HeroManager.Allies.Where(a => !a.IsMe);
-            var objAiHeroes = allies as Obj_AI_Hero[] ?? allies.ToArray(); 
-
-            for (var i = 0; i < objAiHeroes.Count(); i++)
+            if (Program.Config.Item("Draw.Status.HPBar").GetValue<bool>())
             {
-                Drawing.DrawLine(Drawing.Width*0.892f + 0, Drawing.Height*0.479f + (float) (i + 1)*20, Drawing.Width*0.895f + 150, Drawing.Height*0.479f + (float) (i + 1)*20, 16, Color.Black);
-                Drawing.DrawLine(Drawing.Width*0.892f + 1, Drawing.Height*0.480f + (float) (i + 1)*20, Drawing.Width*0.895f + 149, Drawing.Height*0.480f + (float) (i + 1)*20, 14, Color.BurlyWood);
+                var allies = HeroManager.Allies.Where(a => !a.IsMe);
+                var objAiHeroes = allies as Obj_AI_Hero[] ?? allies.ToArray();
 
-                int hPercent = (int) Math.Ceiling((objAiHeroes[i].Health*150/objAiHeroes[i].MaxHealth));
-                if (hPercent > 0)
+                for (var i = 0; i < objAiHeroes.Count(); i++)
                 {
+                    Drawing.DrawLine(Drawing.Width*0.892f + 0, Drawing.Height*0.479f + (float) (i + 1)*20,
+                        Drawing.Width*0.895f + 150, Drawing.Height*0.479f + (float) (i + 1)*20, 16, Color.Black);
                     Drawing.DrawLine(Drawing.Width*0.892f + 1, Drawing.Height*0.480f + (float) (i + 1)*20,
-                        Drawing.Width*0.895f + hPercent - 1, Drawing.Height*0.480f + (float) (i + 1)*20,
-                        14,
-                        hPercent < 50 && hPercent > 30
-                            ? Color.Yellow
-                            : hPercent <= 30 ? Color.Red : Color.DarkOliveGreen);
+                        Drawing.Width*0.895f + 149, Drawing.Height*0.480f + (float) (i + 1)*20, 14, Color.BurlyWood);
+
+                    int hPercent = (int) Math.Ceiling((objAiHeroes[i].Health*150/objAiHeroes[i].MaxHealth));
+                    if (hPercent > 0)
+                    {
+                        Drawing.DrawLine(Drawing.Width*0.892f + 1, Drawing.Height*0.480f + (float) (i + 1)*20,
+                            Drawing.Width*0.895f + hPercent - 1, Drawing.Height*0.480f + (float) (i + 1)*20,
+                            14,
+                            hPercent < 50 && hPercent > 30
+                                ? Color.Yellow
+                                : hPercent <= 30 ? Color.Red : Color.DarkOliveGreen);
+                    }
+
+
+                    Utils.DrawText(Utils.Text, objAiHeroes[i].ChampionName, Drawing.Width*0.895f,
+                        Drawing.Height*0.48f + (float) (i + 1)*20, SharpDX.Color.Black);
+                    //Utils.DrawText(Utils.Text, objAiHeroes[i].ChampionName + ": " + hPercent + "%", Drawing.Width * 0.895f, Drawing.Height * 0.48f + (float)(i + 1) * 20, SharpDX.Color.Black);
+
                 }
-
-
-                Utils.DrawText(Utils.Text, objAiHeroes[i].ChampionName, Drawing.Width * 0.895f, Drawing.Height * 0.48f + (float)(i + 1) * 20, SharpDX.Color.Black);
-                //Utils.DrawText(Utils.Text, objAiHeroes[i].ChampionName + ": " + hPercent + "%", Drawing.Width * 0.895f, Drawing.Height * 0.48f + (float)(i + 1) * 20, SharpDX.Color.Black);
-
             }
-
             var t = Utils.ChampAlly;
             if (t != null && !ObjectManager.Player.IsDead && Program.R.IsReady() && Program.Config.Item("Draw.Notification").GetValue<bool>())
             {
