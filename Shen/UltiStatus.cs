@@ -5,12 +5,12 @@ using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
+
 namespace Shen
 {
     internal class UltiStatus
     {
         public static Menu LocalMenu;
-        private static Render.Sprite _sprite;
 
         private static string MenuTab
         {
