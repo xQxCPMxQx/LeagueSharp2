@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -44,6 +44,10 @@ namespace Shen
             LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings"));
             {
                 LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Protection Status").SetValue(true));
+<<<<<<< HEAD
+                LocalMenu.AddItem(new MenuItem("Draw.Status.HPBar", MenuTab + "Show Allies HP Bar Status").SetValue(true));
+=======
+>>>>>>> 188b14084f7b91eb1fdea76ea0f4967b200b6fef
                 LocalMenu.AddItem(new MenuItem("Draw.Status.Just", MenuTab + "Just Show This: ").SetValue(new StringList(new[] {"All", "Only High Protection Allies"})));
                 LocalMenu.AddItem(new MenuItem("Draw.Notification", MenuTab + "Show Notification Text").SetValue(true));
             }
