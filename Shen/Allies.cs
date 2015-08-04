@@ -43,7 +43,7 @@ namespace Shen
 
             LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings"));
             {
-                LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Targeting Status").SetValue(true));
+                LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Protection Status").SetValue(true));
                 LocalMenu.AddItem(new MenuItem("Draw.Status.Just", MenuTab + "Just Show This: ").SetValue(new StringList(new[] {"All", "Only High Protection Allies"})));
                 LocalMenu.AddItem(new MenuItem("Draw.Notification", MenuTab + "Show Notification Text").SetValue(true));
             }
