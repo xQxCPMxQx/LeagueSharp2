@@ -9,6 +9,8 @@ using System.Speech.Synthesis;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using ItemData = LeagueSharp.Common.Data.ItemData;
+
 #endregion
 
 namespace Shen
@@ -19,6 +21,10 @@ namespace Shen
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
         public static SpeechSynthesizer voice = new SpeechSynthesizer();
+        public static Enemies Enemies;
+        public static Allies ChampionAllies;
+        public static UltiStatus UltiStatus;
+        public static Utils utils;
 
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
@@ -29,10 +35,6 @@ namespace Shen
         private static SpellSlot FlashSlot = ObjectManager.Player.GetSpellSlot("SummonerFlash");
         private static SpellSlot TeleportSlot = ObjectManager.Player.GetSpellSlot("SummonerTeleport");
 
-        private static Obj_AI_Hero xUltiableAlly;
-        private Timer xTimer = new Timer();
-        private double pbUnit;
-        private int pbWidth, pbHeight, pbComplete;
 
         //Menu
         public static Menu Config;
@@ -47,11 +49,9 @@ namespace Shen
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (ObjectManager.Player.BaseSkinName != ChampionName) 
+            if (ObjectManager.Player.ChampionName != ChampionName) 
                 return;
-            
-            if (ObjectManager.Player.IsDead) 
-                return;
+
 
             Q = new Spell(SpellSlot.Q, 520f);
             Q.SetTargetted(0.15f, float.MaxValue);
@@ -67,6 +67,8 @@ namespace Shen
 
             //Create the menu
             Config = new Menu("xQx | Shen", "Shen", true);
+            Config.AddItem(new MenuItem("Mode", "Play Style (WIP):").SetValue(new StringList(new[] { "Auto", "Fighter", "Protector" }, 1)));
+
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
@@ -75,6 +77,12 @@ namespace Shen
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
+            new Utils();
+            Enemies = new Enemies();
+            ChampionAllies = new Allies();
+            UltiStatus = new UltiStatus();
+
+            Config.AddItem(new MenuItem("PC", "Choose Your PC for FPS Drop (WIP):").SetValue(new StringList(new[] { "Wooden PC", "Normal PC", "Monster!" }, 1)));
 
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
@@ -82,12 +90,12 @@ namespace Shen
                 /* [ Don't Use Ult ] */
                 Config.SubMenu("Combo").AddSubMenu(new Menu("Don't use Ult on", "DontUlt"));
                 foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().Where(ally => ally.IsAlly && !ally.IsMe))
-                    Config.SubMenu("Combo").SubMenu("DontUlt").AddItem(new MenuItem("DontUlt" + ally.BaseSkinName, ally.BaseSkinName).SetValue(false));
+                    Config.SubMenu("Combo").SubMenu("DontUlt").AddItem(new MenuItem("DontUlt" + ally.CharData.BaseSkinName, ally.CharData.BaseSkinName).SetValue(false));
 
                 /* [ Ult Priority ] */
                 Config.SubMenu("Combo").AddSubMenu(new Menu("Ultimate Priority", "UltPriority"));
                 foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().Where(ally => ally.IsAlly && !ally.IsMe))
-                    Config.SubMenu("Combo").SubMenu("UltPriority").AddItem(new MenuItem("UltPriority" + ally.BaseSkinName, ally.BaseSkinName).SetValue(new Slider(1, 1, 5)));
+                    Config.SubMenu("Combo").SubMenu("UltPriority").AddItem(new MenuItem("UltPriority" + ally.CharData.BaseSkinName, ally.CharData.BaseSkinName).SetValue(new Slider(1, 1, 5)));
 
                 Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
                 Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
@@ -165,44 +173,17 @@ namespace Shen
                 Config.SubMenu("Drawings").AddItem(new MenuItem("DrawRswnp", "Show Who Need Help").SetValue(true));
             }
 
-            /* [ Speech ] */
-            Config.AddSubMenu(new Menu("Speech", "Speech"));
-            {
-                var xKey = char.ConvertFromUtf32((int)Config.Item("ComboUseRK").GetValue<KeyBind>().Key);
-                
-                Config.SubMenu("Speech").AddSubMenu(new Menu("Speech Test", "SpeechTest"));
-                {
-                    Config.SubMenu("Speech").SubMenu("SpeechTest").AddItem(new MenuItem("SpeechText", "Ezreal needs your help press " + xKey + " for ultimate!"));
-                    Config.SubMenu("Speech").SubMenu("SpeechTest").AddItem(new MenuItem("SpeechButton", "Test Now").SetValue(false))
-                        .ValueChanged += (sender, e) =>
-                        {
-                            if (e.GetNewValue<bool>())
-                            {
-                                Speech();
-                                Config.Item("SpeechButton").SetValue(false);
-                            }
-                        };
-                }
-
-                Config.SubMenu("Speech").AddItem(new MenuItem("SpeechVolume", "Volume").SetValue(new Slider(50, 10, 100)));//.ValueChanged += (sender, eventArgs) => { Game.PrintChat("AAA"); };
-                Config.SubMenu("Speech").AddItem(new MenuItem("SpeechRate", "Rate").SetValue(new Slider(3, -10, 10)));
-                Config.SubMenu("Speech").AddItem(new MenuItem("SpeechGender", "Gender").SetValue(new StringList(new[] {"Male", "Female"}, 1)));
-                Config.SubMenu("Speech").AddItem(new MenuItem("SpeechRepeatTime", "Repeat").SetValue(new StringList(new[] {"Repeat 1 Time ", "Repeat 2 Times", "Repeat 3 Times", "Repeat Everytime"}, 1)));
-                Config.SubMenu("Speech").AddItem(new MenuItem("SpeechRepeatDelay", "Repeat Delay Sec.").SetValue(new Slider(3, 1, 5)));
-                Config.SubMenu("Speech").AddItem(new MenuItem("SpeechActive", "Enabled").SetValue(true));
-            }
-
             new PotionManager();
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnUpdate;
             
             Drawing.OnDraw += Drawing_OnDraw;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
 
             Game.PrintChat(String.Format("<font color='#70DBDB'>xQx | </font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'> Loaded!</font>", ChampionName));
 
-            Speech();
+            //Speech();
         }
 
         public static void Speech()
@@ -246,7 +227,7 @@ namespace Shen
                 select shop).Any<Obj_Shop>(shop => Vector2.Distance(xAlly.Position.To2D(), shop.Position.To2D()) < 1250f);
         }
 
-        public static int CountAlliesInRange(int range, Vector3 point)
+        public static int CountAlliesInRange(float range, Vector3 point)
         {
             return (
                 from units in ObjectManager.Get<Obj_AI_Hero>()
@@ -255,7 +236,7 @@ namespace Shen
                     units => Vector2.Distance(point.To2D(), units.Position.To2D()) <= (float) range);
         }
 
-        public static int CountEnemysInRange(int range, Vector3 point)
+        public static int CountEnemysInRange(float range, Vector3 point)
         {
             return (
                 from units in ObjectManager.Get<Obj_AI_Hero>()
@@ -282,36 +263,34 @@ namespace Shen
                 
             {
                 var xHeros = ObjectManager.Get<Obj_AI_Hero>().Where(xQ => !xQ.IsMe && xQ.IsVisible && !xQ.IsDead);
-                var xAlly = xHeros.Where(xQ => xQ.IsAlly && !xQ.IsMe && !Config.Item("DontUlt" + xQ.BaseSkinName).GetValue<bool>()).OrderBy(xQ => xQ.Health).FirstOrDefault();
+                var xAlly = xHeros.Where(xQ => xQ.IsAlly && !xQ.IsMe && !Config.Item("DontUlt" + xQ.CharData.BaseSkinName).GetValue<bool>()).OrderBy(xQ => xQ.Health).FirstOrDefault();
                 var xEnemy = xHeros.Where(xQ => xQ.IsEnemy);
 
                 
                 if (xAlly.Health < xAlly.Level * 30 && !InShopRange(xAlly))
                 {
+                    var xKey = char.ConvertFromUtf32((int)Config.Item("ComboUseRK").GetValue<KeyBind>().Key);
                     foreach (var x1 in xEnemy.Where(x1 => x1.Distance(xAlly) < 600))
                     {
                         Game.PrintChat(xAlly.ChampionName + " -> " + x1.ChampionName);
-                         xUltiableAlly = xAlly;
-                        var xKey = char.ConvertFromUtf32((int)Config.Item("ComboUseRK").GetValue<KeyBind>().Key);
 
-                    //Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.80f, System.Drawing.Color.Red, "Q is not ready! You can not Jump!");
-                   // Game.PrintChat( xAlly.BaseSkinName + ":-> " + xPriority + " Needs Your Help! Press " + xKey + " for Ultimate!");
+                        //Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.80f, System.Drawing.Color.Red, "Q is not ready! You can not Jump!");
+                   // Game.PrintChat( xAlly.CharData.BaseSkinName + ":-> " + xPriority + " Needs Your Help! Press " + xKey + " for Ultimate!");
 
-                    Drawing.DrawText(Drawing.Width * 0.40f, Drawing.Height * 0.80f, System.Drawing.Color.White, xAlly.BaseSkinName + " Needs Your Help! Press " + xKey + " for Ultimate!");
+                    Drawing.DrawText(Drawing.Width * 0.40f, Drawing.Height * 0.80f, System.Drawing.Color.White, xAlly.CharData.BaseSkinName + " Needs Your Help! Press " + xKey + " for Ultimate!");
                     }
                     /*
-                    var xPriority = Config.Item("UltPriority" + xAlly.BaseSkinName).GetValue<Slider>().Value;
+                    var xPriority = Config.Item("UltPriority" + xAlly.CharData.BaseSkinName).GetValue<Slider>().Value;
                     xUltiableAlly = xAlly;
                     var xKey = char.ConvertFromUtf32((int)Config.Item("ComboUseRK").GetValue<KeyBind>().Key);
-                    Drawing.DrawText(Drawing.Width * 0.40f, Drawing.Height * 0.80f, System.Drawing.Color.White, xAlly.BaseSkinName + " Needs Your Help! Press " + xKey + " for Ultimate!");
+                    Drawing.DrawText(Drawing.Width * 0.40f, Drawing.Height * 0.80f, System.Drawing.Color.White, xAlly.CharData.BaseSkinName + " Needs Your Help! Press " + xKey + " for Ultimate!");
                     */
-                    
                 }
             }            
         }
         private static void Game_OnUpdate(EventArgs args)
         {
-            DrawHelplessAllies();
+         
             if (!Orbwalking.CanMove(100)) return;
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
@@ -321,7 +300,9 @@ namespace Shen
 
             if (Config.Item("ComboUseRK").GetValue<KeyBind>().Active)
             {
-                ComboUseRWithKey();
+                var t = Utils.ChampAlly;
+                if (t != null && R.IsReady())
+                    R.CastOnUnit(t);
             }
 
             if (Config.Item("ComboUseEF").GetValue<KeyBind>().Active)
@@ -359,21 +340,21 @@ namespace Shen
 
             if (Q.IsReady() && useQ)
             {
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                var t = Enemies.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                     Q.CastOnUnit(t);
             }
 
             if (W.IsReady() && useW)
             {
-                var t = TargetSelector.GetTarget(Q.Range / 2, TargetSelector.DamageType.Magical);
+                var t = Enemies.GetTarget(Q.Range / 2, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                     W.CastOnUnit(ObjectManager.Player);
             }
 
             if (E.IsReady() && useE)
             {
-                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+                var t = Enemies.GetTarget(E.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                 {
                     E.Cast(t.Position);
@@ -384,9 +365,6 @@ namespace Shen
 
         private static void ComboUseRWithKey()
         {
-            if (R.IsReady())
-                R.CastOnUnit(xUltiableAlly);
-            //Packet.C2S.Cast.Encoded(new Packet.C2S.Cast.Struct(xUltiableAlly.NetworkId, SpellSlot.R)).Send();
 
         }
 
@@ -394,7 +372,7 @@ namespace Shen
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 			
-            var fqTarget = TargetSelector.GetTarget(Q.Range + 430, TargetSelector.DamageType.Physical);
+            var fqTarget = Enemies.GetTarget(E.Range + 500, TargetSelector.DamageType.Physical);
 
             if (ObjectManager.Player.Distance(fqTarget) > E.Range && E.IsReady() && fqTarget != null &&
                 FlashSlot != SpellSlot.Unknown &&
@@ -410,7 +388,7 @@ namespace Shen
 
             if (Q.IsReady() && useQ)
             {
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                var t = Enemies.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                     Q.CastOnUnit(t);
             }
@@ -450,12 +428,12 @@ namespace Shen
             }
         }
 
-        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base t, InterruptableSpell args)
+        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero t, Interrupter2.InterruptableTargetEventArgs args)
         {
-            var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
-            if (!interruptSpells) return;
+            if (!Config.Item("InterruptSpells").GetValue<KeyBind>().Active) 
+                return;
 
-            if (ObjectManager.Player.Distance(t) < Q.Range)
+            if (ObjectManager.Player.Distance(t) < E.Range)
             {
                 E.Cast(t.Position);
             }

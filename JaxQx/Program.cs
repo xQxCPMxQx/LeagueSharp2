@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using LeagueSharp;
 using LeagueSharp.Common;
 #endregion
@@ -18,6 +17,7 @@ namespace JaxQx
         public static Orbwalking.Orbwalker Orbwalker;
         private static bool usedSpell = true;
         private static bool shennBuffActive = false;
+        private static AssassinManager assassinManager;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
@@ -25,7 +25,7 @@ namespace JaxQx
         public static Spell E;
         public static Spell R;
 
-        public static string[] xWards =
+        public static string[] Wards =
         {
             "RelicSmallLantern", "RelicLantern", "SightWard", "wrigglelantern",
             "ItemGhostWard", "VisionWard", "BantamTrap", "JackInTheBox", "CaitlynYordleTrap", "Bushwhack"
@@ -33,14 +33,12 @@ namespace JaxQx
 
         public static Map map;
 
-        private static SpellSlot IgniteSlot;
-        public static float wardRange = 600f;
-        public static int DelayTick = 0;
+        private static SpellSlot igniteSlot;
+        public static float WardRange = 600f;
+        public static int DelayTick;
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
-        public static Menu MenuTargetedItems;
-        public static Menu MenuNonTargetedItems;
 
         private static void Main(string[] args)
         {
@@ -50,9 +48,7 @@ namespace JaxQx
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.BaseSkinName != "Jax")
-                return;
-            if (Player.IsDead)
+            if (Player.ChampionName != "Jax")
                 return;
 
             Q = new Spell(SpellSlot.Q, 680f);
@@ -67,7 +63,7 @@ namespace JaxQx
             SpellList.Add(E);
             SpellList.Add(R);
 
-            IgniteSlot = Player.GetSpellSlot("SummonerDot");
+            igniteSlot = Player.GetSpellSlot("SummonerDot");
 
             //Create the menu
             Config = new Menu("xQx | Jax", "Jax", true);
@@ -99,10 +95,7 @@ namespace JaxQx
                         new StringList(new[] { "Q+W", "Q+E", "Default" })));
             Config.SubMenu("Harass")
                 .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("Harass")
-                .AddItem(
-                    new MenuItem("HarassActive", "Harass").SetValue(
-                        new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
@@ -136,29 +129,6 @@ namespace JaxQx
             Config.AddSubMenu(MenuExtras);
             MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
-            
-            // Extras -> Use Items 
-            Menu menuUseItems = new Menu("Use Items", "menuUseItems");
-            Config.SubMenu("Extras").AddSubMenu(menuUseItems);
-
-            // Extras -> Use Items -> Targeted Items
-            MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
-            menuUseItems.AddSubMenu(MenuTargetedItems);
-            MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
-
-            // Extras -> Use Items -> AOE Items
-            MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
-            menuUseItems.AddSubMenu(MenuNonTargetedItems);
-            MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
-
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQRange", "Q range").SetValue(new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
@@ -176,6 +146,7 @@ namespace JaxQx
                 Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
             };
 
+            assassinManager = new AssassinManager();
             
             new PotionManager();
             
@@ -202,7 +173,7 @@ namespace JaxQx
             var drawWard = Config.Item("DrawWard").GetValue<Circle>();
             if (drawWard.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, wardRange, drawWard.Color, 1);
+                Render.Circle.DrawCircle(Player.Position, WardRange, drawWard.Color, 1);
             }
 
             var drawMinQRange = Config.Item("DrawQMinRange").GetValue<Circle>();
@@ -226,48 +197,14 @@ namespace JaxQx
             if (E.IsReady())
                 fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.E);
 
-            if (IgniteSlot != SpellSlot.Unknown &&
-                ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (igniteSlot != SpellSlot.Unknown &&
+                ObjectManager.Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
 
             if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3128))
                 fComboDamage += ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Botrk);
 
             return (float) fComboDamage;
-        }
-
-        private static Obj_AI_Hero GetEnemy(float vDefaultRange = 0,
-            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
-        {
-            if (Math.Abs(vDefaultRange) < 0.00001)
-                vDefaultRange = Q.Range;
-
-            if (!Config.Item("AssassinActive").GetValue<bool>())
-                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
-
-            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
-
-            var vEnemy =
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(
-                        enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                            Config.Item("Assassin" + enemy.ChampionName) != null &&
-                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
-
-            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
-            {
-                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
-            }
-
-            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
-
-            Obj_AI_Hero t = !objAiHeroes.Any()
-                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
-                : objAiHeroes[0];
-
-            return t;
         }
 
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
@@ -291,7 +228,7 @@ namespace JaxQx
                 usedSpell = false;
             }
 
-            if (xWards.ToList().Contains(arg.SData.Name))
+            if (Wards.ToList().Contains(arg.SData.Name))
             {
                 Jumper.testSpellCast = arg.End.To2D();
                 Polygon pol;
@@ -346,7 +283,7 @@ namespace JaxQx
 
         private static void Combo()
         {
-            var t = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
+            var t = assassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
 
@@ -373,12 +310,12 @@ namespace JaxQx
                 ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0)
                 E.Cast();
 
-            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (igniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
             {
                 if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health &&
                     ObjectManager.Player.Distance(t) <= 500)
                 {
-                    Player.Spellbook.CastSpell(IgniteSlot, t);
+                    Player.Spellbook.CastSpell(igniteSlot, t);
                 }
             }
 
@@ -512,8 +449,7 @@ namespace JaxQx
             var useW = Config.Item("UseWJungleFarm").GetValue<bool>();
             var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
 
-            var mobs = MinionManager.GetMinions(
-                Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0)
                 return;
@@ -547,29 +483,29 @@ namespace JaxQx
                         (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
         }
 
-        public static void UseItems(Obj_AI_Hero vTarget)
+        public static void UseItems(Obj_AI_Hero t)
         {
-            if (vTarget == null)
+            if (t == null)
                 return;
 
-            foreach (var itemId in from menuItem in MenuTargetedItems.Items
-                let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                where useItem
-                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
-                into itemId
-                where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
-                select itemId)
+            int[] targeted = new[] { 3153, 3144, 3146, 3184 };
+            foreach (
+                var itemId in
+                    targeted.Where(
+                        itemId =>
+                            Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null &&
+                            t.IsValidTarget(450)))
             {
-                Items.UseItem(itemId, vTarget);
+                Items.UseItem(itemId, t);
             }
 
-            foreach (var itemId in (from menuItem in MenuNonTargetedItems.Items
-                let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                where useItem
-                select Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4))
-                into itemId
-                where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
-                select itemId).Where(itemId => vTarget.IsValidTarget(350)))
+            int[] nonTarget = new[] {3180, 3143, 3131, 3074, 3077, 3142};
+            foreach (
+                var itemId in
+                    nonTarget.Where(
+                        itemId =>
+                            Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null &&
+                            t.IsValidTarget(450)))
             {
                 Items.UseItem(itemId);
             }
