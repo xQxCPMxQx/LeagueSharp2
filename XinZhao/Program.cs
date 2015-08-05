@@ -249,9 +249,9 @@ namespace XinZhao
 
         private static void JungleFarm()
         {
-            var useQ = Config.Item("LanerClearUseQ").GetValue<bool>();
-            var useW = Config.Item("LanerClearUseW").GetValue<bool>();
-            var useE = Config.Item("LanerClearUseE").GetValue<bool>();
+            var useQ = Config.Item("LaneClearUseQ").GetValue<bool>();
+            var useW = Config.Item("LaneClearUseW").GetValue<bool>();
+            var useE = Config.Item("LaneClearUseE").GetValue<bool>();
 
             var mobs = MinionManager.GetMinions(
                 ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral,
