@@ -130,6 +130,8 @@ namespace Shen
             Config.AddSubMenu(new Menu("Misc", "Misc"));
             Config.SubMenu("Misc").AddItem(new MenuItem("SmartShield", "Smart W")).SetValue(true);
             Config.SubMenu("Misc").AddItem(new MenuItem("InterruptSpellsE", "Interrupter E")).SetValue(true);
+            Config.SubMenu("Misc").AddItem(new MenuItem("GapCloserE", "GapCloser E")).SetValue(true);
+            
             // Extras
             //Config.AddSubMenu(new Menu("Extras", "Extras"));
             //Config.SubMenu("Extras").AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
@@ -231,9 +233,9 @@ namespace Shen
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (W.IsReady() && gapcloser.Sender.IsValidTarget(Q.Range) && Config.Item("Gap_W").GetValue<bool>())
+            if (E.IsReady() && gapcloser.Sender.IsValidTarget(E.Range) && Config.Item("GapCloserE").GetValue<bool>())
             {
-                W.Cast();
+                E.Cast(gapcloser.Sender.Position);
             }
         }
 
