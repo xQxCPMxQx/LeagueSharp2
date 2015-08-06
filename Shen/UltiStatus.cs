@@ -5,21 +5,20 @@ using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-
 namespace Shen
 {
     internal class UltiStatus
     {
         public static Menu LocalMenu;
 
-        private static string MenuTab
-        {
-            get { return "    "; }
-        }
-
         public UltiStatus()
         {
             Load();
+        }
+
+        private static string MenuTab
+        {
+            get { return "    "; }
         }
 
         private static void Load()
@@ -47,7 +46,7 @@ namespace Shen
                     Drawing.DrawLine(Drawing.Width*0.892f + 1, Drawing.Height*0.480f + (float) (i + 1)*20,
                         Drawing.Width*0.895f + 149, Drawing.Height*0.480f + (float) (i + 1)*20, 14, Color.BurlyWood);
 
-                    int hPercent = (int) Math.Ceiling((objAiHeroes[i].Health*150/objAiHeroes[i].MaxHealth));
+                    var hPercent = (int) Math.Ceiling((objAiHeroes[i].Health*150/objAiHeroes[i].MaxHealth));
                     if (hPercent > 0)
                     {
                         Drawing.DrawLine(Drawing.Width*0.892f + 1, Drawing.Height*0.480f + (float) (i + 1)*20,
@@ -62,18 +61,20 @@ namespace Shen
                     Utils.DrawText(Utils.Text, objAiHeroes[i].ChampionName, Drawing.Width*0.895f,
                         Drawing.Height*0.48f + (float) (i + 1)*20, SharpDX.Color.Black);
                     //Utils.DrawText(Utils.Text, objAiHeroes[i].ChampionName + ": " + hPercent + "%", Drawing.Width * 0.895f, Drawing.Height * 0.48f + (float)(i + 1) * 20, SharpDX.Color.Black);
-
                 }
             }
             var t = Utils.ChampAlly;
             if (t != null && !ObjectManager.Player.IsDead && Program.R.IsReady() && Program.Config.Item("Draw.Notification").GetValue<bool>())
             {
-                var xKey = char.ConvertFromUtf32((int)Program.Config.Item("ComboUseRK").GetValue<KeyBind>().Key);
-                var xText = "Press "+ xKey + " for Ulti: " + t.ChampionName;
-                Utils.DrawText(Utils.TextWarning, xText, Drawing.Width * 0.322f, Drawing.Height * 0.442f, SharpDX.Color.Black);
-                Utils.DrawText(Utils.TextWarning, xText, Drawing.Width * 0.32f, Drawing.Height * 0.44f, SharpDX.Color.White);
+                var xKey = char.ConvertFromUtf32((int) Program.Config.Item("ComboUseRK").GetValue<KeyBind>().Key);
+                var xText = "Press " + xKey + " for Ulti: " + t.ChampionName;
+                Utils.DrawText(Utils.TextWarning, xText, Drawing.Width*0.322f, Drawing.Height*0.442f,
+                    SharpDX.Color.Black);
+                Utils.DrawText(Utils.TextWarning, xText, Drawing.Width*0.32f, Drawing.Height*0.44f, SharpDX.Color.White);
 
-                Utils.DrawText(Utils.Text, "You can Turn Off this message! Please Check 'Protector Settings -> Show Notification Text'", Drawing.Width*0.325f, Drawing.Height*0.52f, SharpDX.Color.White);
+                Utils.DrawText(Utils.Text,
+                    "You can Turn Off this message! Please Check 'Protector Settings -> Show Notification Text'",
+                    Drawing.Width*0.325f, Drawing.Height*0.52f, SharpDX.Color.White);
             }
         }
     }

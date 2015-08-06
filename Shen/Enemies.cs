@@ -3,9 +3,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
-using Font = SharpDX.Direct3D9.Font;
 
 namespace Shen
 {
@@ -13,16 +11,43 @@ namespace Shen
     {
         public static Menu LocalMenu;
 
-        private static string MenuTab { get { return "    "; } }
+        public Enemies()
+        {
+            Load();
+        }
+
+        private static string MenuTab
+        {
+            get { return "    "; }
+        }
 
         private static float SelectorRange
         {
             get { return Program.Config.Item("Enemies.SearchRange").GetValue<Slider>().Value; }
         }
 
-        public Enemies()
+        private static Obj_AI_Hero TsEnemy
         {
-            Load();
+            get
+            {
+                var vMax = HeroManager.Enemies.Where(
+                    e =>
+                        !e.IsDead && e.IsVisible && e.IsValidTarget(SelectorRange))
+                    .Max(
+                        h => LocalMenu.Item("Selected" + h.ChampionName).GetValue<StringList>().SelectedIndex);
+
+                if (!double.IsNaN(vMax))
+                {
+                    var enemy = HeroManager.Enemies.Where(
+                        e =>
+                            !e.IsDead && e.IsVisible && e.IsValidTarget(SelectorRange) &&
+                            LocalMenu.Item("Selected" + e.ChampionName).GetValue<StringList>().SelectedIndex == vMax);
+
+                    return enemy.MinOrDefault(hero => hero.Health);
+                }
+
+                return null;
+            }
         }
 
         private static void Load()
@@ -30,9 +55,12 @@ namespace Shen
             LocalMenu = new Menu("[ Fighter Settings ]", "Enemies");
 
             Program.Config.AddSubMenu(LocalMenu);
-            LocalMenu.AddItem(new MenuItem("Enemies.Mode", "Target Selector:").SetValue(new StringList(new[] { "L# Target Selector", "xQx Shen Target Selector" }, 1)));
+            LocalMenu.AddItem(
+                new MenuItem("Enemies.Mode", "Target Selector:").SetValue(
+                    new StringList(new[] {"L# Target Selector", "xQx Shen Target Selector"}, 1)));
             LocalMenu.AddItem(new MenuItem("Enemies.Active", "Active").SetValue(true));
-            LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Searching Range")).SetValue(new Slider(1000, 1500));
+            LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Searching Range"))
+                .SetValue(new Slider(1000, 1500));
 
             LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:"));
             {
@@ -40,23 +68,30 @@ namespace Shen
                 {
                     LocalMenu.AddItem(
                         new MenuItem("Selected" + enemy.ChampionName, MenuTab + enemy.CharData.BaseSkinName)
-                            .SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" },
+                            .SetValue(new StringList(new[] {"Low Focus", "Medium Focus", "High Focus"},
                                 GetPriority(enemy.ChampionName))));
                 }
             }
 
             LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:"));
             {
-                LocalMenu.AddItem(new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto arrange priorities").SetShared().SetValue(false))
+                LocalMenu.AddItem(
+                    new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto arrange priorities").SetShared()
+                        .SetValue(false))
                     .ValueChanged += AutoPriorityItemValueChanged;
             }
-            LocalMenu.AddItem(new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(true));
+            LocalMenu.AddItem(
+                new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(true));
 
             LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings"));
             {
-                LocalMenu.AddItem(new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true, Color.GreenYellow)));
+                LocalMenu.AddItem(
+                    new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true,
+                        Color.GreenYellow)));
                 LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Targeting Status").SetValue(true));
-                LocalMenu.AddItem(new MenuItem("Draw.Status.Show", MenuTab + MenuTab + "Show This:").SetValue(new StringList(new[] { "All", "Show Only High Enemies" })));
+                LocalMenu.AddItem(
+                    new MenuItem("Draw.Status.Show", MenuTab + MenuTab + "Show This:").SetValue(
+                        new StringList(new[] {"All", "Show Only High Enemies"})));
             }
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
             Game.OnUpdate += OnUpdate;
@@ -71,7 +106,6 @@ namespace Shen
 
         private static void OnUpdate(EventArgs args)
         {
-           
         }
 
         private static void LoadEnemyPriorityData()
@@ -79,8 +113,8 @@ namespace Shen
             foreach (var enemy in HeroManager.Enemies)
             {
                 LocalMenu.Item("Selected" + enemy.ChampionName)
-                        .SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" },
-                            GetPriority(enemy.ChampionName)));
+                    .SetValue(new StringList(new[] {"Low Focus", "Medium Focus", "High Focus"},
+                        GetPriority(enemy.ChampionName)));
             }
         }
 
@@ -94,7 +128,7 @@ namespace Shen
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
-            if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)
+            if (args.Msg != (uint) WindowsMessages.WM_LBUTTONDOWN)
                 return;
 
             if (Program.Config.Item("Enemies.Click").GetValue<bool>())
@@ -115,7 +149,7 @@ namespace Shen
                         var i = vSelected == 2 ? 0 : vSelected + 1;
 
                         LocalMenu.Item("Selected" + selectedTarget.ChampionName)
-                            .SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" }, i));
+                            .SetValue(new StringList(new[] {"Low Focus", "Medium Focus", "High Focus"}, i));
                     }
                 }
             }
@@ -187,8 +221,8 @@ namespace Shen
 
                     Utils.DrawText(vSelected == 2 ? Utils.TextBold : Utils.Text,
                         LocalMenu.Item("Selected" + enemy.CharData.BaseSkinName).GetValue<StringList>().SelectedValue,
-                        enemy.HPBarPosition.X + enemy.BoundingRadius / 2f -
-                        (enemy.CharData.BaseSkinName.Length / 2f),
+                        enemy.HPBarPosition.X + enemy.BoundingRadius/2f -
+                        (enemy.CharData.BaseSkinName.Length/2f),
                         enemy.HPBarPosition.Y - 20,
                         vSelected == 2
                             ? SharpDX.Color.Red
@@ -202,35 +236,13 @@ namespace Shen
                     SelectorRange, drawSearch.Color, 1);
             }
         }
-        public Obj_AI_Hero GetTarget(float vRange = 0, TargetSelector.DamageType vDamageType = TargetSelector.DamageType.Physical)
+
+        public Obj_AI_Hero GetTarget(float vRange = 0,
+            TargetSelector.DamageType vDamageType = TargetSelector.DamageType.Physical)
         {
             if (Math.Abs(vRange) < 0.00001)
                 return null;
             return TsEnemy;
-        }
-
-        private static Obj_AI_Hero TsEnemy
-        {
-            get
-            {
-                var vMax = HeroManager.Enemies.Where(
-                    e =>
-                        !e.IsDead && e.IsVisible && e.IsValidTarget(SelectorRange))
-                    .Max(
-                        h => LocalMenu.Item("Selected" + h.ChampionName).GetValue<StringList>().SelectedIndex);
-
-                if (!Double.IsNaN(vMax))
-                {
-                    var enemy = HeroManager.Enemies.Where(
-                        e =>
-                            !e.IsDead && e.IsVisible && e.IsValidTarget(SelectorRange) &&
-                            LocalMenu.Item("Selected" + e.ChampionName).GetValue<StringList>().SelectedIndex == vMax);
-
-                            return enemy.MinOrDefault(hero => hero.Health);
-                }
-
-                return null;
-            }
         }
     }
 }
