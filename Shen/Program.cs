@@ -178,7 +178,7 @@ namespace Shen
         public static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             
-            if (!sender.IsMe && sender.IsEnemy && ObjectManager.Player.Health < 200 && W.IsReady()) // for minions attack
+            if (!sender.IsMe && sender.IsEnemy && ObjectManager.Player.Health < 200 && W.IsReady() && args.Target.IsMe) // for minions attack
             {
                 W.Cast();
             }
