@@ -73,7 +73,7 @@ namespace JaxQx
             Config.AddSubMenu(targetSelectorMenu);
             
             
-            //new AssassinManager();
+            new AssassinManager();
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
