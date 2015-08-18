@@ -33,6 +33,12 @@ namespace XinZhao
         {
             get
             {
+                var t = TargetSelector.GetTarget(SelectorRange, TargetSelector.DamageType.Physical);
+                if (t == null)
+                {
+                    return null;
+                }
+                
                 var vMax = HeroManager.Enemies.Where(
                     e =>
                         !e.IsDead && e.IsVisible && e.IsValidTarget(SelectorRange))
