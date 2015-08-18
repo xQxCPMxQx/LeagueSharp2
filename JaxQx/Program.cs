@@ -201,7 +201,7 @@ namespace JaxQx
                 ObjectManager.Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
 
-            if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3128))
+            if (Items.CanUseItem(3128))
                 fComboDamage += ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Botrk);
 
             return (float) fComboDamage;
