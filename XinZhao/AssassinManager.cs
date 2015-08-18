@@ -66,7 +66,7 @@ namespace XinZhao
             LocalMenu.AddItem(new MenuItem("TS.Active", "Active").SetValue(true));
             LocalMenu.AddItem(new MenuItem("TS.SearchRange", MenuTab + "Enemy Searching Range")).SetValue(new Slider(950, 1500));
 
-            LocalMenu.AddItem(new MenuItem("TS.Enemies.Title", "Enemies:", false, TextFontStyle.Bold, Color.Yellow));
+            LocalMenu.AddItem(new MenuItem("TS.Enemies.Title", "Enemies:", false, TextFontStyle.Bold));
             {
                 foreach (var enemy in HeroManager.Enemies)
                 {
@@ -77,7 +77,7 @@ namespace XinZhao
                 }
             }
 
-            LocalMenu.AddItem(new MenuItem("TS.Other.Title", "Other Settings:", false, TextFontStyle.Bold, Color.Aqua));
+            LocalMenu.AddItem(new MenuItem("TS.Other.Title", "Other Settings:", false, TextFontStyle.Bold));
             {
                 LocalMenu.AddItem(new MenuItem("TS.AutoPriority", MenuTab + "Auto arrange priorities").SetShared().SetValue(false))
                     .ValueChanged += AutoPriorityItemValueChanged;
@@ -85,7 +85,7 @@ namespace XinZhao
             LocalMenu.AddItem(new MenuItem("TargetingMode", MenuTab + "Target Mode").SetShared().SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
             LocalMenu.AddItem(new MenuItem("TS.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(true));
 
-            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings", false, TextFontStyle.Bold, Color.Aqua));
+            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings", false, TextFontStyle.Bold));
             {
                 LocalMenu.AddItem(new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true, Color.GreenYellow)));
                 LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Targeting Status").SetValue(true));
