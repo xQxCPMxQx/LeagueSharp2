@@ -59,7 +59,7 @@ namespace XinZhao
                 });
 
 
-            LocalMenu = new Menu("XinZhao | Target Selector", "TSxQx", false, TextFontStyle.Bold, Color.YellowGreen);
+            LocalMenu = new Menu("XinZhao | Target Selector", "TSxQx");
 
             Program.Config.AddSubMenu(LocalMenu);
             LocalMenu.AddItem(new MenuItem("TS.Mode", "Selector Mode:").SetValue(new StringList(new[] { "L# Target Selector", "XinZhao Target Selector" }, 1)));
