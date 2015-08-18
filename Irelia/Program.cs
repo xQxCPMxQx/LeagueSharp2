@@ -390,8 +390,10 @@ namespace Irelia
             var useR = Config.Item("UseRCombo").GetValue<bool>();
 
             var t = Enemies.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            if (!t.IsValidTarget())
+            if (t == null)
+            {
                 return;
+            }
 
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
