@@ -34,7 +34,6 @@ namespace Irelia
         public static Menu Config;
         public static Menu MenuExtras;
 
-        public static Utils Utils;
         public static Enemies Enemies;
 
 
@@ -76,7 +75,6 @@ namespace Irelia
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
 
-            Utils = new Utils();
             Enemies = new Enemies();
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
