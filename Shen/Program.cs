@@ -398,12 +398,16 @@ namespace Shen
 
         private static void Combo()
         {
+            var t = Enemies.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            if (t == null)
+            {
+                return;
+            }
+            
             var useQ = Config.Item("ComboUseQ").GetValue<bool>();
             var useW = Config.Item("ComboUseW").GetValue<bool>();
             var useE = Config.Item("ComboUseE").GetValue<bool>();
-
-            var t = Enemies.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-
+            
             if (E.Level > 0 && !E.IsReady() && ObjectManager.Player.Mana > EManaCost + 25 &&
                 t.Health > ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q) &&
                 Math.Abs(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).CooldownExpires) < 0.00001)
