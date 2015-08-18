@@ -284,8 +284,10 @@ namespace JaxQx
         private static void Combo()
         {
             var t = assassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            if (!t.IsValidTarget())
+            if (t == null)
+            {
                 return;
+            }
 
             if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && (shennBuffActive || usedSpell))
                 return;
