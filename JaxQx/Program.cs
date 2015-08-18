@@ -84,7 +84,7 @@ namespace JaxQx
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int) Q.Range)));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo", false, TextFontStyle.Bold).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!", false, TextFontStyle.Bold).SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
             
 
             // Harass
