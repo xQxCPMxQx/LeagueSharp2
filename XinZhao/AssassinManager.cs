@@ -83,7 +83,7 @@ namespace XinZhao
                     .ValueChanged += AutoPriorityItemValueChanged;
             }
             LocalMenu.AddItem(new MenuItem("TargetingMode", MenuTab + "Target Mode").SetShared().SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
-            LocalMenu.AddItem(new MenuItem("TS.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(true));
+            LocalMenu.AddItem(new MenuItem("TS.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(false));
 
             LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings"));
             {
