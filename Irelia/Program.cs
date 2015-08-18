@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -32,8 +33,9 @@ namespace Irelia
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
-        public static Menu MenuTargetedItems;
-        public static Menu MenuNonTargetedItems;
+
+        public static Utils Utils;
+        public static Enemies Enemies;
 
 
         private static void Main(string[] args)
@@ -43,7 +45,7 @@ namespace Irelia
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (vPlayer.BaseSkinName != "Irelia")
+            if (vPlayer.ChampionName != "Irelia")
                 return;
 
             Q = new Spell(SpellSlot.Q, 650f);
@@ -69,32 +71,13 @@ namespace Irelia
             TargetSelector.AddToMenu(TargetSelectorMenu);
             Config.AddSubMenu(TargetSelectorMenu);
 
-            new AssassinManager();
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
 
-            var menuUseItems = new Menu("Use Items", "menuUseItems");
-            Config.AddSubMenu(menuUseItems);
-            // Extras -> Use Items -> Targeted Items
-            MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
-            MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
-            menuUseItems.AddSubMenu(MenuTargetedItems);
-
-            // Extras -> Use Items -> AOE Items
-            MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
-            MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
-            menuUseItems.AddSubMenu(MenuNonTargetedItems);
-
+            Utils = new Utils();
+            Enemies = new Enemies();
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Menu comboUseQ = new Menu("Use Q", "comboUseQ");
@@ -155,11 +138,7 @@ namespace Irelia
                     new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
-            // Extras
-
-//            Config.AddSubMenu(new Menu("Extras", "Extras"));
-            //           Config.SubMenu("Extras").AddItem(new MenuItem("StopUlties", "Interrupt Ulti With E").SetValue(true));
-            //          Config.SubMenu("Extras").AddItem(new MenuItem("ForceInterruptUlties", "Force Interrupt Ulti With Q+E").SetValue(true));
+            Game.PrintChat("xxxxxxxxxx");
 
             // Extras -> Use Items 
             MenuExtras = new Menu("Extras", "Extras");
@@ -205,15 +184,12 @@ namespace Irelia
                 Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
             };
 
-
             new PotionManager();
-
 
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
 
             QUsedTime = Game.Time;
 
@@ -270,39 +246,7 @@ namespace Irelia
             }
         }
 
-        private static Obj_AI_Hero GetEnemy(float vDefaultRange = 0,
-            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
-        {
-            if (Math.Abs(vDefaultRange) < 0.00001)
-                vDefaultRange = Q.Range;
-
-            if (!Config.Item("AssassinActive").GetValue<bool>())
-                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
-
-            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
-
-            var vEnemy =
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(
-                        enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                            Config.Item("Assassin" + enemy.ChampionName) != null &&
-                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
-
-            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
-            {
-                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
-            }
-
-            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
-
-            Obj_AI_Hero t = !objAiHeroes.Any()
-                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
-                : objAiHeroes[0];
-
-            return t;
-        }
+        
 
         private static int BladesSpellCount
         {
@@ -344,21 +288,21 @@ namespace Irelia
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("HarassMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercentage() >= existsMana)
+                if (vPlayer.ManaPercent >= existsMana)
                     Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("LaneClearMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercentage() >= existsMana)
+                if (vPlayer.ManaPercent >= existsMana)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-                if (vPlayer.ManaPercentage() >= existsMana)
+                if (vPlayer.ManaPercent >= existsMana)
                     JungleFarm();
             }
         }
@@ -445,7 +389,10 @@ namespace Irelia
             var useE = Config.Item("UseECombo").GetValue<bool>();
             var useR = Config.Item("UseRCombo").GetValue<bool>();
 
-            var t = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
+            var t = Enemies.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
+
             var useQDontUnderTurret = Config.Item("UseQComboDontUnderTurret").GetValue<bool>();
 
             if (Q.IsReady() && useQ)
@@ -472,7 +419,7 @@ namespace Irelia
 
         private static void Harass()
         {
-            var vTarget = GetEnemy(Q.Range, TargetSelector.DamageType.Physical);
+            var vTarget = Enemies.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useW = Config.Item("UseWHarass").GetValue<bool>();
@@ -604,7 +551,7 @@ namespace Irelia
             if (IgniteSlot != SpellSlot.Unknown && vPlayer.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
-            if (Config.Item("item3153").GetValue<bool>() && Items.CanUseItem(3153))
+            if (Items.CanUseItem(3153))
                 fComboDamage += ObjectManager.Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
 
             return (float) fComboDamage;
@@ -612,85 +559,26 @@ namespace Irelia
 
         public static bool IsPositionSafe(Obj_AI_Base vTarget, Spell vSpell)
         {
-            Vector2 predPos = vSpell.GetPrediction(vTarget).CastPosition.To2D();
-            Vector2 myPos = ObjectManager.Player.Position.To2D();
-            Vector2 newPos = (vTarget.Position.To2D() - myPos);
-            newPos.Normalize();
+            var predPos = vSpell.GetPrediction(vTarget).CastPosition.To2D();
+            var myPos = ObjectManager.Player.Position.To2D();
+            var newPos = (vTarget.Position.To2D() - myPos).Normalized();
 
-            Vector2 checkPos = predPos + newPos * (vSpell.Range - Vector2.Distance(predPos, myPos));
+            var checkPos = predPos + newPos * (vSpell.Range - Vector2.Distance(predPos, myPos));
             Obj_Turret closestTower = null;
 
-            foreach (Obj_Turret tower in
-                ObjectManager.Get<Obj_Turret>()
-                    .Where(tower => tower.IsValid && !tower.IsDead && tower.Health != 0 && tower.IsEnemy))
+            foreach (
+                Obj_Turret tower in
+                    ObjectManager.Get<Obj_Turret>()
+                        .Where(tower => tower.IsValid && !tower.IsDead && !tower.IsDead && tower.IsEnemy)
+                        .Where(tower => Vector3.Distance(tower.Position, ObjectManager.Player.Position) < 1450))
             {
-                if (Vector3.Distance(tower.Position, ObjectManager.Player.Position) < 1450)
-                    closestTower = tower;
+                closestTower = tower;
             }
 
             if (closestTower == null)
                 return true;
 
-            if (Vector2.Distance(closestTower.Position.To2D(), checkPos) <= 910)
-                return false;
-
-            return true;
-        }
-
-        private static void OnProcessSpellCast(Obj_AI_Base vTarget, GameObjectProcessSpellCastEventArgs args)
-        {
-            var stopUlties = Config.Item("StopUlties").GetValue<KeyBind>().Active;
-            var forceInterrupt = Config.Item("ForceInterruptUlties").GetValue<KeyBind>().Active;
-
-            if (!stopUlties || forceInterrupt)
-                return;
-
-            String[] interruptSpells =
-            {
-                "AbsoluteZero", "AlZaharNetherGrasp", "CaitlynAceintheHole", "Crowstorm",
-                "DrainChannel", "FallenOne", "GalioIdolOfDurand", "InfiniteDuress", "KatarinaR", "MissFortuneBulletTime",
-                "Teleport", "Pantheon_GrandSkyfall_Jump", "ShenStandUnited", "UrgotSwap2"
-            };
-
-            foreach (string interruptSpellName in interruptSpells)
-            {
-                if (vTarget.Team != vPlayer.Team && args.SData.Name == interruptSpellName)
-                {
-                    if (vPlayer.Health < vTarget.Health)
-                    {
-                        if (forceInterrupt || vPlayer.Distance(vTarget) >= E.Range ||
-                            vPlayer.Distance(vTarget) <= Q.Range + E.Range)
-                        {
-                            var vMinions = MinionManager.GetMinions(
-                                vPlayer.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
-                            foreach (var vMinion in vMinions)
-                            {
-                                if (vMinion.Distance(vTarget) <= E.Range || vMinion.Distance(vPlayer) <= Q.Range)
-                                {
-                                    Q.CastOnUnit(vMinion);
-                                    if (vPlayer.Distance(vTarget) <= E.Range)
-                                        E.CastOnUnit(vTarget);
-                                }
-                            }
-                        }
-                        else if (vPlayer.Distance(vTarget) <= E.Range && E.IsReady())
-                            E.CastOnUnit(vTarget);
-                    }
-                }
-            }
-            /*
-            if (stopUlties)
-            {
-                foreach (string interruptSpellName in interruptSpells)
-                {
-                    if (vTarget.Team != vPlayer.Team && args.SData.Name == interruptSpellName)
-                    {
-                        if (vPlayer.Distance(vTarget) <= E.Range && E.IsReady() && isStunPossible(vTarget))
-                            E.CastOnUnit(vTarget);
-                    }
-                }
-            }
-            */
+            return !(Vector2.Distance(closestTower.Position.To2D(), checkPos) <= 910);
         }
 
         private static InventorySlot GetInventorySlot(int ID)
@@ -701,32 +589,31 @@ namespace Irelia
                         (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
         }
 
-        public static void UseItems(Obj_AI_Hero vTarget)
+        public static void UseItems(Obj_AI_Hero t)
         {
-            if (vTarget != null)
+            if (t == null)
+                return;
+
+            int[] targeted = new[] { 3153, 3144, 3146, 3184 };
+            foreach (
+                var itemId in
+                    targeted.Where(
+                        itemId =>
+                            Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null &&
+                            t.IsValidTarget(450)))
             {
-                foreach (MenuItem menuItem in MenuTargetedItems.Items)
-                {
-                    var useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>();
-                    if (useItem)
-                    {
-                        var itemID = Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4));
-                        if (Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null)
-                            Items.UseItem(itemID, vTarget);
-                    }
-                }
+                Items.UseItem(itemId, t);
+            }
 
-                foreach (MenuItem menuItem in MenuNonTargetedItems.Items)
-                {
-                    var useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>();
-                    if (useItem)
-                    {
-                        var itemID = Convert.ToInt16(menuItem.Name.ToString().Substring(4, 4));
-                        if (Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null)
-                            Items.UseItem(itemID);
-                    }
-                }
-
+            int[] nonTarget = new[] { 3180, 3143, 3131, 3074, 3077, 3142 };
+            foreach (
+                var itemId in
+                    nonTarget.Where(
+                        itemId =>
+                            Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null &&
+                            t.IsValidTarget(450)))
+            {
+                Items.UseItem(itemId);
             }
         }
     }

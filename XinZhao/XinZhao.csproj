@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssassinManager.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="PlayerSpells.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -59,7 +59,9 @@ namespace XinZhao
         private static void Game_OnUpdate(EventArgs args)
         {
             if (Program.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
                 UseSpells();
+            }
         }
 
         private static void UseSpells()
@@ -67,7 +69,9 @@ namespace XinZhao
             var t = Program.AssassinManager.GetTarget(Program.Q.Range, TargetSelector.DamageType.Magical);
 
             if (!t.IsValidTarget())
+            {
                 return;
+            }
 
             if (SmiteSlot != SpellSlot.Unknown &&
                 Program.Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready)

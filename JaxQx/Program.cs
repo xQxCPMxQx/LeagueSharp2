@@ -17,7 +17,9 @@ namespace JaxQx
         public static Orbwalking.Orbwalker Orbwalker;
         private static bool usedSpell = true;
         private static bool shennBuffActive = false;
+        public static Utils Utils;
         private static AssassinManager assassinManager;
+        
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
@@ -71,9 +73,9 @@ namespace JaxQx
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
-            
-            
-            new AssassinManager();
+
+            new Utils();
+            assassinManager = new AssassinManager();
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -82,6 +84,8 @@ namespace JaxQx
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int) Q.Range)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo", false, TextFontStyle.Bold).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+            
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -95,7 +99,7 @@ namespace JaxQx
                         new StringList(new[] { "Q+W", "Q+E", "Default" })));
             Config.SubMenu("Harass")
                 .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass", false, TextFontStyle.Bold).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
@@ -108,7 +112,7 @@ namespace JaxQx
                 .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
                 .AddItem(
-                    new MenuItem("LaneClearActive", "LaneClear").SetValue(
+                    new MenuItem("LaneClearActive", "LaneClear", false, TextFontStyle.Bold).SetValue(
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             // Jungling Farm
@@ -121,7 +125,7 @@ namespace JaxQx
 
             Config.SubMenu("JungleFarm")
                 .AddItem(
-                    new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
+                    new MenuItem("JungleFarmActive", "JungleFarm", false, TextFontStyle.Bold).SetValue(
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             // Extra
@@ -146,11 +150,7 @@ namespace JaxQx
                 Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
             };
 
-            assassinManager = new AssassinManager();
-            
-            new PotionManager();
-            
-            Config.AddItem(new MenuItem("Ward", "Ward Jump / Flee")).SetValue(new KeyBind('A', KeyBindType.Press));
+            Config.AddItem(new MenuItem("Ward", "Ward Jump / Flee", false, TextFontStyle.Bold).SetValue(new KeyBind('A', KeyBindType.Press)));
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnUpdate;
@@ -254,7 +254,7 @@ namespace JaxQx
                 Jumper.wardJump(Game.CursorPos.To2D());
             }
 
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
             }

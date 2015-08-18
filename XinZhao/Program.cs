@@ -15,6 +15,8 @@ namespace XinZhao
         public static readonly Obj_AI_Hero Player = ObjectManager.Player;
 
         public static Orbwalking.Orbwalker Orbwalker;
+
+        public static Utils Utils;
         public static AssassinManager AssassinManager;
 
         public static List<Spell> SpellList = new List<Spell>();
@@ -180,7 +182,7 @@ namespace XinZhao
             {
                 UseItems(t);
             }
-            
+
             if (PlayerSpells.IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready)
             {
@@ -190,7 +192,7 @@ namespace XinZhao
                 }
             }
 
-            if (R.IsReady() && 
+            if (R.IsReady() &&
                 Config.Item("ComboUserR").GetValue<bool>() &&
                 GetHitsR >= Config.Item("ComboUseRS").GetValue<Slider>().Value)
             {
@@ -285,7 +287,7 @@ namespace XinZhao
             return
                 ObjectManager.Player.InventoryItems.FirstOrDefault(
                     item =>
-                        (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
+                        (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero t)
@@ -324,8 +326,9 @@ namespace XinZhao
             Config.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
 
+            Utils = new Utils();
             AssassinManager = new AssassinManager();
-            
+
             /* [ Combo ] */
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(new Slider(300, 200, 500)));
@@ -333,7 +336,7 @@ namespace XinZhao
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseRS", Tab + "Min. Enemy Count:").SetValue(new Slider(2, 5, 1)));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!", false, TextFontStyle.Bold).SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
-            
+
             Config.AddSubMenu(new Menu("Lane/Jungle Clear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(false));
@@ -346,7 +349,7 @@ namespace XinZhao
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEMinRange", "E min. range").SetValue(new Circle(false, Color.Aqua)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawRRange", "R range").SetValue(new Circle(false, Color.PowderBlue)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
-            
+
             Config.SubMenu("Misc").AddItem(new MenuItem("InterruptSpells", "Interrupt spells using R").SetValue(true));
             Config.SubMenu("Misc").AddItem(new MenuItem("BlockR", "Block R if it won't hit").SetValue(false));
 

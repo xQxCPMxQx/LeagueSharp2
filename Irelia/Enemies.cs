@@ -7,14 +7,13 @@ using SharpDX.Direct3D9;
 
 using Color = System.Drawing.Color;
 
-namespace XinZhao
+namespace Irelia
 {
-    internal class AssassinManager
+    internal class Enemies
     {
         public static Menu LocalMenu;
-        public static Font Text, TextBold, TextWarning;
 
-        public AssassinManager()
+        public Enemies()
         {
             Load();
         }
@@ -55,16 +54,16 @@ namespace XinZhao
 
         private static void Load()
         {
-            LocalMenu = new Menu("[ Xin-Zhao Target Selector ]", "Enemies");
+            LocalMenu = new Menu("[ Irelia Target Selector ]", "Enemies");
 
             Program.Config.AddSubMenu(LocalMenu);
             LocalMenu.AddItem(
-                new MenuItem("Enemies.Mode", "Target Selector:").SetValue(new StringList(new[] { "L# Target Selector", "Xin-Zhao  Target Selector" }, 1)));
+                new MenuItem("Enemies.Mode", "Target Selector:").SetValue(new StringList(new[] { "L# Target Selector", "Irelia Target Selector" }, 1)));
             LocalMenu.AddItem(new MenuItem("Enemies.Active", "Active").SetValue(true));
             LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Searching Range"))
                 .SetValue(new Slider(1000, 1500));
 
-            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:", false, TextFontStyle.Bold));
+            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:"));
             {
                 foreach (var enemy in HeroManager.Enemies)
                 {
@@ -72,7 +71,7 @@ namespace XinZhao
                 }
             }
 
-            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:", false, TextFontStyle.Bold));
+            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:"));
             {
                 LocalMenu.AddItem(
                     new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto arrange priorities").SetShared().SetValue(false))
@@ -81,7 +80,7 @@ namespace XinZhao
             LocalMenu.AddItem(
                 new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(true));
 
-            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings", false, TextFontStyle.Bold));
+            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings"));
             {
                 LocalMenu.AddItem(
                     new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true,
