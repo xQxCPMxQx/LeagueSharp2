@@ -66,7 +66,7 @@ namespace XinZhao
             LocalMenu.AddItem(new MenuItem("TS.Active", "Active").SetValue(true));
             LocalMenu.AddItem(new MenuItem("TS.SearchRange", MenuTab + "Enemy Searching Range")).SetValue(new Slider(950, 1500));
 
-            LocalMenu.AddItem(new MenuItem("TS.Enemies.Title", "Enemies:", false, TextFontStyle.Bold, Color.YellowGreen));
+            LocalMenu.AddItem(new MenuItem("TS.Enemies.Title", "Enemies:", false, TextFontStyle.Bold, Color.Yellow));
             {
                 foreach (var enemy in HeroManager.Enemies)
                 {
