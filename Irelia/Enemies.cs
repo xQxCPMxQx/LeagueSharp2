@@ -15,6 +15,7 @@ namespace Irelia
 
         public Enemies()
         {
+            new Utils();
             Load();
         }
 
