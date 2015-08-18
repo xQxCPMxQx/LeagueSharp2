@@ -84,7 +84,7 @@ namespace Irelia
                     .ValueChanged += AutoPriorityItemValueChanged;
             }
             LocalMenu.AddItem(
-                new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(true));
+                new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(false));
 
             LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings"));
             {
