@@ -11,34 +11,47 @@ namespace JaxQx
     internal class Program
     {
         public const string ChampionName = "Jax";
+
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
 
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
+
         private static bool usedSpell = true;
+
         private static bool shennBuffActive = false;
-        private static AssassinManager assassinManager;
-        
+
+        public static AssassinManager AssassinManager;
+
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
+
         public static Spell Q;
+
         public static Spell W;
+
         public static Spell E;
+
         public static Spell R;
 
         public static string[] Wards =
-        {
-            "RelicSmallLantern", "RelicLantern", "SightWard", "wrigglelantern",
-            "ItemGhostWard", "VisionWard", "BantamTrap", "JackInTheBox", "CaitlynYordleTrap", "Bushwhack"
-        };
+            {
+                "RelicSmallLantern", "RelicLantern", "SightWard", "wrigglelantern",
+                "ItemGhostWard", "VisionWard", "BantamTrap", "JackInTheBox",
+                "CaitlynYordleTrap", "Bushwhack"
+            };
 
         public static Map map;
 
         private static SpellSlot igniteSlot;
+
         public static float WardRange = 600f;
+
         public static int DelayTick;
+
         //Menu
         public static Menu Config;
+
         public static Menu MenuExtras;
 
         private static void Main(string[] args)
@@ -49,8 +62,7 @@ namespace JaxQx
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.ChampionName != "Jax")
-                return;
+            if (Player.ChampionName != "Jax") return;
 
             Q = new Spell(SpellSlot.Q, 680f);
             W = new Spell(SpellSlot.W);
@@ -73,7 +85,7 @@ namespace JaxQx
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
-            assassinManager = new AssassinManager();
+            AssassinManager = new AssassinManager();
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -81,15 +93,19 @@ namespace JaxQx
 
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int) Q.Range)));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!", false, TextFontStyle.Bold).SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
-            
+            Config.SubMenu("Combo")
+                .AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int)Q.Range)));
+            Config.SubMenu("Combo")
+                .AddItem(
+                    new MenuItem("ComboActive", "Combo!", false, TextFontStyle.Bold).SetValue(
+                        new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass")
                 .AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass")
                 .AddItem(
@@ -97,7 +113,10 @@ namespace JaxQx
                         new StringList(new[] { "Q+W", "Q+E", "Default" })));
             Config.SubMenu("Harass")
                 .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass", false, TextFontStyle.Bold).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Harass")
+                .AddItem(
+                    new MenuItem("HarassActive", "Harass", false, TextFontStyle.Bold).SetValue(
+                        new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
@@ -133,9 +152,18 @@ namespace JaxQx
 
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQRange", "Q range").SetValue(new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawQMinRange", "Min. Q range").SetValue(new Circle(true, System.Drawing.Color.GreenYellow)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawWard", "Ward Range").SetValue(new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawQRange", "Q range").SetValue(
+                        new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawQMinRange", "Min. Q range").SetValue(
+                        new Circle(true, System.Drawing.Color.GreenYellow)));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("DrawWard", "Ward Range").SetValue(
+                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             /* [ Damage After Combo ] */
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
@@ -144,19 +172,20 @@ namespace JaxQx
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
             dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
-            {
-                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
-            };
+                {
+                    Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+                };
 
-            Config.AddItem(new MenuItem("Ward", "Ward Jump / Flee", false, TextFontStyle.Bold).SetValue(new KeyBind('A', KeyBindType.Press)));
+            Config.AddItem(
+                new MenuItem("Ward", "Ward Jump / Flee", false, TextFontStyle.Bold).SetValue(
+                    new KeyBind('A', KeyBindType.Press)));
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            GameObject.OnCreate += GameObject_OnCreate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
-            
+
             Notifications.AddNotification(String.Format("{0} Loaded", ChampionName), 4000);
         }
 
@@ -186,38 +215,26 @@ namespace JaxQx
         {
             var fComboDamage = 0d;
 
-            if (Q.IsReady())
-                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q);
+            if (Q.IsReady()) fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q);
 
-            if (W.IsReady())
-                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
+            if (W.IsReady()) fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
 
-            if (E.IsReady())
-                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.E);
+            if (E.IsReady()) fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.E);
 
-            if (igniteSlot != SpellSlot.Unknown &&
-                ObjectManager.Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
-                fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
+            if (igniteSlot != SpellSlot.Unknown
+                && ObjectManager.Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready) fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
 
-            if (Items.CanUseItem(3128))
-                fComboDamage += ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Botrk);
+            if (Items.CanUseItem(3128)) fComboDamage += ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Botrk);
 
-            return (float) fComboDamage;
-        }
-
-        private static void GameObject_OnCreate(GameObject sender, EventArgs args)
-        {
-            //   if (sender.Name.Contains("Missile") || sender.Name.Contains("Minion"))
+            return (float)fComboDamage;
         }
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs arg)
         {
-            if (!sender.IsMe)
-                return;
+            if (!sender.IsMe) return;
 
-            if (arg.SData.Name.ToLower().Contains("jaxleapstrike") ||
-                arg.SData.Name.ToLower().Contains("jaxempowertwo") ||
-                arg.SData.Name.ToLower().Contains("jaxcounterstrike"))
+            if (arg.SData.Name.ToLower().Contains("jaxleapstrike") || arg.SData.Name.ToLower().Contains("jaxempowertwo")
+                || arg.SData.Name.ToLower().Contains("jaxcounterstrike"))
             {
                 usedSpell = true;
             }
@@ -240,7 +257,7 @@ namespace JaxQx
         private static void Game_OnUpdate(EventArgs args)
         {
             shennBuffActive = Player.HasBuff("Sheen", true);
-            
+
             if (DelayTick - Environment.TickCount <= 250)
             {
                 DelayTick = Environment.TickCount;
@@ -260,60 +277,50 @@ namespace JaxQx
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Player.MaxMana / 100 * Config.Item("HarassMana").GetValue<Slider>().Value;
-                if (Player.Mana >= existsMana)
-                    Harass();
+                if (Player.Mana >= existsMana) Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Player.MaxMana / 100 * Config.Item("LaneClearMana").GetValue<Slider>().Value;
-                if (Player.Mana >= existsMana)
-                    LaneClear();
+                if (Player.Mana >= existsMana) LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
                 var existsMana = Player.MaxMana / 100 * Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-                if (Player.Mana >= existsMana)
-                    JungleFarm();
+                if (Player.Mana >= existsMana) JungleFarm();
             }
         }
 
         private static void Combo()
         {
-            var t = assassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (t == null)
             {
                 return;
             }
 
-            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && (shennBuffActive || usedSpell))
-                return;
-                
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && (shennBuffActive || usedSpell)) return;
+
             var minQRange = Config.Item("ComboUseQMinRange").GetValue<Slider>().Value;
 
             if (Q.IsReady() && Player.Distance(t) >= minQRange && ObjectManager.Player.Distance(t) <= Q.Range)
             {
-                if (E.IsReady())
-                    E.Cast();
+                if (E.IsReady()) E.Cast();
                 Q.Cast(t);
             }
 
-            if (ObjectManager.Player.Distance(t) <= E.Range)
-                UseItems(t);
+            if (ObjectManager.Player.Distance(t) <= E.Range) UseItems(t);
 
-            if (W.IsReady() && 
-                ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0)
-                W.Cast();
+            if (W.IsReady() && ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0) W.Cast();
 
-            if (E.IsReady() && 
-                ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0)
-                E.Cast();
+            if (E.IsReady() && ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0) E.Cast();
 
             if (igniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
             {
-                if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health &&
-                    ObjectManager.Player.Distance(t) <= 500)
+                if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health
+                    && ObjectManager.Player.Distance(t) <= 500)
                 {
                     Player.Spellbook.CastSpell(igniteSlot, t);
                 }
@@ -325,8 +332,8 @@ namespace JaxQx
                 {
                     if (
                         ObjectManager.Player.CountEnemiesInRange(
-                            (int) Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2 ||
-                        t.Health > Player.Health)
+                            (int)Orbwalking.GetRealAutoAttackRange(ObjectManager.Player)) >= 2
+                        || t.Health > Player.Health)
                     {
                         R.CastOnUnit(Player);
                     }
@@ -336,81 +343,81 @@ namespace JaxQx
 
         private static void Harass()
         {
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            if (t == null)
+            {
+                return;
+            }
             var useQ = Config.Item("UseQHarass").GetValue<bool>();
             var useW = Config.Item("UseWHarass").GetValue<bool>();
             var useE = Config.Item("UseEHarass").GetValue<bool>();
             var useQDontUnderTurret = Config.Item("UseQHarassDontUnderTurret").GetValue<bool>();
 
-            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-
             switch (Config.Item("HarassMode").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
-                {
-                    if (Q.IsReady() && W.IsReady() && qTarget != null && useQ && useW)
                     {
-                        if (useQDontUnderTurret)
+                        if (Q.IsReady() && W.IsReady() && t != null && useQ && useW)
                         {
-                            if (!qTarget.UnderTurret())
+                            if (useQDontUnderTurret)
                             {
-                                Q.Cast(qTarget);
+                                if (!t.UnderTurret())
+                                {
+                                    Q.Cast(t);
+                                    W.Cast();
+                                }
+                            }
+                            else
+                            {
+                                Q.Cast(t);
                                 W.Cast();
                             }
                         }
-                        else
-                        {
-                            Q.Cast(qTarget);
-                            W.Cast();
-                        }
+                        break;
                     }
-                    break;
-                }
                 case 1:
-                {
-                    if (Q.IsReady() && E.IsReady() && qTarget != null && useQ && useE)
                     {
-                        if (useQDontUnderTurret)
+                        if (Q.IsReady() && E.IsReady() && t != null && useQ && useE)
                         {
-                            if (!qTarget.UnderTurret())
+                            if (useQDontUnderTurret)
                             {
-                                Q.Cast(qTarget);
+                                if (!t.UnderTurret())
+                                {
+                                    Q.Cast(t);
+                                    E.Cast();
+                                }
+                            }
+                            else
+                            {
+                                Q.Cast(t);
                                 E.Cast();
                             }
                         }
-                        else
-                        {
-                            Q.Cast(qTarget);
-                            E.Cast();
-                        }
+                        break;
                     }
-                    break;
-                }
                 case 2:
-                {
-                    if (Q.IsReady() && useQ && qTarget != null && useQ)
                     {
-                        if (useQDontUnderTurret)
+                        if (Q.IsReady() && useQ && t != null && useQ)
                         {
-                            if (!qTarget.UnderTurret())
-                                Q.Cast(qTarget);
+                            if (useQDontUnderTurret)
+                            {
+                                if (!t.UnderTurret()) Q.Cast(t);
+                            }
+                            else Q.Cast(t);
+                            UseItems(t);
                         }
-                        else
-                            Q.Cast(qTarget);
-                        UseItems(qTarget);
-                    }
 
-                    if (W.IsReady() && useW && eTarget != null)
-                    {
-                        W.Cast();
-                    }
+                        if (W.IsReady() && useW && t != null && t.IsValidTarget(E.Range))
+                        {
+                            W.Cast();
+                        }
 
-                    if (E.IsReady() && useE && eTarget != null)
-                    {
-                        E.CastOnUnit(Player);
+                        if (E.IsReady() && useE && t != null && t.IsValidTarget(E.Range))
+                        {
+                            E.CastOnUnit(Player);
+                        }
+                        break;
                     }
-                    break;
-                }
             }
         }
 
@@ -428,18 +435,14 @@ namespace JaxQx
                 {
                     if (useQDontUnderTurret)
                     {
-                        if (!vMinion.UnderTurret())
-                            Q.Cast(vMinion);
+                        if (!vMinion.UnderTurret()) Q.Cast(vMinion);
                     }
-                    else
-                        Q.Cast(vMinion);
+                    else Q.Cast(vMinion);
                 }
 
-                if (useW && W.IsReady())
-                    W.Cast();
+                if (useW && W.IsReady()) W.Cast();
 
-                if (useE && E.IsReady())
-                    E.CastOnUnit(Player);
+                if (useE && E.IsReady()) E.CastOnUnit(Player);
             }
         }
 
@@ -449,25 +452,28 @@ namespace JaxQx
             var useW = Config.Item("UseWJungleFarm").GetValue<bool>();
             var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
 
-            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(
+                Player.ServerPosition,
+                Q.Range,
+                MinionTypes.All,
+                MinionTeam.Neutral,
+                MinionOrderTypes.MaxHealth);
 
-            if (mobs.Count <= 0)
-                return;
+            if (mobs.Count <= 0) return;
 
-            if (Q.IsReady() && useQ && Player.Distance(mobs[0]) > Player.AttackRange)
-                Q.Cast(mobs[0]);
+            if (Q.IsReady() && useQ && Player.Distance(mobs[0]) > Player.AttackRange) Q.Cast(mobs[0]);
 
-            if (W.IsReady() && useW)
-                W.Cast();
+            if (W.IsReady() && useW) W.Cast();
 
-            if (E.IsReady() && useE)
-                E.CastOnUnit(Player);
+            if (E.IsReady() && useE) E.CastOnUnit(Player);
         }
-        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
+
+        private static void Interrupter2_OnInterruptableTarget(
+            Obj_AI_Hero unit,
+            Interrupter2.InterruptableTargetEventArgs args)
         {
             var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
-            if (!interruptSpells || !E.IsReady())
-                return;
+            if (!interruptSpells || !E.IsReady()) return;
 
             if (Player.Distance(unit) <= E.Range)
             {
@@ -479,33 +485,29 @@ namespace JaxQx
         {
             return
                 ObjectManager.Player.InventoryItems.FirstOrDefault(
-                    item =>
-                        (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
+                    item => (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero t)
         {
-            if (t == null)
-                return;
+            if (t == null) return;
 
             int[] targeted = new[] { 3153, 3144, 3146, 3184 };
-            foreach (
-                var itemId in
-                    targeted.Where(
-                        itemId =>
-                            Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null &&
-                            t.IsValidTarget(450)))
+            foreach (var itemId in
+                targeted.Where(
+                    itemId =>
+                    Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                    && t.IsValidTarget(450)))
             {
                 Items.UseItem(itemId, t);
             }
 
-            int[] nonTarget = new[] {3180, 3143, 3131, 3074, 3077, 3142};
-            foreach (
-                var itemId in
-                    nonTarget.Where(
-                        itemId =>
-                            Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null &&
-                            t.IsValidTarget(450)))
+            int[] nonTarget = new[] { 3180, 3143, 3131, 3074, 3077, 3142 };
+            foreach (var itemId in
+                nonTarget.Where(
+                    itemId =>
+                    Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                    && t.IsValidTarget(450)))
             {
                 Items.UseItem(itemId);
             }
