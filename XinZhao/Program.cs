@@ -15,7 +15,7 @@ namespace XinZhao
         public static readonly Obj_AI_Hero Player = ObjectManager.Player;
 
         public static Orbwalking.Orbwalker Orbwalker;
-        public static AssassinManager assassinManager;
+        public static AssassinManager AssassinManager;
 
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q, W, E, R;
@@ -25,9 +25,6 @@ namespace XinZhao
         public static Items.Item Hydra = new Items.Item(3074, 375);
 
         public static Menu Config;
-        public static Menu MenuExtras;
-        public static Menu MenuTargetedItems;
-        public static Menu MenuNonTargetedItems;
 
         private static string Tab
         {
@@ -50,6 +47,7 @@ namespace XinZhao
             R = new Spell(SpellSlot.R, 480);
 
             CreateChampionMenu();
+
             //PlayerSpells.Initialize();
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -104,7 +102,7 @@ namespace XinZhao
             if (!Orbwalking.CanMove(100))
                 return;
 
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
             }
@@ -157,14 +155,16 @@ namespace XinZhao
 
         public static void Combo()
         {
-            var t = assassinManager.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-
-            if (t.IsValidTarget(E.Range) && Q.IsReady())
+            var t = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            if (!t.IsValidTarget())
+                return;
+            var AARange = Orbwalking.GetRealAutoAttackRange(null) + 65;
+            if (t.IsValidTarget(AARange) && Q.IsReady())
             {
                 Q.Cast();
             }
 
-            if (t.IsValidTarget(E.Range) && W.IsReady())
+            if (t.IsValidTarget(AARange) && W.IsReady())
             {
                 W.Cast();
             }
@@ -176,12 +176,11 @@ namespace XinZhao
                     E.CastOnUnit(t);
             }
 
-            if (Player.Distance(t) <= E.Range)
+            if (Player.Distance(t) <= 450)
             {
                 UseItems(t);
             }
-
-
+            
             if (PlayerSpells.IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready)
             {
@@ -289,31 +288,31 @@ namespace XinZhao
                         (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
         }
 
-        public static void UseItems(Obj_AI_Hero vTarget)
+        public static void UseItems(Obj_AI_Hero t)
         {
-            if (vTarget == null)
+            if (t == null)
                 return;
-            
-            foreach (var itemID in (from menuItem in MenuTargetedItems.Items
-                let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                where useItem
-                select Convert.ToInt16(menuItem.Name.Substring(4, 4))
-                into itemID
-                where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
-                select itemID).Where(itemID => Player.Distance(vTarget) < 500))
+
+            int[] targeted = new[] { 3153, 3144, 3146, 3184 };
+            foreach (
+                var itemId in
+                    targeted.Where(
+                        itemId =>
+                            Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null &&
+                            t.IsValidTarget(450)))
             {
-                Items.UseItem(itemID, vTarget);
+                Items.UseItem(itemId, t);
             }
 
-            foreach (var itemID in (from menuItem in MenuNonTargetedItems.Items
-                let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                where useItem
-                select Convert.ToInt16(menuItem.Name.Substring(4, 4))
-                into itemID
-                where Items.HasItem(itemID) && Items.CanUseItem(itemID) && GetInventorySlot(itemID) != null
-                select itemID).Where(itemID => Player.Distance(vTarget)<450))
+            int[] nonTarget = new[] { 3180, 3143, 3131, 3074, 3077, 3142 };
+            foreach (
+                var itemId in
+                    nonTarget.Where(
+                        itemId =>
+                            Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null &&
+                            t.IsValidTarget(450)))
             {
-                Items.UseItem(itemID);
+                Items.UseItem(itemId);
             }
         }
 
@@ -325,15 +324,15 @@ namespace XinZhao
             Config.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
 
-            assassinManager = new AssassinManager();
+            AssassinManager = new AssassinManager();
             
-
             /* [ Combo ] */
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(new Slider(300, 200, 500)));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseRS", Tab + "Min. Enemy Count:").SetValue(new Slider(2, 5, 1)));
-            
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+
             
             Config.AddSubMenu(new Menu("Lane/Jungle Clear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(false));
@@ -348,34 +347,9 @@ namespace XinZhao
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawRRange", "R range").SetValue(new Circle(false, Color.PowderBlue)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
             
-
-            
             Config.SubMenu("Misc").AddItem(new MenuItem("InterruptSpells", "Interrupt spells using R").SetValue(true));
             Config.SubMenu("Misc").AddItem(new MenuItem("BlockR", "Block R if it won't hit").SetValue(false));
 
-
-
-            MenuExtras = new Menu("Extras", "Extras");
-            Config.AddSubMenu(MenuExtras);
-            var menuUseItems = new Menu("Use Items", "menuUseItems");
-            MenuExtras.AddSubMenu(menuUseItems);
-
-            
-            MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
-            menuUseItems.AddSubMenu(MenuTargetedItems);
-            MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
-
-            
-            MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
-            menuUseItems.AddSubMenu(MenuNonTargetedItems);
-            MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
             /*
             new PotionManager();
             */

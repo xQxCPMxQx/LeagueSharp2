@@ -64,7 +64,7 @@ namespace XinZhao
 
         private static void UseSpells()
         {
-            var t = Program.assassinManager.GetTarget(Program.Q.Range, TargetSelector.DamageType.Magical);
+            var t = Program.AssassinManager.GetTarget(Program.Q.Range, TargetSelector.DamageType.Magical);
 
             if (!t.IsValidTarget())
                 return;
