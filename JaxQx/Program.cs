@@ -17,7 +17,6 @@ namespace JaxQx
         public static Orbwalking.Orbwalker Orbwalker;
         private static bool usedSpell = true;
         private static bool shennBuffActive = false;
-        public static Utils Utils;
         private static AssassinManager assassinManager;
         
         //Spells
@@ -74,7 +73,6 @@ namespace JaxQx
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
-            new Utils();
             assassinManager = new AssassinManager();
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
