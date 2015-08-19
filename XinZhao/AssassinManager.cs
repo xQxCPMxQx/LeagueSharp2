@@ -70,7 +70,7 @@ namespace XinZhao
             LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Searching Range"))
                 .SetValue(new Slider(1000, 1500));
 
-            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:", false, TextFontStyle.Bold));
+            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:", false, MenuItemFontStyle.Bold));
             {
                 foreach (var enemy in HeroManager.Enemies)
                 {
@@ -78,7 +78,7 @@ namespace XinZhao
                 }
             }
 
-            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:", false, TextFontStyle.Bold));
+            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:", false, MenuItemFontStyle.Bold));
             {
                 LocalMenu.AddItem(
                     new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto arrange priorities").SetShared().SetValue(false))
@@ -87,7 +87,7 @@ namespace XinZhao
             LocalMenu.AddItem(
                 new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(false));
 
-            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings", false, TextFontStyle.Bold));
+            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings", false, MenuItemFontStyle.Bold));
             {
                 LocalMenu.AddItem(
                     new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true,

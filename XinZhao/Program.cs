@@ -334,7 +334,7 @@ namespace XinZhao
             Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(new Slider(300, 200, 500)));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseRS", Tab + "Min. Enemy Count:").SetValue(new Slider(2, 5, 1)));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!", false, TextFontStyle.Bold).SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!", false, MenuItemFontStyle.Bold).SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
 
             Config.AddSubMenu(new Menu("Lane/Jungle Clear", "LaneClear"));
@@ -342,7 +342,7 @@ namespace XinZhao
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseE", "Use E").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear!", false, TextFontStyle.Bold).SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear!", false, MenuItemFontStyle.Bold).SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawERange", "E range").SetValue(new Circle(false, Color.PowderBlue)));
