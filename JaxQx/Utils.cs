@@ -41,7 +41,7 @@ namespace JaxQx
 
         public static void DrawText(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {
-            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
+            vFont.DrawText(null, vText, (int) vPosX, (int) vPosY, vColor);
         }
     }
 }

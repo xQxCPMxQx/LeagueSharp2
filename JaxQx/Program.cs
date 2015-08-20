@@ -19,7 +19,7 @@ namespace JaxQx
 
         private static bool usedSpell = true;
 
-        private static bool shennBuffActive = false;
+        private static bool shennBuffActive;
 
         public static AssassinManager AssassinManager;
 
@@ -186,7 +186,7 @@ namespace JaxQx
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
 
-            Notifications.AddNotification(String.Format("{0} Loaded", ChampionName), 4000);
+            Notifications.AddNotification($"{ChampionName} Loaded", 4000);
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -247,16 +247,16 @@ namespace JaxQx
             {
                 Jumper.testSpellCast = arg.End.To2D();
                 Polygon pol;
-                if ((pol = map.getInWhichPolygon(arg.End.To2D())) != null)
+                if ((pol = map.GetInWhichPolygon(arg.End.To2D())) != null)
                 {
-                    Jumper.testSpellProj = pol.getProjOnPolygon(arg.End.To2D());
+                    Jumper.testSpellProj = pol.GetProjOnPolygon(arg.End.To2D());
                 }
             }
         }
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            shennBuffActive = Player.HasBuff("Sheen", true);
+            shennBuffActive = Player.HasBuff("Sheen");
 
             if (DelayTick - Environment.TickCount <= 250)
             {
@@ -266,7 +266,7 @@ namespace JaxQx
             if (Config.Item("Ward").GetValue<KeyBind>().Active)
             {
                 ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-                Jumper.wardJump(Game.CursorPos.To2D());
+                Jumper.WardJump(Game.CursorPos.To2D());
             }
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
@@ -295,7 +295,7 @@ namespace JaxQx
 
         private static void Combo()
         {
-            var t = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = AssassinManager.GetTarget(Q.Range);
             if (t == null)
             {
                 return;
@@ -357,7 +357,7 @@ namespace JaxQx
             {
                 case 0:
                     {
-                        if (Q.IsReady() && W.IsReady() && t != null && useQ && useW)
+                        if (Q.IsReady() && W.IsReady() && useQ && useW)
                         {
                             if (useQDontUnderTurret)
                             {
@@ -377,7 +377,7 @@ namespace JaxQx
                     }
                 case 1:
                     {
-                        if (Q.IsReady() && E.IsReady() && t != null && useQ && useE)
+                        if (Q.IsReady() && E.IsReady() && useQ && useE)
                         {
                             if (useQDontUnderTurret)
                             {
@@ -397,7 +397,7 @@ namespace JaxQx
                     }
                 case 2:
                     {
-                        if (Q.IsReady() && useQ && t != null && useQ)
+                        if (Q.IsReady() && useQ && useQ)
                         {
                             if (useQDontUnderTurret)
                             {
@@ -407,12 +407,12 @@ namespace JaxQx
                             UseItems(t);
                         }
 
-                        if (W.IsReady() && useW && t != null && t.IsValidTarget(E.Range))
+                        if (W.IsReady() && useW && t.IsValidTarget(E.Range))
                         {
                             W.Cast();
                         }
 
-                        if (E.IsReady() && useE && t != null && t.IsValidTarget(E.Range))
+                        if (E.IsReady() && useE && t.IsValidTarget(E.Range))
                         {
                             E.CastOnUnit(Player);
                         }
@@ -481,18 +481,18 @@ namespace JaxQx
             }
         }
 
-        private static InventorySlot GetInventorySlot(int ID)
+        private static InventorySlot GetInventorySlot(int id)
         {
             return
                 ObjectManager.Player.InventoryItems.FirstOrDefault(
-                    item => (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
+                    item => (item.Id == (ItemId)id && item.Stacks >= 1) || (item.Id == (ItemId)id && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero t)
         {
             if (t == null) return;
 
-            int[] targeted = new[] { 3153, 3144, 3146, 3184 };
+            int[] targeted = { 3153, 3144, 3146, 3184 };
             foreach (var itemId in
                 targeted.Where(
                     itemId =>
@@ -502,7 +502,7 @@ namespace JaxQx
                 Items.UseItem(itemId, t);
             }
 
-            int[] nonTarget = new[] { 3180, 3143, 3131, 3074, 3077, 3142 };
+            int[] nonTarget = { 3180, 3143, 3131, 3074, 3077, 3142 };
             foreach (var itemId in
                 nonTarget.Where(
                     itemId =>
