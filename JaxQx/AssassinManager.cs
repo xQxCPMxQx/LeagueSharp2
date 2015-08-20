@@ -24,7 +24,11 @@ namespace JaxQx
             get { return "    "; }
         }
 
-        private static float SelectorRange => Program.Config.Item("Enemies.SearchRange").GetValue<Slider>().Value;
+        private static float SelectorRange
+        {
+            get { return Program.Config.Item("Enemies.SearchRange").GetValue<Slider>().Value; }
+        }
+
 
         private static Obj_AI_Hero TsEnemy
         {
@@ -71,7 +75,10 @@ namespace JaxQx
             {
                 foreach (var enemy in HeroManager.Enemies)
                 {
-                    LocalMenu.AddItem(new MenuItem("Selected" + enemy.ChampionName, MenuTab + enemy.CharData.BaseSkinName).SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" }, GetPriority(enemy.ChampionName))));
+                    LocalMenu.AddItem(
+                        new MenuItem("Selected" + enemy.ChampionName, MenuTab + enemy.CharData.BaseSkinName).SetValue(
+                            new StringList(new[] {"Low Focus", "Medium Focus", "High Focus"},
+                                GetPriority(enemy.ChampionName))));
                 }
             }
 
