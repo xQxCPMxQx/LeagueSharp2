@@ -126,15 +126,11 @@ namespace Akali
 
             if (Program.Config.Item("AssassinSetClick").GetValue<bool>())
             {
-                foreach (var objAiHero in from hero in ObjectManager.Get<Obj_AI_Hero>()
-                                          where hero.IsValidTarget()
-                                          select hero
-                                              into h
-                                              orderby h.Distance(Game.CursorPos) descending
-                                              select h
-                                                  into enemy
-                                                  where enemy.Distance(Game.CursorPos) < 150f
-                                                  select enemy)
+                foreach (var objAiHero in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(hero => hero.IsValidTarget())
+                        .OrderByDescending(h => h.Distance(Game.CursorPos))
+                        .Where(enemy => Geometry.Distance(enemy, Game.CursorPos) < 150f))
                 {
                     if (objAiHero != null && objAiHero.IsVisible && !objAiHero.IsDead)
                     {
@@ -147,9 +143,7 @@ namespace Akali
                                 ClearAssassinList();
                                 Program.Config.Item("Assassin" + objAiHero.ChampionName).SetValue(true);
                                 Game.PrintChat(
-                                    string.Format(
-                                        "<font color='FFFFFF'>Added to Assassin List</font> <font color='#09F000'>{0} ({1})</font>",
-                                        objAiHero.Name, objAiHero.ChampionName));
+                                    $"<font color='FFFFFF'>Added to Assassin List</font> <font color='#09F000'>{objAiHero.Name} ({objAiHero.ChampionName})</font>");
                                 break;
                             case 1:
                                 var menuStatus =
@@ -158,10 +152,7 @@ namespace Akali
                                 Program.Config.Item("Assassin" + objAiHero.ChampionName)
                                     .SetValue(!menuStatus);
                                 Game.PrintChat(
-                                    string.Format("<font color='{0}'>{1}</font> <font color='#09F000'>{2} ({3})</font>",
-                                        !menuStatus ? "#FFFFFF" : "#FF8877",
-                                        !menuStatus ? "Added to Assassin List:" : "Removed from Assassin List:",
-                                        objAiHero.Name, objAiHero.ChampionName));
+                                    $"<font color='{(!menuStatus ? "#FFFFFF" : "#FF8877")}'>{(!menuStatus ? "Added to Assassin List:" : "Removed from Assassin List:")}</font> <font color='#09F000'>{objAiHero.Name} ({objAiHero.ChampionName})</font>");
                                 break;
                         }
                     }
@@ -181,7 +172,7 @@ namespace Akali
                 DrawText(TextBold, "Target Mode:", Drawing.Width * 0.89f, Drawing.Height * 0.55f, SharpDX.Color.White);
                 var xSelect = Program.Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex;
                 DrawText(
-                    Text, xSelect == 0 ? "Single Target" : "Multi Targets", (int)Drawing.Width * 0.94f,
+                    Text, xSelect == 0 ? "Single Target" : "Multi Targets", Drawing.Width * 0.94f,
                     Drawing.Height * 0.55f, SharpDX.Color.White);
 
                 DrawText(TextBold, "Priority Targets", Drawing.Width * 0.89f, Drawing.Height * 0.58f, SharpDX.Color.White);

@@ -1,11 +1,9 @@
 using System;
-using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
-using Font = SharpDX.Direct3D9.Font;
 
 namespace JaxQx
 {
@@ -38,7 +36,7 @@ namespace JaxQx
                 {
                     return null;
                 }
-                
+
                 var vMax = HeroManager.Enemies.Where(
                     e =>
                         !e.IsDead && e.IsVisible && e.IsValidTarget(SelectorRange))
@@ -65,35 +63,42 @@ namespace JaxQx
 
             Program.Config.AddSubMenu(LocalMenu);
             LocalMenu.AddItem(
-                new MenuItem("Enemies.Mode", "Target Selector:").SetValue(new StringList(new[] { "L# Target Selector", "Jax Target Selector" }, 1)));
+                new MenuItem("Enemies.Mode", "Target Selector:").SetValue(
+                    new StringList(new[] {"L# Target Selector", "Jax Target Selector"}, 1)));
             LocalMenu.AddItem(new MenuItem("Enemies.Active", "Active").SetValue(true));
             LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Searching Range"))
                 .SetValue(new Slider(1000, 1500));
 
-            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:", false, FontStyle.Bold, SharpDX.Color.Yellow));
+            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:"));
             {
                 foreach (var enemy in HeroManager.Enemies)
                 {
-                    LocalMenu.AddItem(new MenuItem("Selected" + enemy.ChampionName, MenuTab + enemy.CharData.BaseSkinName).SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" }, GetPriority(enemy.ChampionName))));
+                    LocalMenu.AddItem(
+                        new MenuItem("Selected" + enemy.ChampionName, MenuTab + enemy.CharData.BaseSkinName).SetValue(
+                            new StringList(new[] {"Low Focus", "Medium Focus", "High Focus"},
+                                GetPriority(enemy.ChampionName))));
                 }
             }
 
-            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:", false, FontStyle.Bold, SharpDX.Color.GreenYellow));
+            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:"));
             {
                 LocalMenu.AddItem(
-                    new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto arrange priorities").SetShared().SetValue(false))
+                    new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto arrange priorities").SetShared()
+                        .SetValue(false))
                     .ValueChanged += AutoPriorityItemValueChanged;
             }
             LocalMenu.AddItem(
                 new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(false));
 
-            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings", false, FontStyle.Bold, SharpDX.Color.Aqua));
+            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings"));
             {
                 LocalMenu.AddItem(
                     new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true,
                         Color.GreenYellow)));
                 LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Targeting Status").SetValue(true));
-                LocalMenu.AddItem(new MenuItem("Draw.Status.Show", MenuTab + MenuTab + "Show This:").SetValue(new StringList(new[] { "All", "Show Only High Enemies" })));
+                LocalMenu.AddItem(
+                    new MenuItem("Draw.Status.Show", MenuTab + MenuTab + "Show This:").SetValue(
+                        new StringList(new[] {"All", "Show Only High Enemies"})));
             }
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -109,7 +114,9 @@ namespace JaxQx
         {
             foreach (var enemy in HeroManager.Enemies)
             {
-                LocalMenu.Item("Selected" + enemy.ChampionName).SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" }, GetPriority(enemy.ChampionName)));
+                LocalMenu.Item("Selected" + enemy.ChampionName)
+                    .SetValue(new StringList(new[] {"Low Focus", "Medium Focus", "High Focus"},
+                        GetPriority(enemy.ChampionName)));
             }
         }
 
@@ -123,7 +130,7 @@ namespace JaxQx
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
-            if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)
+            if (args.Msg != (uint) WindowsMessages.WM_LBUTTONDOWN)
                 return;
 
             if (!Program.Config.Item("Enemies.Click").GetValue<bool>())
@@ -146,7 +153,7 @@ namespace JaxQx
                 var i = vSelected == 2 ? 0 : vSelected + 1;
 
                 LocalMenu.Item("Selected" + selectedTarget.ChampionName)
-                    .SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" }, i));
+                    .SetValue(new StringList(new[] {"Low Focus", "Medium Focus", "High Focus"}, i));
             }
         }
 
@@ -213,8 +220,8 @@ namespace JaxQx
 
                     Utils.DrawText(vSelected == 2 ? Utils.TextBold : Utils.Text,
                         LocalMenu.Item("Selected" + enemy.CharData.BaseSkinName).GetValue<StringList>().SelectedValue,
-                        enemy.HPBarPosition.X + enemy.BoundingRadius / 2f -
-                        (enemy.CharData.BaseSkinName.Length / 2f),
+                        enemy.HPBarPosition.X + enemy.BoundingRadius/2f -
+                        (enemy.CharData.BaseSkinName.Length/2f),
                         enemy.HPBarPosition.Y - 20,
                         vSelected == 2
                             ? SharpDX.Color.Red

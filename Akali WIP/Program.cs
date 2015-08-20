@@ -14,22 +14,30 @@ namespace Akali
     internal class Program
     {
         public const string ChampionName = "Akali";
-
         public static Spell Q;
         public static Spell W;
         public static Spell E;
         public static Spell R;
         public static List<Spell> SpellList = new List<Spell>();
-
         public static SpellSlot IgniteSlot;
         public static Items.Item Hex;
         public static Items.Item Cutlass;
-
         public static Orbwalking.Orbwalker Orbwalker;
-
         public static Menu Config;
-
         public static Obj_AI_Hero Player = ObjectManager.Player;
+
+        private static Obj_AI_Hero EnemyHaveMota
+        {
+            get
+            {
+                return
+                    (from enemy in
+                        ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValidTarget(R.Range))
+                        from buff in enemy.Buffs
+                        where buff.DisplayName == "AkaliMota"
+                        select enemy).FirstOrDefault();
+            }
+        }
 
         private static void Main(string[] args)
         {
@@ -38,7 +46,7 @@ namespace Akali
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.BaseSkinName != ChampionName)
+            if (Player.CharData.BaseSkinName != ChampionName)
                 return;
 
             Q = new Spell(SpellSlot.Q, 600f);
@@ -79,10 +87,17 @@ namespace Akali
             {
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-                Config.SubMenu("Harass").AddItem(new MenuItem("HarassEnergy", "Min. Energy Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("Harass")
+                    .AddItem(new MenuItem("HarassEnergy", "Min. Energy Percent: ").SetValue(new Slider(50, 100, 0)));
 
-                Config.SubMenu("Harass").AddItem(new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
-                Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassUseQT", "Use Q (toggle)!").SetValue(new KeyBind("J".ToCharArray()[0],
+                            KeyBindType.Toggle)));
+                Config.SubMenu("Harass")
+                    .AddItem(
+                        new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0],
+                            KeyBindType.Press)));
             }
 
             Config.AddSubMenu(new Menu("Farm", "Farm"));
@@ -90,11 +105,11 @@ namespace Akali
                 Config.SubMenu("Farm")
                     .AddItem(
                         new MenuItem("UseQFarm", "Use Q").SetValue(
-                            new StringList(new[] { "Freeze", "LaneClear", "Both", "No" }, 2)));
+                            new StringList(new[] {"Freeze", "LaneClear", "Both", "No"}, 2)));
                 Config.SubMenu("Farm")
                     .AddItem(
                         new MenuItem("UseEFarm", "Use E").SetValue(
-                            new StringList(new[] { "Freeze", "LaneClear", "Both", "No" }, 1)));
+                            new StringList(new[] {"Freeze", "LaneClear", "Both", "No"}, 1)));
                 Config.SubMenu("Farm")
                     .AddItem(
                         new MenuItem("FreezeActive", "Freeze!").SetValue(
@@ -133,20 +148,6 @@ namespace Akali
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate;
-
-        }
-
-        private static Obj_AI_Hero enemyHaveMota
-        {
-            get
-            {
-                return
-                    (from enemy in
-                        ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValidTarget(R.Range))
-                        from buff in enemy.Buffs
-                        where buff.DisplayName == "AkaliMota"
-                        select enemy).FirstOrDefault();
-            }
         }
 
         private static float GetComboDamage(Obj_AI_Base vTarget)
@@ -160,7 +161,7 @@ namespace Akali
                 fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.E);
 
             if (R.IsReady())
-                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.R) * R.Instance.Ammo;
+                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.R)*R.Instance.Ammo;
 
             if (Items.CanUseItem(3146))
                 fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Hexgun);
@@ -174,16 +175,16 @@ namespace Akali
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (W.IsReady() && Player.CountEnemiesInRange(W.Range / 2 + 100) >= 2)
+            if (W.IsReady())
             {
-                W.Cast(Player.Position);
-            }
-
-            if (Player.HasBuff("zedulttargetmark", true))
-            {
-                if (W.IsReady())
+                if (Player.CountEnemiesInRange(W.Range/2 + 100) >= 2)
                 {
-                    W.Cast(Player.Position);
+                    W.Cast(Player);
+                }
+
+                if (Player.HasBuff("zedulttargetmark"))
+                {
+                    W.Cast(Player);
                 }
             }
 
@@ -211,7 +212,7 @@ namespace Akali
                 Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
             {
                 var vEnergy = Config.Item("HarassEnergy").GetValue<Slider>().Value;
-                if (Player.ManaPercentage() >= vEnergy)
+                if (Player.ManaPercent >= vEnergy)
                     Harass();
             }
 
@@ -234,7 +235,7 @@ namespace Akali
 
         private static void Combo()
         {
-            var t = GetTarget((R.IsReady() ? R.Range: Q.Range), TargetSelector.DamageType.Magical);
+            var t = GetTarget((R.IsReady() ? R.Range : Q.Range), TargetSelector.DamageType.Magical);
 
             if (GetComboDamage(t) > t.Health && IgniteSlot != SpellSlot.Unknown &&
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
@@ -257,7 +258,7 @@ namespace Akali
                 Cutlass.Cast(t);
             }
 
-            var motaEnemy = enemyHaveMota;
+            var motaEnemy = EnemyHaveMota;
             if (motaEnemy != null && motaEnemy.IsValidTarget(Orbwalking.GetRealAutoAttackRange(t)))
                 return;
 
@@ -305,8 +306,8 @@ namespace Akali
                 foreach (var minion in allMinions)
                 {
                     if (minion.IsValidTarget() &&
-                        HealthPrediction.GetHealthPrediction(minion, (int) (Player.Distance(minion) * 1000 / 1400)) <
-                        0.75 * Player.GetSpellDamage(minion, SpellSlot.Q))
+                        HealthPrediction.GetHealthPrediction(minion, (int) (Player.Distance(minion)*1000/1400)) <
+                        0.75*Player.GetSpellDamage(minion, SpellSlot.Q))
                     {
                         Q.CastOnUnit(minion);
                         return;
@@ -320,7 +321,7 @@ namespace Akali
                     allMinions.Any(
                         minion =>
                             minion.IsValidTarget(E.Range) &&
-                            minion.Health < 0.75 * Player.GetSpellDamage(minion, SpellSlot.E) &&
+                            minion.Health < 0.75*Player.GetSpellDamage(minion, SpellSlot.E) &&
                             minion.IsValidTarget(E.Range)))
                 {
                     E.Cast();
@@ -335,7 +336,7 @@ namespace Akali
                     if (useQ)
                         Q.CastOnUnit(minion);
 
-                    if (useE && minion.IsValidTarget(E.Range) )
+                    if (useE && minion.IsValidTarget(E.Range))
                         E.Cast();
                 }
             }
@@ -371,7 +372,8 @@ namespace Akali
             }
         }
 
-        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0,
+            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
             if (Math.Abs(vDefaultRange) < 0.00001)
                 vDefaultRange = Q.Range;
@@ -395,9 +397,9 @@ namespace Akali
                 vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
             }
 
-            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+            var objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
 
-            Obj_AI_Hero t = !objAiHeroes.Any()
+            var t = !objAiHeroes.Any()
                 ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
                 : objAiHeroes[0];
 
