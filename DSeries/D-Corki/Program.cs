@@ -1,32 +1,26 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-
 namespace D_Corki
 {
-    class Program
+    internal class Program
     {
         private const string ChampionName = "Corki";
-
         private static Orbwalking.Orbwalker _orbwalker;
-
         private static Spell _q, _w, _e, _r, _r1, _r2;
-
         private static Menu _config;
-
         private static Obj_AI_Hero _player;
-
-        private static Int32 _lastSkin;
-
+        private static int _lastSkin;
         private static Items.Item _youmuu, _blade, _bilge;
+        private static readonly int[] SmitePurple = {3713, 3726, 3725, 3726, 3723};
+        private static readonly int[] SmiteGrey = {3711, 3722, 3721, 3720, 3719};
+        private static readonly int[] SmiteRed = {3715, 3718, 3717, 3716, 3714};
+        private static readonly int[] SmiteBlue = {3706, 3710, 3709, 3708, 3707};
 
-        private static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };
-        private static readonly int[] SmiteGrey = { 3711, 3722, 3721, 3720, 3719 };
-        private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
-        private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
@@ -34,7 +28,7 @@ namespace D_Corki
         private static void Game_OnGameLoad(EventArgs args)
         {
             _player = ObjectManager.Player;
-            if (ObjectManager.Player.BaseSkinName != ChampionName) return;
+            if (ObjectManager.Player.CharData.BaseSkinName != ChampionName) return;
 
             _q = new Spell(SpellSlot.Q, 825f);
             _w = new Spell(SpellSlot.W, 800f);
@@ -68,9 +62,16 @@ namespace D_Corki
             _config.SubMenu("Combo").AddItem(new MenuItem("UseQC", "Use Q")).SetValue(true);
             _config.SubMenu("Combo").AddSubMenu(new Menu("Use W", "Use W"));
             _config.SubMenu("Combo").SubMenu("Use W").AddItem(new MenuItem("UseWC", "Use W")).SetValue(true);
-            _config.SubMenu("Combo").SubMenu("Use W").AddItem(new MenuItem("diveintower", "Dive In tower with W")).SetValue(true);
-            _config.SubMenu("Combo").SubMenu("Use W").AddItem(new MenuItem("UseWHE", "Your HP% Use W >").SetValue(new Slider(65, 1, 100)));
-            _config.SubMenu("Combo").SubMenu("Use W").AddItem(new MenuItem("EnemyC", "Enemy in R.Range <").SetValue(new Slider(2, 1, 5)));
+            _config.SubMenu("Combo")
+                .SubMenu("Use W")
+                .AddItem(new MenuItem("diveintower", "Dive In tower with W"))
+                .SetValue(true);
+            _config.SubMenu("Combo")
+                .SubMenu("Use W")
+                .AddItem(new MenuItem("UseWHE", "Your HP% Use W >").SetValue(new Slider(65, 1)));
+            _config.SubMenu("Combo")
+                .SubMenu("Use W")
+                .AddItem(new MenuItem("EnemyC", "Enemy in R.Range <").SetValue(new Slider(2, 1, 5)));
             _config.SubMenu("Combo").AddItem(new MenuItem("UseEC", "Use E")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseRC", "Use R")).SetValue(true);
             _config.SubMenu("Combo")
@@ -82,17 +83,17 @@ namespace D_Corki
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1)));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1)));
             _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
             _config.SubMenu("items")
                 .SubMenu("Potions")
@@ -100,14 +101,14 @@ namespace D_Corki
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1)));
             _config.SubMenu("items")
                 .SubMenu("Potions")
                 .AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1)));
 
             //Harass
             _config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -120,7 +121,7 @@ namespace D_Corki
                     new MenuItem("harasstoggle", "AutoHarass (toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
             _config.SubMenu("Harass")
-                .AddItem(new MenuItem("Harrasmana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Harrasmana", "Minimum Mana").SetValue(new Slider(60, 1)));
             _config.SubMenu("Harass")
                 .AddItem(
                     new MenuItem("ActiveHarass", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
@@ -136,7 +137,7 @@ namespace D_Corki
             _config.SubMenu("Farm").AddItem(new MenuItem("UseEJ", "E Jungle")).SetValue(true);
             _config.SubMenu("Farm").AddItem(new MenuItem("UseRJ", "R Jungle")).SetValue(true);
             _config.SubMenu("Farm").AddItem(new MenuItem("RlimL", "R Amount >").SetValue(new Slider(3, 1, 7)));
-            _config.SubMenu("Farm").AddItem(new MenuItem("Lanemana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+            _config.SubMenu("Farm").AddItem(new MenuItem("Lanemana", "Minimum Mana").SetValue(new Slider(60, 1)));
             _config.SubMenu("Farm")
                 .AddItem(
                     new MenuItem("ActiveLast", "LastHit!").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
@@ -194,7 +195,7 @@ namespace D_Corki
             _config.AddToMainMenu();
             Game.PrintChat("<font color='#881df2'>D-Corki by Diabaths</font> Loaded.");
             Game.PrintChat(
-               "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
+                "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
@@ -207,10 +208,7 @@ namespace D_Corki
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (_player.HasBuff("CorkiMissileBarrageCounterBig"))
-                _r.Range = _r2.Range;
-            else
-                _r.Range = _r1.Range;
+            _r.Range = _player.HasBuff("CorkiMissileBarrageCounterBig") ? _r2.Range : _r1.Range;
             if (_config.Item("skinC").GetValue<bool>() && SkinChanged())
             {
                 GenModelPacket(_player.ChampionName, _config.Item("skinCorki").GetValue<Slider>().Value);
@@ -220,18 +218,20 @@ namespace D_Corki
             {
                 Combo();
             }
-            if ((_config.Item("ActiveHarass").GetValue<KeyBind>().Active || _config.Item("harasstoggle").GetValue<KeyBind>().Active) && (100 * (_player.Mana / _player.MaxMana)) > _config.Item("Harrasmana").GetValue<Slider>().Value)
+            if ((_config.Item("ActiveHarass").GetValue<KeyBind>().Active ||
+                 _config.Item("harasstoggle").GetValue<KeyBind>().Active) &&
+                (100*(_player.Mana/_player.MaxMana)) > _config.Item("Harrasmana").GetValue<Slider>().Value)
             {
                 Harass();
-
             }
-            if (_config.Item("ActiveLane").GetValue<KeyBind>().Active && (100 * (_player.Mana / _player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value)
+            if (_config.Item("ActiveLane").GetValue<KeyBind>().Active &&
+                (100*(_player.Mana/_player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value)
             {
                 Laneclear();
                 JungleClear();
-
             }
-            if (_config.Item("ActiveLast").GetValue<KeyBind>().Active && (100 * (_player.Mana / _player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value)
+            if (_config.Item("ActiveLast").GetValue<KeyBind>().Active &&
+                (100*(_player.Mana/_player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value)
             {
                 LastHit();
             }
@@ -248,12 +248,14 @@ namespace D_Corki
         {
             return _player.Spellbook.GetSpell(SpellSlot.R).Ammo;
         }
-        static void GenModelPacket(string champ, int skinId)
+
+        private static void GenModelPacket(string champ, int skinId)
         {
-            Packet.S2C.UpdateModel.Encoded(new Packet.S2C.UpdateModel.Struct(_player.NetworkId, skinId, champ)).Process();
+            Packet.S2C.UpdateModel.Encoded(new Packet.S2C.UpdateModel.Struct(_player.NetworkId, skinId, champ))
+                .Process();
         }
 
-        static bool SkinChanged()
+        private static bool SkinChanged()
         {
             return (_config.Item("skinCorki").GetValue<Slider>().Value != _lastSkin);
         }
@@ -264,7 +266,7 @@ namespace D_Corki
             var useQ = _config.Item("UseQC").GetValue<bool>();
             var useE = _config.Item("UseEC").GetValue<bool>();
             var useR = _config.Item("UseRC").GetValue<bool>();
-            
+
 
             if (useQ && _q.IsReady())
             {
@@ -292,7 +294,7 @@ namespace D_Corki
         {
             var useW = _config.Item("UseWC").GetValue<bool>();
             var diveTower = _config.Item("diveintower").GetValue<bool>();
-            if (Utility.UnderTurret(target) && !diveTower) return;
+            if (target.UnderTurret() && !diveTower) return;
             var usewhE = (100*(_player.Health/_player.MaxHealth)) > _config.Item("UseWHE").GetValue<Slider>().Value;
             if (useW && _w.IsReady() && usewhE && _player.Distance(target) > Orbwalking.GetRealAutoAttackRange(_player) &&
                 ObjectManager.Player.CountEnemiesInRange(1300) <= _config.Item("EnemyC").GetValue<Slider>().Value)
@@ -360,13 +362,12 @@ namespace D_Corki
             if (!Orbwalking.CanMove(40)) return;
 
             var rangedMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _q.Range + _q.Width + 30,
-            MinionTypes.Ranged);
-            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _q.Range + _q.Width + 30,
-            MinionTypes.All);
-            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _e.Range, MinionTypes.All);
-            var allMinionsR = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _r.Range, MinionTypes.All);
+                MinionTypes.Ranged);
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _q.Range + _q.Width + 30);
+            var allMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _e.Range);
+            var allMinionsR = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _r.Range);
             var rangedMinionsR = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _r.Range + _r.Width,
-            MinionTypes.Ranged);
+                MinionTypes.Ranged);
             var useQl = _config.Item("UseQL").GetValue<bool>();
             var useEl = _config.Item("UseEL").GetValue<bool>();
             var useRl = _config.Item("UseRL").GetValue<bool>();
@@ -387,7 +388,7 @@ namespace D_Corki
                 else
                     foreach (var minion in allMinionsQ)
                         if (!Orbwalking.InAutoAttackRange(minion) &&
-                        minion.Health < 0.75 * _player.GetSpellDamage(minion, SpellSlot.Q))
+                            minion.Health < 0.75*_player.GetSpellDamage(minion, SpellSlot.Q))
                             _q.Cast(minion);
             }
             if (_e.IsReady() && useEl)
@@ -401,7 +402,7 @@ namespace D_Corki
                 else
                     foreach (var minion in allMinionsE)
                         if (!Orbwalking.InAutoAttackRange(minion) &&
-                        minion.Health < 0.75 * _player.GetSpellDamage(minion, SpellSlot.E))
+                            minion.Health < 0.75*_player.GetSpellDamage(minion, SpellSlot.E))
                             _e.Cast(minion);
             }
             if (_r.IsReady() && useRl && rlimL < UltiStucks() && allMinionsR.Count > 3)
@@ -420,25 +421,25 @@ namespace D_Corki
                 else
                     foreach (var minion in allMinionsR)
                         if (!Orbwalking.InAutoAttackRange(minion) &&
-                        minion.Health < 0.75 * _player.GetSpellDamage(minion, SpellSlot.R))
+                            minion.Health < 0.75*_player.GetSpellDamage(minion, SpellSlot.R))
                             _r.Cast(minion);
             }
         }
 
         private static void LastHit()
         {
-            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _q.Range, MinionTypes.All);
+            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _q.Range);
             var useQ = _config.Item("UseQLH").GetValue<bool>();
             var useE = _config.Item("UseELH").GetValue<bool>();
             if (allMinions.Count < 3) return;
             foreach (var minion in allMinions)
             {
-                if (useQ && _q.IsReady() && minion.Health < 0.75 * _player.GetSpellDamage(minion, SpellSlot.Q))
+                if (useQ && _q.IsReady() && minion.Health < 0.75*_player.GetSpellDamage(minion, SpellSlot.Q))
                 {
                     _q.Cast(minion);
                 }
 
-                if (_w.IsReady() && useE && minion.Health < 0.75 * _player.GetSpellDamage(minion, SpellSlot.E))
+                if (_w.IsReady() && useE && minion.Health < 0.75*_player.GetSpellDamage(minion, SpellSlot.E))
                 {
                     _e.Cast(minion);
                 }
@@ -447,7 +448,8 @@ namespace D_Corki
 
         private static void JungleClear()
         {
-            var mobs = MinionManager.GetMinions(_player.ServerPosition, _q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(_player.ServerPosition, _q.Range, MinionTypes.All, MinionTeam.Neutral,
+                MinionOrderTypes.MaxHealth);
             var useQ = _config.Item("UseQJ").GetValue<bool>();
             var useE = _config.Item("UseEJ").GetValue<bool>();
             var useR = _config.Item("UseRJ").GetValue<bool>();
@@ -474,6 +476,7 @@ namespace D_Corki
         {
             return _config.Item("usePackets").GetValue<bool>();
         }
+
         private static bool HasBigRocket()
         {
             return ObjectManager.Player.Buffs.Any(buff => buff.DisplayName.ToLower() == "corkimissilebarragecounterbig");
@@ -484,13 +487,15 @@ namespace D_Corki
             if (_q.IsReady() && _config.Item("UseQM").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(_q.Range, TargetSelector.DamageType.Magical);
-                if (_q.GetDamage(t) > t.Health && _player.Distance(t) <= _q.Range && _q.GetPrediction(t).Hitchance >= Qchangekil())
+                if (_q.GetDamage(t) > t.Health && _player.Distance(t) <= _q.Range &&
+                    _q.GetPrediction(t).Hitchance >= Qchangekil())
                     _q.Cast(t, Packets(), true);
             }
             if (_e.IsReady() && _config.Item("UseEM").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(_w.Range, TargetSelector.DamageType.Magical);
-                if (_e.GetDamage(t) > t.Health && _player.Distance(t) <= _e.Range && _e.GetPrediction(t).Hitchance >= Echangekil())
+                if (_e.GetDamage(t) > t.Health && _player.Distance(t) <= _e.Range &&
+                    _e.GetPrediction(t).Hitchance >= Echangekil())
                     _e.Cast(t, Packets(), true);
             }
             if (_r.IsReady() && _config.Item("UseRM").GetValue<bool>())
@@ -503,40 +508,40 @@ namespace D_Corki
                             .Where(
                                 hero =>
                                     hero.IsValidTarget(bigRocket ? _r2.Range : _r1.Range) &&
-                                    _r1.GetDamage(hero) * (bigRocket ? 1.5f : 1f) > hero.Health))
+                                    _r1.GetDamage(hero)*(bigRocket ? 1.5f : 1f) > hero.Health))
                     if (_r.GetPrediction(t).Hitchance >= Rchangekil())
                         _r.Cast(t, Packets(), true);
             }
         }
+
         private static void UseItemes(Obj_AI_Hero target)
         {
             var iBilge = _config.Item("Bilge").GetValue<bool>();
             var iBilgeEnemyhp = target.Health <=
-                                (target.MaxHealth * (_config.Item("BilgeEnemyhp").GetValue<Slider>().Value) / 100);
+                                (target.MaxHealth*(_config.Item("BilgeEnemyhp").GetValue<Slider>().Value)/100);
             var iBilgemyhp = _player.Health <=
-                             (_player.MaxHealth * (_config.Item("Bilgemyhp").GetValue<Slider>().Value) / 100);
+                             (_player.MaxHealth*(_config.Item("Bilgemyhp").GetValue<Slider>().Value)/100);
             var iBlade = _config.Item("Blade").GetValue<bool>();
             var iBladeEnemyhp = target.Health <=
-                                (target.MaxHealth * (_config.Item("BladeEnemyhp").GetValue<Slider>().Value) / 100);
+                                (target.MaxHealth*(_config.Item("BladeEnemyhp").GetValue<Slider>().Value)/100);
             var iBlademyhp = _player.Health <=
-                             (_player.MaxHealth * (_config.Item("Blademyhp").GetValue<Slider>().Value) / 100);
+                             (_player.MaxHealth*(_config.Item("Blademyhp").GetValue<Slider>().Value)/100);
             var iYoumuu = _config.Item("Youmuu").GetValue<bool>();
 
             if (_player.Distance(target) <= 450 && iBilge && (iBilgeEnemyhp || iBilgemyhp) && _bilge.IsReady())
             {
                 _bilge.Cast(target);
-
             }
             if (_player.Distance(target) <= 450 && iBlade && (iBladeEnemyhp || iBlademyhp) && _blade.IsReady())
             {
                 _blade.Cast(target);
-
             }
             if (_player.Distance(target) <= 450 && iYoumuu && _youmuu.IsReady())
             {
                 _youmuu.Cast();
             }
         }
+
         private static void Usepotion()
         {
             var mobs = MinionManager.GetMinions(_player.ServerPosition, _q.Range,
@@ -544,22 +549,30 @@ namespace D_Corki
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             var iusehppotion = _config.Item("usehppotions").GetValue<bool>();
             var iusepotionhp = _player.Health <=
-                               (_player.MaxHealth * (_config.Item("usepotionhp").GetValue<Slider>().Value) / 100);
+                               (_player.MaxHealth*(_config.Item("usepotionhp").GetValue<Slider>().Value)/100);
             var iusemppotion = _config.Item("usemppotions").GetValue<bool>();
             var iusepotionmp = _player.Mana <=
-                               (_player.MaxMana * (_config.Item("usepotionmp").GetValue<Slider>().Value) / 100);
+                               (_player.MaxMana*(_config.Item("usepotionmp").GetValue<Slider>().Value)/100);
             if (ObjectManager.Player.InFountain() || ObjectManager.Player.HasBuff("Recall")) return;
 
             if (ObjectManager.Player.CountEnemiesInRange(800) > 0 ||
                 (mobs.Count > 0 && _config.Item("ActiveLane").GetValue<KeyBind>().Active && (Items.HasItem(1039) ||
-                 SmiteBlue.Any(i => Items.HasItem(i)) || SmiteRed.Any(i => Items.HasItem(i)) || SmitePurple.Any(i => Items.HasItem(i)) ||
-                  SmiteBlue.Any(i => Items.HasItem(i)) || SmiteGrey.Any(i => Items.HasItem(i))
-                     )))
+                                                                                             SmiteBlue.Any(
+                                                                                                 i => Items.HasItem(i)) ||
+                                                                                             SmiteRed.Any(
+                                                                                                 i => Items.HasItem(i)) ||
+                                                                                             SmitePurple.Any(
+                                                                                                 i => Items.HasItem(i)) ||
+                                                                                             SmiteBlue.Any(
+                                                                                                 i => Items.HasItem(i)) ||
+                                                                                             SmiteGrey.Any(
+                                                                                                 i => Items.HasItem(i))
+                    )))
             {
                 if (iusepotionhp && iusehppotion &&
-                     !(ObjectManager.Player.HasBuff("RegenerationPotion", true) ||
-                       ObjectManager.Player.HasBuff("ItemCrystalFlask", true) ||
-                       ObjectManager.Player.HasBuff("ItemMiniRegenPotion", true)))
+                    !(ObjectManager.Player.HasBuff("RegenerationPotion") ||
+                      ObjectManager.Player.HasBuff("ItemCrystalFlask") ||
+                      ObjectManager.Player.HasBuff("ItemMiniRegenPotion")))
                 {
                     if (Items.HasItem(2041) && Items.CanUseItem(2041))
                     {
@@ -577,9 +590,9 @@ namespace D_Corki
 
 
                 if (iusepotionmp && iusemppotion &&
-                    !(ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true) ||
-                      ObjectManager.Player.HasBuff("ItemCrystalFlask", true) ||
-                      ObjectManager.Player.HasBuff("ItemMiniRegenPotion", true)))
+                    !(ObjectManager.Player.HasBuff("FlaskOfCrystalWater") ||
+                      ObjectManager.Player.HasBuff("ItemCrystalFlask") ||
+                      ObjectManager.Player.HasBuff("ItemMiniRegenPotion")))
                 {
                     if (Items.HasItem(2041) && Items.CanUseItem(2041))
                     {
@@ -596,6 +609,7 @@ namespace D_Corki
                 }
             }
         }
+
         private static HitChance Qchangecombo()
         {
             switch (_config.Item("Qchange").GetValue<StringList>().SelectedIndex)
@@ -646,6 +660,7 @@ namespace D_Corki
                     return HitChance.Medium;
             }
         }
+
         private static HitChance Qchangehar()
         {
             switch (_config.Item("QchangeHar").GetValue<StringList>().SelectedIndex)
@@ -696,6 +711,7 @@ namespace D_Corki
                     return HitChance.High;
             }
         }
+
         private static HitChance Qchangekil()
         {
             switch (_config.Item("Qchangekil").GetValue<StringList>().SelectedIndex)
@@ -753,25 +769,25 @@ namespace D_Corki
             {
                 if (_config.Item("DrawQ").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _q.Range, System.Drawing.Color.Gray,
+                    Utility.DrawCircle(ObjectManager.Player.Position, _q.Range, Color.Gray,
                         _config.Item("CircleThickness").GetValue<Slider>().Value,
                         _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
                 if (_config.Item("DrawW").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _w.Range, System.Drawing.Color.Gray,
+                    Utility.DrawCircle(ObjectManager.Player.Position, _w.Range, Color.Gray,
                         _config.Item("CircleThickness").GetValue<Slider>().Value,
                         _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
                 if (_config.Item("DrawE").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _e.Range, System.Drawing.Color.Gray,
+                    Utility.DrawCircle(ObjectManager.Player.Position, _e.Range, Color.Gray,
                         _config.Item("CircleThickness").GetValue<Slider>().Value,
                         _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
                 if (_config.Item("DrawR").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _r.Range, System.Drawing.Color.Gray,
+                    Utility.DrawCircle(ObjectManager.Player.Position, _r.Range, Color.Gray,
                         _config.Item("CircleThickness").GetValue<Slider>().Value,
                         _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
@@ -780,22 +796,21 @@ namespace D_Corki
             {
                 if (_config.Item("DrawQ").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _q.Range, System.Drawing.Color.White);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _q.Range, Color.White);
                 }
                 if (_config.Item("DrawW").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _w.Range, System.Drawing.Color.White);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _w.Range, Color.White);
                 }
                 if (_config.Item("DrawE").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _e.Range, System.Drawing.Color.White);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _e.Range, Color.White);
                 }
 
                 if (_config.Item("DrawR").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _r.Range, System.Drawing.Color.White);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _r.Range, Color.White);
                 }
-
             }
         }
     }
