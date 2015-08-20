@@ -97,7 +97,7 @@ namespace JaxQx
                 .AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int)Q.Range)));
             Config.SubMenu("Combo")
                 .AddItem(
-                    new MenuItem("ComboActive", "Combo!", false, MenuItemFontStyle.Bold).SetValue(
+                    new MenuItem("ComboActive", "Combo!").SetValue(
                         new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
             // Harass
@@ -115,7 +115,7 @@ namespace JaxQx
                 .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("HarassActive", "Harass", false, MenuItemFontStyle.Bold).SetValue(
+                    new MenuItem("HarassActive", "Harass").SetValue(
                         new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             // Lane Clear
@@ -129,7 +129,7 @@ namespace JaxQx
                 .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
                 .AddItem(
-                    new MenuItem("LaneClearActive", "LaneClear", false, MenuItemFontStyle.Bold).SetValue(
+                    new MenuItem("LaneClearActive", "LaneClear").SetValue(
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             // Jungling Farm
@@ -142,7 +142,7 @@ namespace JaxQx
 
             Config.SubMenu("JungleFarm")
                 .AddItem(
-                    new MenuItem("JungleFarmActive", "JungleFarm", false, MenuItemFontStyle.Bold).SetValue(
+                    new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             // Extra
@@ -177,7 +177,7 @@ namespace JaxQx
                 };
 
             Config.AddItem(
-                new MenuItem("Ward", "Ward Jump / Flee", false, MenuItemFontStyle.Bold).SetValue(
+                new MenuItem("Ward", "Ward Jump / Flee").SetValue(
                     new KeyBind('A', KeyBindType.Press)));
             Config.AddToMainMenu();
 
