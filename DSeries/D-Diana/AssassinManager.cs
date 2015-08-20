@@ -1,17 +1,17 @@
 using System;
-using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
 using SharpDX.Direct3D9;
-using Font = SharpDX.Direct3D9.Font;
+using Color = System.Drawing.Color;
 
 namespace D_Diana
 {
     internal class AssassinManager
     {
         public static Font Text, TextBold;
-        private static string space = "    ";
+        private static readonly string space = "    ";
 
         public AssassinManager()
         {
@@ -28,8 +28,7 @@ namespace D_Diana
                     Height = 13,
                     Weight = FontWeight.Bold,
                     OutputPrecision = FontPrecision.Default,
-                    Quality = FontQuality.ClearType,
-
+                    Quality = FontQuality.ClearType
                 });
 
             Text = new Font(
@@ -39,8 +38,7 @@ namespace D_Diana
                     FaceName = "Tahoma",
                     Height = 13,
                     OutputPrecision = FontPrecision.Default,
-                    Quality = FontQuality.ClearType,
-
+                    Quality = FontQuality.ClearType
                 });
 
             Program.Config.AddSubMenu(new Menu("Set Priority Targets", "MenuAssassin"));
@@ -52,13 +50,13 @@ namespace D_Diana
             Program.Config.SubMenu("MenuAssassin")
                 .AddItem(
                     new MenuItem("AssassinSelectOption", space + "Set:").SetValue(
-                        new StringList(new[] { "Single Select", "Multi Select" })));
+                        new StringList(new[] {"Single Select", "Multi Select"})));
 
             Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("xM1", "Enemies:"));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
+            foreach (
+                var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
             {
                 Program.Config.SubMenu("MenuAssassin")
-
                     .AddItem(
                         new MenuItem("Assassin" + enemy.ChampionName, space + enemy.ChampionName).SetValue(
                             TargetSelector.GetPriority(enemy) > 3));
@@ -92,7 +90,7 @@ namespace D_Diana
             Game.OnWndProc += Game_OnWndProc;
         }
 
-        static void ClearAssassinList()
+        private static void ClearAssassinList()
         {
             foreach (
                 var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
@@ -100,18 +98,18 @@ namespace D_Diana
                 Program.Config.Item("Assassin" + enemy.ChampionName).SetValue(false);
             }
         }
+
         private static void OnUpdate(EventArgs args)
         {
         }
 
-        public static void DrawText(Font vFont, String vText, float vPosX, float vPosY, SharpDX.ColorBGRA vColor)
+        public static void DrawText(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {
-            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
+            vFont.DrawText(null, vText, (int) vPosX, (int) vPosY, vColor);
         }
 
         private static void Game_OnWndProc(WndEventArgs args)
         {
-
             if (Program.Config.Item("AssassinReset").GetValue<KeyBind>().Active && args.Msg == 257)
             {
                 ClearAssassinList();
@@ -119,7 +117,7 @@ namespace D_Diana
                     "<font color='#FFFFFF'>Reset Assassin List is Complete! Click on the enemy for Add/Remove.</font>");
             }
 
-            if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)
+            if (args.Msg != (uint) WindowsMessages.WM_LBUTTONDOWN)
             {
                 return;
             }
@@ -127,14 +125,14 @@ namespace D_Diana
             if (Program.Config.Item("AssassinSetClick").GetValue<bool>())
             {
                 foreach (var objAiHero in from hero in ObjectManager.Get<Obj_AI_Hero>()
-                                          where hero.IsValidTarget()
-                                          select hero
-                                              into h
-                                              orderby h.Distance(Game.CursorPos) descending
-                                              select h
-                                                  into enemy
-                                                  where enemy.Distance(Game.CursorPos) < 150f
-                                                  select enemy)
+                    where hero.IsValidTarget()
+                    select hero
+                    into h
+                    orderby h.Distance(Game.CursorPos) descending
+                    select h
+                    into enemy
+                    where enemy.Distance(Game.CursorPos) < 150f
+                    select enemy)
                 {
                     if (objAiHero != null && objAiHero.IsVisible && !objAiHero.IsDead)
                     {
@@ -147,9 +145,7 @@ namespace D_Diana
                                 ClearAssassinList();
                                 Program.Config.Item("Assassin" + objAiHero.ChampionName).SetValue(true);
                                 Game.PrintChat(
-                                    string.Format(
-                                        "<font color='FFFFFF'>Added to Assassin List</font> <font color='#09F000'>{0} ({1})</font>",
-                                        objAiHero.Name, objAiHero.ChampionName));
+                                    $"<font color='FFFFFF'>Added to Assassin List</font> <font color='#09F000'>{objAiHero.Name} ({objAiHero.ChampionName})</font>");
                                 break;
                             case 1:
                                 var menuStatus =
@@ -158,16 +154,14 @@ namespace D_Diana
                                 Program.Config.Item("Assassin" + objAiHero.ChampionName)
                                     .SetValue(!menuStatus);
                                 Game.PrintChat(
-                                    string.Format("<font color='{0}'>{1}</font> <font color='#09F000'>{2} ({3})</font>",
-                                        !menuStatus ? "#FFFFFF" : "#FF8877",
-                                        !menuStatus ? "Added to Assassin List:" : "Removed from Assassin List:",
-                                        objAiHero.Name, objAiHero.ChampionName));
+                                    $"<font color='{(!menuStatus ? "#FFFFFF" : "#FF8877")}'>{(!menuStatus ? "Added to Assassin List:" : "Removed from Assassin List:")}</font> <font color='#09F000'>{objAiHero.Name} ({objAiHero.ChampionName})</font>");
                                 break;
                         }
                     }
                 }
             }
         }
+
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (!Program.Config.Item("AssassinActive").GetValue<bool>())
@@ -178,21 +172,21 @@ namespace D_Diana
                 var enemies = ObjectManager.Get<Obj_AI_Hero>().Where(xEnemy => xEnemy.IsEnemy);
                 var objAiHeroes = enemies as Obj_AI_Hero[] ?? enemies.ToArray();
 
-                DrawText(TextBold, "Target Mode:", Drawing.Width * 0.89f, Drawing.Height * 0.55f, SharpDX.Color.White);
+                DrawText(TextBold, "Target Mode:", Drawing.Width*0.89f, Drawing.Height*0.55f, SharpDX.Color.White);
                 var xSelect = Program.Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex;
                 DrawText(
-                    Text, xSelect == 0 ? "Single Target" : "Multi Targets", (int)Drawing.Width * 0.94f,
-                    Drawing.Height * 0.55f, SharpDX.Color.White);
+                    Text, xSelect == 0 ? "Single Target" : "Multi Targets", Drawing.Width*0.94f,
+                    Drawing.Height*0.55f, SharpDX.Color.White);
 
-                DrawText(TextBold, "Priority Targets", Drawing.Width * 0.89f, Drawing.Height * 0.58f, SharpDX.Color.White);
-                DrawText(TextBold, "_____________", Drawing.Width * 0.89f, Drawing.Height * 0.58f, SharpDX.Color.White);
+                DrawText(TextBold, "Priority Targets", Drawing.Width*0.89f, Drawing.Height*0.58f, SharpDX.Color.White);
+                DrawText(TextBold, "_____________", Drawing.Width*0.89f, Drawing.Height*0.58f, SharpDX.Color.White);
 
-                for (int i = 0; i < objAiHeroes.Count(); i++)
+                for (var i = 0; i < objAiHeroes.Count(); i++)
                 {
                     var xValue = Program.Config.Item("Assassin" + objAiHeroes[i].ChampionName).GetValue<bool>();
                     DrawText(
-                        xValue ? TextBold : Text, objAiHeroes[i].ChampionName, Drawing.Width * 0.895f,
-                        Drawing.Height * 0.58f + (float)(i + 1) * 15,
+                        xValue ? TextBold : Text, objAiHeroes[i].ChampionName, Drawing.Width*0.895f,
+                        Drawing.Height*0.58f + (float) (i + 1)*15,
                         xValue ? SharpDX.Color.GreenYellow : SharpDX.Color.DarkGray);
                 }
             }
