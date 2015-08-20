@@ -1,18 +1,17 @@
 using System;
+using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SharpDX.Direct3D9;
-
 using Color = System.Drawing.Color;
+using Font = SharpDX.Direct3D9.Font;
 
 namespace JaxQx
 {
     internal class AssassinManager
     {
         public static Menu LocalMenu;
-        public static Font Text, TextBold, TextWarning;
 
         public AssassinManager()
         {
@@ -71,7 +70,7 @@ namespace JaxQx
             LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Searching Range"))
                 .SetValue(new Slider(1000, 1500));
 
-            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:"));
+            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:", false, FontStyle.Bold, SharpDX.Color.Yellow));
             {
                 foreach (var enemy in HeroManager.Enemies)
                 {
@@ -79,7 +78,7 @@ namespace JaxQx
                 }
             }
 
-            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:"));
+            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:", false, FontStyle.Bold, SharpDX.Color.GreenYellow));
             {
                 LocalMenu.AddItem(
                     new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto arrange priorities").SetShared().SetValue(false))
@@ -88,7 +87,7 @@ namespace JaxQx
             LocalMenu.AddItem(
                 new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(false));
 
-            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings", false));
+            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings", false, FontStyle.Bold, SharpDX.Color.Aqua));
             {
                 LocalMenu.AddItem(
                     new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true,
