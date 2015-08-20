@@ -1,71 +1,49 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
 using LeagueSharp;
 using LeagueSharp.Common;
-using Color = System.Drawing.Color;
+
 namespace D_Elise
 {
-    class Program
+    internal class Program
     {
         private const string ChampionName = "Elise";
-
         private static Orbwalking.Orbwalker _orbwalker;
-
         private static bool _human;
-
         private static bool _spider;
-
         private static Spell _humanQ, _humanW, _humanE, _r, _spiderQ, _spiderW, _spiderE;
-
         private static Menu _config;
-
         private static SpellSlot _igniteSlot;
-
         private static Obj_AI_Hero _player;
+        private static readonly float[] HumanQcd = {6, 6, 6, 6, 6};
+        private static readonly float[] HumanWcd = {12, 12, 12, 12, 12};
+        private static readonly float[] HumanEcd = {14, 13, 12, 11, 10};
+        private static readonly float[] SpiderQcd = {6, 6, 6, 6, 6};
+        private static readonly float[] SpiderWcd = {12, 12, 12, 12, 12};
+        private static readonly float[] SpiderEcd = {26, 23, 20, 17, 14};
+        private static float _humQcd, _humWcd, _humEcd;
+        private static float _spidQcd, _spidWcd, _spidEcd;
+        private static float _humaQcd, _humaWcd, _humaEcd;
+        private static float _spideQcd, _spideWcd, _spideEcd;
+        private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis, _zhonya;
+        private static SpellSlot _smiteSlot = SpellSlot.Unknown;
+        private static Spell _smite;
+        //Credits to Kurisu
+        private static readonly int[] SmitePurple = {3713, 3726, 3725, 3726, 3723};
+        private static readonly int[] SmiteGrey = {3711, 3722, 3721, 3720, 3719};
+        private static readonly int[] SmiteRed = {3715, 3718, 3717, 3716, 3714};
+        private static readonly int[] SmiteBlue = {3706, 3710, 3709, 3708, 3707};
 
-        private static readonly float[] HumanQcd = { 6, 6, 6, 6, 6 };
-
-        private static readonly float[] HumanWcd = { 12, 12, 12, 12, 12 };
-
-        private static readonly float[] HumanEcd = { 14, 13, 12, 11, 10 };
-
-        private static readonly float[] SpiderQcd = { 6, 6, 6, 6, 6 };
-
-        private static readonly float[] SpiderWcd = { 12, 12, 12, 12, 12 };
-
-        private static readonly float[] SpiderEcd = { 26, 23, 20, 17, 14 };
-
-        private static float _humQcd = 0, _humWcd = 0, _humEcd = 0;
-
-        private static float _spidQcd = 0, _spidWcd = 0, _spidEcd = 0;
-
-        private static float _humaQcd = 0, _humaWcd = 0, _humaEcd = 0;
-
-        private static float _spideQcd = 0, _spideWcd = 0, _spideEcd = 0;
-
-       private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis, _zhonya;
-
-       private static SpellSlot _smiteSlot = SpellSlot.Unknown;
-
-       private static Spell _smite;
-       //Credits to Kurisu
-       private static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };
-       private static readonly int[] SmiteGrey = { 3711, 3722, 3721, 3720, 3719 };
-       private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
-       private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
-
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-
             _player = ObjectManager.Player;
-            if (_player.BaseSkinName != ChampionName) return;
+            if (_player.CharData.BaseSkinName != ChampionName) return;
 
             _humanQ = new Spell(SpellSlot.Q, 625f);
             _humanW = new Spell(SpellSlot.W, 950f);
@@ -88,7 +66,7 @@ namespace D_Elise
 
             SetSmiteSlot();
             _igniteSlot = _player.GetSpellSlot("SummonerDot");
-           
+
             _config = new Menu("D-Elise", "D-Elise", true);
 
 
@@ -118,7 +96,7 @@ namespace D_Elise
             _config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Human Q")).SetValue(true);
             _config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Human W")).SetValue(true);
             _config.SubMenu("Harass")
-                .AddItem(new MenuItem("Harrasmana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Harrasmana", "Minimum Mana").SetValue(new Slider(60, 1)));
             _config.SubMenu("Harass")
                 .AddItem(
                     new MenuItem("ActiveHarass", "Harass key").SetValue(new KeyBind("C".ToCharArray()[0],
@@ -132,17 +110,17 @@ namespace D_Elise
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1)));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1)));
             _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
             _config.SubMenu("items")
                 .SubMenu("Deffensive")
@@ -157,14 +135,14 @@ namespace D_Elise
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Deffensive")
-                .AddItem(new MenuItem("lotisminhp", "Solari if Ally Hp<").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("lotisminhp", "Solari if Ally Hp<").SetValue(new Slider(35, 1)));
             _config.SubMenu("items")
                 .SubMenu("Deffensive")
                 .AddItem(new MenuItem("Zhonyas", "Use Zhonya's"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Deffensive")
-                .AddItem(new MenuItem("Zhonyashp", "Use Zhonya's if HP%<").SetValue(new Slider(20, 1, 100)));
+                .AddItem(new MenuItem("Zhonyashp", "Use Zhonya's if HP%<").SetValue(new Slider(20, 1)));
             _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
             _config.SubMenu("items")
                 .SubMenu("Potions")
@@ -172,14 +150,14 @@ namespace D_Elise
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1)));
             _config.SubMenu("items")
                 .SubMenu("Potions")
                 .AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1)));
 
             //Farm
             _config.AddSubMenu(new Menu("Farm", "Farm"));
@@ -199,7 +177,7 @@ namespace D_Elise
                 .AddItem(
                     new MenuItem("ClearActive", "Clear Lane").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
-            _config.SubMenu("Farm").AddItem(new MenuItem("Lanemana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+            _config.SubMenu("Farm").AddItem(new MenuItem("Lanemana", "Minimum Mana").SetValue(new Slider(60, 1)));
 
             //Farm
             _config.AddSubMenu(new Menu("Jungle", "Jungle"));
@@ -211,15 +189,20 @@ namespace D_Elise
                 .AddItem(
                     new MenuItem("ActiveJungle", "Jungle").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             _config.SubMenu("Jungle")
-                .AddItem(new MenuItem("Junglemana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Junglemana", "Minimum Mana").SetValue(new Slider(60, 1)));
 
             //Smite 
             _config.AddSubMenu(new Menu("Smite", "Smite"));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Usesmite", "Use Smite(toggle)").SetValue(new KeyBind("H".ToCharArray()[0],KeyBindType.Toggle)));
+            _config.SubMenu("Smite")
+                .AddItem(
+                    new MenuItem("Usesmite", "Use Smite(toggle)").SetValue(new KeyBind("H".ToCharArray()[0],
+                        KeyBindType.Toggle)));
             _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue Early ")).SetValue(true);
-            _config.SubMenu("Smite").AddItem(new MenuItem("manaJ", "Smite Blue Early if MP% <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite")
+                .AddItem(new MenuItem("manaJ", "Smite Blue Early if MP% <").SetValue(new Slider(35, 1)));
             _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red Early ")).SetValue(true);
-            _config.SubMenu("Smite").AddItem(new MenuItem("healthJ", "Smite Red Early if HP% <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite")
+                .AddItem(new MenuItem("healthJ", "Smite Red Early if HP% <").SetValue(new Slider(35, 1)));
             _config.SubMenu("Smite").AddItem(new MenuItem("smitecombo", "Use Smite in target")).SetValue(true);
             _config.Item("smitecombo").ValueChanged += Switchcombo;
             _config.SubMenu("Smite").AddItem(new MenuItem("Smiteeee", "Smite Minion in HumanE path").SetValue(false));
@@ -272,9 +255,9 @@ namespace D_Elise
             Drawing.OnDraw += Drawing_OnDraw;
             Game.PrintChat("<font color='#881df2'>D-Elise by Diabaths</font> Loaded.");
             Game.PrintChat(
-              "<font color='#FF0000'>If You like my work and want to support me,  plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
-
+                "<font color='#FF0000'>If You like my work and want to support me,  plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
+
         private static void Switchcombo(object sender, OnValueChangeEventArgs e)
         {
             if (e.GetNewValue<bool>())
@@ -286,6 +269,7 @@ namespace D_Elise
             if (e.GetNewValue<bool>())
                 _config.Item("smitecombo").SetValue(false);
         }
+
         private static void Game_OnUpdate(EventArgs args)
         {
             Cooldowns();
@@ -316,7 +300,6 @@ namespace D_Elise
             if (_config.Item("ActiveHarass").GetValue<KeyBind>().Active)
             {
                 Harass();
-
             }
             if (_config.Item("ActiveKs").GetValue<bool>())
             {
@@ -326,8 +309,8 @@ namespace D_Elise
             {
                 AutoE();
             }
-          }
-       
+        }
+
         private static void Smiteontarget(Obj_AI_Hero target)
         {
             var usesmite = _config.Item("smitecombo").GetValue<bool>();
@@ -339,12 +322,14 @@ namespace D_Elise
                 ObjectManager.Player.Spellbook.CastSpell(_smiteSlot, target);
             }
         }
+
         private static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe)
                 //Game.PrintChat("Spell name: " + args.SData.Name.ToString());
                 GetCDs(args);
         }
+
         private static void Usepotion()
         {
             var mobs = MinionManager.GetMinions(_player.ServerPosition, _humanE.Range,
@@ -352,22 +337,30 @@ namespace D_Elise
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             var iusehppotion = _config.Item("usehppotions").GetValue<bool>();
             var iusepotionhp = _player.Health <=
-                               (_player.MaxHealth * (_config.Item("usepotionhp").GetValue<Slider>().Value) / 100);
+                               (_player.MaxHealth*(_config.Item("usepotionhp").GetValue<Slider>().Value)/100);
             var iusemppotion = _config.Item("usemppotions").GetValue<bool>();
             var iusepotionmp = _player.Mana <=
-                               (_player.MaxMana * (_config.Item("usepotionmp").GetValue<Slider>().Value) / 100);
+                               (_player.MaxMana*(_config.Item("usepotionmp").GetValue<Slider>().Value)/100);
             if (_player.InFountain() || ObjectManager.Player.HasBuff("Recall")) return;
 
-            if (_player.CountEnemysInRange(800f) > 0 ||
+            if (_player.CountEnemiesInRange(800f) > 0 ||
                 (mobs.Count > 0 && _config.Item("ActiveJungle").GetValue<KeyBind>().Active && (Items.HasItem(1039) ||
-                 SmiteBlue.Any(i => Items.HasItem(i)) || SmiteRed.Any(i => Items.HasItem(i)) || SmitePurple.Any(i => Items.HasItem(i)) ||
-                  SmiteBlue.Any(i => Items.HasItem(i)) || SmiteGrey.Any(i => Items.HasItem(i))
-                     )))
+                                                                                               SmiteBlue.Any(
+                                                                                                   i => Items.HasItem(i)) ||
+                                                                                               SmiteRed.Any(
+                                                                                                   i => Items.HasItem(i)) ||
+                                                                                               SmitePurple.Any(
+                                                                                                   i => Items.HasItem(i)) ||
+                                                                                               SmiteBlue.Any(
+                                                                                                   i => Items.HasItem(i)) ||
+                                                                                               SmiteGrey.Any(
+                                                                                                   i => Items.HasItem(i))
+                    )))
             {
                 if (iusepotionhp && iusehppotion &&
-                     !(ObjectManager.Player.HasBuff("RegenerationPotion", true) ||
-                       ObjectManager.Player.HasBuff("ItemCrystalFlask", true) ||
-                       ObjectManager.Player.HasBuff("ItemMiniRegenPotion", true)))
+                    !(ObjectManager.Player.HasBuff("RegenerationPotion") ||
+                      ObjectManager.Player.HasBuff("ItemCrystalFlask") ||
+                      ObjectManager.Player.HasBuff("ItemMiniRegenPotion")))
                 {
                     if (Items.HasItem(2041) && Items.CanUseItem(2041))
                     {
@@ -385,9 +378,9 @@ namespace D_Elise
 
 
                 if (iusepotionmp && iusemppotion &&
-                    !(ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true) ||
-                      ObjectManager.Player.HasBuff("ItemCrystalFlask", true) ||
-                      ObjectManager.Player.HasBuff("ItemMiniRegenPotion", true)))
+                    !(ObjectManager.Player.HasBuff("FlaskOfCrystalWater") ||
+                      ObjectManager.Player.HasBuff("ItemCrystalFlask") ||
+                      ObjectManager.Player.HasBuff("ItemMiniRegenPotion")))
                 {
                     if (Items.HasItem(2041) && Items.CanUseItem(2041))
                     {
@@ -409,14 +402,14 @@ namespace D_Elise
         {
             var iBilge = _config.Item("Bilge").GetValue<bool>();
             var iBilgeEnemyhp = target.Health <=
-                                (target.MaxHealth * (_config.Item("BilgeEnemyhp").GetValue<Slider>().Value) / 100);
+                                (target.MaxHealth*(_config.Item("BilgeEnemyhp").GetValue<Slider>().Value)/100);
             var iBilgemyhp = _player.Health <=
-                             (_player.MaxHealth * (_config.Item("Bilgemyhp").GetValue<Slider>().Value) / 100);
+                             (_player.MaxHealth*(_config.Item("Bilgemyhp").GetValue<Slider>().Value)/100);
             var iBlade = _config.Item("Blade").GetValue<bool>();
             var iBladeEnemyhp = target.Health <=
-                                (target.MaxHealth * (_config.Item("BladeEnemyhp").GetValue<Slider>().Value) / 100);
+                                (target.MaxHealth*(_config.Item("BladeEnemyhp").GetValue<Slider>().Value)/100);
             var iBlademyhp = _player.Health <=
-                             (_player.MaxHealth * (_config.Item("Blademyhp").GetValue<Slider>().Value) / 100);
+                             (_player.MaxHealth*(_config.Item("Blademyhp").GetValue<Slider>().Value)/100);
             var iOmen = _config.Item("Omen").GetValue<bool>();
             var iOmenenemys = ObjectManager.Get<Obj_AI_Hero>().Count(hero => hero.IsValidTarget(450)) >=
                               _config.Item("Omenenemys").GetValue<Slider>().Value;
@@ -425,61 +418,57 @@ namespace D_Elise
             var ilotis = _config.Item("lotis").GetValue<bool>();
             var iZhonyas = _config.Item("Zhonyas").GetValue<bool>();
             var iZhonyashp = _player.Health <=
-                             (_player.MaxHealth * (_config.Item("Zhonyashp").GetValue<Slider>().Value) / 100);
+                             (_player.MaxHealth*(_config.Item("Zhonyashp").GetValue<Slider>().Value)/100);
             if (_player.Distance(target) <= 450 && iBilge && (iBilgeEnemyhp || iBilgemyhp) && _bilge.IsReady())
             {
                 _bilge.Cast(target);
-
             }
             if (_player.Distance(target) <= 450 && iBlade && (iBladeEnemyhp || iBlademyhp) && _blade.IsReady())
             {
                 _blade.Cast(target);
-
             }
             if (iTiamat && _tiamat.IsReady() && target.IsValidTarget(_tiamat.Range))
             {
                 _tiamat.Cast();
-
             }
             if (iHydra && _hydra.IsReady() && target.IsValidTarget(_hydra.Range))
             {
                 _hydra.Cast();
-
             }
             if (iOmenenemys && iOmen && _rand.IsReady())
             {
                 _rand.Cast();
-
             }
             if (ilotis)
             {
                 foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly || hero.IsMe))
                 {
-                    if (hero.Health <= (hero.MaxHealth * (_config.Item("lotisminhp").GetValue<Slider>().Value) / 100) &&
+                    if (hero.Health <= (hero.MaxHealth*(_config.Item("lotisminhp").GetValue<Slider>().Value)/100) &&
                         hero.Distance(_player.ServerPosition) <= _lotis.Range && _lotis.IsReady())
                         _lotis.Cast();
                 }
             }
-            if (iZhonyas && iZhonyashp && _player.CountEnemysInRange(1000f) >= 1)
+            if (iZhonyas && iZhonyashp && _player.CountEnemiesInRange(1000f) >= 1)
             {
                 _zhonya.Cast(_player);
-
             }
         }
 
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(_humanW.Range, TargetSelector.DamageType.Magical);
-            var sReady = (_smiteSlot != SpellSlot.Unknown && ObjectManager.Player.Spellbook.CanUseSpell(_smiteSlot) == SpellState.Ready);
+            var sReady = (_smiteSlot != SpellSlot.Unknown &&
+                          ObjectManager.Player.Spellbook.CanUseSpell(_smiteSlot) == SpellState.Ready);
             var qdmg = _player.GetSpellDamage(target, SpellSlot.Q);
             var wdmg = _player.GetSpellDamage(target, SpellSlot.W);
             if (target == null) return; //buffelisecocoon
             Smiteontarget(target);
             if (_human)
             {
-                if (target.Distance(_player.Position) < _humanE.Range && _config.Item("UseHumanE").GetValue<bool>() && _humanE.IsReady())
+                if (target.Distance(_player.Position) < _humanE.Range && _config.Item("UseHumanE").GetValue<bool>() &&
+                    _humanE.IsReady())
                 {
-                    if (sReady && _config.Item("Smiteeee").GetValue<bool>() && 
+                    if (sReady && _config.Item("Smiteeee").GetValue<bool>() &&
                         _humanE.GetPrediction(target).CollisionObjects.Count == 1)
                     {
                         CheckingCollision(target);
@@ -491,25 +480,30 @@ namespace D_Elise
                     }
                 }
 
-                if (_player.Distance(target) <= _humanQ.Range && _config.Item("UseHumanQ").GetValue<bool>() && _humanQ.IsReady())
+                if (_player.Distance(target) <= _humanQ.Range && _config.Item("UseHumanQ").GetValue<bool>() &&
+                    _humanQ.IsReady())
                 {
                     _humanQ.Cast(target, Packets());
                 }
-                if (_player.Distance(target) <= _humanW.Range && _config.Item("UseHumanW").GetValue<bool>() && _humanW.IsReady())
+                if (_player.Distance(target) <= _humanW.Range && _config.Item("UseHumanW").GetValue<bool>() &&
+                    _humanW.IsReady())
                 {
                     _humanW.Cast(target, Packets());
                 }
-                if (!_humanQ.IsReady() && !_humanW.IsReady() && !_humanE.IsReady() && _config.Item("UseRCombo").GetValue<bool>() && _r.IsReady())
+                if (!_humanQ.IsReady() && !_humanW.IsReady() && !_humanE.IsReady() &&
+                    _config.Item("UseRCombo").GetValue<bool>() && _r.IsReady())
                 {
                     _r.Cast();
                 }
-                if (!_humanQ.IsReady() && !_humanW.IsReady() && _player.Distance(target) <= _spiderQ.Range && _config.Item("UseRCombo").GetValue<bool>() && _r.IsReady())
+                if (!_humanQ.IsReady() && !_humanW.IsReady() && _player.Distance(target) <= _spiderQ.Range &&
+                    _config.Item("UseRCombo").GetValue<bool>() && _r.IsReady())
                 {
                     _r.Cast();
                 }
             }
             if (!_spider) return;
-            if (_player.Distance(target) <= _spiderQ.Range && _config.Item("UseSpiderQ").GetValue<bool>() && _spiderQ.IsReady())
+            if (_player.Distance(target) <= _spiderQ.Range && _config.Item("UseSpiderQ").GetValue<bool>() &&
+                _spiderQ.IsReady())
             {
                 _spiderQ.Cast(target, Packets());
             }
@@ -517,11 +511,13 @@ namespace D_Elise
             {
                 _spiderW.Cast();
             }
-            if (_player.Distance(target) <= _spiderE.Range && _player.Distance(target) > _spiderQ.Range && _config.Item("UseSpiderE").GetValue<bool>() && _spiderE.IsReady() && !_spiderQ.IsReady())
+            if (_player.Distance(target) <= _spiderE.Range && _player.Distance(target) > _spiderQ.Range &&
+                _config.Item("UseSpiderE").GetValue<bool>() && _spiderE.IsReady() && !_spiderQ.IsReady())
             {
                 _spiderE.Cast(target, Packets());
             }
-            if (_player.Distance(target) > _spiderQ.Range && !_spiderE.IsReady() && _r.IsReady() && !_spiderQ.IsReady() && _config.Item("UseRCombo").GetValue<bool>())
+            if (_player.Distance(target) > _spiderQ.Range && !_spiderE.IsReady() && _r.IsReady() && !_spiderQ.IsReady() &&
+                _config.Item("UseRCombo").GetValue<bool>())
             {
                 _r.Cast();
             }
@@ -533,7 +529,8 @@ namespace D_Elise
             {
                 _r.Cast();
             }
-            if ((_humanQ.IsReady() && qdmg >= target.Health || _humanW.IsReady() && wdmg >= target.Health) && _config.Item("UseRCombo").GetValue<bool>())
+            if ((_humanQ.IsReady() && qdmg >= target.Health || _humanW.IsReady() && wdmg >= target.Health) &&
+                _config.Item("UseRCombo").GetValue<bool>())
             {
                 _r.Cast();
             }
@@ -545,13 +542,14 @@ namespace D_Elise
             var target = TargetSelector.GetTarget(_humanQ.Range, TargetSelector.DamageType.Magical);
             if (target != null)
             {
-
-                if (_human && _player.Distance(target) <= _humanQ.Range && _config.Item("UseQHarass").GetValue<bool>() && _humanQ.IsReady())
+                if (_human && _player.Distance(target) <= _humanQ.Range && _config.Item("UseQHarass").GetValue<bool>() &&
+                    _humanQ.IsReady())
                 {
                     _humanQ.Cast(target, Packets());
                 }
 
-                if (_human && _player.Distance(target) <= _humanW.Range && _config.Item("UseWHarass").GetValue<bool>() && _humanW.IsReady())
+                if (_human && _player.Distance(target) <= _humanW.Range && _config.Item("UseWHarass").GetValue<bool>() &&
+                    _humanW.IsReady())
                 {
                     _humanW.Cast(target, Packets());
                 }
@@ -560,23 +558,27 @@ namespace D_Elise
 
         private static void JungleFarm()
         {
-            var jungleQ = (_config.Item("HumanQFarmJ").GetValue<bool>() && (100 * (_player.Mana / _player.MaxMana)) > _config.Item("Junglemana").GetValue<Slider>().Value);
-            var jungleW = (_config.Item("HumanWFarmJ").GetValue<bool>() && (100 * (_player.Mana / _player.MaxMana)) > _config.Item("Junglemana").GetValue<Slider>().Value);
+            var jungleQ = (_config.Item("HumanQFarmJ").GetValue<bool>() &&
+                           (100*(_player.Mana/_player.MaxMana)) > _config.Item("Junglemana").GetValue<Slider>().Value);
+            var jungleW = (_config.Item("HumanWFarmJ").GetValue<bool>() &&
+                           (100*(_player.Mana/_player.MaxMana)) > _config.Item("Junglemana").GetValue<Slider>().Value);
             var spiderjungleQ = _config.Item("SpiderQFarmJ").GetValue<bool>();
             var spiderjungleW = _config.Item("SpiderWFarmJ").GetValue<bool>();
-            var switchR = (100 * (_player.Mana / _player.MaxMana)) < _config.Item("Junglemana").GetValue<Slider>().Value;
+            var switchR = (100*(_player.Mana/_player.MaxMana)) < _config.Item("Junglemana").GetValue<Slider>().Value;
             var mobs = MinionManager.GetMinions(_player.ServerPosition, _humanQ.Range,
-            MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             if (mobs.Count > 0)
             {
                 foreach (var minion in mobs)
                     if (_human)
                     {
-                        if (jungleQ && _humanQ.IsReady() && minion.IsValidTarget() && _player.Distance(minion) <= _humanQ.Range)
+                        if (jungleQ && _humanQ.IsReady() && minion.IsValidTarget() &&
+                            _player.Distance(minion) <= _humanQ.Range)
                         {
                             _humanQ.Cast(minion, Packets());
                         }
-                        if (jungleW && _humanW.IsReady() && !_humanQ.IsReady() && minion.IsValidTarget() && _player.Distance(minion) <= _humanW.Range)
+                        if (jungleW && _humanW.IsReady() && !_humanQ.IsReady() && minion.IsValidTarget() &&
+                            _player.Distance(minion) <= _humanW.Range)
                         {
                             _humanW.Cast(minion, Packets());
                         }
@@ -589,11 +591,13 @@ namespace D_Elise
                 {
                     if (_spider)
                     {
-                        if (spiderjungleQ && _spiderQ.IsReady() && minion.IsValidTarget() && _player.Distance(minion) <= _spiderQ.Range)
+                        if (spiderjungleQ && _spiderQ.IsReady() && minion.IsValidTarget() &&
+                            _player.Distance(minion) <= _spiderQ.Range)
                         {
                             _spiderQ.Cast(minion, Packets());
                         }
-                        if (spiderjungleW && _spiderW.IsReady() && minion.IsValidTarget() && _player.Distance(minion) <= 150)
+                        if (spiderjungleW && _spiderW.IsReady() && minion.IsValidTarget() &&
+                            _player.Distance(minion) <= 150)
                         {
                             _orbwalker.SetAttack(true);
                             _spiderW.Cast();
@@ -609,16 +613,15 @@ namespace D_Elise
 
         private static void FarmLane()
         {
-            var ManaUse = (100 * (_player.Mana / _player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value;
+            //var manaUse = (100*(_player.Mana/_player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value;
             var useR = _config.Item("Farm_R").GetValue<KeyBind>().Active;
             var useHumQ = (_config.Item("HumanQFarm").GetValue<bool>() &&
-                           (100 * (_player.Mana / _player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value);
+                           (100*(_player.Mana/_player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value);
             var useHumW = (_config.Item("HumanWFarm").GetValue<bool>() &&
-                           (100 * (_player.Mana / _player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value);
+                           (100*(_player.Mana/_player.MaxMana)) > _config.Item("Lanemana").GetValue<Slider>().Value);
             var useSpiQFarm = (_spiderQ.IsReady() && _config.Item("SpiderQFarm").GetValue<bool>());
             var useSpiWFarm = (_spiderW.IsReady() && _config.Item("SpiderWFarm").GetValue<bool>());
-            var allminions = MinionManager.GetMinions(_player.ServerPosition, _humanQ.Range, MinionTypes.All,
-                MinionTeam.Enemy, MinionOrderTypes.Health);
+            var allminions = MinionManager.GetMinions(_player.ServerPosition, _humanQ.Range);
             {
                 if (_config.Item("ClearActive").GetValue<KeyBind>().Active)
                 {
@@ -693,6 +696,7 @@ namespace D_Elise
                 }
             }
         }
+
         //Credits to Kurisu
         private static string Smitetype()
         {
@@ -721,22 +725,21 @@ namespace D_Elise
             foreach (
                 var spell in
                     ObjectManager.Player.Spellbook.Spells.Where(
-                        spell => String.Equals(spell.Name, Smitetype(), StringComparison.CurrentCultureIgnoreCase)))
+                        spell => string.Equals(spell.Name, Smitetype(), StringComparison.CurrentCultureIgnoreCase)))
             {
                 _smiteSlot = spell.Slot;
                 _smite = new Spell(_smiteSlot, 700);
                 return;
             }
         }
-      
+
         private static int GetSmiteDmg()
         {
-            int level = _player.Level;
-            int index = _player.Level / 5;
-            float[] dmgs = { 370 + 20 * level, 330 + 30 * level, 240 + 40 * level, 100 + 50 * level };
-            return (int)dmgs[index];
+            var level = _player.Level;
+            var index = _player.Level/5;
+            float[] dmgs = {370 + 20*level, 330 + 30*level, 240 + 40*level, 100 + 50*level};
+            return (int) dmgs[index];
         }
-
 
         //New map Monsters Name By SKO
         private static void Smiteuse()
@@ -745,27 +748,27 @@ namespace D_Elise
             if (ObjectManager.Player.Spellbook.CanUseSpell(_smiteSlot) != SpellState.Ready) return;
             var useblue = _config.Item("Useblue").GetValue<bool>();
             var usered = _config.Item("Usered").GetValue<bool>();
-            var health = (100 * (_player.Mana / _player.MaxMana)) < _config.Item("healthJ").GetValue<Slider>().Value;
-            var mana = (100 * (_player.Mana / _player.MaxMana)) < _config.Item("manaJ").GetValue<Slider>().Value;
+            var health = (100*(_player.Mana/_player.MaxMana)) < _config.Item("healthJ").GetValue<Slider>().Value;
+            var mana = (100*(_player.Mana/_player.MaxMana)) < _config.Item("manaJ").GetValue<Slider>().Value;
             string[] jungleMinions;
             if (Utility.Map.GetMap().Type.Equals(Utility.Map.MapType.TwistedTreeline))
             {
-                jungleMinions = new string[] { "TT_Spiderboss", "TT_NWraith", "TT_NGolem", "TT_NWolf" };
+                jungleMinions = new[] {"TT_Spiderboss", "TT_NWraith", "TT_NGolem", "TT_NWolf"};
             }
             else
             {
-                jungleMinions = new string[]
+                jungleMinions = new[]
                 {
                     "SRU_Blue", "SRU_Gromp", "SRU_Murkwolf", "SRU_Razorbeak", "SRU_Red", "SRU_Krug", "SRU_Dragon",
                     "SRU_Baron", "Sru_Crab"
                 };
             }
             var minions = MinionManager.GetMinions(_player.Position, 1000, MinionTypes.All, MinionTeam.Neutral);
-            if (minions.Count() > 0)
+            if (minions.Any())
             {
-                int smiteDmg = GetSmiteDmg();
+                var smiteDmg = GetSmiteDmg();
 
-                foreach (Obj_AI_Base minion in minions)
+                foreach (var minion in minions)
                 {
                     if (Utility.Map.GetMap().Type.Equals(Utility.Map.MapType.TwistedTreeline) &&
                         minion.Health <= smiteDmg &&
@@ -799,11 +802,13 @@ namespace D_Elise
             _player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             var target = TargetSelector.GetTarget(_humanE.Range, TargetSelector.DamageType.Magical);
 
-            if (_human && _player.Distance(target) < _humanE.Range && _humanE.IsReady() && _humanE.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
+            if (_human && _player.Distance(target) < _humanE.Range && _humanE.IsReady() &&
+                _humanE.GetPrediction(target).Hitchance >= HitChance.VeryHigh)
             {
                 _humanE.Cast(target, Packets());
             }
         }
+
         private static bool Packets()
         {
             return _config.Item("usePackets").GetValue<bool>();
@@ -812,7 +817,8 @@ namespace D_Elise
         private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base target, InterruptableSpell spell)
         {
             if (!_config.Item("UseEInt").GetValue<bool>()) return;
-            if (_player.Distance(target) < _humanE.Range && target != null && _humanE.GetPrediction(target).Hitchance >= HitChance.Low)
+            if (_player.Distance(target) < _humanE.Range && target != null &&
+                _humanE.GetPrediction(target).Hitchance >= HitChance.Low)
             {
                 _humanE.Cast(target, Packets());
             }
@@ -820,11 +826,13 @@ namespace D_Elise
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (_spiderE.IsReady() && _spider && gapcloser.Sender.IsValidTarget(_spiderE.Range) && _config.Item("Spidergapcloser").GetValue<bool>())
+            if (_spiderE.IsReady() && _spider && gapcloser.Sender.IsValidTarget(_spiderE.Range) &&
+                _config.Item("Spidergapcloser").GetValue<bool>())
             {
                 _spiderE.Cast(gapcloser.Sender, Packets());
             }
-            if (_humanE.IsReady() && _human && gapcloser.Sender.IsValidTarget(_humanE.Range) && _config.Item("Humangapcloser").GetValue<bool>())
+            if (_humanE.IsReady() && _human && gapcloser.Sender.IsValidTarget(_humanE.Range) &&
+                _config.Item("Humangapcloser").GetValue<bool>())
             {
                 _humanE.Cast(gapcloser.Sender, Packets());
             }
@@ -832,7 +840,7 @@ namespace D_Elise
 
         private static float CalculateCd(float time)
         {
-            return time + (time * _player.PercentCooldownMod);
+            return time + (time*_player.PercentCooldownMod);
         }
 
         private static void Cooldowns()
@@ -883,28 +891,29 @@ namespace D_Elise
                     return HitChance.Medium;
             }
         }
+
         // Credits to Brain0305
-        private static bool CheckingCollision(Obj_AI_Hero target)
+        private static void CheckingCollision(Obj_AI_Hero target)
         {
             foreach (var col in MinionManager.GetMinions(_player.Position, 1500, MinionTypes.All, MinionTeam.NotAlly))
             {
-                var segment = Geometry.ProjectOn(col.ServerPosition.To2D(), _player.ServerPosition.To2D(),
+                var segment = col.ServerPosition.To2D().ProjectOn(_player.ServerPosition.To2D(),
                     col.Position.To2D());
                 if (segment.IsOnSegment &&
                     target.ServerPosition.To2D().Distance(segment.SegmentPoint) <= GetHitBox(col) + 40)
                 {
-                    if ( col.Distance(_player.Position) < _smite.Range  &&
+                    if (col.Distance(_player.Position) < _smite.Range &&
                         col.Health < _player.GetSummonerSpellDamage(col, Damage.SummonerSpell.Smite))
                     {
                         _player.Spellbook.CastSpell(_smiteSlot, col);
-                        return true;
+                        return;
                     }
                 }
             }
-            return false;
         }
+
         // Credits to Brain0305
-        static float GetHitBox(Obj_AI_Base minion)
+        private static float GetHitBox(Obj_AI_Base minion)
         {
             var nameMinion = minion.Name.ToLower();
             if (nameMinion.Contains("mech")) return 65;
@@ -923,7 +932,7 @@ namespace D_Elise
             var wDmg = _player.GetSpellDamage(target, SpellSlot.W);
 
             if (target != null && _config.Item("UseIgnite").GetValue<bool>() && _igniteSlot != SpellSlot.Unknown &&
-            _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
+                _player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready)
             {
                 if (igniteDmg > target.Health)
                 {
@@ -932,14 +941,16 @@ namespace D_Elise
             }
             if (_human)
             {
-                if (_humanQ.IsReady() && _player.Distance(target) <= _humanQ.Range && target != null && _config.Item("HumanQKs").GetValue<bool>())
+                if (_humanQ.IsReady() && _player.Distance(target) <= _humanQ.Range && target != null &&
+                    _config.Item("HumanQKs").GetValue<bool>())
                 {
                     if (target.Health <= qhDmg)
                     {
                         _humanQ.Cast(target);
                     }
                 }
-                if (_humanW.IsReady() && _player.Distance(target) <= _humanW.Range && target != null && _config.Item("HumanWKs").GetValue<bool>())
+                if (_humanW.IsReady() && _player.Distance(target) <= _humanW.Range && target != null &&
+                    _config.Item("HumanWKs").GetValue<bool>())
                 {
                     if (target.Health <= wDmg)
                     {
@@ -947,7 +958,8 @@ namespace D_Elise
                     }
                 }
             }
-            if (_spider && _spiderQ.IsReady() && _player.Distance(target) <= _spiderQ.Range && target != null && _config.Item("SpiderQKs").GetValue<bool>())
+            if (_spider && _spiderQ.IsReady() && _player.Distance(target) <= _spiderQ.Range && target != null &&
+                _config.Item("SpiderQKs").GetValue<bool>())
             {
                 if (target.Health <= qhDmg)
                 {
@@ -956,85 +968,86 @@ namespace D_Elise
             }
         }
 
-        static void Drawing_OnDraw(EventArgs args)
+        private static void Drawing_OnDraw(EventArgs args)
         {
             var elise = Drawing.WorldToScreen(_player.Position);
             if (_config.Item("drawmode").GetValue<bool>() && _config.Item("Usesmite").GetValue<KeyBind>().Active)
             {
                 if (_config.Item("smitecombo").GetValue<bool>())
                 {
-                    Drawing.DrawText(Drawing.Width * 0.90f, Drawing.Height * 0.66f, System.Drawing.Color.DarkOrange,
-                      "Smite Tagret");
+                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.66f, Color.DarkOrange,
+                        "Smite Tagret");
                 }
-                else Drawing.DrawText(Drawing.Width * 0.80f, Drawing.Height * 0.66f, System.Drawing.Color.DarkRed,
-                     "Smite minion in Human E Path");
+                else
+                    Drawing.DrawText(Drawing.Width*0.80f, Drawing.Height*0.66f, Color.DarkRed,
+                        "Smite minion in Human E Path");
             }
-                
+
             if (_config.Item("Drawsmite").GetValue<bool>())
             {
                 if (_config.Item("Usesmite").GetValue<KeyBind>().Active)
                 {
-                    Drawing.DrawText(Drawing.Width * 0.90f, Drawing.Height * 0.68f, System.Drawing.Color.DarkOrange,
+                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.68f, Color.DarkOrange,
                         "Smite Is On");
                 }
                 else
-                    Drawing.DrawText(Drawing.Width * 0.90f, Drawing.Height * 0.68f, System.Drawing.Color.DarkRed,
+                    Drawing.DrawText(Drawing.Width*0.90f, Drawing.Height*0.68f, Color.DarkRed,
                         "Smite Is Off");
             }
             if (_config.Item("CircleLag").GetValue<bool>())
             {
                 if (_human && _config.Item("DrawQ").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _humanQ.Range, System.Drawing.Color.Gray,
+                    Utility.DrawCircle(ObjectManager.Player.Position, _humanQ.Range, Color.Gray,
                         _config.Item("CircleThickness").GetValue<Slider>().Value,
                         _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
                 if (_human && _config.Item("DrawW").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _humanW.Range, System.Drawing.Color.Gray,
+                    Utility.DrawCircle(ObjectManager.Player.Position, _humanW.Range, Color.Gray,
                         _config.Item("CircleThickness").GetValue<Slider>().Value,
                         _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
                 if (_human && _config.Item("DrawE").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _humanE.Range, System.Drawing.Color.Gray,
+                    Utility.DrawCircle(ObjectManager.Player.Position, _humanE.Range, Color.Gray,
                         _config.Item("CircleThickness").GetValue<Slider>().Value,
                         _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
                 if (_spider && _config.Item("SpiderDrawQ").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _spiderQ.Range, System.Drawing.Color.Gray,
+                    Utility.DrawCircle(ObjectManager.Player.Position, _spiderQ.Range, Color.Gray,
                         _config.Item("CircleThickness").GetValue<Slider>().Value,
                         _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
                 if (_spider && _config.Item("SpiderDrawE").GetValue<bool>())
                 {
-                    Utility.DrawCircle(ObjectManager.Player.Position, _spiderE.Range, System.Drawing.Color.Gray,
-                   _config.Item("CircleThickness").GetValue<Slider>().Value,
-                   _config.Item("CircleQuality").GetValue<Slider>().Value);
+                    Utility.DrawCircle(ObjectManager.Player.Position, _spiderE.Range, Color.Gray,
+                        _config.Item("CircleThickness").GetValue<Slider>().Value,
+                        _config.Item("CircleQuality").GetValue<Slider>().Value);
                 }
             }
             else
             {
                 if (_human && _config.Item("DrawQ").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _humanQ.Range, System.Drawing.Color.LightGray);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _humanQ.Range, Color.LightGray);
                 }
                 if (_human && _config.Item("DrawW").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _humanW.Range, System.Drawing.Color.LightGray);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _humanW.Range, Color.LightGray);
                 }
                 if (_human && _config.Item("DrawE").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _humanE.Range, System.Drawing.Color.LightGray);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _humanE.Range, Color.LightGray);
                 }
                 if (_spider && _config.Item("SpiderDrawQ").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _spiderQ.Range, System.Drawing.Color.LightGray);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _spiderQ.Range, Color.LightGray);
                 }
                 if (_spider && _config.Item("SpiderDrawE").GetValue<bool>())
                 {
-                    Drawing.DrawCircle(ObjectManager.Player.Position, _spiderE.Range, System.Drawing.Color.LightGray);
+                    Drawing.DrawCircle(ObjectManager.Player.Position, _spiderE.Range, Color.LightGray);
                 }
             }
             if (!_spider)
@@ -1089,4 +1102,3 @@ namespace D_Elise
         }
     }
 }
-
