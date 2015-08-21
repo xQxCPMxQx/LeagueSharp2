@@ -193,7 +193,7 @@ namespace XinZhao
             }
 
             if (R.IsReady() &&
-                Config.Item("ComboUserR").GetValue<bool>() &&
+                Config.Item("ComboUseR").GetValue<bool>() &&
                 GetHitsR >= Config.Item("ComboUseRS").GetValue<Slider>().Value)
             {
                 R.Cast();
