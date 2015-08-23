@@ -5,7 +5,6 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
-using Font = SharpDX.Direct3D9.Font;
 
 namespace XinZhao
 {

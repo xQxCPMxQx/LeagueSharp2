@@ -28,10 +28,7 @@ namespace XinZhao
 
         public static Menu Config;
 
-        private static string Tab
-        {
-            get { return "    "; }
-        }
+
 
         private static void Main(string[] args)
         {
@@ -48,38 +45,98 @@ namespace XinZhao
             E = new Spell(SpellSlot.E, 600);
             R = new Spell(SpellSlot.R, 480);
 
-            CreateChampionMenu();
+            Config = new Menu("xQx | XinZhao", ChampionName, true);
 
-            //PlayerSpells.Initialize();
+            Config.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
+            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
+
+            Utils = new Utils();
+            AssassinManager = new AssassinManager();
+
+            /* [ Combo ] */
+            Config.AddSubMenu(new Menu("Combo", "Combo"));
+            Config.SubMenu("Combo")
+                .AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(new Slider(300, 200, 500)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
+            Config.SubMenu("Combo")
+                .AddItem(new MenuItem("ComboUseRS", Utils.Tab + "Min. Enemy Count:").SetValue(new Slider(2, 5, 1)));
+            Config.SubMenu("Combo")
+                .AddItem(
+                    new MenuItem("ComboActive", "Combo!").SetValue(
+                        new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+
+
+            Config.AddSubMenu(new Menu("Lane/Jungle Clear", "LaneClear"));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("EnabledFarm", "Enable! (On/Off: Mouse Scroll)").SetValue(true));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(false));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(false));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseE", "Use E").SetValue(false));
+            Config.SubMenu("LaneClear")
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear")
+                .AddItem(
+                    new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0],
+                        KeyBindType.Press)));
+
+            Config.AddSubMenu(new Menu("Drawings", "Drawings"));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("DrawERange", "E range").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("DrawEMinRange", "E min. range").SetValue(new Circle(false, Color.Aqua)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("DrawRRange", "R range").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings")
+                .AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("EnabledFarmPermashow", "Show Farm Permashow").SetValue(true)).ValueChanged +=
+                (s, ar) =>
+                {
+                    if (ar.GetNewValue<bool>())
+                    {
+                        Config.Item("EnabledFarm").Permashow(true, "Enabled Farm");
+                    }
+                    else
+                    {
+                        Config.Item("EnabledFarm").Permashow(false);
+                    }
+                };
+            Config.Item("EnabledFarm").Permashow(Config.Item("EnabledFarmPermashow").GetValue<bool>(), "Enabled Farm");
+
+            Config.SubMenu("Misc").AddItem(new MenuItem("InterruptSpells", "Interrupt spells using R").SetValue(true));
+            Config.SubMenu("Misc").AddItem(new MenuItem("BlockR", "Block R if it won't hit").SetValue(false));
+
+            Config.AddToMainMenu();
+
+            PlayerSpells.Initialize();
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Game.OnWndProc += Game_OnWndProc;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
 
             WelcomeMessage();
         }
 
-        static int GetHitsR
+        private static int GetHitsR
         {
             get
             {
                 return
                     HeroManager.Enemies.Where(h => h.IsValidTarget(R.Range))
-                        .Where(
-                            enemy =>
-                                R.WillHit(enemy, Player.Position) &&
-                                Player.Distance(enemy.ServerPosition, true) < R.Range)
+                        .Where(enemy => R.WillHit(enemy, Player.Position) && Player.Distance(enemy.Position) < R.Range)
                         .ToList()
                         .Count;
             }
         }
-        static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+
+        private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
             if (!Config.Item("BlockR").GetValue<bool>())
             {
                 return;
             }
-
 
             if (args.Slot == SpellSlot.R && GetHitsR == 0)
             {
@@ -87,7 +144,8 @@ namespace XinZhao
             }
         }
 
-        static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
+        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero unit,
+            Interrupter2.InterruptableTargetEventArgs args)
         {
             if (!Config.Item("InterruptSpells").GetValue<bool>())
                 return;
@@ -111,7 +169,7 @@ namespace XinZhao
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana / 100 * Config.Item("LaneClearMana").GetValue<Slider>().Value;
+                var existsMana = Player.MaxMana/100*Config.Item("LaneClearMana").GetValue<Slider>().Value;
                 if (Player.Mana >= existsMana)
                 {
                     LaneClear();
@@ -158,9 +216,12 @@ namespace XinZhao
         public static void Combo()
         {
             var t = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+
             if (!t.IsValidTarget())
                 return;
+
             var AARange = Orbwalking.GetRealAutoAttackRange(null) + 65;
+
             if (t.IsValidTarget(AARange) && Q.IsReady())
             {
                 Q.Cast();
@@ -208,6 +269,9 @@ namespace XinZhao
 
         private static void LaneClear()
         {
+            if (!Config.Item("EnabledFarm").GetValue<bool>())
+                return;
+
             var useQ = Config.Item("LaneClearUseQ").GetValue<bool>();
             var useW = Config.Item("LaneClearUseW").GetValue<bool>();
             var useE = Config.Item("LaneClearUseE").GetValue<bool>();
@@ -245,7 +309,6 @@ namespace XinZhao
                     locE.Position.IsValid())
                     E.Cast(locE.Position);
             }
-
         }
 
         private static void JungleFarm()
@@ -268,7 +331,7 @@ namespace XinZhao
             if (useW && W.IsReady() && mobs.Count >= 1)
                 W.Cast();
 
-            if (useE && E.IsReady() && mobs.Count >= 2)
+            if (useE && E.IsReady() && mobs.Count >= 1)
                 E.CastOnUnit(mob);
 
             if (mobs.Count >= 2)
@@ -279,7 +342,6 @@ namespace XinZhao
                 if (Hydra.IsReady())
                     Hydra.Cast();
             }
-
         }
 
         private static InventorySlot GetInventorySlot(int ID)
@@ -287,7 +349,7 @@ namespace XinZhao
             return
                 ObjectManager.Player.InventoryItems.FirstOrDefault(
                     item =>
-                        (item.Id == (ItemId)ID && item.Stacks >= 1) || (item.Id == (ItemId)ID && item.Charges >= 1));
+                        (item.Id == (ItemId) ID && item.Stacks >= 1) || (item.Id == (ItemId) ID && item.Charges >= 1));
         }
 
         public static void UseItems(Obj_AI_Hero t)
@@ -295,7 +357,7 @@ namespace XinZhao
             if (t == null)
                 return;
 
-            int[] targeted = new[] { 3153, 3144, 3146, 3184 };
+            int[] targeted = new[] {3153, 3144, 3146, 3184};
             foreach (
                 var itemId in
                     targeted.Where(
@@ -306,7 +368,7 @@ namespace XinZhao
                 Items.UseItem(itemId, t);
             }
 
-            int[] nonTarget = new[] { 3180, 3143, 3131, 3074, 3077, 3142 };
+            int[] nonTarget = new[] {3180, 3143, 3131, 3074, 3077, 3142};
             foreach (
                 var itemId in
                     nonTarget.Where(
@@ -318,46 +380,16 @@ namespace XinZhao
             }
         }
 
-
-        private static void CreateChampionMenu()
+        private static void Game_OnWndProc(WndEventArgs args)
         {
-            Config = new Menu("xQx | XinZhao", ChampionName, true);
+            if (args.Msg != 0x20a)
+                return;
 
-            Config.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
-            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
-
-            Utils = new Utils();
-            AssassinManager = new AssassinManager();
-
-            /* [ Combo ] */
-            Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("EMinRange", "Min. E Range").SetValue(new Slider(300, 200, 500)));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseR", "Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseRS", Tab + "Min. Enemy Count:").SetValue(new Slider(2, 5, 1)));
-            Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
-
-
-            Config.AddSubMenu(new Menu("Lane/Jungle Clear", "LaneClear"));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseE", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
-
-            Config.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawERange", "E range").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawEMinRange", "E min. range").SetValue(new Circle(false, Color.Aqua)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawRRange", "R range").SetValue(new Circle(false, Color.PowderBlue)));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawThrown", "Can be thrown enemy").SetValue(new Circle(false, Color.PowderBlue)));
-
-            Config.SubMenu("Misc").AddItem(new MenuItem("InterruptSpells", "Interrupt spells using R").SetValue(true));
-            Config.SubMenu("Misc").AddItem(new MenuItem("BlockR", "Block R if it won't hit").SetValue(false));
-
-            /*
-            new PotionManager();
-            */
-            Config.AddToMainMenu();
+            Config.SubMenu("LaneClear")
+                .Item("EnabledFarm")
+                .SetValue(!Config.SubMenu("LaneClear").Item("EnabledFarm").GetValue<bool>());
         }
+        
 
         private static void WelcomeMessage()
         {

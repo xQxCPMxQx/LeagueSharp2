@@ -1,6 +1,7 @@
 #region
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -97,8 +98,7 @@ namespace JaxQx
                 .AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int)Q.Range)));
             Config.SubMenu("Combo")
                 .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(
-                        new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow));
 
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -115,8 +115,7 @@ namespace JaxQx
                 .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("HarassActive", "Harass").SetValue(
-                        new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)); 
 
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
@@ -129,8 +128,7 @@ namespace JaxQx
                 .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
                 .AddItem(
-                    new MenuItem("LaneClearActive", "LaneClear").SetValue(
-                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow));
 
             // Jungling Farm
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
@@ -143,7 +141,7 @@ namespace JaxQx
             Config.SubMenu("JungleFarm")
                 .AddItem(
                     new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
-                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)); ;
 
             // Extra
             MenuExtras = new Menu("Extras", "Extras");
@@ -177,8 +175,7 @@ namespace JaxQx
                 };
 
             Config.AddItem(
-                new MenuItem("Ward", "Ward Jump / Flee").SetValue(
-                    new KeyBind('A', KeyBindType.Press)));
+                new MenuItem("Ward", "Ward Jump / Flee").SetValue(new KeyBind('A', KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow));
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnUpdate;
