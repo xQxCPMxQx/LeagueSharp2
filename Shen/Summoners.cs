@@ -4,7 +4,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-namespace Vi
+namespace Shen
 {
     internal class Summoners
     {
