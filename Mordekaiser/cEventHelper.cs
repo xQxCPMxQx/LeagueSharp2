@@ -1,10 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Management;
 using System.Reflection;
-using System.Text;
 
 namespace Mordekaiser
 {
@@ -12,7 +9,8 @@ namespace Mordekaiser
 
     public static class cEventHelper
     {
-        private static readonly Dictionary<Type, List<FieldInfo>> DicEventFieldInfos = new Dictionary<Type, List<FieldInfo>>();
+        private static readonly Dictionary<Type, List<FieldInfo>> DicEventFieldInfos =
+            new Dictionary<Type, List<FieldInfo>>();
 
         private static BindingFlags AllBindings
         {
@@ -60,21 +58,24 @@ namespace Mordekaiser
             if (obj == null) return;
 
             Type t = obj.GetType();
-            List<FieldInfo> event_fields = GetTypeEventFields(t);
-            EventHandlerList static_event_handlers = null;
+            List<FieldInfo> eventFields = GetTypeEventFields(t);
+            EventHandlerList staticEventHandlers = null;
 
-            foreach (FieldInfo fi in event_fields.Where(fi => EventName == "" || String.Compare(EventName, fi.Name, StringComparison.OrdinalIgnoreCase) == 0))
+            foreach (
+                FieldInfo fi in
+                    eventFields.Where(
+                        fi =>
+                        EventName == "" || String.Compare(EventName, fi.Name, StringComparison.OrdinalIgnoreCase) == 0))
             {
                 if (fi.IsStatic)
                 {
-                    if (static_event_handlers == null) static_event_handlers = GetStaticEventHandlerList(t, obj);
+                    if (staticEventHandlers == null) staticEventHandlers = GetStaticEventHandlerList(t, obj);
 
                     object idx = fi.GetValue(obj);
-                    Delegate eh = static_event_handlers[idx];
+                    Delegate eh = staticEventHandlers[idx];
                     if (eh == null) continue;
 
                     Delegate[] dels = eh.GetInvocationList();
-                    if (dels == null) continue;
 
                     EventInfo ei = t.GetEvent(fi.Name, AllBindings);
                     foreach (Delegate del in dels) ei.RemoveEventHandler(obj, del);
