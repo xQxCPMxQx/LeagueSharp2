@@ -123,11 +123,8 @@ namespace XinZhao
         {
             get
             {
-                return
-                    HeroManager.Enemies.Where(h => h.IsValidTarget(R.Range))
-                        .Where(enemy => R.WillHit(enemy, Player.Position) && Player.Distance(enemy.Position) < R.Range)
-                        .ToList()
-                        .Count;
+                get { return Player.CountEnemiesInRange(R.Range); }
+                //return  HeroManager.Enemies.Where(h => h.IsValidTarget(R.Range)).Where(enemy => R.WillHit(enemy, Player.Position) && Player.Distance(enemy.Position) < R.Range).ToList().Count;
             }
         }
 
