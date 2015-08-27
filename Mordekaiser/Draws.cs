@@ -54,7 +54,9 @@ namespace Mordekaiser
 
         private static void DrawR()
         {
-            if (!Menu.MenuR.Item("Enemies.Active").GetValue<bool>()) return;
+            if (!Menu.MenuR.Item("UseR.Active").GetValue<bool>()) return;
+            
+            if (!Menu.MenuR.Item("DrawR.Search").GetValue<Circle>().Active) return;
 
             if (Menu.MenuR.Item("DrawR.Status.Show").GetValue<StringList>().SelectedIndex == 1)
             {
