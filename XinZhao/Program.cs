@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using LeagueSharp;
 using LeagueSharp.Common;
 using Color = System.Drawing.Color;
-#endregiong
+#endregion
 
 namespace XinZhao
 {
@@ -121,11 +121,7 @@ namespace XinZhao
 
         private static int GetHitsR
         {
-            get
-            {
-                { return Player.CountEnemiesInRange(R.Range); }
-                //return  HeroManager.Enemies.Where(h => h.IsValidTarget(R.Range)).Where(enemy => R.WillHit(enemy, Player.Position) && Player.Distance(enemy.Position) < R.Range).ToList().Count;
-            }
+            get { { return Player.CountEnemiesInRange(R.Range); } }
         }
 
         private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
