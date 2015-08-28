@@ -271,7 +271,7 @@ namespace Mordekaiser
                 Program.Config.AddSubMenu(MenuItems);
             }
 
-            MenuDrawings = new LeagueSharp.Common.Menu("Drawings", "Drawings");
+            MenuDrawings = new LeagueSharp.Common.Menu("Other Drawings", "Drawings");
             {
                 /* [ Damage After Combo ] */
                 var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
