@@ -299,7 +299,6 @@ namespace Mordekaiser
 
                     if (oMob != null)
                     {
-                        Game.PrintChat(oMob.SkinName);
                         if (oMob.IsValidTarget(spellRange))
                         {
                             return oMob;
