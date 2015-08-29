@@ -395,9 +395,11 @@ namespace Olafisback
 
         private static void Combo()
         {
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+  var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
 
-            if (t.IsValidTarget() && Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady() &&
+            if (Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady() &&
                 Player.Distance(t.ServerPosition) <= Q.Range)
             {
                 PredictionOutput Qpredict = Q.GetPrediction(t);
@@ -410,12 +412,12 @@ namespace Olafisback
                     Q.Cast(Qpredict.CastPosition);
             }
 
-            if (t.IsValidTarget() && Config.Item("UseECombo").GetValue<bool>() && E.IsReady() &&
+            if (Config.Item("UseECombo").GetValue<bool>() && E.IsReady() &&
                 Player.Distance(t.ServerPosition) <= E.Range)
 
                 E.CastOnUnit(t);
 
-            if (t.IsValidTarget() && Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() &&
+            if (Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() &&
                 Player.Distance(t.ServerPosition) <= 225f)
 
                 W.Cast();
@@ -459,14 +461,14 @@ namespace Olafisback
 
             if (t.IsValidTarget())
             {
+                Vector3 hitHere;
                 PredictionOutput Qpredict = Q.GetPrediction(t);
-                var hithere = Qpredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
-                if (Player.Distance(t.ServerPosition) >= 350)
-                {
-                    Q.Cast(hithere);
-                }
+                if (!t.IsFacing(Player) && t.Path.Count() >= 1) // target is running
+                    hitHere = Q.GetPrediction(t).CastPosition +
+                              Vector3.Normalize(t.ServerPosition - Player.Position)*t.MoveSpeed/2;
                 else
-                    Q.Cast(Qpredict.CastPosition);
+                    hitHere = Qpredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
+                Q.Cast(Player.Distance(t.ServerPosition) >= 350 ? hitHere : Qpredict.CastPosition);
             }
         }
 
