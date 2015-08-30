@@ -57,7 +57,6 @@ namespace JaxQx
 
         private static void Main(string[] args)
         {
-            map = new Map();
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
 
@@ -177,7 +176,9 @@ namespace JaxQx
             Config.AddItem(
                 new MenuItem("Ward", "Ward Jump / Flee").SetValue(new KeyBind('A', KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow));
             Config.AddToMainMenu();
-
+            
+            map = new Map();
+            
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
