@@ -53,8 +53,6 @@ namespace JaxQx
         //Menu
         public static Menu Config;
 
-        public static Menu MenuExtras;
-
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -143,9 +141,10 @@ namespace JaxQx
                         new KeyBind("V".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)); ;
 
             // Extra
-            MenuExtras = new Menu("Extras", "Extras");
-            Config.AddSubMenu(MenuExtras);
-            MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
+            var misc = new Menu("Misc", "Misc");
+            Config.AddSubMenu(misc);
+            misc.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
+            misc.AddItem(new MenuItem("Misc.AutoW", "Auto Hit W if possible").SetValue(true));
 
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
@@ -189,9 +188,10 @@ namespace JaxQx
         }
         private static void OrbwalkingBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (args.Target is Obj_AI_Hero && W.IsReady())
+            if (args.Target is Obj_AI_Hero && W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>)
                 W.Cast();
         }
+        
         private static void Drawing_OnDraw(EventArgs args)
         {
             var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
