@@ -188,7 +188,7 @@ namespace JaxQx
         }
         private static void OrbwalkingBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (args.Target is Obj_AI_Hero && W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>)
+            if (args.Target is Obj_AI_Hero && W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>())
                 W.Cast();
         }
         
