@@ -183,10 +183,15 @@ namespace JaxQx
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
 
             Notifications.AddNotification(String.Format("{0} Loaded", ChampionName), 4000);
         }
-
+        private static void OrbwalkingBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (args.Target is Obj_AI_Hero && W.IsReady())
+                W.Cast();
+        }
         private static void Drawing_OnDraw(EventArgs args)
         {
             var drawQRange = Config.Item("DrawQRange").GetValue<Circle>();
