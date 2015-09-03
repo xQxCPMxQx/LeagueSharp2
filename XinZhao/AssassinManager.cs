@@ -65,7 +65,7 @@ namespace XinZhao
             LocalMenu.AddItem(
                 new MenuItem("Enemies.Mode", "Target Selector:").SetValue(new StringList(new[] { "L# Target Selector", "Xin-Zhao  Target Selector" }, 1)));
             LocalMenu.AddItem(new MenuItem("Enemies.Active", "Active").SetValue(true));
-            LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Searching Range"))
+            LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Search Range"))
                 .SetValue(new Slider(1000, 1500));
 
             LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:").SetFontStyle(FontStyle.Bold, SharpDX.Color.Yellow));
@@ -79,11 +79,11 @@ namespace XinZhao
             LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:").SetFontStyle(FontStyle.Bold, SharpDX.Color.Yellow)); 
             {
                 LocalMenu.AddItem(
-                    new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto arrange priorities").SetShared().SetValue(false))
+                    new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto-arrange Priorities").SetShared().SetValue(false))
                     .ValueChanged += AutoPriorityItemValueChanged;
             }
             LocalMenu.AddItem(
-                new MenuItem("Enemies.Click", MenuTab + "Chance Enemy's Hitchance with Mouse Left-click").SetValue(false));
+                new MenuItem("Enemies.Click", MenuTab + "Change Enemy's Focus with Mouse Left-click").SetValue(false));
 
             LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings").SetFontStyle(FontStyle.Bold, SharpDX.Color.Yellow)); 
             {
@@ -91,7 +91,7 @@ namespace XinZhao
                     new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true,
                         Color.GreenYellow)));
                 LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Targeting Status").SetValue(true));
-                LocalMenu.AddItem(new MenuItem("Draw.Status.Show", MenuTab + MenuTab + "Show This:").SetValue(new StringList(new[] { "All", "Show Only High Enemies" })));
+                LocalMenu.AddItem(new MenuItem("Draw.Status.Show", MenuTab + MenuTab + "Show Targeting Status For:").SetValue(new StringList(new[] { "All", "Show Only High Enemies" })));
             }
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
             Drawing.OnDraw += Drawing_OnDraw;
