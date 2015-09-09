@@ -1,7 +1,6 @@
 #region
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -22,11 +21,91 @@ namespace Olafisback
         public double ExpireTime { get; set; }
     }
 
+    internal enum Mobs
+    {
+        Blue = 1,
+        Red = 2,
+        Dragon = 1,
+        Baron = 2,
+        All = 3
+    }
+
 
     internal class Program
     {
+        private struct Tuple<TA, TB, TC> : IEquatable<Tuple<TA, TB, TC>>
+        {
+            private readonly TA item;
+            private readonly TB itemType;
+            private readonly TC targetingType;
+
+            public Tuple(TA pItem, TB pItemType, TC pTargetingType)
+            {
+                this.item = pItem;
+                this.itemType = pItemType;
+                this.targetingType = pTargetingType;
+            }
+
+            public TA Item
+            {
+                get { return this.item; }
+            }
+
+            public TB ItemType
+            {
+                get { return this.itemType; }
+            }
+
+            public TC TargetingType
+            {
+                get { return this.targetingType; }
+            }
+
+            public override int GetHashCode()
+            {
+                return this.item.GetHashCode() ^ this.itemType.GetHashCode() ^ this.targetingType.GetHashCode();
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || this.GetType() != obj.GetType())
+                {
+                    return false;
+                }
+                return this.Equals((Tuple<TA, TB, TC>)obj);
+            }
+
+            public bool Equals(Tuple<TA, TB, TC> other)
+            {
+                return other.item.Equals(item) && other.itemType.Equals(this.itemType)
+                       && other.targetingType.Equals(this.targetingType);
+            }
+        }
+
+        private enum EnumItemType
+        {
+            Targeted,
+            AoE
+        }
+
+        private enum EnumItemTargettingType
+        {
+            Ally,
+            EnemyHero,
+            EnemyObjects
+        }
+
+        public static Obj_AI_Hero Player
+        {
+            get { return ObjectManager.Player; }
+        }
+
+        private static string Tab
+        {
+            get { return "       "; }
+        }
         public const string ChampionName = "Olaf";
-        private static string space = "         ";
+        
 
         private static readonly OlafAxe olafAxe = new OlafAxe();
         public static Font vText;
@@ -45,18 +124,12 @@ namespace Olafisback
 
         public static SpellSlot IgniteSlot;
 
-        //Items
-        private static Items.Item itemHydra;
-        private static Items.Item itemBOTRK;
-        private static Items.Item itemTiamat;
-        private static Items.Item itemBilgewaterCutlass;
         private static Items.Item itemYoumuu;
-        private static Items.Item itemRandiunsOmen;
+        private static Dictionary<string, Tuple<Items.Item, EnumItemType, EnumItemTargettingType>> ItemDb;
 
         //Menu
         public static Menu Config;
-        private static GameObject _axeObj;
-        private static Obj_AI_Hero Player;
+//        private static GameObject _axeObj;
 
         private static void Main(string[] args)
         {
@@ -65,8 +138,7 @@ namespace Olafisback
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            Player = ObjectManager.Player;
-            if (Player.BaseSkinName != ChampionName)
+            if (Player.CharData.BaseSkinName != ChampionName)
                 return;
 
             /* [ Spells ] */
@@ -85,12 +157,44 @@ namespace Olafisback
             IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
             /* [ Items ] */
-            itemBOTRK = new Items.Item(3153, 450f);
-            itemBilgewaterCutlass = new Items.Item(3144, 450f);
-            itemHydra = new Items.Item(3074, 225f);
-            itemTiamat = new Items.Item(3077, 225f);
-            itemRandiunsOmen = new Items.Item(3143, 490f);
             itemYoumuu = new Items.Item(3142, 225f);
+
+            ItemDb = new Dictionary<string, Tuple<Items.Item, EnumItemType, EnumItemTargettingType>>
+            {
+                {
+                    "Tiamat",
+                    new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                        new Items.Item(3077, 250f),
+                        EnumItemType.AoE,
+                        EnumItemTargettingType.EnemyObjects)
+                },
+                {
+                    "Bilge",
+                    new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3144, 450f),
+                        EnumItemType.Targeted, EnumItemTargettingType.EnemyHero)
+                },
+                {
+                    "Blade",
+                    new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                        new Items.Item(3153, 450f),
+                        EnumItemType.Targeted,
+                        EnumItemTargettingType.EnemyHero)
+                },
+                {
+                    "Hydra",
+                    new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                        new Items.Item(3074, 250f),
+                        EnumItemType.AoE,
+                        EnumItemTargettingType.EnemyObjects)
+                },
+                {
+                    "Randiun",
+                    new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                        new Items.Item(3143, 490f),
+                        EnumItemType.AoE,
+                        EnumItemTargettingType.EnemyHero)
+                }
+            };
 
             /* [ Menus ] */
             Config = new Menu(ChampionName, ChampionName, true);
@@ -111,29 +215,26 @@ namespace Olafisback
                 Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W")).SetValue(true);
                 Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E")).SetValue(true);
                 Config.SubMenu("Combo").AddItem(new MenuItem("UseItems", "Use Items")).SetValue(true);
-                Config.SubMenu("Combo")
-                    .AddItem(
-                        new MenuItem("ComboActive", "Combo!").SetValue(
-                            new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
             }
 
             /* [ Harass ] */
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             {
                 Config.SubMenu("Harass").AddItem(new MenuItem("Spell Settings", "Spell Settings:"));
-                Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", space + "Use Q").SetValue(false));
-                Config.SubMenu("Harass").AddItem(new MenuItem("UseQ2Harass", space + "Use Q (Short)").SetValue(true));
-                Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", space + "Use E").SetValue(true));
+                Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", Tab + "Use Q").SetValue(false));
+                Config.SubMenu("Harass").AddItem(new MenuItem("UseQ2Harass", Tab + "Use Q (Short)").SetValue(true));
+                Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", Tab + "Use E").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("Mana Settings", "Mana Settings:"));
                 Config.SubMenu("Harass")
                     .AddItem(
-                        new MenuItem("Harass.UseQ.MinMana", space + "Q Harass Min. Mana").SetValue(new Slider(30, 100, 0)));
+                        new MenuItem("Harass.UseQ.MinMana", Tab + "Q Harass Min. Mana").SetValue(new Slider(30, 100, 0)));
 
                 Config.SubMenu("Harass").AddItem(new MenuItem("Toggle Settings", "Toggle Settings:"));
                 {
                     Config.SubMenu("Harass")
                         .AddItem(
-                            new MenuItem("Harass.UseQ.Toggle", space + "Toggle Q!").SetValue(
+                            new MenuItem("Harass.UseQ.Toggle", Tab + "Toggle Q!").SetValue(
                                 new KeyBind("T".ToCharArray()[0],
                                     KeyBindType.Toggle)));
                 }
@@ -147,76 +248,76 @@ namespace Olafisback
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             {
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClear Q Settings", "Q Settings"));
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarm", space + "Use Q").SetValue(false));
-                Config.SubMenu("LaneClear")
-                    .AddItem(new MenuItem("UseQFarmMinCount", space + "Use Q Min. Minion").SetValue(new Slider(2, 5, 1)));
-                Config.SubMenu("LaneClear")
-                    .AddItem(new MenuItem("UseQFarmMinMana", space + "Use Q Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarm", Tab + "Use Q").SetValue(true)).ValueChanged +=
+                    (sender, eventArgs) =>
+                        {
+                            Config.SubMenu("LaneClear").Item("UseQFarmMinCount").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("LaneClear").Item("UseQFarmMinMana").Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarmMinCount", Tab + "Use Q Min. Minion").SetValue(new Slider(2, 5, 1)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarmMinMana", Tab + "Use Q Min. Mana").SetValue(new Slider(30, 100, 0)));
 
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClear E Settings", "E Settings "));
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarm", space + "Use E").SetValue(false));
-                Config.SubMenu("LaneClear")
-                    .AddItem(
-                        new MenuItem("UseEFarmSet", space + "Use E Just:").SetValue(
-                            new StringList(new[] {"Last Hit", "Allways"}, 0)));
-                Config.SubMenu("LaneClear")
-                    .AddItem(
-                        new MenuItem("UseEFarmMinHealth", space + "Use E Min. Health").SetValue(new Slider(10, 100, 0)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarm", Tab + "Use E").SetValue(true)).ValueChanged +=
+                    (sender, eventArgs) =>
+                        {
+                            Config.SubMenu("LaneClear").Item("UseEFarmSet").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("LaneClear").Item("UseEFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
+                        };
+
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmSet", Tab + "Use E Just:").SetValue(new StringList(new[] { "Last Hit", "Allways" }, 0)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmMinHealth", Tab + "Use E Min. Health").SetValue(new Slider(10, 100, 0)));
 
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseItems", "Use Items ").SetValue(true));
-                Config.SubMenu("LaneClear")
-                    .AddItem(
-                        new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0],
-                            KeyBindType.Press)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0],KeyBindType.Press)));
             }
 
             /* [ Jungle Clear ] */
             Config.AddSubMenu(new Menu("Jungle Clear", "JungleFarm"));
             {
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarm Q Settings", "Q Settings"));
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", space + "Use Q").SetValue(false));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("UseQJFarmMinMana", space + "Use Q Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", Tab + "Use Q").SetValue(true)).ValueChanged +=
+                    (sender, eventArgs) =>
+                        {
+                            Config.SubMenu("JungleFarm").Item("UseQJFarmMinMana").Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarmMinMana", Tab + "Use Q Min. Mana").SetValue(new Slider(30, 100, 0)));
+                /*---------------------------*/
+                
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarm W Settings", "W Settings")).ValueChanged +=
+                    (sender, eventArgs) =>
+                        {
+                            Config.SubMenu("JungleFarm").Item("UseWJFarm").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("JungleFarm").Item("UseWJFarmMinMana").Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", Tab + "Use W").SetValue(false));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarmMinMana", Tab + "Use W Min. Mana").SetValue(new Slider(30, 100, 0)));
+                /*---------------------------*/
 
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarm W Settings", "W Settings"));
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", space + "Use W").SetValue(false));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("UseWJFarmMinMana", space + "Use W Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", Tab + "Use E").SetValue(false)).ValueChanged +=
+                    (sender, eventArgs) =>
+                        {
+                            Config.SubMenu("JungleFarm").Item("UseEJFarm").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("JungleFarm").Item("UseEJFarmSet").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("JungleFarm").Item("UseEJFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
+                        };;
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarmSet", Tab + "Use E Just:").SetValue(new StringList(new[] { "Last Hit", "Allways" }, 1)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarmMinHealth", Tab + "Use E Min. Health").SetValue(new Slider(10, 100, 0)));
 
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarm E Settings", "E Settings "));
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", space + "Use E").SetValue(false));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(
-                        new MenuItem("UseEJFarmSet", space + "Use E Just:").SetValue(
-                            new StringList(new[] {"Last Hit", "Allways"}, 1)));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(
-                        new MenuItem("UseEJFarmMinHealth", space + "Use E Min. Health").SetValue(new Slider(10, 100, 0)));
+                /*---------------------------*/
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseItems", "Use Items ").SetValue(true)).ValueChanged +=
+                    (sender, eventArgs) =>
+                        {
+                            Config.SubMenu("JungleFarm").Item("UseJFarmYoumuuForDragon").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("JungleFarm").Item("UseJFarmYoumuuForBlueRed").Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForDragon", Tab + "Baron/Dragon:").SetValue(new StringList(new []{"Off", "Dragon", "Baron","Both"}, 3)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForBlueRed", Tab + "Blue/Red:").SetValue(new StringList(new[] { "Off", "Blue", "Red", "Both" }, 3)));
 
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("JungleFarm Baron Dragon Settings", "Baron / Dragon Settings "));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(
-                        new MenuItem("UseJFarmYoumuuForDragon", space + "Use Youmuu's Ghostblade for Dragon").SetValue(
-                            false));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(
-                        new MenuItem("UseJFarmYoumuuForBaron", space + "Use Youmuu's Ghostblade for Baron").SetValue(
-                            false));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe (Only Jungle)").SetValue(false));
 
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("JungleFarm Blue Red Settings", "Blue / Red Settings "));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("UseJFarmYoumuuForBlueRed", space + "Use Youmuu's Ghostblade").SetValue(false));
-
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe (Only Jungle)").SetValue(false));
-
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseItems", "Use Items ").SetValue(true));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(
-                        new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0],
-                            KeyBindType.Press)));
+                
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0],KeyBindType.Press)));
             }
 
             /* [ Flee ] */
@@ -245,24 +346,24 @@ namespace Olafisback
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.SpellDrawing", "Spell Drawing:"));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Draw.QRange", space + "Q range").SetValue(new Circle(true,
+                    new MenuItem("Draw.QRange", Tab + "Q range").SetValue(new Circle(true,
                         System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Draw.Q2Range", space + "Short Q range").SetValue(new Circle(true,
+                    new MenuItem("Draw.Q2Range", Tab + "Short Q range").SetValue(new Circle(true,
                         System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Draw.ERange", space + "E range").SetValue(new Circle(false,
+                    new MenuItem("Draw.ERange", Tab + "E range").SetValue(new Circle(false,
                         System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeDrawing", "Axe Drawing:"));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Draw.AxePosition", space + "Axe Position").SetValue(new Circle(true,
+                    new MenuItem("Draw.AxePosition", Tab + "Axe Position").SetValue(new Circle(true,
                         System.Drawing.Color.GreenYellow)));
             Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("Draw.AxeTime", space + "Axe Time Remaining").SetValue(true));
+                .AddItem(new MenuItem("Draw.AxeTime", Tab + "Axe Time Remaining").SetValue(true));
             Config.AddToMainMenu();
 
             vText = new Font(
@@ -319,10 +420,10 @@ namespace Olafisback
             {
                 var time = TimeSpan.FromSeconds(olafAxe.ExpireTime - Game.Time);
                 var pos = Drawing.WorldToScreen(olafAxe.AxePos);
-                var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds - 1);
+                var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
 
                 Color vTimeColor = time.TotalSeconds > 4 ? Color.White : Color.Red;
-                DrawText(vText, display, (int) pos.X - display.Length*3, (int) pos.Y - 65, vTimeColor);
+                DrawText(vText, display, (int)pos.X - display.Length * 3, (int)pos.Y - 65, vTimeColor);
             }
             /*
                         if (_axeObj != null)
@@ -362,8 +463,7 @@ namespace Olafisback
                 if (t.IsValidTarget())
                     E.CastOnUnit(t);
             }
-
-
+            
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 Combo();
@@ -395,58 +495,43 @@ namespace Olafisback
 
         private static void Combo()
         {
-  var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
 
             if (Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady() &&
                 Player.Distance(t.ServerPosition) <= Q.Range)
             {
-                PredictionOutput Qpredict = Q.GetPrediction(t);
-                var hithere = Qpredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
-                if (Player.Distance(t.ServerPosition) >= 350)
+                PredictionOutput qPredictionOutput = Q.GetPrediction(t);
+                var castPosition = qPredictionOutput.CastPosition.Extend(ObjectManager.Player.Position, -100);
+                
+                if (Player.Distance(t.ServerPosition) >= 300)
                 {
-                    Q.Cast(hithere);
+                    Q.Cast(castPosition);
                 }
                 else
-                    Q.Cast(Qpredict.CastPosition);
+                {
+                    Q.Cast(qPredictionOutput.CastPosition);
+                }
             }
 
-            if (Config.Item("UseECombo").GetValue<bool>() && E.IsReady() &&
-                Player.Distance(t.ServerPosition) <= E.Range)
-
+            if (Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Player.Distance(t.ServerPosition) <= E.Range)
+            {
                 E.CastOnUnit(t);
+            }
 
-            if (Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() &&
-                Player.Distance(t.ServerPosition) <= 225f)
-
+            if (Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Player.Distance(t.ServerPosition) <= 225f)
+            {
                 W.Cast();
+            }
 
             if (Config.Item("UseItems").GetValue<bool>())
             {
-                itemBOTRK.Cast(t);
-
-                itemBilgewaterCutlass.Cast(t);
-                if (Player.Distance(t.ServerPosition) <= itemHydra.Range)
-                {
-                    itemHydra.Cast();
-                }
-                if (Player.Distance(t.ServerPosition) <= itemTiamat.Range)
-                {
-                    itemTiamat.Cast();
-                }
-                if (Player.Distance(t.ServerPosition) <= 400)
-                {
-                    itemYoumuu.Cast();
-                }
-                if (Player.Distance(t.ServerPosition) <= itemRandiunsOmen.Range)
-                {
-                    itemRandiunsOmen.Cast();
-                }
+                CastItems(t);
             }
 
-            if (GetComboDamage(t) > t.Health && IgniteSlot != SpellSlot.Unknown &&
-                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (GetComboDamage(t) > t.Health && IgniteSlot != SpellSlot.Unknown
+                && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 Player.Spellbook.CastSpell(IgniteSlot, t);
             }
@@ -461,14 +546,20 @@ namespace Olafisback
 
             if (t.IsValidTarget())
             {
-                Vector3 hitHere;
-                PredictionOutput Qpredict = Q.GetPrediction(t);
+                Vector3 castPosition;
+                PredictionOutput qPredictionOutput = Q.GetPrediction(t);
+
                 if (!t.IsFacing(Player) && t.Path.Count() >= 1) // target is running
-                    hitHere = Q.GetPrediction(t).CastPosition +
-                              Vector3.Normalize(t.ServerPosition - Player.Position)*t.MoveSpeed/2;
+                {
+                    castPosition = Q.GetPrediction(t).CastPosition
+                                   + Vector3.Normalize(t.ServerPosition - Player.Position) * t.MoveSpeed / 2;
+                }
                 else
-                    hitHere = Qpredict.CastPosition.Extend(ObjectManager.Player.Position, -100);
-                Q.Cast(Player.Distance(t.ServerPosition) >= 350 ? hitHere : Qpredict.CastPosition);
+                {
+                    castPosition = qPredictionOutput.CastPosition.Extend(ObjectManager.Player.Position, -100);
+                }
+
+                Q.Cast(Player.Distance(t.ServerPosition) >= 350 ? castPosition : qPredictionOutput.CastPosition);
             }
         }
 
@@ -479,14 +570,13 @@ namespace Olafisback
 
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            if (t.IsValidTarget() && Q.IsReady() &&
-                Player.Mana > Player.MaxMana/100*Config.Item("Harass.UseQ.MinMana").GetValue<Slider>().Value &&
-                Player.Distance(t.ServerPosition) <= Q2.Range)
+            if (t.IsValidTarget() && Q.IsReady()
+                && Player.Mana > Player.MaxMana / 100 * Config.Item("Harass.UseQ.MinMana").GetValue<Slider>().Value
+                && Player.Distance(t.ServerPosition) <= Q2.Range)
             {
-                PredictionOutput q2Predict = Q2.GetPrediction(t);
-                var hithere = q2Predict.CastPosition.Extend(ObjectManager.Player.Position, -140);
-                if (q2Predict.Hitchance >= HitChance.High)
-                    Q2.Cast(hithere);
+                PredictionOutput q2PredictionOutput = Q2.GetPrediction(t);
+                var castPosition = q2PredictionOutput.CastPosition.Extend(ObjectManager.Player.Position, -140);
+                if (q2PredictionOutput.Hitchance >= HitChance.High) Q2.Cast(castPosition);
             }
         }
 
@@ -525,9 +615,11 @@ namespace Olafisback
                 CastShortQ();
             }
 
-            if (E.IsReady() && Config.Item("UseEHarass").GetValue<bool>() &&
-                Player.Distance(t.ServerPosition) <= E.Range)
+            if (E.IsReady() && Config.Item("UseEHarass").GetValue<bool>()
+                && Player.Distance(t.ServerPosition) <= E.Range)
+            {
                 E.CastOnUnit(t);
+            }
         }
 
         private static void LaneClear()
@@ -540,34 +632,39 @@ namespace Olafisback
 
             if (Config.Item("LaneClearUseItems").GetValue<bool>())
             {
-                var vMinions = MinionManager.GetMinions(Player.ServerPosition, itemTiamat.Range);
+                foreach (var item in from item in ItemDb
+                                     where
+                                         item.Value.ItemType == EnumItemType.AoE
+                                         && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
+                                     let iMinions =
+                                         MinionManager.GetMinions(
+                                             ObjectManager.Player.ServerPosition,
+                                             item.Value.Item.Range)
+                                     where
+                                         iMinions.Count >= Config.Item("Lane.W.MinObj").GetValue<Slider>().Value
+                                         && item.Value.Item.IsReady()
+                                     select item)
                 {
-                    if (vMinions != null && vMinions.Count >= 2)
-                    {
-                        if (itemTiamat.IsReady())
-                            itemTiamat.Cast();
-                        if (itemHydra.IsReady())
-                            itemHydra.Cast();
-                    }
+                    item.Value.Item.Cast();
                 }
             }
 
             if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady())
             {
-                if (Player.Mana < Player.MaxMana/100*Config.Item("UseQFarmMinMana").GetValue<Slider>().Value)
+                if (Player.Mana < Player.MaxMana / 100 * Config.Item("UseQFarmMinMana").GetValue<Slider>().Value)
                     return;
 
                 var vParamQMinionCount = Config.Item("UseQFarmMinCount").GetValue<Slider>().Value;
 
                 var objAiHero = from x1 in ObjectManager.Get<Obj_AI_Minion>()
-                    where x1.IsValidTarget() && x1.IsEnemy
-                    select x1
-                    into h
-                    orderby h.Distance(Player) descending
-                    select h
-                    into x2
-                    where x2.Distance(Player) < Q.Range - 20 && !x2.IsDead
-                    select x2;
+                                where x1.IsValidTarget() && x1.IsEnemy
+                                select x1
+                                    into h
+                                    orderby h.Distance(Player) descending
+                                    select h
+                                        into x2
+                                        where x2.Distance(Player) < Q.Range - 20 && !x2.IsDead
+                                        select x2;
 
                 var aiMinions = objAiHero as Obj_AI_Minion[] ?? objAiHero.ToArray();
 
@@ -587,7 +684,7 @@ namespace Olafisback
             if (Config.Item("UseEFarm").GetValue<bool>() && E.IsReady())
             {
 
-                if (Player.Health < Player.MaxHealth/100*Config.Item("UseEFarmMinHealth").GetValue<Slider>().Value)
+                if (Player.Health < Player.MaxHealth / 100 * Config.Item("UseEFarmMinHealth").GetValue<Slider>().Value)
                     return;
 
                 var eMinions = MinionManager.GetMinions(Player.ServerPosition, E.Range);
@@ -596,18 +693,18 @@ namespace Olafisback
                 switch (vParamESettings)
                 {
                     case 0:
-                    {
-                        if (eMinions[0].IsValidTarget() &&
-                            eMinions[0].Health <= Player.GetSpellDamage(eMinions[0], SpellSlot.E))
-                            E.CastOnUnit(eMinions[0]);
-                        break;
-                    }
+                        {
+                            if (eMinions[0].IsValidTarget() &&
+                                eMinions[0].Health <= Player.GetSpellDamage(eMinions[0], SpellSlot.E))
+                                E.CastOnUnit(eMinions[0]);
+                            break;
+                        }
                     case 1:
-                    {
-                        if (eMinions[0].IsValidTarget())
-                            E.CastOnUnit(eMinions[0]);
-                        break;
-                    }
+                        {
+                            if (eMinions[0].IsValidTarget())
+                                E.CastOnUnit(eMinions[0]);
+                            break;
+                        }
                 }
             }
         }
@@ -625,74 +722,83 @@ namespace Olafisback
             if (Config.Item("UseQJAutoAxe").GetValue<bool>() &&
                 Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
-                string[] bigBoys = {"Baron", "Dragon", "Red", "Blue"};
+                string[] bigBoys = { "Baron", "Dragon", "Red", "Blue" };
 
                 foreach (
                     var xbigBoys in
-                        bigBoys.Where(xbigBoys => _axeObj != null).Where(xbigBoys => mob.Name.Contains(xbigBoys)))
+                        bigBoys.Where(xbigBoys => olafAxe != null).Where(xbigBoys => mob.Name.Contains(xbigBoys)))
                 {
-                    ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, _axeObj.Position);
+                    ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, olafAxe.AxePos);
                 }
-            }
-
-            if (itemYoumuu.IsReady() && Player.Distance(mob) < 400)
-            {
-                if (mob.Name.Contains("Baron") && Config.Item("UseJFarmYoumuuForBaron").GetValue<bool>())
-                    itemYoumuu.Cast();
-
-                if (mob.Name.Contains("Dragon") && Config.Item("UseJFarmYoumuuForDragon").GetValue<bool>())
-                    itemYoumuu.Cast();
-
-                if ((mob.Name.Contains("Red") || mob.Name.Contains("Blue")) &&
-                    Config.Item("UseJFarmYoumuuForBlueRed").GetValue<bool>())
-                    itemYoumuu.Cast();
             }
 
             if (Config.Item("JungleFarmUseItems").GetValue<bool>())
             {
-                if (itemTiamat.IsReady() && Player.Distance(mob) < itemTiamat.Range)
-                    itemTiamat.Cast();
-                if (itemHydra.IsReady() && Player.Distance(mob) < itemTiamat.Range)
-                    itemHydra.Cast();
+                foreach (var item in from item in ItemDb
+                                     where
+                                         item.Value.ItemType == EnumItemType.AoE
+                                         && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
+                                     let iMinions =
+                                         MinionManager.GetMinions(
+                                             ObjectManager.Player.ServerPosition,
+                                             item.Value.Item.Range)
+                                     where item.Value.Item.IsReady()
+                                     select item)
+                {
+                    item.Value.Item.Cast();
+                }
+
+                if (itemYoumuu.IsReady() && Player.Distance(mob) < 400)
+                {
+                    var youmuuBaron = Config.Item("UseJFarmYoumuuForDragon").GetValue<StringList>().SelectedIndex;
+                    var youmuuRed = Config.Item("UseJFarmYoumuuForBlueRed").GetValue<StringList>().SelectedIndex;
+
+                    if (mob.Name.Contains("Dragon") && (youmuuBaron == (int)Mobs.Dragon || youmuuBaron == (int)Mobs.All)) {itemYoumuu.Cast();}
+
+                    if (mob.Name.Contains("Baron") && (youmuuBaron == (int)Mobs.Baron || youmuuBaron == (int)Mobs.All)) itemYoumuu.Cast();
+
+                    if (mob.Name.Contains("Blue") && (youmuuRed == (int)Mobs.Blue || youmuuRed == (int)Mobs.All)) itemYoumuu.Cast();
+
+                    if (mob.Name.Contains("Red") && (youmuuRed == (int)Mobs.Red || youmuuRed == (int)Mobs.All)) itemYoumuu.Cast();
+                }
             }
 
             if (Config.Item("UseQJFarm").GetValue<bool>() && Q.IsReady())
             {
-                if (Player.Mana < Player.MaxMana/100*Config.Item("UseQJFarmMinMana").GetValue<Slider>().Value)
+                if (Player.Mana < Player.MaxMana / 100 * Config.Item("UseQJFarmMinMana").GetValue<Slider>().Value)
                     return;
 
-                if (Q.IsReady())
-                    if (Q.Cast(mob.Position - 20)) ;
+                if (Q.IsReady()) Q.Cast(mob.Position - 20);
             }
 
             if (Config.Item("UseWJFarm").GetValue<bool>() && W.IsReady())
             {
-                if (Player.Mana < Player.MaxMana/100*Config.Item("UseWJFarmMinMana").GetValue<Slider>().Value)
+                if (Player.Mana < Player.MaxMana / 100 * Config.Item("UseWJFarmMinMana").GetValue<Slider>().Value)
                     return;
 
-                if (mobs.Count >= 2 || mob.Health > Player.TotalAttackDamage*2.5)
+                if (mobs.Count >= 2 || mob.Health > Player.TotalAttackDamage * 2.5)
                     W.Cast();
             }
 
             if (Config.Item("UseEJFarm").GetValue<bool>() && E.IsReady())
             {
-                if (Player.Health < Player.MaxHealth/100*Config.Item("UseEJFarmMinHealth").GetValue<Slider>().Value)
+                if (Player.Health < Player.MaxHealth / 100 * Config.Item("UseEJFarmMinHealth").GetValue<Slider>().Value)
                     return;
 
                 var vParamESettings = Config.Item("UseEJFarmSet").GetValue<StringList>().SelectedIndex;
                 switch (vParamESettings)
                 {
                     case 0:
-                    {
-                        if (mob.Health <= Player.GetSpellDamage(mob, SpellSlot.E))
-                            E.CastOnUnit(mob);
-                        break;
-                    }
+                        {
+                            if (mob.Health <= Player.GetSpellDamage(mob, SpellSlot.E))
+                                E.CastOnUnit(mob);
+                            break;
+                        }
                     case 1:
-                    {
-                        E.CastOnUnit(mob);
-                        break;
-                    }
+                        {
+                            E.CastOnUnit(mob);
+                            break;
+                        }
                 }
             }
         }
@@ -709,6 +815,23 @@ namespace Olafisback
             {
                 if (itemYoumuu.IsReady())
                     itemYoumuu.Cast();
+            }
+        }
+
+        private static void CastItems(Obj_AI_Hero t)
+        {
+            foreach (var item in ItemDb)
+            {
+                if (item.Value.ItemType == EnumItemType.AoE
+                    && item.Value.TargetingType == EnumItemTargettingType.EnemyHero)
+                {
+                    if (t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady()) item.Value.Item.Cast();
+                }
+                if (item.Value.ItemType == EnumItemType.Targeted
+                    && item.Value.TargetingType == EnumItemTargettingType.EnemyHero)
+                {
+                    if (t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady()) item.Value.Item.Cast(t);
+                }
             }
         }
 
@@ -729,7 +852,7 @@ namespace Olafisback
                 Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
 
-            return (float) fComboDamage;
+            return (float)fComboDamage;
         }
 
         public static void DrawText(Font vFont, String vText, int vPosX, int vPosY, Color vColor)
