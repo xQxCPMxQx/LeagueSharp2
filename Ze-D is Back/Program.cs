@@ -725,7 +725,8 @@ namespace Zed
             {
                 if (!_r.IsReady()) return UltCastStage.Cooldown;
 
-                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "zedult"
+                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "ZedR"
+                //return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "zedult"
                     ? UltCastStage.First
                     : UltCastStage.Second);
             }
@@ -738,7 +739,8 @@ namespace Zed
             {
                 if (!_w.IsReady()) return ShadowCastStage.Cooldown;
 
-                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "ZedShadowDash"
+                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "ZedW"
+                //return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "ZedShadowDash"
                     ? ShadowCastStage.First
                     : ShadowCastStage.Second);
                
