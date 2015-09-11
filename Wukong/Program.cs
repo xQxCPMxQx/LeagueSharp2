@@ -421,10 +421,15 @@ namespace Wukong
             if (useE)
             {
                 var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
+                if (allMinionsE.Count >= 2)
+                    E.CastOnUnit(allMinionsE[0]);
+                /*
                 var locE = E.GetCircularFarmLocation(allMinionsE);
+                
                 if (allMinionsE.Count == allMinionsE.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 &&
                     locE.Position.IsValid())
                     E.Cast(locE.Position);
+                */
             }
 
             if (Tiamat.IsReady() && Config.Item("LaneClearUseTiamat").GetValue<bool>())
