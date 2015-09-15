@@ -297,6 +297,10 @@ namespace Shen
             var drawE = Config.Item("DrawE").GetValue<Circle>();
             if (drawE.Active && Q.Level > 0)
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, drawE.Color);
+                
+            var drawEFlash = Config.Item("DrawEF").GetValue<Circle>();
+            if (drawEFlash.Active)
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range + 550, drawEFlash.Color);
         }
 
         private static void DrawHelplessAllies()
