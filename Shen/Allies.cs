@@ -35,8 +35,8 @@ namespace Shen
                 {
                     var ally = HeroManager.Allies.Where(
                         a => !a.IsDead && !a.IsMe &&
-                             LocalMenu.Item("Selected.Champ" + a.ChampionName).GetValue<StringList>().SelectedIndex <=
-                             vMax);
+                             LocalMenu.Item("Selected.Champ" + a.ChampionName).GetValue<StringList>().SelectedIndex <= vMax &&
+                             LocalMenu.Item("Selected.Champ" + a.ChampionName).GetValue<StringList>().SelectedIndex > 0);
 
                     return ally.MinOrDefault(hero => hero.Health);
                 }
