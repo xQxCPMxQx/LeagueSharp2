@@ -19,16 +19,16 @@ namespace XinZhao
         {
             get
             {
-                if (SmiteBlue.Any(i => Items.HasItem(i)))
+                if (SmiteBlue.Any(i => LeagueSharp.Common.Items.HasItem(i)))
                     return "s5_summonersmiteplayerganker";
 
-                if (SmiteRed.Any(i => Items.HasItem(i)))
+                if (SmiteRed.Any(i => LeagueSharp.Common.Items.HasItem(i)))
                     return "s5_summonersmiteduel";
 
-                if (SmiteGrey.Any(i => Items.HasItem(i)))
+                if (SmiteGrey.Any(i => LeagueSharp.Common.Items.HasItem(i)))
                     return "s5_summonersmitequick";
 
-                if (SmitePurple.Any(i => Items.HasItem(i)))
+                if (SmitePurple.Any(i => LeagueSharp.Common.Items.HasItem(i)))
                     return "itemsmiteaoe";
 
                 return "summonersmite";
@@ -106,7 +106,7 @@ namespace XinZhao
         {
             var range = 700f;
             var use = menu.Item("Spells.Smite").GetValue<bool>();
-            var itemCheck = SmiteBlue.Any(i => Items.HasItem(i)) || SmiteRed.Any(i => Items.HasItem(i));
+            var itemCheck = SmiteBlue.Any(i => LeagueSharp.Common.Items.HasItem(i)) || SmiteRed.Any(i => LeagueSharp.Common.Items.HasItem(i));
             if (itemCheck && use &&
                 Program.Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready &&
                 t.Distance(Program.Player.Position) < range)

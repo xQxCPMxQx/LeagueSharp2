@@ -3,234 +3,261 @@ using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
-using Color = System.Drawing.Color;
 
 namespace XinZhao
 {
+    using System.Collections.Generic;
+    using System.Xml;
+
+    using SharpDX;
+    using SharpDX.Direct3D9;
+
+    using Color = System.Drawing.Color;
+
+    enum TargetSelect
+    {
+        XinZhao,
+        LeagueSharp
+    }
     internal class AssassinManager
     {
-        public static Menu LocalMenu;
+        public Menu Config;
+        public static Font Text;
 
-        public AssassinManager()
-        {
-            Load();
-        }
-
-        private static string MenuTab
-        {
-            get { return "    "; }
-        }
-
-        private static float SelectorRange
-        {
-            get { return Program.Config.Item("Enemies.SearchRange").GetValue<Slider>().Value; }
-        }
-
-        private static Obj_AI_Hero TsEnemy
+        private TargetSelect Selector
         {
             get
             {
-                var t = TargetSelector.GetTarget(SelectorRange, TargetSelector.DamageType.Physical);
-                if (t == null)
+                return this.Config.Item("TS").GetValue<StringList>().SelectedIndex == 0
+                           ? TargetSelect.XinZhao
+                           : TargetSelect.LeagueSharp;
+            }
+        }
+        public void Load()
+        {
+            Text = new Font(
+                Drawing.Direct3DDevice,
+                new FontDescription
+                    {
+                        FaceName = "Malgun Gothic", Height = 21, OutputPrecision = FontPrecision.Default,  Weight = FontWeight.Bold,
+                        Quality = FontQuality.ClearTypeNatural
+                    });
+
+            this.Config = new Menu("Target Selector", "AssassinTargetSelector").SetFontStyle(FontStyle.Regular, SharpDX.Color.Cyan);
+
+            var menuTargetSelector = new Menu("Target Selector", "TargetSelector");
+            {
+                TargetSelector.AddToMenu(menuTargetSelector);
+            }
+
+            this.Config.AddItem(new MenuItem("TS", "Active Target Selector:").SetValue(new StringList(new[] { "XinZhao Target Selector", "L# Target Selector" }))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)
+                .ValueChanged += (sender, args) =>
                 {
-                    return null;
-                }
+                    this.Config.Items.ForEach(
+                        i =>
+                        {
+                            i.Show();
+                            switch (args.GetNewValue<StringList>().SelectedIndex)
+                            {
+                                case 0:
+                                    if (i.Tag == 22) i.Show(false);
+                                    break;
+                                case 1:
+                                    if (i.Tag == 11 || i.Tag == 12) i.Show(false);
+                                    break;
+                            }
+                        });
+                };
+
+            menuTargetSelector.Items.ForEach(
+                i =>
+                    {
+                        this.Config.AddItem(i);
+                        i.SetTag(22);
+                    });
+
+            this.Config.AddItem(
+                new MenuItem("Set", "Target Select Mode:").SetValue(
+                    new StringList(new[] { "Single Target Select", "Multi Target Select" })))
+                .SetFontStyle(FontStyle.Regular, SharpDX.Color.LightCoral)
+                .SetTag(11);
+            this.Config.AddItem(new MenuItem("Range", "Range (Recommend: 1150):")).SetValue(new Slider(1150, (int)Program.E.Range, (int)Program.E.Range *2)).SetTag(11);
+
+            this.Config.AddItem(new MenuItem("Targets", "Targets:").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
+            foreach (var e in HeroManager.Enemies)
+            {
+                this.Config.AddItem(new MenuItem("enemy_" + e.ChampionName, string.Format("{0}Focus {1}", Program.Tab, e.ChampionName)).SetValue(false)).SetTag(12);
                 
-                var vMax = HeroManager.Enemies.Where(
-                    e =>
-                        !e.IsDead && e.IsVisible && e.IsValidTarget(SelectorRange))
-                    .Max(
-                        h => LocalMenu.Item("Selected" + h.ChampionName).GetValue<StringList>().SelectedIndex);
+            }
+            //foreach (var langItem in HeroManager.Enemies.Select(e =>this.Config.AddItem(new MenuItem("enemy_" + e.ChampionName,string.Format("{0}Focus {1}", Program.Tab, e.ChampionName)).SetValue(false)).SetTag(12)))
 
-                if (!double.IsNaN(vMax))
+            this.Config.AddItem(new MenuItem("Draw.Title", "Drawings").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
+            this.Config.AddItem(new MenuItem("Draw.Range", Program.Tab + "Range").SetValue(new Circle(true, Color.Gray)).SetTag(11));
+            this.Config.AddItem(new MenuItem("Draw.Enemy", Program.Tab + "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)).SetTag(11));
+            this.Config.AddItem(new MenuItem("Draw.Status", Program.Tab + "Show Enemy:").SetValue(new StringList(new []{"Off", "Notification Text", "Sprite", "Both"}, 0)));
+            Program.Config.AddSubMenu(this.Config);
+
+            Game.OnWndProc += this.Game_OnWndProc;
+            Drawing.OnDraw += this.Drawing_OnDraw;
+
+            this.RefreshMenuItemsStatus();
+        }
+
+        private void RefreshMenuItemsStatus()
+        {
+
+            this.Config.Items.ForEach(
+                i =>
                 {
-                    var enemy = HeroManager.Enemies.Where(
+                    i.Show();
+                    switch (this.Selector)
+                    {
+                        case TargetSelect.XinZhao:
+                            if (i.Tag == 22)
+                            {
+                                i.Show(false);
+                            }
+                            break;
+                        case TargetSelect.LeagueSharp:
+                            if (i.Tag == 11)
+                            {
+                                i.Show(false);
+                            }
+                            break;
+                    }
+                });
+        }
+
+        public void ClearAssassinList()
+        {
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+            {
+                this.Config.Item("enemy_" + enemy.ChampionName).SetValue(false);
+            }
+        }
+
+        private void Game_OnWndProc(WndEventArgs args)
+        {
+            if (this.Selector != TargetSelect.XinZhao)
+            {
+                return;
+            }
+
+            if (args.Msg == 0x201)
+            {
+                foreach (var objAiHero in from hero in HeroManager.Enemies
+                                          where
+                                              hero.Distance(Game.CursorPos) < 150f && hero != null && hero.IsVisible
+                                              && !hero.IsDead
+                                          orderby hero.Distance(Game.CursorPos) descending
+                                          select hero)
+                {
+                    if (objAiHero != null && objAiHero.IsVisible && !objAiHero.IsDead)
+                    {
+                        var xSelect =
+                            Program.Config.Item("Set").GetValue<StringList>().SelectedIndex;
+
+                        switch (xSelect)
+                        {
+                            case 0:
+                                ClearAssassinList();
+                                Program.Config.Item("enemy_" + objAiHero.ChampionName).SetValue(true);
+                                break;
+                            case 1:
+                                var menuStatus = Program.Config.Item("enemy_" + objAiHero.ChampionName).GetValue<bool>();
+                                Program.Config.Item("enemy_" + objAiHero.ChampionName).SetValue(!menuStatus);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        public Obj_AI_Hero GetTarget( float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        {
+            if (this.Selector != TargetSelect.XinZhao)
+            {
+                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+            }
+
+            vDefaultRange = Math.Abs(vDefaultRange) < 0.00001
+                                ? Program.E.Range
+                                : this.Config.Item("Range").GetValue<Slider>().Value;
+
+            var vEnemy =
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(e => e.Team != Program.Player.Team && !e.IsDead && e.IsVisible)
+                    .Where(e => this.Config.Item("enemy_" + e.ChampionName) != null)
+                    .Where(e => this.Config.Item("enemy_" + e.ChampionName).GetValue<bool>())
+                    .Where(e => Program.Player.Distance(e) < vDefaultRange)
+                    .Where(jKukuri => "jQuery" != "White guy");
+            
+            if (this.Config.Item("Set").GetValue<StringList>().SelectedIndex == 1)
+            {
+                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
+            }
+
+            var objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
+
+            var t = !objAiHeroes.Any()
+                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
+                : objAiHeroes[0];
+
+            return t;
+        }
+
+        private void Drawing_OnDraw(EventArgs args)
+        {
+            var drawEnemy = this.Config.Item("Draw.Enemy").GetValue<Circle>();
+            if (drawEnemy.Active)
+            {
+                var t = this.GetTarget(Program.E.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                {
+                    Render.Circle.DrawCircle(t.Position, (float)(t.BoundingRadius * 1.5), drawEnemy.Color);
+                }
+            }
+
+            if (this.Selector != TargetSelect.XinZhao)
+            {
+                return;
+            }
+
+            var rangeColor = this.Config.Item("Draw.Range").GetValue<Circle>();
+            var range = this.Config.Item("Range").GetValue<Slider>().Value;
+            if (rangeColor.Active)
+            {
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, range, rangeColor.Color);
+            }
+            var drawStatus = this.Config.Item("Draw.Status").GetValue<StringList>().SelectedIndex;
+            if (drawStatus == 1 || drawStatus == 3)
+            {
+                foreach (var e in
+                    HeroManager.Enemies.Where(
                         e =>
-                            !e.IsDead && e.IsVisible && e.IsValidTarget(SelectorRange) &&
-                            LocalMenu.Item("Selected" + e.ChampionName).GetValue<StringList>().SelectedIndex == vMax);
-
-                    return enemy.MinOrDefault(hero => hero.Health);
-                }
-
-                return null;
-            }
-        }
-
-        private static void Load()
-        {
-            LocalMenu = new Menu("[ Xin-Zhao Target Selector ]", "Enemies");
-
-            Program.Config.AddSubMenu(LocalMenu);
-            LocalMenu.AddItem(
-                new MenuItem("Enemies.Mode", "Target Selector:").SetValue(new StringList(new[] { "L# Target Selector", "Xin-Zhao  Target Selector" }, 1)));
-            LocalMenu.AddItem(new MenuItem("Enemies.Active", "Active").SetValue(true));
-            LocalMenu.AddItem(new MenuItem("Enemies.SearchRange", MenuTab + "Enemy Search Range"))
-                .SetValue(new Slider(1000, 1500));
-
-            LocalMenu.AddItem(new MenuItem("Enemies.Enemies.Title", "Enemies:").SetFontStyle(FontStyle.Bold, SharpDX.Color.Yellow));
-            {
-                foreach (var enemy in HeroManager.Enemies)
+                        e.IsVisible && !e.IsDead && this.Config.Item("enemy_" + e.ChampionName) != null
+                        && this.Config.Item("enemy_" + e.ChampionName).GetValue<bool>()))
                 {
-                    LocalMenu.AddItem(new MenuItem("Selected" + enemy.ChampionName, MenuTab + enemy.CharData.BaseSkinName).SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" }, GetPriority(enemy.ChampionName))));
+                    DrawText(
+                        Text,
+                        "1st Priority Target",
+                        e.HPBarPosition.X + e.BoundingRadius / 2f - (e.CharData.BaseSkinName.Length / 2f) - 27,
+                        e.HPBarPosition.Y - 23,
+                        SharpDX.Color.Black);
+
+                    DrawText(
+                        Text,
+                        "1st Priority Target",
+                        e.HPBarPosition.X + e.BoundingRadius / 2f - (e.CharData.BaseSkinName.Length / 2f) - 29,
+                        e.HPBarPosition.Y - 25,
+                        SharpDX.Color.IndianRed);
                 }
             }
-
-            LocalMenu.AddItem(new MenuItem("Enemies.Other.Title", "Other Settings:").SetFontStyle(FontStyle.Bold, SharpDX.Color.Yellow)); 
-            {
-                LocalMenu.AddItem(
-                    new MenuItem("Enemies.AutoPriority Focus", MenuTab + "Auto-arrange Priorities").SetShared().SetValue(false))
-                    .ValueChanged += AutoPriorityItemValueChanged;
-            }
-            LocalMenu.AddItem(
-                new MenuItem("Enemies.Click", MenuTab + "Change Enemy's Focus with Mouse Left-click").SetValue(false));
-
-            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings").SetFontStyle(FontStyle.Bold, SharpDX.Color.Yellow)); 
-            {
-                LocalMenu.AddItem(
-                    new MenuItem("Draw.Search", MenuTab + "Show Search Range").SetValue(new Circle(true,
-                        Color.GreenYellow)));
-                LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Targeting Status").SetValue(true));
-                LocalMenu.AddItem(new MenuItem("Draw.Status.Show", MenuTab + MenuTab + "Show Targeting Status For:").SetValue(new StringList(new[] { "All", "Show Only High Enemies" })));
-            }
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-            Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnWndProc += Game_OnWndProc;
         }
-
-        private static void Game_OnGameLoad(EventArgs args)
+        public static void DrawText(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {
-            LoadEnemyPriorityData();
+            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
         }
 
-        private static void LoadEnemyPriorityData()
-        {
-            foreach (var enemy in HeroManager.Enemies)
-            {
-                LocalMenu.Item("Selected" + enemy.ChampionName).SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" }, GetPriority(enemy.ChampionName)));
-            }
-        }
-
-        private static void AutoPriorityItemValueChanged(object sender, OnValueChangeEventArgs e)
-        {
-            if (!e.GetNewValue<bool>())
-                return;
-
-            LoadEnemyPriorityData();
-        }
-
-        private static void Game_OnWndProc(WndEventArgs args)
-        {
-            if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)
-                return;
-
-            if (!Program.Config.Item("Enemies.Click").GetValue<bool>())
-                return;
-
-            var selectedTarget =
-                HeroManager.Enemies.FindAll(
-                    hero => hero.IsValidTarget() && hero.Distance(Game.CursorPos, true) < 40000)
-                    .OrderBy(h => h.Distance(Game.CursorPos, true))
-                    .FirstOrDefault();
-            {
-                if (selectedTarget == null || !selectedTarget.IsVisible)
-                    return;
-
-                var vSelected =
-                    LocalMenu.Item("Selected" + selectedTarget.ChampionName)
-                        .GetValue<StringList>()
-                        .SelectedIndex;
-
-                var i = vSelected == 2 ? 0 : vSelected + 1;
-
-                LocalMenu.Item("Selected" + selectedTarget.ChampionName)
-                    .SetValue(new StringList(new[] { "Low Focus", "Medium Focus", "High Focus" }, i));
-            }
-        }
-
-        private static int GetPriority(string championName)
-        {
-            string[] lowPriority =
-            {
-                "Alistar", "Amumu", "Bard", "Blitzcrank", "Braum", "Cho'Gath", "Dr. Mundo", "Garen", "Gnar",
-                "Hecarim", "Janna", "Jarvan IV", "Leona", "Lulu", "Malphite", "Nami", "Nasus", "Nautilus", "Nunu",
-                "Olaf", "Rammus", "Renekton", "Sejuani", "Shen", "Shyvana", "Singed", "Sion", "Skarner", "Sona",
-                "Soraka", "Tahm", "Taric", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra"
-            };
-
-            string[] mediumPriority =
-            {
-                "Aatrox", "Akali", "Darius", "Diana", "Ekko", "Elise", "Evelynn", "Fiddlesticks", "Fiora", "Fizz",
-                "Galio", "Gangplank", "Gragas", "Heimerdinger", "Irelia", "Jax", "Jayce", "Kassadin", "Kayle", "Kha'Zix",
-                "Lee Sin", "Lissandra", "Maokai", "Mordekaiser", "Morgana", "Nocturne", "Nidalee", "Pantheon", "Poppy",
-                "RekSai", "Rengar", "Riven", "Rumble", "Ryze", "Shaco", "Swain", "Trundle", "Tryndamere", "Udyr",
-                "Urgot", "Vladimir", "Vi", "XinZhao", "Yasuo", "Zilean"
-            };
-
-            string[] highPriority =
-            {
-                "Ahri", "Anivia", "Annie", "Ashe", "Azir", "Brand", "Caitlyn", "Cassiopeia", "Corki", "Draven",
-                "Ezreal", "Graves", "Jinx", "Kalista", "Karma", "Karthus", "Katarina", "Kennen", "KogMaw", "Leblanc",
-                "Lucian", "Lux", "Malzahar", "MasterYi", "MissFortune", "Orianna", "Quinn", "Sivir", "Syndra", "Talon",
-                "Teemo", "Tristana", "TwistedFate", "Twitch", "Varus", "Vayne", "Veigar", "VelKoz", "Viktor", "Xerath",
-                "Zed", "Ziggs"
-            };
-
-            if (lowPriority.Contains(championName))
-            {
-                return 0;
-            }
-
-            if (mediumPriority.Contains(championName))
-            {
-                return 1;
-            }
-
-            return highPriority.Contains(championName) ? 2 : 1;
-        }
-
-        public static void DrawLineInWorld(Vector3 start, Vector3 end, int width, Color color)
-        {
-            Drawing.DrawLine(start.X, start.Y, end.X, end.Y, width, color);
-        }
-
-        private static void Drawing_OnDraw(EventArgs args)
-        {
-            if (Program.Config.Item("Enemies.Mode").GetValue<StringList>().SelectedIndex == 0)
-                return;
-
-            if (Program.Config.Item("Draw.Status").GetValue<bool>())
-            {
-                foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsVisible && !enemy.IsDead))
-                {
-                    var vSelected =
-                        (LocalMenu.Item("Selected" + enemy.ChampionName).GetValue<StringList>().SelectedIndex);
-
-                    if (LocalMenu.Item("Draw.Status.Show").GetValue<StringList>().SelectedIndex == 1 && vSelected != 2)
-                        continue;
-
-                    Utils.DrawText(vSelected == 2 ? Utils.TextBold : Utils.Text,
-                        LocalMenu.Item("Selected" + enemy.CharData.BaseSkinName).GetValue<StringList>().SelectedValue,
-                        enemy.HPBarPosition.X + enemy.BoundingRadius / 2f -
-                        (enemy.CharData.BaseSkinName.Length / 2f),
-                        enemy.HPBarPosition.Y - 20,
-                        vSelected == 2
-                            ? SharpDX.Color.Red
-                            : (vSelected == 1 ? SharpDX.Color.Yellow : SharpDX.Color.Gray));
-                }
-            }
-            var drawSearch = Program.Config.Item("Draw.Search").GetValue<Circle>();
-            if (drawSearch.Active)
-            {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position,
-                    SelectorRange, drawSearch.Color, 1);
-            }
-        }
-
-        public Obj_AI_Hero GetTarget(float vRange = 0,
-            TargetSelector.DamageType vDamageType = TargetSelector.DamageType.Physical)
-        {
-            return Math.Abs(vRange) < 0.00001 ? null : TsEnemy;
-        }
     }
 }
