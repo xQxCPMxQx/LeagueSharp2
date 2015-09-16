@@ -124,6 +124,10 @@ namespace Mordekaiser.Events
                     Spells.W.CastOnUnit(Utils.Player.Self);
                 }
             }
+            else
+            {
+                Spells.W.CastOnUnit(Utils.Player.Self);
+            }
 
             var ghost = Utils.HowToTrainYourDragon;
             if (ghost != null)
