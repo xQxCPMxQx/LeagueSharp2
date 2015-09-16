@@ -64,7 +64,7 @@ namespace Shen
                 }
             }
             var t = Utils.ChampAlly;
-            if (t != null && !ObjectManager.Player.IsDead && Program.R.IsReady() && Program.Config.Item("Draw.Notification").GetValue<bool>())
+            if (t != null && !ObjectManager.Player.IsDead && Program.R.IsReady() && Program.Config.Item("Draw.Notification").GetValue<bool>() && Program.Config.Item("ComboUseR").GetValue<StringList>().SelectedIndex == 2)
             {
                 var xKey = char.ConvertFromUtf32((int) Program.Config.Item("ComboUseRK").GetValue<KeyBind>().Key);
                 var xText = "Press " + xKey + " for Ulti: " + t.ChampionName;
