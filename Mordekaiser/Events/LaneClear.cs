@@ -83,7 +83,7 @@ namespace Mordekaiser.Events
             }
             else
             {
-                if (minionsW.Count >= 3) // WIP
+                if (minionsW.Count >= 2) // WIP
                 {
                     Spells.W.CastOnUnit(Utils.Player.Self);
                 }
