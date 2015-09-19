@@ -265,7 +265,7 @@ namespace Olafisback
                             Config.SubMenu("LaneClear").Item("UseEFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
                         };
 
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmSet", Tab + "Use E Just:").SetValue(new StringList(new[] { "Last Hit", "Allways" }, 0)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmSet", Tab + "Use E Just:").SetValue(new StringList(new[] { "Last Hit", "Always" }, 0)));
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmMinHealth", Tab + "Use E Min. Health").SetValue(new Slider(10, 100, 0)));
 
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseItems", "Use Items ").SetValue(true));
@@ -314,7 +314,7 @@ namespace Olafisback
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForDragon", Tab + "Baron/Dragon:").SetValue(new StringList(new []{"Off", "Dragon", "Baron","Both"}, 3)));
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForBlueRed", Tab + "Blue/Red:").SetValue(new StringList(new[] { "Off", "Blue", "Red", "Both" }, 3)));
 
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe (Only Jungle)").SetValue(false));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe (Only in Jungle)").SetValue(false));
 
                 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0],KeyBindType.Press)));
@@ -333,8 +333,8 @@ namespace Olafisback
             /* [ Misc ] */
             var menuMisc = new Menu("Misc", "Misc");
             {
-                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto (if possible hit to enemy)").SetValue(false));
-                menuMisc.AddItem(new MenuItem("Misc.AutoR", "Use R for Crowd Controls").SetValue(false));
+                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto (If Enemy Hit)").SetValue(false));
+                menuMisc.AddItem(new MenuItem("Misc.AutoR", "Use R Auto on Crowd-Control").SetValue(false));
                 Config.AddSubMenu(menuMisc);
             }
             /* [ Other ] */
