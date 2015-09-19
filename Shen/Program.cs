@@ -16,24 +16,24 @@ namespace Shen
     internal class Program
     {
         public const string ChampionName = "Shen";
-
-        public static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
-
-        public static string Tab { get { return "       "; } }
+        //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
         public static SpeechSynthesizer voice = new SpeechSynthesizer();
         public static Enemies Enemies;
         public static Allies ChampionAllies;
         public static UltiStatus UltiStatus;
+        public static Utils utils;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q, W, E, R;
-        private static SpellSlot TeleportSlot = Player.GetSpellSlot("SummonerTeleport");
+        private static SpellSlot TeleportSlot = ObjectManager.Player.GetSpellSlot("SummonerTeleport");
         //Menu
         public static Menu Config;
         public static Menu MenuExtras;
+        public static Menu MenuTargetedItems;
+        public static Menu MenuNonTargetedItems;
 
-        private static float EManaCost { get { return Player.GetSpell(SpellSlot.E).ManaCost; } }
+        private static float EManaCost { get { return ObjectManager.Player.GetSpell(SpellSlot.E).ManaCost; } }
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -41,7 +41,7 @@ namespace Shen
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.ChampionName != ChampionName)
+            if (ObjectManager.Player.ChampionName != ChampionName)
                 return;
 
 
@@ -77,20 +77,19 @@ namespace Shen
             
 
             // Combo
-            var menuCombo = new Menu("Combo", "Combo");
-
-            Config.AddSubMenu(menuCombo);
+            Config.AddSubMenu(new Menu("Combo", "Combo"));
             {
-                menuCombo.AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
-                menuCombo.AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
-                menuCombo.AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
-                menuCombo.AddItem(new MenuItem("ComboUseEF", "Use Flash + E").SetValue(new KeyBind("T".ToCharArray()[0],KeyBindType.Press)));
-                menuCombo.AddItem(new MenuItem("ComboUseR", "User R").SetValue(new StringList(new[] { "Off", "Auto", "Confirm with a key" }, 2)))
-                    .ValueChanged +=(sender, eventArgs) =>
-                        {
-                            menuCombo.Item("ComboUserRK").Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
-                        };
-                menuCombo.AddItem(new MenuItem("ComboUseRK", Tab + "Confirm key:").SetValue(new KeyBind("U".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
+                Config.SubMenu("Combo")
+                    .AddItem(
+                        new MenuItem("ComboUseEF", "Use Flash + E").SetValue(new KeyBind("T".ToCharArray()[0],
+                            KeyBindType.Press)));
+                Config.SubMenu("Combo")
+                    .AddItem(
+                        new MenuItem("ComboUseRK", "Use R | Confirm with this Key:").SetValue(
+                            new KeyBind("U".ToCharArray()[0], KeyBindType.Press)));
             }
 
             /* [ Harass ] */
@@ -153,16 +152,13 @@ namespace Shen
                         new MenuItem("DrawEF", "Flash + E Range").SetValue(new Circle(false, Color.Gray)));
             }
             Config.AddItem(new MenuItem("FleeActive", "Flee").SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Press)));
-
-
+            
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 
             PlayerSpells.Initialize();
 
             Config.AddToMainMenu();
-
-            RefreshMenuItems();
 
             Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
@@ -178,15 +174,11 @@ namespace Shen
             //Speech();
         }
 
-        public static void RefreshMenuItems()
-        {
-            Config.Item("ComboUserRK").Show(Config.Item("ComboUseR").GetValue<StringList>().SelectedIndex == 2);
-        }
         public static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (Config.Item("SmartShield").GetValue<bool>())
             {
-                if (!sender.IsMe && sender.IsEnemy && Player.Health < 200 && W.IsReady() && args.Target.IsMe) // for minions attack
+                if (!sender.IsMe && sender.IsEnemy && ObjectManager.Player.Health < 200 && W.IsReady() && args.Target.IsMe) // for minions attack
                 {
                     W.Cast();
                 }
@@ -196,6 +188,16 @@ namespace Shen
                     W.Cast();
                 }
             }
+
+            return;
+            
+                if (sender.IsEnemy && sender.IsValid && Config.Item("SmartShield").GetValue<bool>() && W.IsReady())
+                {
+                    if (args.SData.Name.ToLower().Contains("basicattack") && sender.Distance(ObjectManager.Player) < 500)
+                    {
+                        W.Cast();
+                    }
+                }
         }
 
         public static void Speech()
@@ -244,16 +246,16 @@ namespace Shen
             var fComboDamage = 0d;
 
             if (Q.IsReady())
-                fComboDamage += Player.GetSpellDamage(t, SpellSlot.Q);
+                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q);
 
             if (E.IsReady())
-                fComboDamage += Player.GetSpellDamage(t, SpellSlot.E);
+                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.E);
 
             if (R.IsReady())
-                fComboDamage += Player.GetSpellDamage(t, SpellSlot.R);
+                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.R);
 
-            if (PlayerSpells.IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready)
-                fComboDamage += Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
+            if (PlayerSpells.IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready)
+                fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
 
             return (float)fComboDamage;
         }
@@ -289,21 +291,17 @@ namespace Shen
         {
             var drawQ = Config.Item("DrawQ").GetValue<Circle>();
             if (drawQ.Active && Q.Level > 0)
-                Render.Circle.DrawCircle(Player.Position, Q.Range, drawQ.Color);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, drawQ.Color);
 
             var drawE = Config.Item("DrawE").GetValue<Circle>();
             if (drawE.Active && Q.Level > 0)
-                Render.Circle.DrawCircle(Player.Position, Q.Range, drawE.Color);
-                
-            var drawEFlash = Config.Item("DrawEF").GetValue<Circle>();
-            if (drawEFlash.Active)
-                Render.Circle.DrawCircle(Player.Position, E.Range + 550, drawEFlash.Color);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, drawE.Color);
         }
 
         private static void DrawHelplessAllies()
         {
             var drawRswnp = Config.Item("DrawRswnp").GetValue<bool>();
-            if (drawRswnp && (R.IsReady() || Player.Spellbook.GetSpell(SpellSlot.R).CooldownExpires < 2))
+            if (drawRswnp && (R.IsReady() || ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).CooldownExpires < 2))
 
             {
                 var xHeros = ObjectManager.Get<Obj_AI_Hero>().Where(xQ => !xQ.IsMe && xQ.IsVisible && !xQ.IsDead);
@@ -347,11 +345,10 @@ namespace Shen
                 Combo();
             }
 
-            var t = Utils.ChampAlly;
-            if (t != null && R.IsReady())
+            if (R.IsReady() && Config.Item("ComboUseRK").GetValue<KeyBind>().Active)
             {
-                if ((Config.Item("ComboUseRK").GetValue<KeyBind>().Active && Config.Item("ComboUseR").GetValue<StringList>().SelectedIndex == 2)
-                    || Config.Item("ComboUseR").GetValue<StringList>().SelectedIndex == 1)
+                var t = Utils.ChampAlly;
+                if (t != null && R.IsReady())
                 {
                     R.CastOnUnit(t);
                 }
@@ -371,7 +368,7 @@ namespace Shen
             if (Config.Item("FleeActive").GetValue<KeyBind>().Active)
             {
                 var pos = Game.CursorPos;
-                Player.IssueOrder(GameObjectOrder.MoveTo, pos);
+                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, pos);
                 if (E.IsReady())
                     E.Cast(pos);
             }
@@ -379,23 +376,23 @@ namespace Shen
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
                 Config.Item("HarassUseQT").GetValue<KeyBind>().Active)
             {
-                if (Player.ManaPercent < Config.Item("HarassEnergy").GetValue<Slider>().Value)
+                if (ObjectManager.Player.ManaPercent < Config.Item("HarassEnergy").GetValue<Slider>().Value) ;
                 Harass();
             }
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana/100*
+                var existsMana = ObjectManager.Player.MaxMana/100*
                                  Config.Item("LaneClearEnergy").GetValue<Slider>().Value;
-                if (Player.Mana >= existsMana)
+                if (ObjectManager.Player.Mana >= existsMana)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Player.MaxMana/100*
+                var existsMana = ObjectManager.Player.MaxMana/100*
                                  Config.Item("JungleFarmEnergy").GetValue<Slider>().Value;
-                if (Player.Mana >= existsMana)
+                if (ObjectManager.Player.Mana >= existsMana)
                     JungleFarm();
             }
         }
@@ -412,9 +409,9 @@ namespace Shen
             var useW = Config.Item("ComboUseW").GetValue<bool>();
             var useE = Config.Item("ComboUseE").GetValue<bool>();
             
-            if (E.Level > 0 && !E.IsReady() && Player.Mana > EManaCost + 25 &&
-                t.Health > Player.GetSpellDamage(t, SpellSlot.Q) &&
-                Math.Abs(Player.Spellbook.GetSpell(SpellSlot.E).CooldownExpires) < 0.00001)
+            if (E.Level > 0 && !E.IsReady() && ObjectManager.Player.Mana > EManaCost + 25 &&
+                t.Health > ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q) &&
+                Math.Abs(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).CooldownExpires) < 0.00001)
                 return;
 
             if (E.IsReady() && useE)
@@ -434,10 +431,10 @@ namespace Shen
 
 
             if (t.IsValidTarget(550) && PlayerSpells.IgniteSlot != SpellSlot.Unknown &&
-                Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready &&
-                Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
+                ObjectManager.Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready &&
+                ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
             {
-                Player.Spellbook.CastSpell(PlayerSpells.IgniteSlot, t);
+                ObjectManager.Player.Spellbook.CastSpell(PlayerSpells.IgniteSlot, t);
             }
 
         }
@@ -448,15 +445,15 @@ namespace Shen
 
         private static void ComboFlashE()
         {
-            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 
             var fqTarget = Enemies.GetTarget(E.Range + 500, TargetSelector.DamageType.Physical);
 
-            if (Player.Distance(fqTarget) > E.Range && E.IsReady() && fqTarget != null &&
+            if (ObjectManager.Player.Distance(fqTarget) > E.Range && E.IsReady() && fqTarget != null &&
                 PlayerSpells.FlashSlot != SpellSlot.Unknown &&
-                Player.Spellbook.CanUseSpell(PlayerSpells.FlashSlot) == SpellState.Ready)
+                ObjectManager.Player.Spellbook.CanUseSpell(PlayerSpells.FlashSlot) == SpellState.Ready)
             {
-                Player.Spellbook.CastSpell(PlayerSpells.FlashSlot, fqTarget.ServerPosition);
+                ObjectManager.Player.Spellbook.CastSpell(PlayerSpells.FlashSlot, fqTarget.ServerPosition);
                 Utility.DelayAction.Add(100, () => E.Cast(fqTarget.Position));
             }
         }
@@ -478,13 +475,13 @@ namespace Shen
             var useQ = Config.Item("JungleFarmUseQ").GetValue<bool>();
             var useW = Config.Item("JungleFarmUseW").GetValue<bool>();
 
-            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0) return;
 
             var mob = mobs[0];
-            if (useQ && Q.IsReady() && mob.Health < Player.GetSpellDamage(mob, SpellSlot.Q) + 30)
+            if (useQ && Q.IsReady() && mob.Health < ObjectManager.Player.GetSpellDamage(mob, SpellSlot.Q) + 30)
             {
                 Q.CastOnUnit(mob);
             }
@@ -498,11 +495,11 @@ namespace Shen
         private static void LaneClear()
         {
             var useQ = Config.Item("LaneClearUseQ").GetValue<bool>();
-            var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
 
             if (useQ && Q.IsReady() && allMinionsQ.Count > 0)
             {
-                if (allMinionsQ[0].Health < Player.GetSpellDamage(allMinionsQ[0], SpellSlot.Q))
+                if (allMinionsQ[0].Health < ObjectManager.Player.GetSpellDamage(allMinionsQ[0], SpellSlot.Q))
                     Q.CastOnUnit(allMinionsQ[0]);
             }
         }
@@ -513,7 +510,7 @@ namespace Shen
             if (!Config.Item("InterruptSpellsE").GetValue<KeyBind>().Active)
                 return;
 
-            if (Player.Distance(t) < E.Range)
+            if (ObjectManager.Player.Distance(t) < E.Range)
             {
                 E.Cast(t.Position);
             }
@@ -521,7 +518,7 @@ namespace Shen
 
         private static InventorySlot GetInventorySlot(int id)
         {
-            return Player.InventoryItems.FirstOrDefault(
+            return ObjectManager.Player.InventoryItems.FirstOrDefault(
                 item => (item.Id == (ItemId) id && item.Stacks >= 1) || (item.Id == (ItemId) id && item.Charges >= 1));
         }
 
