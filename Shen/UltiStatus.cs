@@ -64,7 +64,7 @@ namespace Shen
                 }
             }
             var t = Utils.ChampAlly;
-            if (t != null && !ObjectManager.Player.IsDead && Program.R.IsReady() && Program.Config.Item("Draw.Notification").GetValue<bool>() && Program.Config.Item("ComboUseR").GetValue<StringList>().SelectedIndex == 2)
+            if (t != null && !ObjectManager.Player.IsDead && Program.R.IsReady() && Program.Config.Item("Draw.Notification").GetValue<bool>())
             {
                 var xKey = char.ConvertFromUtf32((int) Program.Config.Item("ComboUseRK").GetValue<KeyBind>().Key);
                 var xText = "Press " + xKey + " for Ulti: " + t.ChampionName;
@@ -73,7 +73,7 @@ namespace Shen
                 Utils.DrawText(Utils.TextWarning, xText, Drawing.Width*0.32f, Drawing.Height*0.44f, SharpDX.Color.White);
 
                 Utils.DrawText(Utils.Text,
-                    "You can Turn Off this message! Please Check 'Protector Settings -> Show Notification Text'",
+                    "You can Turn Off this message! Please Check 'Protector Settings -> ShowItem Notification Text'",
                     Drawing.Width*0.325f, Drawing.Height*0.52f, SharpDX.Color.White);
             }
         }
