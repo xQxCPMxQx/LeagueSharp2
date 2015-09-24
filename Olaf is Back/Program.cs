@@ -261,7 +261,7 @@ namespace Olafisback
             {
                 Config.SubMenu("Harass").AddItem(new MenuItem("Spell Settings", "Spell Settings:"));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", Tab + "Use Q").SetValue(false));
-                Config.SubMenu("Harass").AddItem(new MenuItem("UseQ2Harass", Tab + "Use Q (Short)").SetValue(true));
+                Config.SubMenu("Harass").AddItem(new MenuItem("UseQ2Harass", Tab + "Use Q (Short-Range)").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", Tab + "Use E").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("Mana Settings", "Mana Settings:"));
                 Config.SubMenu("Harass")
@@ -272,13 +272,13 @@ namespace Olafisback
                 {
                     Config.SubMenu("Harass")
                         .AddItem(
-                            new MenuItem("Harass.UseQ.Toggle", Tab + "Toggle Q!").SetValue(
+                            new MenuItem("Harass.UseQ.Toggle", Tab + "Auto-Use Q").SetValue(
                                 new KeyBind("T".ToCharArray()[0],
                                     KeyBindType.Toggle)));
                 }
                 Config.SubMenu("Harass")
                     .AddItem(
-                        new MenuItem("HarassActive", "Harass Active!").SetValue(new KeyBind("C".ToCharArray()[0],
+                        new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0],
                             KeyBindType.Press)));
             }
 
@@ -291,8 +291,8 @@ namespace Olafisback
                         Config.SubMenu("LaneClear").Item("UseQFarmMinCount").Show(eventArgs.GetNewValue<bool>());
                         Config.SubMenu("LaneClear").Item("UseQFarmMinMana").Show(eventArgs.GetNewValue<bool>());
                     };
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarmMinCount", Tab + "Use Q Min. Minion").SetValue(new Slider(2, 5, 1)));
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarmMinMana", Tab + "Use Q Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarmMinCount", Tab + "Min. Minion to Use Q").SetValue(new Slider(2, 5, 1)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarmMinMana", Tab + "Min. Mana to Use Q").SetValue(new Slider(30, 100, 0)));
 
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarm", "Use E").SetValue(true)).ValueChanged +=
                     (sender, eventArgs) =>
@@ -301,11 +301,11 @@ namespace Olafisback
                         Config.SubMenu("LaneClear").Item("UseEFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
                     };
 
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmSet", Tab + "Use E Just:").SetValue(new StringList(new[] { "Last Hit", "Always" }, 0)));
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmMinHealth", Tab + "Use E Min. Health").SetValue(new Slider(10, 100, 0)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmSet", Tab + "Use E:").SetValue(new StringList(new[] { "Last Hit", "Always" }, 0)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmMinHealth", Tab + "Min. Health to Use E").SetValue(new Slider(10, 100, 0)));
 
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseItems", "Use Items ").SetValue(true));
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "Lane Clear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             }
 
             /* [ Jungle Clear ] */
@@ -316,7 +316,7 @@ namespace Olafisback
                     {
                         Config.SubMenu("JungleFarm").Item("UseQJFarmMinMana").Show(eventArgs.GetNewValue<bool>());
                     };
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarmMinMana", Tab + "Use Q Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarmMinMana", Tab + "Min. Mana to Use Q").SetValue(new Slider(30, 100, 0)));
                 /*---------------------------*/
 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", "Use W").SetValue(false)).ValueChanged +=
@@ -324,7 +324,7 @@ namespace Olafisback
                     {
                         Config.SubMenu("JungleFarm").Item("UseWJFarmMinMana").Show(eventArgs.GetNewValue<bool>());
                     };
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarmMinMana", Tab + "Use W Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarmMinMana", Tab + "Min. Man to Use W").SetValue(new Slider(30, 100, 0)));
                 /*---------------------------*/
 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "Use E").SetValue(false)).ValueChanged +=
@@ -333,8 +333,8 @@ namespace Olafisback
                         Config.SubMenu("JungleFarm").Item("UseEJFarmSet").Show(eventArgs.GetNewValue<bool>());
                         Config.SubMenu("JungleFarm").Item("UseEJFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
                     }; ;
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarmSet", Tab + "Use E Just:").SetValue(new StringList(new[] { "Last Hit", "Allways" }, 1)));
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarmMinHealth", Tab + "Use E Min. Health").SetValue(new Slider(10, 100, 0)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarmSet", Tab + "Use E:").SetValue(new StringList(new[] { "Last Hit", "Always" }, 1)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarmMinHealth", Tab + "Min. Health to Use E").SetValue(new Slider(10, 100, 0)));
 
                 /*---------------------------*/
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseItems", "Use Items ").SetValue(true)).ValueChanged +=
@@ -346,7 +346,7 @@ namespace Olafisback
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForDragon", Tab + "Baron/Dragon:").SetValue(new StringList(new[] { "Off", "Dragon", "Baron", "Both" }, 3)));
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForBlueRed", Tab + "Blue/Red:").SetValue(new StringList(new[] { "Off", "Blue", "Red", "Both" }, 3)));
 
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto Catch Axe (Only in Jungle)").SetValue(false));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto-Catch Axe (Only in Jungle)").SetValue(false));
 
 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
@@ -365,8 +365,8 @@ namespace Olafisback
             /* [ Misc ] */
             var menuMisc = new Menu("Misc", "Misc");
             {
-                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Use E Auto (If Enemy Hit)").SetValue(false));
-                menuMisc.AddItem(new MenuItem("Misc.AutoR", "Use R Auto on Crowd-Control").SetValue(false));
+                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Auto-Use E (If Enemy Hit)").SetValue(false));
+                menuMisc.AddItem(new MenuItem("Misc.AutoR", "Auto-Use R on Crowd-Control").SetValue(false));
                 Config.AddSubMenu(menuMisc);
             }
             /* [ Other ] */
