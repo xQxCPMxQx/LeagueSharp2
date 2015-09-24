@@ -72,7 +72,7 @@ namespace XinZhao
             Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
 
 
-            var mLane = new Menu("Lane Moed", "LaneMode");
+            var mLane = new Menu("Lane Mode", "LaneMode");
             mLane.AddItem(new MenuItem("EnabledFarm", "Enable! (On/Off: Mouse Scroll)").SetValue(true));
             mLane.AddItem(new MenuItem("Lane.UseQ", "Use Q").SetValue(false));
             mLane.AddItem(new MenuItem("Lane.UseW", "Use W").SetValue(false));
