@@ -790,34 +790,7 @@ namespace Zed
                 
 
         }
-            else
-            {
-               time = 0.15f+ target.Distance(_player.ServerPosition) / 1750f;
-               var dist = target.MoveSpeed * time;
 
-                var hithere = target.GetWaypoints().Count > 1
-                    ? target.Position.Extend(target.GetWaypoints()[1].To3D(), dist)
-                    : target.Position;
-                for (int i = 0; i < 3; i++)
-                {
-                    time = 0.15f + hithere.Distance(_player.ServerPosition) / 1750f;
-                    hithere = target.GetWaypoints().Count > 1
-                    ? target.Position.Extend(target.GetWaypoints()[1].To3D(), dist)
-                    : target.Position;
-                    dist = target.MoveSpeed * time;
-                }
-                _q.UpdateSourcePosition(_player.ServerPosition, _player.ServerPosition);
-
-                if (hithere.Distance(_player.ServerPosition) < 900)
-                {
-                    _q.Cast(hithere);
-                }
-               
-
-            }
-                
-
-        }
         private static void CastE()
         {
             if (!_e.IsReady()) return;
