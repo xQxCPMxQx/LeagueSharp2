@@ -483,7 +483,6 @@ namespace Pantheon
                 var dontCheckMana = false;
                 if (bigBoys != null)
                 {
-                    Game.PrintChat(bigBoys.Name);
                     dontCheckMana = (Config.Item("Jungle.Mana.Dont.Blue").GetValue<bool>() &&
                                      bigBoys.Name.Contains("SRU_Blue"))
                                     ||
