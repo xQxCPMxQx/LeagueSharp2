@@ -113,7 +113,7 @@ namespace D_Elise
             _config.SubMenu("Combo").AddItem(new MenuItem("UseSpiderW", "Spider W")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseSpiderE", "Spider E")).SetValue(true);
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("ActiveCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             //Harass
             _config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -123,10 +123,9 @@ namespace D_Elise
                 .AddItem(new MenuItem("Harrasmana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("ActiveHarass", "Harass Key").SetValue(new KeyBind("C".ToCharArray()[0],
+                    new MenuItem("ActiveHarass", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
                         KeyBindType.Press)));
 						
-/*			//Items REMOVED THIS because Activator assemblies should probably handle these functions.
             _config.AddSubMenu(new Menu("Items", "items"));
             _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Tiamat", "Use Tiamat")).SetValue(true);
@@ -134,17 +133,17 @@ namespace D_Elise
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Cutlass")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy HP <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or My HP < ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
+                .AddItem(new MenuItem("Bilgemyhp", "Or Self % HP < ").SetValue(new Slider(85, 1, 100)));
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use BotRK")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy HP <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or My HP <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Blademyhp", "Or Self % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items").AddSubMenu(new Menu("Defensive", "Defensive"));
             _config.SubMenu("items")
                 .SubMenu("Defense")
@@ -152,14 +151,14 @@ namespace D_Elise
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Defensive")
-                .AddItem(new MenuItem("Omenenemys", "Use Randuin's if X Enemy").SetValue(new Slider(2, 1, 5)));
+                .AddItem(new MenuItem("Omenenemys", "Use Randuin's if Targets >=").SetValue(new Slider(2, 1, 5)));
             _config.SubMenu("items")
                 .SubMenu("Defensive")
                 .AddItem(new MenuItem("lotis", "Use Iron Solari"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Defensive")
-                .AddItem(new MenuItem("lotisminhp", "Use Solari if Ally HP <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("lotisminhp", "Use Solari if Ally % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Defensive")
                 .AddItem(new MenuItem("Zhonyas", "Use Zhonya's"))
@@ -181,8 +180,7 @@ namespace D_Elise
                 .SetValue(true);
             _config.SubMenu("Items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
-*/
+                .AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
             
 			//Farm Lane
             _config.AddSubMenu(new Menu("Farm", "Farm"));
@@ -219,10 +217,10 @@ namespace D_Elise
             //Smite 
             _config.AddSubMenu(new Menu("Smite", "Smite"));
             _config.SubMenu("Smite").AddItem(new MenuItem("Usesmite", "Use Smite (Toggle)").SetValue(new KeyBind("H".ToCharArray()[0],KeyBindType.Toggle)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue Early ")).SetValue(true);
-            _config.SubMenu("Smite").AddItem(new MenuItem("manaJ", "Smite Blue Early if % Mana <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red Early ")).SetValue(true);
-            _config.SubMenu("Smite").AddItem(new MenuItem("healthJ", "Smite Red Early if % HP <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue-Camp Early")).SetValue(true);
+            _config.SubMenu("Smite").AddItem(new MenuItem("manaJ", "Smite Blue-Camp Earlyif % Mana <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red-Camp Early")).SetValue(true);
+            _config.SubMenu("Smite").AddItem(new MenuItem("healthJ", "Smite Red-Camp Earlyif % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("Smite").AddItem(new MenuItem("smitecombo", "Use Smite on Enemies")).SetValue(true);
             _config.Item("smitecombo").ValueChanged += Switchcombo;
             _config.SubMenu("Smite").AddItem(new MenuItem("Smiteeee", "Smite Minion Blocking Human E Path").SetValue(false));
@@ -239,7 +237,7 @@ namespace D_Elise
                     new MenuItem("autoE", "Human E with Very High Hitchance").SetValue(new KeyBind("T".ToCharArray()[0],
                         KeyBindType.Press)));
             _config.SubMenu("Misc")
-                .AddItem(new MenuItem("Echange", "E Hitchance in Combo").SetValue(
+                .AddItem(new MenuItem("Echange", "E Hit Chancechance in Combo").SetValue(
                     new StringList(new[] {"Low", "Medium", "High", "Very High"})));
 
 
@@ -273,9 +271,9 @@ namespace D_Elise
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-/*             Game.PrintChat("<font color='#881df2'>D-Elise by Diabaths</font> Loaded.");
-            Game.PrintChat(
-              "<font color='#FF0000'>If You like my work and want to support me, plz donate via Paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S"); */
+            //Game.PrintChat("<font color='#881df2'>D-Elise by Diabaths</font> Loaded.");
+            //Game.PrintChat(
+            //  "<font color='#FF0000'>If You like my work and want to support me, plz donate via Paypal in </font> <font //color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
         private static void Switchcombo(object sender, OnValueChangeEventArgs e)
         {
