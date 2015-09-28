@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
@@ -66,7 +66,7 @@ namespace D_Jarvan
             Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("xM2", "Other Settings:"));
 
             Program.Config.SubMenu("MenuAssassin")
-                .AddItem(new MenuItem("AssassinSetClick", space + "Add/Remove with click").SetValue(true));
+                .AddItem(new MenuItem("AssassinSetClick", space + "Add/Remove with Click").SetValue(true));
             Program.Config.SubMenu("MenuAssassin")
                 .AddItem(
                     new MenuItem("AssassinReset", space + "Reset List").SetValue(new KeyBind("T".ToCharArray()[0],
@@ -77,7 +77,7 @@ namespace D_Jarvan
             Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, Color.GreenYellow)));
             Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)));
             Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
-            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawStatus", "Show status on the screen").SetValue(true));
+            Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawStatus", "Show Status on Screen").SetValue(true));
             Program.Config.SubMenu("MenuAssassin").SubMenu("Draw").AddItem(new MenuItem("DrawSprite", "Show Selected Enemy").SetValue(true));
 
             Game.OnUpdate += OnUpdate;
@@ -109,7 +109,7 @@ namespace D_Jarvan
             {
                 ClearAssassinList();
                 Game.PrintChat(
-                    "<font color='#FFFFFF'>Reset Assassin List is Complete! Click on the enemy for Add/Remove.</font>");
+                    "<font color='#FFFFFF'>Reset Assassin List is Complete! Click on the enemy to Add/Remove.</font>");
             }
 
             if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)
