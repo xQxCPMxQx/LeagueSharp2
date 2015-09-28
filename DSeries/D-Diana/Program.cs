@@ -1023,8 +1023,5 @@ namespace D_Diana
 
             return t;
         }
-
     }
 }
-
-
