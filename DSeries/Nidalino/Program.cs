@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -107,30 +107,30 @@ namespace D_Nidalee
 
             //Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q")).SetValue(true);
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Human Q")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use Human W")).SetValue(true);
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R")).SetValue(true);
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboCougar", "Use Q Cougar")).SetValue(true);
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseWComboCougar", "Use W Cougar")).SetValue(true);
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseEComboCougar", "Use E Cougar")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseQComboCougar", "Use Cougar Q")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseWComboCougar", "Use Cougar W")).SetValue(true);
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseEComboCougar", "Use Cougar E"")).SetValue(true);
             Config.SubMenu("Combo")
                 .AddItem(
-                    new MenuItem("QHitCombo", "Q HitChange").SetValue(
+                    new MenuItem("QHitCombo", "Q Hit Chance").SetValue(
                         new StringList(new[] {"Low", "Medium", "High", "Very High"})));
 
             Config.SubMenu("Combo")
-                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("ActiveCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             //Extra
             Config.AddSubMenu(new Menu("Heal", "Heal"));
-            Config.SubMenu("Heal").AddItem(new MenuItem("UseAutoE", "Use auto E")).SetValue(true);
-            Config.SubMenu("Heal").AddItem(new MenuItem("HPercent", "Health percent")).SetValue(new Slider(40, 1, 100));
-            Config.SubMenu("Heal").AddItem(new MenuItem("AllyUseAutoE", "Ally Use auto E")).SetValue(true);
+            Config.SubMenu("Heal").AddItem(new MenuItem("UseAutoE", "Use Auto-E")).SetValue(true);
+            Config.SubMenu("Heal").AddItem(new MenuItem("HPercent", "Use E if % HP <")).SetValue(new Slider(40, 1, 100));
+            Config.SubMenu("Heal").AddItem(new MenuItem("AllyUseAutoE", "Use Auto-E on Ally")).SetValue(true);
             Config.SubMenu("Heal")
-                .AddItem(new MenuItem("AllyHPercent", "Health percent"))
+                .AddItem(new MenuItem("AllyHPercent", "Ally % HP"))
                 .SetValue(new Slider(40, 1, 100));
 
-            Config.AddSubMenu(new Menu("items", "items"));
+            Config.AddSubMenu(new Menu("Items", "items"));
             Config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
             Config.SubMenu("items")
                 .SubMenu("Offensive")
@@ -138,57 +138,57 @@ namespace D_Nidalee
                 .SetValue(true);
             Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Tiamat", "Use Tiamat")).SetValue(true);
             Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hydra", "Use Hydra")).SetValue(true);
-            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
+            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Cutlass")).SetValue(true);
             Config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             Config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1, 100)));
-            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
+                .AddItem(new MenuItem("Bilgemyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
+            Config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use BotRK")).SetValue(true);
             Config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             Config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
-            Config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
+                .AddItem(new MenuItem("Blademyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
+            Config.SubMenu("items").AddSubMenu(new Menu("Defensive", "Defensive"));
             Config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("Omen", "Use Randuin Omen"))
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("Omen", "Use Randuin's Omen"))
                 .SetValue(true);
             Config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("Omenenemys", "Randuin if enemys>").SetValue(new Slider(2, 1, 5)));
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("Omenenemys", "Use Randuin's if Targets >=").SetValue(new Slider(2, 1, 5)));
             Config.SubMenu("items")
-                .SubMenu("Deffensive")
+                .SubMenu("Defensive")
                 .AddItem(new MenuItem("lotis", "Use Iron Solari"))
                 .SetValue(true);
             Config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("lotisminhp", "Solari if Ally Hp<").SetValue(new Slider(35, 1, 100)));
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("lotisminhp", "Use Solari if Ally % HP <").SetValue(new Slider(35, 1, 100)));
             Config.SubMenu("items")
-                .SubMenu("Deffensive")
+                .SubMenu("Defensive")
                 .AddItem(new MenuItem("Zhonyas", "Use Zhonya's"))
                 .SetValue(true);
             Config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("Zhonyashp", "Use Zhonya's if HP%<").SetValue(new Slider(20, 1, 100)));
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("Zhonyashp", "Use Zhonya's if % HP <").SetValue(new Slider(20, 1, 100)));
             Config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
             Config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usehppotions", "Use Healt potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usehppotions", "Use Health Potion/Flask/Biscuit"))
                 .SetValue(true);
             Config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionhp", "If % HP <").SetValue(new Slider(35, 1, 100)));
             Config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usemppotions", "Use Mana Potion/Flask/Biscuit"))
                 .SetValue(true);
             Config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
 
             //Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -196,17 +196,17 @@ namespace D_Nidalee
             Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W")).SetValue(true);
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("QHitharass", "Q HitChange").SetValue(
+                    new MenuItem("QHitharass", "Q Hit Chance").SetValue(
                         new StringList(new[] {"Low", "Medium", "High", "Very High"})));
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("harasstoggle", "AutoHarass (toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
+                    new MenuItem("harasstoggle", "Auto-Harass (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
             Config.SubMenu("Harass")
-                .AddItem(new MenuItem("Harrasmana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Harrasmana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("ActiveHarass", "Harass key").SetValue(new KeyBind("X".ToCharArray()[0],
+                    new MenuItem("ActiveHarass", "Harass").SetValue(new KeyBind("X".ToCharArray()[0],
                         KeyBindType.Press)));
 
 
@@ -215,42 +215,42 @@ namespace D_Nidalee
             Config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseQLH", "Use Q (Human)")).SetValue(true);
             Config.SubMenu("Farm")
                 .SubMenu("LastHit")
-                .AddItem(new MenuItem("lastmana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("lastmana", "Min. % Mana").SetValue(new Slider(35, 1, 100)));
             Config.SubMenu("Farm")
                 .SubMenu("LastHit")
                 .AddItem(
-                    new MenuItem("ActiveLast", "LastHit!").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("ActiveLast", "Last Hit").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
 
-            Config.SubMenu("Farm").AddSubMenu(new Menu("Lane/Jungle", "Lane"));
-            Config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("farm_E1", "Use E (Human)")).SetValue(true);
-            Config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseQLane", "Use Q (Cougar)")).SetValue(true);
-            Config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseWLane", "Use W (Cougar)")).SetValue(true);
-            Config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseELane", "Use E (Cougar)")).SetValue(true);
+            Config.SubMenu("Farm").AddSubMenu(new Menu("Lane/Jungle Clear", "Lane"));
+            Config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("farm_E1", "Use Human E")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseQLane", "Use Cougar Q")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseWLane", "Use Cougar W")).SetValue(true);
+            Config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseELane", "Use Cougar E")).SetValue(true);
             Config.SubMenu("Farm")
                 .SubMenu("Lane")
                 .AddItem(
-                    new MenuItem("LaneClear", "Clear key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("LaneClear", "Lane/Jungle Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             Config.SubMenu("Farm")
                 .SubMenu("Lane")
                 .AddItem(
-                    new MenuItem("farm_R", "Auto Switch Forms(toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
+                    new MenuItem("farm_R", "Auto-Switch Forms (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
             Config.SubMenu("Farm")
                 .SubMenu("Lane")
-                .AddItem(new MenuItem("Lane", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Lane", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
 
 
             //Kill Steal
             Config.AddSubMenu(new Menu("Misc", "Misc"));
-            Config.SubMenu("Misc").AddItem(new MenuItem("ActiveKs", "Use KillSteal")).SetValue(true);
+            Config.SubMenu("Misc").AddItem(new MenuItem("ActiveKs", "Enable Killsteal")).SetValue(true);
             Config.SubMenu("Misc").AddItem(new MenuItem("UseQKs", "Use Q")).SetValue(true);
             Config.SubMenu("Misc").AddItem(new MenuItem("UseIgnite", "Use Ignite")).SetValue(true);
             Config.SubMenu("Misc")
-                .AddItem(new MenuItem("escapeterino", "Escape!!!"))
+                .AddItem(new MenuItem("escapeterino", "Flee"))
                 .SetValue(new KeyBind("N".ToCharArray()[0], KeyBindType.Press));
 
             //Damage after combo:
-            MenuItem dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
+            MenuItem dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw Combo Damage").SetValue(true);
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
             dmgAfterComboItem.ValueChanged +=
@@ -265,12 +265,12 @@ namespace D_Nidalee
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
             Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
-            Config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
-            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawCooldown", "Draw Cooldown")).SetValue(true);
+            Config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag-Free Circles").SetValue(true));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawCooldown", "Draw Cooldowns")).SetValue(true);
             Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
+                .AddItem(new MenuItem("CircleQuality", "Circle Quality").SetValue(new Slider(100, 100, 10)));
             Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
+                .AddItem(new MenuItem("CircleThickness", "Circle Thickness").SetValue(new Slider(1, 10, 1)));
 
             Config.AddToMainMenu();
 
@@ -280,9 +280,9 @@ namespace D_Nidalee
             //Game_OnGameEnd += Game_OnGameEnd;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
-            Game.PrintChat("<font color='#881df2'>SKO Nidallee Reworked By Diabaths </font>Loaded!");
-            Game.PrintChat(
-                "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
+            //Game.PrintChat("<font color='#881df2'>SKO Nidallee Reworked By Diabaths </font>Loaded!");
+            //Game.PrintChat(
+            //    "<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font //color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -916,5 +916,3 @@ namespace D_Nidalee
         }
     }
 }
-     
-   
