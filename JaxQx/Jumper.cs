@@ -103,7 +103,7 @@ namespace JaxQx
         public static bool InDistance(Vector2 pos1, Vector2 pos2, float distance)
         {
             float dist2 = Vector2.DistanceSquared(pos1, pos2);
-            return (dist2 <= distance * distance) ? true : false;
+            return dist2 <= distance * distance;
         }
     }
 }

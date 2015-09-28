@@ -3,7 +3,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-namespace XinZhao
+namespace Pantheon
 {
     internal class PlayerSpells
     {

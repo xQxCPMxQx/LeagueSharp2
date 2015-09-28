@@ -73,7 +73,7 @@ namespace Shen
                 Utils.DrawText(Utils.TextWarning, xText, Drawing.Width*0.32f, Drawing.Height*0.44f, SharpDX.Color.White);
 
                 Utils.DrawText(Utils.Text,
-                    "You can Turn Off this message! Please Check 'Protector Settings -> Show Notification Text'",
+                    "You can Turn Off this message! Please Check 'Protector Settings -> ShowItem Notification Text'",
                     Drawing.Width*0.325f, Drawing.Height*0.52f, SharpDX.Color.White);
             }
         }

@@ -35,8 +35,8 @@ namespace Shen
                 {
                     var ally = HeroManager.Allies.Where(
                         a => !a.IsDead && !a.IsMe &&
-                             LocalMenu.Item("Selected.Champ" + a.ChampionName).GetValue<StringList>().SelectedIndex <=
-                             vMax);
+                             LocalMenu.Item("Selected.Champ" + a.ChampionName).GetValue<StringList>().SelectedIndex <= vMax &&
+                             LocalMenu.Item("Selected.Champ" + a.ChampionName).GetValue<StringList>().SelectedIndex > 0);
 
                     return ally.MinOrDefault(hero => hero.Health);
                 }
@@ -71,7 +71,7 @@ namespace Shen
                         .SetValue(false)).ValueChanged += AutoProtectionItemValueChanged;
             }
             LocalMenu.AddItem(
-                new MenuItem("ChampionAllies.Click", MenuTab + "Mouse LEFT-CLICK: Change Ally's Protection Stauts")
+                new MenuItem("ChampionAllies.Click", MenuTab + "Mouse LEFT-CLICK: Change Ally's Protection Status")
                     .SetValue(true));
 
             LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings"));
@@ -79,7 +79,7 @@ namespace Shen
                 LocalMenu.AddItem(new MenuItem("Draw.Status", MenuTab + "Show Protection Status").SetValue(true));
                 LocalMenu.AddItem(new MenuItem("Draw.Status.HPBar", MenuTab + "Show Allies HP Bar Status").SetValue(true));
                 LocalMenu.AddItem(
-                    new MenuItem("Draw.Status.Just", MenuTab + "Just Show This: ").SetValue(
+                    new MenuItem("Draw.Status.Just", MenuTab + "Show This: ").SetValue(
                         new StringList(new[] {"All", "Only High Protection Allies"})));
                 LocalMenu.AddItem(new MenuItem("Draw.Notification", MenuTab + "Show Notification Text").SetValue(true));
             }

@@ -53,21 +53,21 @@ namespace Pantheon
         private void Load()
         {
             _potions = _potions.OrderBy(x => x.Priority).ToList();
-            Program.MenuExtras.AddSubMenu(new Menu("Potion Manager", "PotionManager"));
+            Program.Config.AddSubMenu(new Menu("Potion Manager", "PotionManager"));
 
-            Program.MenuExtras.SubMenu("PotionManager").AddSubMenu(new Menu("Health", "Health"));
-            Program.MenuExtras.SubMenu("PotionManager")
+            Program.Config.SubMenu("PotionManager").AddSubMenu(new Menu("Health", "Health"));
+            Program.Config.SubMenu("PotionManager")
                 .SubMenu("Health")
                 .AddItem(new MenuItem("HealthPotion", "Use Health Potion").SetValue(true));
-            Program.MenuExtras.SubMenu("PotionManager")
+            Program.Config.SubMenu("PotionManager")
                 .SubMenu("Health")
                 .AddItem(new MenuItem("HealthPercent", "HP Trigger Percent").SetValue(new Slider(30)));
 
-            Program.MenuExtras.SubMenu("PotionManager").AddSubMenu(new Menu("Mana", "Mana"));
-            Program.MenuExtras.SubMenu("PotionManager")
+            Program.Config.SubMenu("PotionManager").AddSubMenu(new Menu("Mana", "Mana"));
+            Program.Config.SubMenu("PotionManager")
                 .SubMenu("Mana")
                 .AddItem(new MenuItem("ManaPotion", "Use Mana Potion").SetValue(true));
-            Program.MenuExtras.SubMenu("PotionManager")
+            Program.Config.SubMenu("PotionManager")
                 .SubMenu("Mana")
                 .AddItem(new MenuItem("ManaPercent", "MP Trigger Percent").SetValue(new Slider(30)));
 
@@ -82,18 +82,18 @@ namespace Pantheon
 
             try
             {
-                if (Program.MenuExtras.Item("HealthPotion").GetValue<bool>())
+                if (Program.Config.Item("HealthPotion").GetValue<bool>())
                 {
-                    if (GetPlayerHealthPercentage() <= Program.MenuExtras.Item("HealthPercent").GetValue<Slider>().Value)
+                    if (GetPlayerHealthPercentage() <= Program.Config.Item("HealthPercent").GetValue<Slider>().Value)
                     {
                         var healthSlot = GetPotionSlot(PotionType.Health);
                         if (!IsBuffActive(PotionType.Health))
                             ObjectManager.Player.Spellbook.CastSpell(healthSlot.SpellSlot);
                     }
                 }
-                if (Program.MenuExtras.Item("ManaPotion").GetValue<bool>())
+                if (Program.Config.Item("ManaPotion").GetValue<bool>())
                 {
-                    if (GetPlayerManaPercentage() <= Program.MenuExtras.Item("ManaPercent").GetValue<Slider>().Value)
+                    if (GetPlayerManaPercentage() <= Program.Config.Item("ManaPercent").GetValue<Slider>().Value)
                     {
                         var manaSlot = GetPotionSlot(PotionType.Mana);
                         if (!IsBuffActive(PotionType.Mana))

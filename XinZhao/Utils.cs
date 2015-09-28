@@ -7,7 +7,10 @@ namespace XinZhao
     internal class Utils
     {
         public static Font Text, TextBold, TextWarning;
-
+        public static string Tab
+        {
+            get { return "    "; }
+        }
         public Utils()
         {
             Text = new Font(Drawing.Direct3DDevice,

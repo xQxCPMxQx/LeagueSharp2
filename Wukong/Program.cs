@@ -100,7 +100,7 @@ namespace Wukong
             var menuCombo = new Menu("R", "R");
             // Combo
             Config.AddSubMenu(menuCombo);
-            menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Use R if enemy count >= (0 = off)").SetValue(new Slider(1, 5, 0)));
+            menuCombo.AddItem(new MenuItem("UseRComboEnemyCount", "Use R if Enemy Count >= (0 = off)").SetValue(new Slider(1, 5, 0)));
             menuCombo.AddItem(new MenuItem("UseRForTheEnemy", "Force Ultimate For:"));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 menuCombo.AddItem(new MenuItem("forceUlti" + enemy.ChampionName, space + enemy.ChampionName).SetValue(new StringList(new[] { "Off", "Everytime", "Just Killable" })));
@@ -112,7 +112,7 @@ namespace Wukong
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarassTurret", "Don't Under Turret E").SetValue(true));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarassTurret", "Don't E Under Enemy Turret").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
@@ -144,8 +144,8 @@ namespace Wukong
             // Extras -> Use Items 
             MenuMisc = new Menu("Misc", "Misc");
             Config.AddSubMenu(MenuMisc);
-            MenuMisc.AddItem(new MenuItem("Misc.AutoQ", "Auto Q if it'll hit").SetValue(true));
-            MenuMisc.AddItem(new MenuItem("Misc.BlockR", "Block R if it won't hit").SetValue(false));
+            MenuMisc.AddItem(new MenuItem("Misc.AutoQ", "Auto Q if it Will Hit").SetValue(true));
+            MenuMisc.AddItem(new MenuItem("Misc.BlockR", "Block R if it Won't Hit").SetValue(false));
             MenuMisc.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
             var menuUseItems = new Menu("Use Items", "menuUseItems");
@@ -157,7 +157,7 @@ namespace Wukong
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
+            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy").SetValue(true));
 
             // Extras -> Use Items -> AOE Items
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
@@ -166,7 +166,7 @@ namespace Wukong
             MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
-            MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
+            MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat").SetValue(true));
             MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
 
             // Drawing
@@ -421,10 +421,15 @@ namespace Wukong
             if (useE)
             {
                 var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range);
+                if (allMinionsE.Count >= 2)
+                    E.CastOnUnit(allMinionsE[0]);
+                /*
                 var locE = E.GetCircularFarmLocation(allMinionsE);
+                
                 if (allMinionsE.Count == allMinionsE.Count(m => Player.Distance(m) < E.Range) && locE.MinionsHit >= 2 &&
                     locE.Position.IsValid())
                     E.Cast(locE.Position);
+                */
             }
 
             if (Tiamat.IsReady() && Config.Item("LaneClearUseTiamat").GetValue<bool>())

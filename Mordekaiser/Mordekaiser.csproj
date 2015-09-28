@@ -44,6 +44,9 @@
     <Reference Include="SharpDX">
       <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -54,8 +57,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DamageCalc.cs" />
+    <Compile Include="Draws.cs" />
+    <Compile Include="cEventHelper.cs" />
+    <Compile Include="Logics\LogicW.cs" />
+    <Compile Include="PlayerSpells.cs" />
+    <Compile Include="Spells.cs" />
+    <Compile Include="Events\Combo.cs" />
+    <Compile Include="Events\Harass.cs" />
+    <Compile Include="Events\JungleClear.cs" />
+    <Compile Include="Events\LaneClear.cs" />
+    <Compile Include="Items.cs" />
+    <Compile Include="Menu.cs" />
+    <Compile Include="Events\OnUpdate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

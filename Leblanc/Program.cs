@@ -66,7 +66,7 @@ namespace Leblanc
             Q.SetTargetted(0.5f, 1500f);
 
             W = new Spell(SpellSlot.W, 670);
-            W.SetSkillshot(0.6f, 220f, 1300f, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.6f, 220f, 1450f, false, SkillshotType.SkillshotCircle);
 
             E = new Spell(SpellSlot.E, 900);
             E.SetSkillshot(0.3f, 55f, 1650f, true, SkillshotType.SkillshotLine);

@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
+using Color = System.Drawing.Color;
 
 #endregion
 
@@ -14,8 +16,16 @@ namespace Pantheon
     internal class Program
     {
         public const string ChampionName = "Pantheon";
-        private static readonly Obj_AI_Hero Player = ObjectManager.Player;
-        //Orbwalker instance
+
+        public static Obj_AI_Hero Player
+        {
+            get { return ObjectManager.Player; }
+        }
+
+        public static string Tab
+        {
+            get { return "       "; }
+        } //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
         private static bool usedSpell, shennBuffActive;
         //Spells
@@ -24,13 +34,17 @@ namespace Pantheon
         public static Spell E;
         public static Spell W;
         public static Spell R;
-        private static SpellSlot IgniteSlot;
-        private static readonly Items.Item Tiamat = new Items.Item(3077, 450);
+
+        private static Vector2 PingLocation;
+        private static int LastPingT = 0;
+
+        public static AssassinManager AssassinManager;
+        public static PotionManager PotionManager;
+        public static Utils Utils;
+        public static Items Items;
         //Menu
         public static Menu Config;
-        public static Menu MenuExtras;
-        public static Menu MenuTargetedItems;
-        public static Menu MenuNonTargetedItems;
+        public static Menu menuMisc;
 
         private static void Main(string[] args)
         {
@@ -45,7 +59,7 @@ namespace Pantheon
             Q = new Spell(SpellSlot.Q, 620f);
             W = new Spell(SpellSlot.W, 620f);
             E = new Spell(SpellSlot.E, 640f);
-            R = new Spell(SpellSlot.R, 2000f);
+            R = new Spell(SpellSlot.R, 5500f);
 
             Q.SetTargetted(0.2f, 1700f);
             W.SetTargetted(0.2f, 1700f);
@@ -56,8 +70,6 @@ namespace Pantheon
             SpellList.Add(E);
             SpellList.Add(R);
 
-            IgniteSlot = Player.GetSpellSlot("SummonerDot");
-
             Config = new Menu("xQx | Pantheon", "Pantheon", true);
 
             var targetSelectorMenu = new Menu("Target Selector", "TargetSelector");
@@ -66,6 +78,14 @@ namespace Pantheon
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+
+            Utils = new Utils();
+            Sprite.Load();
+            Items = new Items();
+
+            AssassinManager = new AssassinManager();
+            AssassinManager.Load();
+
 
             // Combo
             Config.AddSubMenu(new Menu("Combo", "Combo"));
@@ -84,69 +104,109 @@ namespace Pantheon
                     .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
                 Config.SubMenu("Harass")
                     .AddItem(
-                        new MenuItem("HarassActiveT", "Harass (toggle)!").SetValue(new KeyBind("H".ToCharArray()[0],
-                            KeyBindType.Toggle)));
+                        new MenuItem("HarassActiveT", "Harass (Toggle)").SetValue(new KeyBind("H".ToCharArray()[0],
+                            KeyBindType.Toggle)))
+                    .Permashow(true);
                 Config.SubMenu("Harass")
                     .AddItem(
                         new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0],
                             KeyBindType.Press)));
             }
 
-            Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear")
-                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("LaneClear")
-                .AddItem(
-                    new MenuItem("LaneClearActive", "LaneClear!").SetValue(
-                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+            var menuLane = new Menu("Lane Mode", "Lane Mode");
+            {
+                menuLane.AddItem(
+                    new MenuItem("Lane.UseQ", "Use Q").SetValue(
+                        new StringList(new[] {"Off", "On", "Just out of AA Range"}, 1)));
+                menuLane.AddItem(new MenuItem("Lane.UseE", "Use E").SetValue(false));
+
+                menuLane.AddItem(
+                    new MenuItem("Lane.Mana.Option", "Min. Mana Options").SetValue(
+                        new StringList(new[] {"Don't check", "Min. Mana Percent", "Protect my mana for"}))
+                        .SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua)).ValueChanged +=
+                    (sender, eventArgs) =>
+                    {
+                        menuLane.Item("Lane.Mana.MinMana").Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 1);
+                        menuLane.Item("Lane.Mana.KeepQ").Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
+                        menuLane.Item("Lane.Mana.KeepW").Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
+                        menuLane.Item("Lane.Mana.KeepE").Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
+                        menuLane.Item("Lane.Mana.KeepR").Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
+                    };
+                menuLane.AddItem(
+                    new MenuItem("Lane.Mana.MinMana", Tab + "Min. Mana Percent: ").SetValue(new Slider(30, 100, 0)));
+                menuLane.AddItem(new MenuItem("Lane.Mana.KeepQ", Tab + "Q Spell").SetValue(true));
+                menuLane.AddItem(new MenuItem("Lane.Mana.KeepW", Tab + "W Spell").SetValue(true));
+                menuLane.AddItem(new MenuItem("Lane.Mana.KeepE", Tab + "E Spell").SetValue(true));
+                menuLane.AddItem(new MenuItem("Lane.Mana.KeepR", Tab + "R Spell").SetValue(true));
+
+
+                menuLane.AddItem(
+                    new MenuItem("Lane.Exec", "Lane Clear Active!").SetValue(new KeyBind("V".ToCharArray()[0],
+                        KeyBindType.Press))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
+                Config.AddSubMenu(menuLane);
+            }
 
             // Jungling Farm
-            Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
+            var menuJungle = new Menu("Jungle Mode", "Jungle Mode");
+            Config.AddSubMenu(menuJungle);
             {
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(
-                        new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(
-                            new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                menuJungle.AddItem(
+                    new MenuItem("Jungle.UseQ", "Use Q").SetValue(
+                        new StringList(new[] {"Off", "On", "Just for big Mobs"}, 1)));
+                menuJungle.AddItem(
+                    new MenuItem("Jungle.UseW", "Use W").SetValue(
+                        new StringList(new[] {"Off", "On", "Just for big Mobs"}, 1)));
+                menuJungle.AddItem(
+                    new MenuItem("Jungle.UseE", "Use E").SetValue(
+                        new StringList(new[] {"Off", "Mob Count > =1", "Mob Count > =2", "Mob Count > =3"}, 2)));
+
+                menuJungle.AddItem(
+                    new MenuItem("Jungle.Mana.Option", "Min. Mana Options").SetValue(
+                        new StringList(new[] {"Don't check", "Min. Mana Percent", "Protect my mana (for Combo):"}))
+                        .SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua)).ValueChanged +=
+                    (sender, eventArgs) =>
+                    {
+                        menuJungle.Item("Jungle.Mana.MinMana")
+                            .Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 1);
+
+                        menuJungle.Item("Jungle.Mana.KeepQ")
+                            .Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
+                        menuJungle.Item("Jungle.Mana.KeepW")
+                            .Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
+                        menuJungle.Item("Jungle.Mana.KeepE")
+                            .Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
+                        menuJungle.Item("Jungle.Mana.KeepR")
+                            .Show(eventArgs.GetNewValue<StringList>().SelectedIndex == 2);
+                    };
+
+                menuJungle.AddItem(
+                    new MenuItem("Jungle.Mana.MinMana", Tab + "Min. Mana Percent: ").SetValue(new Slider(30, 100, 0)));
+                menuJungle.AddItem(new MenuItem("Jungle.Mana.KeepQ", Tab + "Q Spell").SetValue(true));
+                menuJungle.AddItem(new MenuItem("Jungle.Mana.KeepW", Tab + "W Spell").SetValue(true));
+                menuJungle.AddItem(new MenuItem("Jungle.Mana.KeepE", Tab + "E Spell").SetValue(true));
+                menuJungle.AddItem(new MenuItem("Jungle.Mana.KeepR", Tab + "R Spell").SetValue(true));
+
+                menuJungle.AddItem(
+                    new MenuItem("Jungle.Mana.Dont.Title", "Dont control mana If I'm taking").SetFontStyle(
+                        FontStyle.Regular, SharpDX.Color.IndianRed));
+                menuJungle.AddItem(new MenuItem("Jungle.Mana.Dont.Blue", Tab + "Blue Monster").SetValue(true));
+                menuJungle.AddItem(new MenuItem("Jungle.Mana.Dont.Red", Tab + "Red Monster").SetValue(false));
+                menuJungle.AddItem(new MenuItem("Jungle.Mana.Dont.Dragon", Tab + "Dragon").SetValue(true));
+                menuJungle.AddItem(new MenuItem("Jungle.Mana.Dont.Baron", Tab + "Baron").SetValue(true));
+
+
+                menuJungle.AddItem(
+                    new MenuItem("JungleFarmActive", "JungleMode!").SetValue(new KeyBind("V".ToCharArray()[0],
+                        KeyBindType.Press))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
             }
 
-            MenuExtras = new Menu("Extras", "Extras");
+            menuMisc = new Menu("Misc", "Misc");
             {
-                Config.AddSubMenu(MenuExtras);
-                MenuExtras.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
-                MenuExtras.AddItem(new MenuItem("AutoLevelUp", "Auto Level Up").SetValue(true));
+                Config.AddSubMenu(menuMisc);
+                menuMisc.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
+                menuMisc.AddItem(new MenuItem("PingLH", "Ping low health enemies (Only local)").SetValue(true));
             }
 
-            var menuUseItems = new Menu("Use Items", "menuUseItems");
-            {
-                Config.SubMenu("Extras").AddSubMenu(menuUseItems);
-
-                // Extras -> Use Items -> Targeted Items
-                MenuTargetedItems = new Menu("Targeted Items", "menuTargetItems");
-                {
-                    menuUseItems.AddSubMenu(MenuTargetedItems);
-                    MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
-                    MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
-                    MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
-                    MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
-                }
-                // Extras -> Use Items -> AOE Items
-                MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
-                {
-                    menuUseItems.AddSubMenu(MenuNonTargetedItems);
-                    MenuNonTargetedItems.AddItem(new MenuItem("item3180", "Odyn's Veil").SetValue(true));
-                    MenuNonTargetedItems.AddItem(new MenuItem("item3143", "Randuin's Omen").SetValue(true));
-                    MenuNonTargetedItems.AddItem(new MenuItem("item3131", "Sword of the Divine").SetValue(true));
-                    MenuNonTargetedItems.AddItem(new MenuItem("item3074", "Ravenous Hydra").SetValue(true));
-                    MenuNonTargetedItems.AddItem(new MenuItem("item3077", "Tiamat ").SetValue(true));
-                    MenuNonTargetedItems.AddItem(new MenuItem("item3142", "Youmuu's Ghostblade").SetValue(true));
-                }
-            }
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             {
@@ -174,19 +234,43 @@ namespace Pantheon
                 var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
                 Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
 
-                Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+                Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
                 Utility.HpBarDamageIndicator.Enabled = true;
             }
 
-            new PotionManager();
+            menuLane.Item("Lane.Mana.MinMana")
+                .Show(menuLane.Item("Lane.Mana.Option").GetValue<StringList>().SelectedIndex == 1);
+            menuLane.Item("Lane.Mana.KeepQ")
+                .Show(menuLane.Item("Lane.Mana.Option").GetValue<StringList>().SelectedIndex == 2);
+            menuLane.Item("Lane.Mana.KeepW")
+                .Show(menuLane.Item("Lane.Mana.Option").GetValue<StringList>().SelectedIndex == 2);
+            menuLane.Item("Lane.Mana.KeepE")
+                .Show(menuLane.Item("Lane.Mana.Option").GetValue<StringList>().SelectedIndex == 2);
+            menuLane.Item("Lane.Mana.KeepR")
+                .Show(menuLane.Item("Lane.Mana.Option").GetValue<StringList>().SelectedIndex == 2);
+
+            menuJungle.Item("Jungle.Mana.MinMana")
+                .Show(menuJungle.Item("Jungle.Mana.Option").GetValue<StringList>().SelectedIndex == 1);
+            menuJungle.Item("Jungle.Mana.KeepQ")
+                .Show(menuJungle.Item("Jungle.Mana.Option").GetValue<StringList>().SelectedIndex == 2);
+            menuJungle.Item("Jungle.Mana.KeepW")
+                .Show(menuJungle.Item("Jungle.Mana.Option").GetValue<StringList>().SelectedIndex == 2);
+            menuJungle.Item("Jungle.Mana.KeepE")
+                .Show(menuJungle.Item("Jungle.Mana.Option").GetValue<StringList>().SelectedIndex == 2);
+            menuJungle.Item("Jungle.Mana.KeepR")
+                .Show(menuJungle.Item("Jungle.Mana.Option").GetValue<StringList>().SelectedIndex == 2);
+
+
+            PotionManager = new PotionManager();
+
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += DrawingOnOnEndScene;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
 
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Notifications.AddNotification(string.Format("{0} Loaded", ChampionName), 4000);
         }
 
@@ -234,6 +318,17 @@ namespace Pantheon
         {
             shennBuffActive = Player.HasBuff("Sheen", true);
 
+            if (Config.Item("PingLH").GetValue<bool>())
+                foreach (
+                    var enemy in
+                        HeroManager.Enemies.Where(
+                            t =>
+                                ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready &&
+                                t.IsValidTarget() && ComboDamage(t) > t.Health))
+                {
+                    Ping(enemy.Position.To2D());
+                }
+
             if (!Orbwalking.CanMove(100))
                 return;
 
@@ -243,29 +338,26 @@ namespace Pantheon
             }
 
             if (Config.Item("HarassActive").GetValue<KeyBind>().Active ||
-               (Config.Item("HarassActiveT").GetValue<KeyBind>().Active && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo))
+                (Config.Item("HarassActiveT").GetValue<KeyBind>().Active &&
+                 Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo))
             {
                 var existsMana = Config.Item("HarassMana").GetValue<Slider>().Value;
                 if (Player.ManaPercent >= existsMana)
                     Harass();
             }
 
-            if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
+            if (Config.Item("Lane.Exec").GetValue<KeyBind>().Active)
             {
-                var existsMana = Config.Item("LaneClearMana").GetValue<Slider>().Value;
-                if (Player.ManaPercent >= existsMana)
-                    LaneClear();
+                LaneMode();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
-                var existsMana = Config.Item("JungleFarmMana").GetValue<Slider>().Value;
-                if (Player.ManaPercent >= existsMana)
-                    JungleFarm();
+                JungleMode();
             }
         }
 
-        private static float GetComboDamage(Obj_AI_Hero t)
+        private static float ComboDamage(Obj_AI_Hero t)
         {
             var fComboDamage = 0d;
 
@@ -278,10 +370,8 @@ namespace Pantheon
             if (E.IsReady())
                 fComboDamage += Player.GetSpellDamage(t, SpellSlot.E);
 
-            if (R.IsReady())
-                fComboDamage += Player.GetSpellDamage(t, SpellSlot.R);
-
-            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+            if (PlayerSpells.IgniteSlot != SpellSlot.Unknown &&
+                Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready)
                 fComboDamage += Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
 
             return (float) fComboDamage;
@@ -290,7 +380,7 @@ namespace Pantheon
         private static void Combo()
         {
             Obj_AI_Hero t;
-            t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+            t = AssassinManager.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (!t.IsValidTarget())
                 return;
 
@@ -311,14 +401,13 @@ namespace Pantheon
                 E.Cast(t.Position);
             }
 
-            UseItems(t);
-
-            if (IgniteSlot != SpellSlot.Unknown &&
-                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
+            if (PlayerSpells.IgniteSlot != SpellSlot.Unknown &&
+                Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready &&
                 Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)
             {
-                Player.Spellbook.CastSpell(IgniteSlot, t);
+                Player.Spellbook.CastSpell(PlayerSpells.IgniteSlot, t);
             }
+            CastItems();
         }
 
         private static void Harass()
@@ -345,130 +434,263 @@ namespace Pantheon
             }
         }
 
-        private static void JungleFarm()
+        private static bool CheckModeManaState(string menuName, bool dontCheckmana = false)
         {
-            var useQ = Config.Item("UseQJungleFarm").GetValue<bool>();
-            var useE = Config.Item("UseEJungleFarm").GetValue<bool>();
-
-            var mobs = MinionManager.GetMinions(
-                ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral,
-                MinionOrderTypes.MaxHealth);
-
-            if (mobs.Count <= 0)
-                return;
-
-            var mob = mobs[0];
-            if (useQ && Q.IsReady() && mobs.Count >= 1)
-                Q.CastOnUnit(mob);
-
-            if (useE && E.IsReady() && mobs.Count >= 2 &&
-                (LastCastedSpell.LastCastPacketSent.Slot != SpellSlot.E ||
-                 Environment.TickCount - LastCastedSpell.LastCastPacketSent.Tick > 150))
+            if (dontCheckmana)
             {
-                E.Cast(mob.Position);
+                return true;
             }
 
-            if (Tiamat.IsReady() && Config.Item("JungleFarmUseTiamat").GetValue<bool>())
+            switch (Config.Item(menuName + ".Mana.Option").GetValue<StringList>().SelectedIndex)
             {
-                if (mobs.Count >= 2)
-                    Tiamat.Cast(Player);
+                case 1:
+                    if (Player.ManaPercent < Config.Item(menuName + ".Mana.MinMana").GetValue<Slider>().Value)
+                    {
+                        return false;
+                    }
+                    break;
+
+                case 2:
+                    var protectMana = (Config.Item(menuName + ".Mana.KeepQ").GetValue<bool>() && Q.Level > 0
+                        ? Q.ManaCost
+                        : 0) +
+                                      (Config.Item(menuName + ".Mana.KeepW").GetValue<bool>() && W.Level > 0
+                                          ? W.ManaCost
+                                          : 0) +
+                                      (Config.Item(menuName + ".Mana.KeepE").GetValue<bool>() && E.Level > 0
+                                          ? E.ManaCost
+                                          : 0) +
+                                      (Config.Item(menuName + ".Mana.KeepR").GetValue<bool>() && R.Level > 0 &&
+                                       R.Cooldown < 20
+                                          ? R.ManaCost
+                                          : 0);
+
+                    if (Player.Mana < protectMana)
+                        return false;
+                    break;
             }
+
+            return true;
         }
 
-        private static void LaneClear()
+        private static void JungleMode()
         {
-            var useQ = Config.Item("UseQLaneClear").GetValue<bool>() && Q.IsReady();
-            var useE = Config.Item("UseELaneClear").GetValue<bool>() && E.IsReady();
+            var bigBoys = Utils.GetMobs(W.Range, Utils.MobTypes.BigBoys);
 
-            if (useQ)
+            if (Config.Item("Jungle.Mana.Option").GetValue<StringList>().SelectedIndex != 0)
             {
-                var vMinions = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range);
-                foreach (var minions in
-                    vMinions.Where(
-                        minions => minions.Health < ObjectManager.Player.GetSpellDamage(minions, SpellSlot.Q)))
+
+                var dontCheckMana = false;
+                if (bigBoys != null)
+                {
+                    dontCheckMana = (Config.Item("Jungle.Mana.Dont.Blue").GetValue<bool>() &&
+                                     bigBoys.Name.Contains("SRU_Blue"))
+                                    ||
+                                    (Config.Item("Jungle.Mana.Dont.Red").GetValue<bool>() &&
+                                     bigBoys.Name.Contains("SRU_Red"))
+                                    ||
+                                    (Config.Item("Jungle.Mana.Dont.Dragon").GetValue<bool>() &&
+                                     bigBoys.Name.Contains("SRU_Dragon"))
+                                    ||
+                                    (Config.Item("Jungle.Mana.Dont.Baron").GetValue<bool>() &&
+                                     bigBoys.Name.Contains("SRU_Baron"));
+                }
+
+                if (!CheckModeManaState("Jungle", dontCheckMana))
+                {
+                    return;
+                }
+            }
+
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All,
+                MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
+            if (mobs.Count <= 0)
+            {
+                return;
+            }
+
+            var mob = mobs[0];
+            var useQ = Config.Item("Jungle.UseQ").GetValue<StringList>().SelectedIndex;
+            var useW = Config.Item("Jungle.UseW").GetValue<StringList>().SelectedIndex;
+
+            switch (useQ)
+            {
+                case 1:
+                    Q.CastOnUnit(mobs[0]);
+                    break;
+
+                case 2:
+                    if (bigBoys != null)
+                        Q.CastOnUnit(bigBoys);
+                    break;
+            }
+
+            switch (useW)
+            {
+                case 1:
+                    W.CastOnUnit(mobs[0]);
+                    break;
+
+                case 2:
+                    if (bigBoys != null)
+                        W.CastOnUnit(bigBoys);
+                    break;
+            }
+
+            var eMob = Config.Item("Jungle.UseE").GetValue<StringList>().SelectedIndex;
+            if (E.IsReady() && eMob != 0)
+            {
+                if (mobs.Count >= eMob)
+                {
+                    E.Cast(mob.Position);
+                }
+            }
+
+            if (mobs.Count >= 2)
+            {
+                foreach (var item in from item in Items.ItemDb
+                    where
+                        item.Value.ItemType == Items.EnumItemType.AoE
+                        && item.Value.TargetingType == Items.EnumItemTargettingType.EnemyObjects
+                    let iMinions =
+                        MinionManager.GetMinions(
+                            ObjectManager.Player.ServerPosition,
+                            item.Value.Item.Range,
+                            MinionTypes.All,
+                            MinionTeam.Neutral)
+                    where
+                        item.Value.Item.IsReady()
+                        && iMinions[0].Distance(Player.Position) < item.Value.Item.Range
+                    select item)
+                {
+                    item.Value.Item.Cast();
+                }
+            }
+
+
+        }
+
+        private static void LaneMode()
+        {
+            if (Config.Item("Lane.Mana.Option").GetValue<StringList>().SelectedIndex != 0 &&
+                !CheckModeManaState("Jungle"))
+            {
+                return;
+            }
+
+            var useQ = Config.Item("Lane.UseQ").GetValue<StringList>().SelectedIndex;
+            var useE = Config.Item("Lane.UseE").GetValue<bool>() && E.IsReady();
+
+            var vMinions = MinionManager.GetMinions(ObjectManager.Player.Position, Q.Range);
+            foreach (var minions in
+                vMinions.Where(
+                    minions => minions.Health < Q.GetDamage(minions)))
+            {
+                if (useQ == 1)
+                {
                     Q.Cast(minions);
+                }
+                else if (useQ == 2)
+                {
+                    if (minions.Distance(Player.Position) > Orbwalking.GetRealAutoAttackRange(null) + 65)
+                        Q.Cast(minions);
+                }
+
             }
 
             if (useE)
             {
-                var rangedMinionsE = MinionManager.GetMinions(
-                    ObjectManager.Player.ServerPosition, E.Range + E.Width + 30, MinionTypes.Ranged);
+                var rangedMinionsE = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range + E.Width,
+                    MinionTypes.Ranged);
 
-                var locE = W.GetCircularFarmLocation(rangedMinionsE, W.Width*0.75f);
-                if (locE.MinionsHit >= 3 && E.IsInRange(locE.Position.To3D()))
+                var locE = E.GetCircularFarmLocation(rangedMinionsE, E.Range);
+                if (locE.MinionsHit >= 2 && E.IsInRange(locE.Position.To3D()))
                 {
                     E.Cast(locE.Position);
                 }
             }
+
+            foreach (var item in from item in Items.ItemDb
+                where
+                    item.Value.ItemType == Items.EnumItemType.AoE
+                    && item.Value.TargetingType == Items.EnumItemTargettingType.EnemyObjects
+                let iMinions =
+                    MinionManager.GetMinions(
+                        ObjectManager.Player.ServerPosition,
+                        item.Value.Item.Range)
+                where
+                    iMinions.Count >= 2 && item.Value.Item.IsReady()
+                    && iMinions[0].Distance(Player.Position) < item.Value.Item.Range
+                select item)
+            {
+                item.Value.Item.Cast();
+            }
         }
 
-        private static float GetComboDamage(Obj_AI_Base vTarget)
+        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero unit,
+            Interrupter2.InterruptableTargetEventArgs args)
         {
-            var fComboDamage = 0d;
-
-            if (Q.IsReady())
-                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.Q);
-
-            if (E.IsReady())
-                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.E);
-
-            if (Items.CanUseItem(3128))
-                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Botrk);
-
-            if (IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
-
-            return (float) fComboDamage;
-        }
-
-        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base vTarget, InterruptableSpell args)
-        {
-            var interruptSpells = Config.Item("InterruptSpells").GetValue<KeyBind>().Active;
-            if (!interruptSpells)
+            if (!Config.Item("InterruptSpells").GetValue<bool>())
                 return;
 
-            if (Player.Distance(vTarget) < Orbwalking.GetRealAutoAttackRange(ObjectManager.Player))
+            if (unit.IsValidTarget(W.Range) && W.IsReady())
             {
-                if (W.IsReady())
-                    W.Cast();
+                W.CastOnUnit(unit);
             }
         }
 
-        private static InventorySlot GetInventorySlot(int id)
+        private static void CastItems()
         {
-            return
-                ObjectManager.Player.InventoryItems.FirstOrDefault(
-                    item =>
-                        (item.Id == (ItemId) id && item.Stacks >= 1) || (item.Id == (ItemId) id && item.Charges >= 1));
-        }
-
-        public static void UseItems(Obj_AI_Hero vTarget)
-        {
-            if (vTarget == null)
+            var t = AssassinManager.GetTarget(750, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
                 return;
 
-            foreach (var itemID in from menuItem in MenuTargetedItems.Items
-                let useItem = MenuTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                where useItem
-                select Convert.ToInt16(menuItem.Name.Substring(4, 4))
-                into itemId
-                where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
-                select itemId)
+            foreach (var item in Items.ItemDb)
             {
-                Items.UseItem(itemID, vTarget);
-            }
+                if (item.Value.ItemType == Items.EnumItemType.AoE &&
+                    item.Value.TargetingType == Items.EnumItemTargettingType.EnemyObjects)
+                {
+                    if (t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady())
+                    {
+                        item.Value.Item.Cast(Player);
+                    }
+                }
 
-            foreach (var itemID in from menuItem in MenuNonTargetedItems.Items
-                let useItem = MenuNonTargetedItems.Item(menuItem.Name).GetValue<bool>()
-                where useItem
-                select Convert.ToInt16(menuItem.Name.Substring(4, 4))
-                into itemId
-                where Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
-                select itemId)
-            {
-                if (Player.Distance(vTarget) <= 350)
-                    Items.UseItem(itemID);
+                if (item.Value.ItemType == Items.EnumItemType.Targeted &&
+                    item.Value.TargetingType == Items.EnumItemTargettingType.EnemyHero)
+                {
+                    if (t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady())
+                    {
+                        item.Value.Item.Cast(t);
+                    }
+                }
+
             }
         }
+
+
+        private static void Ping(Vector2 position)
+        {
+            if (LeagueSharp.Common.Utils.TickCount - LastPingT < 30*1000)
+            {
+                return;
+            }
+
+            LastPingT = LeagueSharp.Common.Utils.TickCount;
+            PingLocation = position;
+            SimplePing();
+
+            Utility.DelayAction.Add(150, SimplePing);
+            Utility.DelayAction.Add(300, SimplePing);
+            Utility.DelayAction.Add(400, SimplePing);
+            Utility.DelayAction.Add(800, SimplePing);
+        }
+
+        private static void SimplePing()
+        {
+            Game.ShowPing(PingCategory.Fallback, PingLocation, true);
+        }
+
     }
 }

@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-namespace XinZhao
+namespace Pantheon
 {
     using System.Collections.Generic;
     using System.Xml;
@@ -14,11 +14,12 @@ namespace XinZhao
 
     using Color = System.Drawing.Color;
 
-    enum TargetSelect
+    internal enum TargetSelect
     {
-        XinZhao,
+        Pantheon,
         LeagueSharp
     }
+
     internal class AssassinManager
     {
         public Menu Config;
@@ -29,28 +30,36 @@ namespace XinZhao
             get
             {
                 return this.Config.Item("TS").GetValue<StringList>().SelectedIndex == 0
-                           ? TargetSelect.XinZhao
-                           : TargetSelect.LeagueSharp;
+                    ? TargetSelect.Pantheon
+                    : TargetSelect.LeagueSharp;
             }
         }
+
         public void Load()
         {
             Text = new Font(
                 Drawing.Direct3DDevice,
                 new FontDescription
-                    {
-                        FaceName = "Malgun Gothic", Height = 21, OutputPrecision = FontPrecision.Default,  Weight = FontWeight.Bold,
-                        Quality = FontQuality.ClearTypeNatural
-                    });
+                {
+                    FaceName = "Malgun Gothic",
+                    Height = 21,
+                    OutputPrecision = FontPrecision.Default,
+                    Weight = FontWeight.Bold,
+                    Quality = FontQuality.ClearTypeNatural
+                });
 
-            this.Config = new Menu("Target Selector", "AssassinTargetSelector").SetFontStyle(FontStyle.Regular, SharpDX.Color.Cyan);
+            this.Config = new Menu("Target Selector", "AssassinTargetSelector").SetFontStyle(FontStyle.Regular,
+                SharpDX.Color.Cyan);
 
             var menuTargetSelector = new Menu("Target Selector", "TargetSelector");
             {
                 TargetSelector.AddToMenu(menuTargetSelector);
             }
 
-            this.Config.AddItem(new MenuItem("TS", "Active Target Selector:").SetValue(new StringList(new[] { "XinZhao Target Selector", "L# Target Selector" }))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)
+            this.Config.AddItem(
+                new MenuItem("TS", "Active Target Selector:").SetValue(
+                    new StringList(new[] {"Pantheon Target Selector", "L# Target Selector"})))
+                .SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)
                 .ValueChanged += (sender, args) =>
                 {
                     this.Config.Items.ForEach(
@@ -71,30 +80,39 @@ namespace XinZhao
 
             menuTargetSelector.Items.ForEach(
                 i =>
-                    {
-                        this.Config.AddItem(i);
-                        i.SetTag(22);
-                    });
+                {
+                    this.Config.AddItem(i);
+                    i.SetTag(22);
+                });
 
             this.Config.AddItem(
                 new MenuItem("Set", "Target Select Mode:").SetValue(
-                    new StringList(new[] { "Single Target Select", "Multi Target Select" })))
+                    new StringList(new[] {"Single Target Select", "Multi Target Select"})))
                 .SetFontStyle(FontStyle.Regular, SharpDX.Color.LightCoral)
                 .SetTag(11);
-            this.Config.AddItem(new MenuItem("Range", "Range (Recommend: 1150):")).SetValue(new Slider(1150, (int)Program.E.Range, (int)Program.E.Range *2)).SetTag(11);
+            this.Config.AddItem(new MenuItem("Range", "Range (Recommend: 1000):"))
+                .SetValue(new Slider(1150, (int) Program.Q.Range, (int) Program.Q.Range*2))
+                .SetTag(11);
 
-            this.Config.AddItem(new MenuItem("Targets", "Targets:").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
+            this.Config.AddItem(
+                new MenuItem("Targets", "Targets:").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
             foreach (var e in HeroManager.Enemies)
             {
-                this.Config.AddItem(new MenuItem("enemy_" + e.ChampionName, string.Format("{0}Focus {1}", Program.Tab, e.ChampionName)).SetValue(false)).SetTag(12);
-                
+                this.Config.AddItem(
+                    new MenuItem("enemy_" + e.ChampionName, string.Format("{0}Focus {1}", Program.Tab, e.ChampionName))
+                        .SetValue(false)).SetTag(12);
             }
-            //foreach (var langItem in HeroManager.Enemies.Select(e =>this.Config.AddItem(new MenuItem("enemy_" + e.ChampionName,string.Format("{0}Focus {1}", Program.Tab, e.ChampionName)).SetValue(false)).SetTag(12)))
 
-            this.Config.AddItem(new MenuItem("Draw.Title", "Drawings").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
-            this.Config.AddItem(new MenuItem("Draw.Range", Program.Tab + "Range").SetValue(new Circle(true, Color.Gray)).SetTag(11));
-            this.Config.AddItem(new MenuItem("Draw.Enemy", Program.Tab + "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)).SetTag(11));
-            this.Config.AddItem(new MenuItem("Draw.Status", Program.Tab + "Show Enemy:").SetValue(new StringList(new []{"Off", "Notification Text", "Sprite", "Both"}, 0)));
+            this.Config.AddItem(
+                new MenuItem("Draw.Title", "Drawings").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
+            this.Config.AddItem(
+                new MenuItem("Draw.Range", Program.Tab + "Range").SetValue(new Circle(true, Color.Gray)).SetTag(11));
+            this.Config.AddItem(
+                new MenuItem("Draw.Enemy", Program.Tab + "Active Enemy").SetValue(new Circle(true, Color.GreenYellow))
+                    .SetTag(11));
+            this.Config.AddItem(
+                new MenuItem("Draw.Status", Program.Tab + "Show Enemy:").SetValue(
+                    new StringList(new[] {"Off", "Notification Text", "Sprite", "Both"}, 0)));
             Program.Config.AddSubMenu(this.Config);
 
             Game.OnWndProc += this.Game_OnWndProc;
@@ -112,7 +130,7 @@ namespace XinZhao
                     i.Show();
                     switch (this.Selector)
                     {
-                        case TargetSelect.XinZhao:
+                        case TargetSelect.Pantheon:
                             if (i.Tag == 22)
                             {
                                 i.Show(false);
@@ -138,7 +156,7 @@ namespace XinZhao
 
         private void Game_OnWndProc(WndEventArgs args)
         {
-            if (this.Selector != TargetSelect.XinZhao)
+            if (this.Selector != TargetSelect.Pantheon)
             {
                 return;
             }
@@ -146,11 +164,11 @@ namespace XinZhao
             if (args.Msg == 0x201)
             {
                 foreach (var objAiHero in from hero in HeroManager.Enemies
-                                          where
-                                              hero.Distance(Game.CursorPos) < 150f && hero != null && hero.IsVisible
-                                              && !hero.IsDead
-                                          orderby hero.Distance(Game.CursorPos) descending
-                                          select hero)
+                    where
+                        hero.Distance(Game.CursorPos) < 150f && hero != null && hero.IsVisible
+                        && !hero.IsDead
+                    orderby hero.Distance(Game.CursorPos) descending
+                    select hero)
                 {
                     if (objAiHero != null && objAiHero.IsVisible && !objAiHero.IsDead)
                     {
@@ -173,16 +191,17 @@ namespace XinZhao
             }
         }
 
-        public Obj_AI_Hero GetTarget( float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        public Obj_AI_Hero GetTarget(float vDefaultRange = 0,
+            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
-            if (this.Selector != TargetSelect.XinZhao)
+            if (this.Selector != TargetSelect.Pantheon)
             {
                 return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
             }
 
             vDefaultRange = Math.Abs(vDefaultRange) < 0.00001
-                                ? Program.E.Range
-                                : this.Config.Item("Range").GetValue<Slider>().Value;
+                ? Program.E.Range
+                : this.Config.Item("Range").GetValue<Slider>().Value;
 
             var vEnemy =
                 ObjectManager.Get<Obj_AI_Hero>()
@@ -191,7 +210,7 @@ namespace XinZhao
                     .Where(e => this.Config.Item("enemy_" + e.ChampionName).GetValue<bool>())
                     .Where(e => Program.Player.Distance(e) < vDefaultRange)
                     .Where(jKukuri => "jQuery" != "White guy");
-            
+
             if (this.Config.Item("Set").GetValue<StringList>().SelectedIndex == 1)
             {
                 vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
@@ -214,11 +233,11 @@ namespace XinZhao
                 var t = this.GetTarget(Program.E.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
-                    Render.Circle.DrawCircle(t.Position, (float)(t.BoundingRadius * 1.5), drawEnemy.Color);
+                    Render.Circle.DrawCircle(t.Position, (float) (t.BoundingRadius*1.5), drawEnemy.Color);
                 }
             }
 
-            if (this.Selector != TargetSelect.XinZhao)
+            if (this.Selector != TargetSelect.Pantheon)
             {
                 return;
             }
@@ -235,28 +254,29 @@ namespace XinZhao
                 foreach (var e in
                     HeroManager.Enemies.Where(
                         e =>
-                        e.IsVisible && !e.IsDead && this.Config.Item("enemy_" + e.ChampionName) != null
-                        && this.Config.Item("enemy_" + e.ChampionName).GetValue<bool>()))
+                            e.IsVisible && !e.IsDead && this.Config.Item("enemy_" + e.ChampionName) != null
+                            && this.Config.Item("enemy_" + e.ChampionName).GetValue<bool>()))
                 {
                     DrawText(
                         Text,
                         "1st Priority Target",
-                        e.HPBarPosition.X + e.BoundingRadius / 2f - (e.CharData.BaseSkinName.Length / 2f) - 27,
+                        e.HPBarPosition.X + e.BoundingRadius/2f - (e.CharData.BaseSkinName.Length/2f) - 27,
                         e.HPBarPosition.Y - 23,
                         SharpDX.Color.Black);
 
                     DrawText(
                         Text,
                         "1st Priority Target",
-                        e.HPBarPosition.X + e.BoundingRadius / 2f - (e.CharData.BaseSkinName.Length / 2f) - 29,
+                        e.HPBarPosition.X + e.BoundingRadius/2f - (e.CharData.BaseSkinName.Length/2f) - 29,
                         e.HPBarPosition.Y - 25,
                         SharpDX.Color.IndianRed);
                 }
             }
         }
+
         public static void DrawText(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {
-            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
+            vFont.DrawText(null, vText, (int) vPosX, (int) vPosY, vColor);
         }
 
     }

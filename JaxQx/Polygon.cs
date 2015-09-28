@@ -5,7 +5,7 @@ using LeagueSharp.Common;
 
 namespace JaxQx
 {
-    class Polygon
+    internal class Polygon
     {
         public List<Vector2> Points = new List<Vector2>();
 
@@ -34,7 +34,7 @@ namespace JaxQx
             Vector2 start = Points[Count() - 1];
             foreach (Vector2 vecPol in Points)
             {
-                Vector2 proj = projOnLine(start, vecPol,vec);
+                Vector2 proj = projOnLine(start, vecPol, vec);
                 closest = ClosestVec(proj, closest, vec);
                 start = vecPol;
             }
@@ -66,14 +66,26 @@ namespace JaxQx
         {
             Vector2 nullVec = new Vector2(-1, -1);
             float l2 = Vector2.DistanceSquared(v, w);
+
             if (l2 == 0.0)
+            {
                 return nullVec;
+            }
+
             float t = Vector2.Dot(p - v, w - v) / l2;
+
             if (t < 0.0)
+            {
                 return nullVec;
-            else if (t > 1.0)
+            }
+
+            if (t > 1.0)
+            {
                 return nullVec;
-            Vector2 projection = v + t * (w - v); 
+            }
+
+            Vector2 projection = v + t * (w - v);
+
             return projection;
         }
 
