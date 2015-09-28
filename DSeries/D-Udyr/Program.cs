@@ -1,4 +1,4 @@
-﻿
+
 
 using System;
 using System.Collections.Generic;
@@ -93,87 +93,87 @@ namespace D_Udyr
             _config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             _orbwalker = new Orbwalking.Orbwalker(_config.SubMenu("Orbwalking"));
 
-            //Auto Level
+            //Auto-Level
             _config.AddSubMenu(new Menu("Style", "Style"));
-            _config.SubMenu("Style").AddItem(new MenuItem("udAutoLevel", "Auto Level")).SetValue(false);
+            _config.SubMenu("Style").AddItem(new MenuItem("udAutoLevel", "Auto-Level")).SetValue(false);
             _config.SubMenu("Style").AddItem(new MenuItem("udyrStyle", "Level Sequence").SetValue(
-                new StringList(new[] { "Tiger Q-E-W-R", "Tiger Q-W-E-R", "Pheonix R-E-W-Q", "Pheonix R-W-E-Q" })));
+                new StringList(new[] { "Tiger (Q-E-W-R)", "Tiger (Q-W-E-R)", "Pheonix (R-E-W-Q)", "Pheonix (R-W-E-Q)" })));
           
             //Combo
             _config.AddSubMenu(new Menu("Main", "Main"));
-            _config.SubMenu("Main").AddItem(new MenuItem("AutoShield", "Auto Shield")).SetValue(true);
+            _config.SubMenu("Main").AddItem(new MenuItem("AutoShield", "Auto-Shield")).SetValue(true);
             _config.SubMenu("Main")
-                .AddItem(new MenuItem("AutoShield%", "AutoShield HP %").SetValue(new Slider(50, 100, 0)));
+                .AddItem(new MenuItem("AutoShield%", "Auto-Shield if % HP <").SetValue(new Slider(50, 100, 0)));
             _config.SubMenu("Main")
-                .AddItem(new MenuItem("TargetRange", "Range to Use E").SetValue(new Slider(1000, 600, 1500)));
+                .AddItem(new MenuItem("TargetRange", "Use E at Range").SetValue(new Slider(1000, 600, 1500)));
             _config.SubMenu("Main")
-                .AddItem(new MenuItem("ActiveCombo", "Combo Key").SetValue(new KeyBind(32, KeyBindType.Press)));
-            _config.SubMenu("Main").AddItem(new MenuItem("smitecombo", "Use Smite in target")).SetValue(true);
+                .AddItem(new MenuItem("ActiveCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
+            _config.SubMenu("Main").AddItem(new MenuItem("smitecombo", "Use Smite on Target")).SetValue(true);
             _config.SubMenu("Main")
                 .AddItem(
                     new MenuItem("StunCycle", "Stun Cycle").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
-            //Forest gump
-            _config.AddSubMenu(new Menu("Forest Gump", "Forest Gump"));
-            _config.SubMenu("Forest Gump").AddItem(new MenuItem("ForestE", "Use E")).SetValue(true);
-            _config.SubMenu("Forest Gump").AddItem(new MenuItem("ForestW", "Use W")).SetValue(true);
-            _config.SubMenu("Forest Gump")
+            //Flee
+            _config.AddSubMenu(new Menu("Flee", "Flee"));
+            _config.SubMenu("Flee").AddItem(new MenuItem("ForestE", "Use E")).SetValue(true);
+            _config.SubMenu("Flee").AddItem(new MenuItem("ForestW", "Use W")).SetValue(true);
+            _config.SubMenu("Flee")
                 .AddItem(
-                    new MenuItem("Forest", "Forest gump(Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
+                    new MenuItem("Forest", "Flee (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
-            _config.SubMenu("Forest Gump")
-                .AddItem(new MenuItem("Forest-Mana", "Forest gump Mana").SetValue(new Slider(50, 100, 0)));
+            _config.SubMenu("Flee")
+                .AddItem(new MenuItem("Forest-Mana", "Flee if % Mana >").SetValue(new Slider(50, 100, 0)));
 
-            _config.AddSubMenu(new Menu("items", "items"));
+            _config.AddSubMenu(new Menu("Items", "items"));
             _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Tiamat", "Use Tiamat")).SetValue(true);
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hydra", "Use Hydra")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Cutlass")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp < ").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy % HP < ").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
+                .AddItem(new MenuItem("Bilgemyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use BotRK")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp < ").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy % HP < ").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp < ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
+                .AddItem(new MenuItem("Blademyhp", "If Self % HP < ").SetValue(new Slider(85, 1, 100)));
+            _config.SubMenu("items").AddSubMenu(new Menu("Defensive", "Defensive"));
             _config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("Omen", "Use Randuin Omen"))
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("Omen", "Use Randuin's Omen"))
                 .SetValue(true);
             _config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("Omenenemys", "Randuin if enemys>").SetValue(new Slider(2, 1, 5)));
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("Omenenemys", "Use Randuin's if Targets >=").SetValue(new Slider(2, 1, 5)));
             _config.SubMenu("items")
-                .SubMenu("Deffensive")
+                .SubMenu("Defensive")
                 .AddItem(new MenuItem("lotis", "Use Iron Solari")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("lotisminhp", "Solari if Ally Hp<").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("items").SubMenu("Defensive").AddItem(new MenuItem("lotisminhp", "Use Solari if Ally % HP <").SetValue(new Slider(35, 1, 100)));
            
-            _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("Righteous", "Use Righteous Glory")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("Righteousenemys", "Righteous Glory if  Enemy >=").SetValue(new Slider(2, 1, 5)));
-            _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("Righteousenemysrange", "Righteous Glory Range Check").SetValue(new Slider(800, 400, 1400)));
+            _config.SubMenu("items").SubMenu("Defensive").AddItem(new MenuItem("Righteous", "Use Righteous Glory")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").AddItem(new MenuItem("Righteousenemys", "Righteous Glory if >= X Target(s)"").SetValue(new Slider(2, 1, 5)));
+            _config.SubMenu("items").SubMenu("Defensive").AddItem(new MenuItem("Righteousenemysrange", "Range to Use Righteous Glory").SetValue(new Slider(800, 400, 1400)));
             
             _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usehppotions", "Use Healt potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usehppotions", "Use Health Potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionhp", "If % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usemppotions", "Use Mana Potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
 
 
             //Farm
@@ -186,11 +186,11 @@ namespace D_Udyr
             _config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("Use-R-Farm", "Use R")).SetValue(true);
             _config.SubMenu("Farm")
                 .SubMenu("Lane")
-                .AddItem(new MenuItem("Farm-Mana", "Mana Limit").SetValue(new Slider(50, 100, 0)));
+                .AddItem(new MenuItem("Farm-Mana", "Min. % Mana").SetValue(new Slider(50, 100, 0)));
             _config.SubMenu("Farm")
                 .SubMenu("Lane")
                 .AddItem(
-                    new MenuItem("ActiveLane", "Lane Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("ActiveLane", "Lane Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             _config.SubMenu("Farm").AddSubMenu(new Menu("Jungle", "Jungle"));
             _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("jungleitems", "Use Items")).SetValue(true);
             _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("Use-Q-Jungle", "Use Q")).SetValue(true);
@@ -199,25 +199,25 @@ namespace D_Udyr
             _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("Use-R-Jungle", "Use R")).SetValue(true);
             _config.SubMenu("Farm")
                 .SubMenu("Jungle")
-                .AddItem(new MenuItem("Jungle-Mana", "Mana Limit").SetValue(new Slider(50, 100, 0)));
+                .AddItem(new MenuItem("Jungle-Mana", "Min. % Mana").SetValue(new Slider(50, 100, 0)));
             _config.SubMenu("Farm")
                 .SubMenu("Jungle")
                 .AddItem(
-                    new MenuItem("ActiveJungle", "Jungle Key").SetValue(new KeyBind("V".ToCharArray()[0],
+                    new MenuItem("ActiveJungle", "Jungle Clear").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
 
             //Smite 
             _config.AddSubMenu(new Menu("Smite", "Smite"));
             _config.SubMenu("Smite")
                 .AddItem(
-                    new MenuItem("Usesmite", "Use Smite(toggle)").SetValue(new KeyBind("H".ToCharArray()[0],
+                    new MenuItem("Usesmite", "Use Smite (Toggle)").SetValue(new KeyBind("H".ToCharArray()[0],
                         KeyBindType.Toggle)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue Early ")).SetValue(true);
+            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue-Camp Early")).SetValue(true);
             _config.SubMenu("Smite")
-                .AddItem(new MenuItem("manaJ", "Smite Blue Early if MP% <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red Early ")).SetValue(true);
+                .AddItem(new MenuItem("manaJ", "Smite Blue-Camp if MP% <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red-Camp Early")).SetValue(true);
             _config.SubMenu("Smite")
-                .AddItem(new MenuItem("healthJ", "Smite Red Early if HP% <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("healthJ", "Smite Red-Camp if % HP <").SetValue(new Slider(35, 1, 100)));
 
             _config.AddToMainMenu();
             Drawing.OnDraw += Drawing_OnDraw;
@@ -229,10 +229,10 @@ namespace D_Udyr
             }
             
 
-            Game.PrintChat("<font color='#881df2'>Udyr By Diabaths </font>Loaded!");
-            Game.PrintChat("<font color='#881df2'>StunCycle by xcxooxl");
-            Game.PrintChat(
-                "<font color='#FF0000'>If You like my work and want to support me,  plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
+            //Game.PrintChat("<font color='#881df2'>Udyr By Diabaths </font>Loaded!");
+            //Game.PrintChat("<font color='#881df2'>StunCycle by xcxooxl");
+            //Game.PrintChat(
+            //    "<font color='#FF0000'>If You like my work and want to support me,  plz donate via paypal in </font> <font //color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
 
         private static void LevelUpMode(object sender, OnValueChangeEventArgs e)
