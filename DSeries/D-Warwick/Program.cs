@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
@@ -77,67 +77,67 @@ namespace D_Warwick
 
             //Combo useignite
             _config.AddSubMenu(new Menu("Combo", "Combo"));
-            _config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite in target")).SetValue(true);
+            _config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite on Target")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("useignite", "Use Ignite")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("useQC", "Use Q")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("myass", "Use Q In minions if enemys out of qrange")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("savemyass", "use Q in Minion if HP% <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Combo").AddItem(new MenuItem("myass", "Use Q on Minions if No Targets")).SetValue(true);
+            _config.SubMenu("Combo").AddItem(new MenuItem("savemyass", "Use Q on Minion if % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("Combo").AddItem(new MenuItem("useWC", "Use W").SetValue(true));
-            _config.SubMenu("Combo").AddSubMenu(new Menu("Ulti_Use", "Ulti_Use"));
+            _config.SubMenu("Combo").AddSubMenu(new Menu("Ultimate Settings", "Ulti_Use"));
             _config.SubMenu("Combo").SubMenu("Ulti_Use").AddItem(new MenuItem("UseRC", "Use R")).SetValue(true);
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != _player.Team))
                 _config.SubMenu("Combo").SubMenu("Ulti_Use").AddItem(new MenuItem("castR" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("UseCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("UseCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
-            _config.AddSubMenu(new Menu("items", "items"));
+            _config.AddSubMenu(new Menu("Items", "items"));
             _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Tiamat", "Use Tiamat")).SetValue(true);
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hydra", "Use Hydra")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Cutlass")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
+                .AddItem(new MenuItem("Bilgemyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use BotRK")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
+                .AddItem(new MenuItem("Blademyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
+            _config.SubMenu("items").AddSubMenu(new Menu("Defensive", "Defensive"));
             _config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("Omen", "Use Randuin Omen"))
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("Omen", "Use Randuin's Omen"))
                 .SetValue(true);
             _config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("Omenenemys", "Randuin if enemys>").SetValue(new Slider(2, 1, 5)));
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("Omenenemys", "Use Randuin's if Targets >=").SetValue(new Slider(2, 1, 5)));
             _config.SubMenu("items")
-                .SubMenu("Deffensive")
+                .SubMenu("Defensive")
                 .AddItem(new MenuItem("lotis", "Use Iron Solari"))
                 .SetValue(true);
             _config.SubMenu("items")
-                .SubMenu("Deffensive")
-                .AddItem(new MenuItem("lotisminhp", "Solari if Ally Hp<").SetValue(new Slider(35, 1, 100)));
+                .SubMenu("Defensive")
+                .AddItem(new MenuItem("lotisminhp", "Use Solari if Ally % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usehppotions", "Use Healt potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usehppotions", "Use Health Potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionhp", "If % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usemppotions", "Use Mana Potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
 
             //harass
             _config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -145,59 +145,59 @@ namespace D_Warwick
             _config.SubMenu("Harass").AddItem(new MenuItem("useQH", "Use Q").SetValue(true));
             _config.SubMenu("Harass").AddItem(new MenuItem("useWH", "Use W").SetValue(true));
             _config.SubMenu("Harass")
-                .AddItem(new MenuItem("harassmana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("harassmana", "Min. % Mana").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("Harass")
-                .AddItem(new MenuItem("harasstoggle", "AutoHarass (toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
+                .AddItem(new MenuItem("harasstoggle", "Auto-Harass (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                     KeyBindType.Toggle)));
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("ActiveHarass", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("ActiveHarass", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             //Farm
             _config.AddSubMenu(new Menu("Farm", "Farm"));
-            _config.SubMenu("Farm").AddSubMenu(new Menu("LaneClear", "LaneClear"));
+            _config.SubMenu("Farm").AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             _config.SubMenu("Farm").SubMenu("LaneClear").AddItem(new MenuItem("UseItemslane", "Use Items").SetValue(true));
             _config.SubMenu("Farm").SubMenu("LaneClear").AddItem(new MenuItem("UseQL", "Use Q").SetValue(true));
             _config.SubMenu("Farm").SubMenu("LaneClear").AddItem(new MenuItem("useWL", "use W").SetValue(true));
             _config.SubMenu("Farm")
                 .SubMenu("LaneClear")
                 .AddItem(
-                    new MenuItem("ActiveLane", "Farm key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("ActiveLane", "Lane Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             _config.SubMenu("Farm")
                 .SubMenu("LaneClear")
-                .AddItem(new MenuItem("Lanemana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
-            _config.SubMenu("Farm").AddSubMenu(new Menu("Jungle", "Jungle"));
+                .AddItem(new MenuItem("Lanemana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
+            _config.SubMenu("Farm").AddSubMenu(new Menu("Jungle Clear", "Jungle"));
             _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseItemsjungle", "Use Items").SetValue(true));
             _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("useQJ", "Use Q").SetValue(true));
             _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("useWJ", "Use W").SetValue(true));
             _config.SubMenu("Farm")
                .SubMenu("Jungle")
                .AddItem(
-                   new MenuItem("ActiveJungle", "Jungle key").SetValue(new KeyBind("V".ToCharArray()[0],
+                   new MenuItem("ActiveJungle", "Jungle").SetValue(new KeyBind("V".ToCharArray()[0],
                        KeyBindType.Press)));
             _config.SubMenu("Farm")
                 .SubMenu("Jungle")
-                .AddItem(new MenuItem("Junglemana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Junglemana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
 
             //Smite ActiveJungle
             _config.AddSubMenu(new Menu("Smite", "Smite"));
             _config.SubMenu("Smite")
                 .AddItem(
-                    new MenuItem("Usesmite", "Use Smite(toggle)").SetValue(new KeyBind("H".ToCharArray()[0],
+                    new MenuItem("Usesmite", "Use Smite (Toggle)").SetValue(new KeyBind("H".ToCharArray()[0],
                         KeyBindType.Toggle)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue Early ")).SetValue(true);
+            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue-Camp Early")).SetValue(true);
             _config.SubMenu("Smite")
-                .AddItem(new MenuItem("manaJ", "Smite Blue Early if MP% <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red Early ")).SetValue(true);
+                .AddItem(new MenuItem("manaJ", "Smite Blue-Camp if % Mana <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red-Camp Early")).SetValue(true);
             _config.SubMenu("Smite")
-                .AddItem(new MenuItem("healthJ", "Smite Red Early if HP% <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("healthJ", "Smite Red-Camp if % HP <").SetValue(new Slider(35, 1, 100)));
 
             //Misc
             _config.AddSubMenu(new Menu("Misc", "Misc"));
-            _config.SubMenu("Misc").AddItem(new MenuItem("Inter_R", "Interrupter R")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseIgnitekill", "Use Ignite KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseQM", "Use Q KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseRM", "Use R KillSteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("Inter_R", "Use R to Interrupt")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseIgnitekill", "Use Ignite to Killsteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseQM", "Use Q to Killsteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseRM", "Use R to Killsteal")).SetValue(true);
            
 
             //Draw
@@ -206,16 +206,16 @@ namespace D_Warwick
             _config.SubMenu("Drawing").AddItem(new MenuItem("DrawW", "Draw W").SetValue(true));
             _config.SubMenu("Drawing").AddItem(new MenuItem("DrawE", "Draw E").SetValue(true));
             _config.SubMenu("Drawing").AddItem(new MenuItem("DrawR", "Draw R").SetValue(true));
-            _config.SubMenu("Drawing").AddItem(new MenuItem("Drawsmite", "Draw smite")).SetValue(true);
-            _config.SubMenu("Drawing").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
+            _config.SubMenu("Drawing").AddItem(new MenuItem("Drawsmite", "Draw Smite")).SetValue(true);
+            _config.SubMenu("Drawing").AddItem(new MenuItem("CircleLag", "Lag-Free Circles").SetValue(true));
             _config.SubMenu("Drawing")
-                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
+                .AddItem(new MenuItem("CircleQuality", "Circle Quality").SetValue(new Slider(100, 100, 10)));
             _config.SubMenu("Drawing")
-                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
+                .AddItem(new MenuItem("CircleThickness", "Circle Thickness").SetValue(new Slider(1, 10, 1)));
 
             _config.AddToMainMenu();
 
-            Game.PrintChat("<font color='#881df2'>D-Warwick by Diabaths</font> Loaded.");
+            //Game.PrintChat("<font color='#881df2'>D-Warwick by Diabaths</font> Loaded.");
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
