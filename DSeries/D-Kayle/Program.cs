@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -88,64 +88,64 @@ namespace D_Kayle
             //Combo
             _config.AddSubMenu(new Menu("Combo", "Combo"));
             _config.SubMenu("Combo").AddItem(new MenuItem("UseIgnitecombo", "Use Ignite")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite in target")).SetValue(true);
+            _config.SubMenu("Combo").AddItem(new MenuItem("smitecombo", "Use Smite on Target")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E")).SetValue(true);
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("ActiveCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
 
             _config.AddSubMenu(new Menu("items", "items"));
             _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("frostQ", "Use Frost Queen")).SetValue(true);
-            _config.SubMenu("items").AddSubMenu(new Menu("Deffensive", "Deffensive"));
-            _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("Omen", "Use Randuin Omen")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("Omenenemys", "Randuin if enemys>").SetValue(new Slider(2, 1, 5)));
-            _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("lotis", "Use Iron Solari")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").AddItem(new MenuItem("lotisminhp", "Solari if Ally Hp<").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("items").SubMenu("Deffensive").AddSubMenu(new Menu("Cleanse", "Cleanse"));
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddSubMenu(new Menu("Mikael's Crucible", "mikael"));
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").SubMenu("mikael").AddItem(new MenuItem("usemikael", "Use Mikael's to remove Debuffs")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").SubMenu("mikael").AddItem(new MenuItem("mikaelusehp", "Or Use if Mikael's Ally Hp <%").SetValue(new Slider(25, 1, 100)));
+            _config.SubMenu("items").AddSubMenu(new Menu("Defensive", "Defensive"));
+            _config.SubMenu("items").SubMenu("Defensive").AddItem(new MenuItem("Omen", "Use Randuin's Omen")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").AddItem(new MenuItem("Omenenemys", "Use Randuin's if Targets >=").SetValue(new Slider(2, 1, 5)));
+            _config.SubMenu("items").SubMenu("Defensive").AddItem(new MenuItem("lotis", "Use Iron Solari")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").AddItem(new MenuItem("lotisminhp", "Use Solari if Ally % HP <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("items").SubMenu("Defensive").AddSubMenu(new Menu("Cleanse", "Cleanse"));
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddSubMenu(new Menu("Mikael's Crucible", "mikael"));
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").SubMenu("mikael").AddItem(new MenuItem("usemikael", "Use Mikael's to Remove Debuffs")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").SubMenu("mikael").AddItem(new MenuItem("mikaelusehp", "Use Mikael's if Ally % HP <").SetValue(new Slider(25, 1, 100)));
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly))
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").SubMenu("mikael").AddItem(new MenuItem("mikaeluse" + hero.BaseSkinName, hero.BaseSkinName).SetValue(true));
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("useqss", "Use QSS/Mercurial Scimitar/Dervish Blade")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("blind", "Blind")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("charm", "Charm")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("fear", "Fear")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("flee", "Flee")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("snare", "Snare")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("taunt", "Taunt")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("suppression", "Suppression")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("stun", "Stun")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("polymorph", "Polymorph")).SetValue(false);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("silence", "Silence")).SetValue(false);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("zedultexecute", "Zed Ult")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Deffensive").SubMenu("Cleanse").AddItem(new MenuItem("Cleansemode", "")).SetValue(new StringList(new string[2] { "Cleanse Always", "Cleanse in Combo" }));
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").SubMenu("mikael").AddItem(new MenuItem("mikaeluse" + hero.BaseSkinName, hero.BaseSkinName).SetValue(true));
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("useqss", "Use QSS/Mercurial Scimitar/Dervish Blade")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("blind", "Blind")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("charm", "Charm")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("fear", "Fear")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("flee", "Flee")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("snare", "Snare")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("taunt", "Taunt")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("suppression", "Suppression")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("stun", "Stun")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("polymorph", "Polymorph")).SetValue(false);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("silence", "Silence")).SetValue(false);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("zedultexecute", "Zed's Death Mark")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Defensive").SubMenu("Cleanse").AddItem(new MenuItem("Cleansemode", "")).SetValue(new StringList(new string[2] { "Cleanse Always", "Cleanse in Combo" }));
 
             _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
-            _config.SubMenu("items").SubMenu("Potions").AddItem(new MenuItem("usehppotions", "Use Healt potion/Flask/Biscuit")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Potions").AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("items").SubMenu("Potions").AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Potions").AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("items").SubMenu("Potions").AddItem(new MenuItem("usehppotions", "Use Health Potion/Flask/Biscuit")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Potions").AddItem(new MenuItem("usepotionhp", "If % HP <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("items").SubMenu("Potions").AddItem(new MenuItem("usemppotions", "Use Mana Potion/Flask/Biscuit")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Potions").AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
 
             //utilities
             _config.AddSubMenu(new Menu("Utilities", "utilities"));
-            _config.SubMenu("utilities").AddItem(new MenuItem("onmeW", "W Self")).SetValue(true);
-            _config.SubMenu("utilities").AddItem(new MenuItem("healper", "Self Health %")).SetValue(new Slider(40, 1, 100));
-            _config.SubMenu("utilities").AddItem(new MenuItem("onmeR", "R Self Use")).SetValue(true);
-            _config.SubMenu("utilities").AddItem(new MenuItem("ultiSelfHP", "Self Health %")).SetValue(new Slider(40, 1, 100));
+            _config.SubMenu("utilities").AddItem(new MenuItem("onmeW", "Use W on Self")).SetValue(true);
+            _config.SubMenu("utilities").AddItem(new MenuItem("healper", "Self % HP")).SetValue(new Slider(40, 1, 100));
+            _config.SubMenu("utilities").AddItem(new MenuItem("onmeR", "Use R on Self")).SetValue(true);
+            _config.SubMenu("utilities").AddItem(new MenuItem("ultiSelfHP", "Self % HP")).SetValue(new Slider(40, 1, 100));
 
-            _config.SubMenu("utilities").AddSubMenu(new Menu("Use W Ally", "Use W Ally"));
-             _config.SubMenu("utilities").SubMenu("Use W Ally").AddItem(new MenuItem("allyW", "W Ally")).SetValue(true);
-             _config.SubMenu("utilities").SubMenu("Use W Ally").AddItem(new MenuItem("allyhealper", "Ally Health %")).SetValue(new Slider(40, 1, 100));
+            _config.SubMenu("utilities").AddSubMenu(new Menu("Use W on Ally", "Use W Ally"));
+             _config.SubMenu("utilities").SubMenu("Use W Ally").AddItem(new MenuItem("allyW", "Use W on Ally")).SetValue(true);
+             _config.SubMenu("utilities").SubMenu("Use W Ally").AddItem(new MenuItem("allyhealper", "Ally % HP")).SetValue(new Slider(40, 1, 100));
              foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly && !hero.IsMe))
              _config.SubMenu("utilities").SubMenu("Use W Ally").AddItem(new MenuItem("usewally" + hero.BaseSkinName, hero.BaseSkinName).SetValue(true));
 
-             _config.SubMenu("utilities").AddSubMenu(new Menu("Use R Ally", "Use R Ally"));
-             _config.SubMenu("utilities").SubMenu("Use R Ally").AddItem(new MenuItem("allyR", "R Ally Use")).SetValue(true);
-             _config.SubMenu("utilities").SubMenu("Use R Ally").AddItem(new MenuItem("ultiallyHP", "Ally Health %")).SetValue(new Slider(40, 1, 100));
+             _config.SubMenu("utilities").AddSubMenu(new Menu("Use R on Ally", "Use R Ally"));
+             _config.SubMenu("utilities").SubMenu("Use R Ally").AddItem(new MenuItem("allyR", "Use R on Ally")).SetValue(true);
+             _config.SubMenu("utilities").SubMenu("Use R Ally").AddItem(new MenuItem("ultiallyHP", "Ally % HP")).SetValue(new Slider(40, 1, 100));
              foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly && !hero.IsMe))
                 _config.SubMenu("utilities").SubMenu("Use R Ally").AddItem(new MenuItem("userally" + hero.BaseSkinName, hero.BaseSkinName).SetValue(true));
 
@@ -155,56 +155,56 @@ namespace D_Kayle
             _config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E")).SetValue(true);
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("harasstoggle", "AutoHarass (toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
+                    new MenuItem("harasstoggle", "Auto-Harass (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("ActiveHarass", "Harass key").SetValue(new KeyBind("X".ToCharArray()[0],
+                    new MenuItem("ActiveHarass", "Harass").SetValue(new KeyBind("X".ToCharArray()[0],
                         KeyBindType.Press)));
             _config.SubMenu("Harass")
-                .AddItem(new MenuItem("Harrasmana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Harrasmana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
 
             //Farm
             _config.AddSubMenu(new Menu("Farm", "Farm"));
-            _config.SubMenu("Farm").AddSubMenu(new Menu("Laneclear", "Laneclear"));
-            _config.SubMenu("Farm").SubMenu("Laneclear").AddItem(new MenuItem("UseQLane", "Use Q Lane")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Laneclear").AddItem(new MenuItem("UseELane", "Use E Lane")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Laneclear").AddItem(new MenuItem("Farmmana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+            _config.SubMenu("Farm").AddSubMenu(new Menu("Lane Clear", "Laneclear"));
+            _config.SubMenu("Farm").SubMenu("Laneclear").AddItem(new MenuItem("UseQLane", "Use Q")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Laneclear").AddItem(new MenuItem("UseELane", "Use E")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Laneclear").AddItem(new MenuItem("Farmmana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             _config.SubMenu("Farm").SubMenu("Laneclear").AddItem(new MenuItem("Activelane", "Lane Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             _config.SubMenu("Farm").AddSubMenu(new Menu("Lasthit", "Lasthit"));
-            _config.SubMenu("Farm").SubMenu("Lasthit").AddItem(new MenuItem("UseQLast", "Use Q Last")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Lasthit").AddItem(new MenuItem("UseELast", "Use E Last")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Lasthit").AddItem(new MenuItem("lasthitmana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+            _config.SubMenu("Farm").SubMenu("Lasthit").AddItem(new MenuItem("UseQLast", "Use Q")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Lasthit").AddItem(new MenuItem("UseELast", "Use E")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Lasthit").AddItem(new MenuItem("lasthitmana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             _config.SubMenu("Farm").SubMenu("Lasthit").AddItem(new MenuItem("activelast", "Last Hit").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
             _config.SubMenu("Farm").AddSubMenu(new Menu("Jungleclear", "Jungleclear"));
-            _config.SubMenu("Farm").SubMenu("Jungleclear").AddItem(new MenuItem("UseQjungle", "Use Q Jungle")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Jungleclear").AddItem(new MenuItem("UseEjungle", "Use E Jungle")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Jungleclear").AddItem(new MenuItem("junglemana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+            _config.SubMenu("Farm").SubMenu("Jungleclear").AddItem(new MenuItem("UseQjungle", "Use Q")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Jungleclear").AddItem(new MenuItem("UseEjungle", "Use E")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Jungleclear").AddItem(new MenuItem("junglemana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             _config.SubMenu("Farm").SubMenu("Jungleclear").AddItem(new MenuItem("Activejungle", "Jungle Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
            
             //Smite 
             _config.AddSubMenu(new Menu("Smite", "Smite"));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Usesmite", "Use Smite(toggle)").SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue Early ")).SetValue(true);
-            _config.SubMenu("Smite").AddItem(new MenuItem("manaJ", "Smite Blue Early if MP% <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red Early ")).SetValue(true);
-            _config.SubMenu("Smite").AddItem(new MenuItem("healthJ", "Smite Red Early if HP% <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Usesmite", "Use Smite (Toggle)").SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Toggle)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue-Camp Early")).SetValue(true);
+            _config.SubMenu("Smite").AddItem(new MenuItem("manaJ", "Smite Blue-Camp iif % MP <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red-Camp Early")).SetValue(true);
+            _config.SubMenu("Smite").AddItem(new MenuItem("healthJ", "Smite Red-Camp if % HP <").SetValue(new Slider(35, 1, 100)));
 
             //Kill Steal
             _config.AddSubMenu(new Menu("Misc", "Misc"));
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseQKs", "Use Q KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseIgnite", "Use Ignite KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("usePackets", "Usepackes")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseQKs", "Use Q to Killsteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseIgnite", "Use Ignite to Killsteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("usePackets", "Use Packets")).SetValue(true);
             _config.SubMenu("Misc").AddItem(new MenuItem("skinKa", "Use Custom Skin").SetValue(false));
             _config.SubMenu("Misc").AddItem(new MenuItem("skinKayle", "Skin Changer").SetValue(new Slider(4, 1, 8)));
-            _config.SubMenu("Misc").AddItem(new MenuItem("GapCloserE", "Use Q to GapCloser")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("GapCloserE", "Use Q against Gapcloser")).SetValue(true);
             _config.SubMenu("Misc")
                 .AddItem(
-                    new MenuItem("Escape", "Escapes key").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("Escape", "Escape").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
             _config.SubMenu("Misc").AddItem(new MenuItem("support", "Support Mode")).SetValue(false);
 
             //Damage after combo:
-            MenuItem dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
+            MenuItem dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw Combo Damage").SetValue(true);
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
             dmgAfterComboItem.ValueChanged +=
@@ -219,12 +219,12 @@ namespace D_Kayle
             _config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
             _config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
             _config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("Drawsmite", "Draw smite")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
+            _config.SubMenu("Drawings").AddItem(new MenuItem("Drawsmite", "Draw Smite")).SetValue(true);
+            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag-Free Circles").SetValue(true));
             _config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
+                .AddItem(new MenuItem("CircleQuality", "Circle Quality").SetValue(new Slider(100, 100, 10)));
             _config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
+                .AddItem(new MenuItem("CircleThickness", "Circle Thickness").SetValue(new Slider(1, 10, 1)));
 
             _config.AddToMainMenu();
 
@@ -233,14 +233,14 @@ namespace D_Kayle
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
 
-            Game.PrintChat("<font color='#881df2'>D-Kayle By Diabaths </font>Loaded!");
+            //Game.PrintChat("<font color='#881df2'>D-Kayle By Diabaths </font>Loaded!");
             if (_config.Item("skinKa").GetValue<bool>())
             {
                 GenModelPacket(_player.ChampionName, _config.Item("skinKayle").GetValue<Slider>().Value);
                 _lastSkin = _config.Item("skinKayle").GetValue<Slider>().Value;
             }
-            Game.PrintChat(
-               "<font color='#FF0000'>If You like my work and want to support me,  plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
+            //Game.PrintChat(
+            //   "<font color='#FF0000'>If You like my work and want to support me,  plz donate via paypal in </font> <font //color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
 
         private static void Game_OnUpdate(EventArgs args)
