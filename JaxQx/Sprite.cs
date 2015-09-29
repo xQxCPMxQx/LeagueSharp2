@@ -1,11 +1,11 @@
 ﻿using LeagueSharp;
 using SharpDX;
 
-namespace XinZhao
+namespace JaxQx
 {
     using LeagueSharp.Common;
 
-    using XinZhao.Properties;
+    using JaxQx.Properties;
 
     internal class Sprite
     {
@@ -14,7 +14,7 @@ namespace XinZhao
             get
             {
                 var drawStatus = Program.AssassinManager.Config.Item("Draw.Status").GetValue<StringList>().SelectedIndex;
-                if (KillableEnemy == null || (drawStatus!= 2 && drawStatus != 3))
+                if (KillableEnemy == null || (drawStatus != 2 && drawStatus != 3))
                     return new Vector2(0f, 0f);
 
                 return new Vector2(KillableEnemy.HPBarPosition.X + KillableEnemy.BoundingRadius / 2f,

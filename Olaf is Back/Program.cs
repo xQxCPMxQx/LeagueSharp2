@@ -84,6 +84,7 @@ namespace Olafisback
 
         private enum EnumItemType
         {
+            OnTarget,
             Targeted,
             AoE
         }
@@ -162,7 +163,7 @@ namespace Olafisback
             ItemDb =
                 new Dictionary<string, Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>>
                     {
-                        {
+                         {
                             "Tiamat",
                             new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
                             new LeagueSharp.Common.Items.Item(3077, 450f),
@@ -194,7 +195,7 @@ namespace Olafisback
                             "Titanic Hydra Cleave",
                             new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
                             new LeagueSharp.Common.Items.Item(3748, Orbwalking.GetRealAutoAttackRange(null) + 65),
-                            EnumItemType.AoE,
+                            EnumItemType.OnTarget,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
@@ -415,6 +416,7 @@ namespace Olafisback
             Game.OnUpdate += Game_OnUpdate;
             GameObject.OnCreate += GameObject_OnCreate;
             GameObject.OnDelete += GameObject_OnDelete;
+            Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
             Game.PrintChat("<font color='#FFFFFF'>Olaf is Back V2</font> <font color='#70DBDB'> Loaded!</font>");
         }
 
@@ -441,6 +443,22 @@ namespace Olafisback
             }
         }
 
+        private static void OrbwalkingBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (args.Target is Obj_AI_Hero)
+            {
+                foreach (var item in
+                    ItemDb.Where(
+                        i =>
+                        i.Value.ItemType == EnumItemType.OnTarget
+                        && i.Value.TargetingType == EnumItemTargettingType.EnemyHero && i.Value.Item.IsReady()))
+                {
+                    Game.PrintChat(item.Value.Item.Id.ToString());
+                    item.Value.Item.Cast();
+                }
+            }
+        }
+        
         private static void Drawing_OnDraw(EventArgs args)
         {
             var drawAxePosition = Config.Item("Draw.AxePosition").GetValue<Circle>();

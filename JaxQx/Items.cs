@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using LeagueSharp.Common;
 
-namespace XinZhao
+namespace JaxQx
 {
     internal class Items
     {
