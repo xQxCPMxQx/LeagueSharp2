@@ -448,10 +448,10 @@ namespace Olafisback
             if (args.Target is Obj_AI_Hero)
             {
                 foreach (var item in
-                    Items.ItemDb.Where(
+                    ItemDb.Where(
                         i =>
-                        i.Value.ItemType == Items.EnumItemType.OnTarget
-                        && i.Value.TargetingType == Items.EnumItemTargettingType.EnemyHero && i.Value.Item.IsReady()))
+                        i.Value.ItemType == EnumItemType.OnTarget
+                        && i.Value.TargetingType == EnumItemTargettingType.EnemyHero && i.Value.Item.IsReady()))
                 {
                     Game.PrintChat(item.Value.Item.Id.ToString());
                     item.Value.Item.Cast();
