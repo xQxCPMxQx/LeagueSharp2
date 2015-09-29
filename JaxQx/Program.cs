@@ -20,9 +20,7 @@ namespace JaxQx
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
 
-        private static bool usedSpell = true;
-
-        private static bool ShenBuffActive;
+        private static bool shenBuffActive;
 
         public static AssassinManager AssassinManager;
 
@@ -190,7 +188,7 @@ namespace JaxQx
                 {
                     if (sender.IsMe && eventArgs.Buff.Name.ToLower() == "sheen")
                     {
-                        ShenBuffActive = false;
+                        shenBuffActive = false;
                     }
                 };
 
@@ -199,7 +197,7 @@ namespace JaxQx
                     if (sender.IsMe && eventArgs.Buff.Name.ToLower() == "sheen")
                     {
 
-                        ShenBuffActive = true;
+                        shenBuffActive = true;
                     }
                     
                 };
@@ -211,7 +209,7 @@ namespace JaxQx
         {
             if (args.Target is Obj_AI_Hero)
             {
-                if (W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>() && !ShenBuffActive)
+                if (W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>() && !shenBuffActive)
                 {
                     W.Cast();
                 }
@@ -366,7 +364,7 @@ namespace JaxQx
                 return;
             }
 
-            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && ShenBuffActive)
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && shenBuffActive)
             {
                 return;
             }
