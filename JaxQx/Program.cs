@@ -13,14 +13,16 @@ namespace JaxQx
     {
         public const string ChampionName = "Jax";
 
-        public static readonly Obj_AI_Hero Player = ObjectManager.Player;
+        public static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+
+        public static string Tab { get { return "       "; } }
 
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
 
         private static bool usedSpell = true;
 
-        private static bool shennBuffActive = false;
+        private static bool ShenBuffActive;
 
         public static AssassinManager AssassinManager;
 
@@ -49,7 +51,6 @@ namespace JaxQx
 
         public static Map map;
 
-        private static SpellSlot igniteSlot;
 
         public static float WardRange = 600f;
 
@@ -81,29 +82,26 @@ namespace JaxQx
             SpellList.Add(E);
             SpellList.Add(R);
 
-            igniteSlot = Player.GetSpellSlot("SummonerDot");
-
             //Create the menu
             Config = new Menu("xQx | Jax", "Jax", true);
 
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
-
             AssassinManager = new AssassinManager();
+            AssassinManager.Load();
+            Sprite.Load();
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
 
             // Combo
-            Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo")
-                .AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int)Q.Range)));
-            Config.SubMenu("Combo")
-                .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow));
-
+            var menuCombo = new Menu("Combo", "Combo");
+            
+            
+            menuCombo.AddItem(new MenuItem("ComboUseQMinRange", "Min. Q Range").SetValue(new Slider(250, (int)Q.Range)));
+            menuCombo.AddItem(new MenuItem("Combo.CastE", "E Setting:").SetValue(new StringList(new[] { "Cast E Before Q Jump", "Cast E After Q Jump" }, 1)));
+            
+            menuCombo.AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow));
+            Config.AddSubMenu(menuCombo);
             // Harass
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
@@ -150,6 +148,7 @@ namespace JaxQx
 
             Extra = new Extra();
             Utils = new Utils();
+            PlayerSpells.Initialize();
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings")
@@ -187,6 +186,23 @@ namespace JaxQx
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
+            Obj_AI_Base.OnBuffRemove += (sender, eventArgs) =>
+                {
+                    if (sender.IsMe && eventArgs.Buff.Name.ToLower() == "sheen")
+                    {
+                        ShenBuffActive = false;
+                    }
+                };
+
+            Obj_AI_Base.OnBuffAdd += (sender, eventArgs) =>
+                {
+                    if (sender.IsMe && eventArgs.Buff.Name.ToLower() == "sheen")
+                    {
+
+                        ShenBuffActive = true;
+                    }
+                    
+                };
 
             Notifications.AddNotification(String.Format("{0} Loaded", ChampionName), 4000);
         }
@@ -195,7 +211,7 @@ namespace JaxQx
         {
             if (args.Target is Obj_AI_Hero)
             {
-                if (W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>())
+                if (W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>() && !ShenBuffActive)
                 {
                     W.Cast();
                 }
@@ -253,8 +269,8 @@ namespace JaxQx
                 fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.E);
             }
 
-            if (igniteSlot != SpellSlot.Unknown
-                && ObjectManager.Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
+            if (PlayerSpells.IgniteSlot != SpellSlot.Unknown
+                && ObjectManager.Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready)
             {
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
             }
@@ -273,16 +289,17 @@ namespace JaxQx
             {
                 return;
             }
+            if (arg.Slot == SpellSlot.Q && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
+                && E.IsReady())
+            {
 
-            if (arg.SData.Name.ToLower().Contains("jaxleapstrike") || arg.SData.Name.ToLower().Contains("jaxempowertwo")
-                || arg.SData.Name.ToLower().Contains("jaxcounterstrike"))
-            {
-                usedSpell = true;
+                if (Config.Item("Combo.CastE").GetValue<StringList>().SelectedIndex == 0)
+                {
+                    
+                    E.Cast();
+                }
             }
-            else
-            {
-                usedSpell = false;
-            }
+
 
             if (Wards.ToList().Contains(arg.SData.Name))
             {
@@ -297,8 +314,6 @@ namespace JaxQx
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            shennBuffActive = Player.HasBuff("Sheen", true);
-
             if (DelayTick - Environment.TickCount <= 250)
             {
                 DelayTick = Environment.TickCount;
@@ -351,7 +366,7 @@ namespace JaxQx
                 return;
             }
 
-            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && (shennBuffActive || usedSpell))
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95) && ShenBuffActive)
             {
                 return;
             }
@@ -363,19 +378,36 @@ namespace JaxQx
                 Q.Cast(t);
             }
 
+            if (E.IsReady())
+            {
+                switch (Config.Item("Combo.CastE").GetValue<StringList>().SelectedIndex)
+                {
+                    case 0:
+                        if (E.IsReady() && Q.IsReady() && t.IsValidTarget(Q.Range))
+                        {
+                            if (Player.Distance(t) >= minQRange && t.IsValidTarget(Q.Range))
+                                Q.CastOnUnit(t);
+                            E.Cast();
+                        }
+                        break;
+                    case 1:
+                        if (E.IsReady() && t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 95))
+                        {
+                            E.Cast();
+                        }
+                        break;
+                }
+            }
+
             if (Q.IsReady() && Player.Distance(t) >= minQRange && t.IsValidTarget(Q.Range))
             {
-                if (E.IsReady())
-                {
-                    E.Cast();
-                }
-
                 Q.Cast(t);
             }
+            
 
             if (ObjectManager.Player.Distance(t) <= E.Range)
             {
-                //CastItems();
+                CastItems();
                 //UseItems(t);
             }
 
@@ -389,12 +421,12 @@ namespace JaxQx
                 E.Cast();
             }
 
-            if (igniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
+            if (PlayerSpells.IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(PlayerSpells.IgniteSlot) == SpellState.Ready)
             {
                 if (Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health
                     && ObjectManager.Player.Distance(t) <= 500)
                 {
-                    Player.Spellbook.CastSpell(igniteSlot, t);
+                    Player.Spellbook.CastSpell(PlayerSpells.IgniteSlot, t);
                 }
             }
 
@@ -591,24 +623,28 @@ namespace JaxQx
             if (!t.IsValidTarget())
                 return;
 
-            foreach (var item in Items.ItemDb)
+            foreach (
+                var item in
+                    Items.ItemDb.Where(
+                        item =>
+                        item.Value.ItemType == Items.EnumItemType.AoE
+                        && item.Value.TargetingType == Items.EnumItemTargettingType.EnemyObjects)
+                        .Where(item => t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady()))
             {
-                if (item.Value.ItemType == Items.EnumItemType.AoE && item.Value.TargetingType == Items.EnumItemTargettingType.EnemyObjects)
-                {
-                    if (t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady())
-                    {
-                        item.Value.Item.Cast();
-                    }
-                }
-
-                if (item.Value.ItemType == Items.EnumItemType.Targeted && item.Value.TargetingType == Items.EnumItemTargettingType.EnemyHero)
-                {
-                    if (t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady())
-                    {
-                        item.Value.Item.Cast(t);
-                    }
-                }
+                item.Value.Item.Cast();
             }
+
+            foreach (
+                var item in
+                    Items.ItemDb.Where(
+                        item =>
+                        item.Value.ItemType == Items.EnumItemType.Targeted
+                        && item.Value.TargetingType == Items.EnumItemTargettingType.EnemyHero)
+                        .Where(item => t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady()))
+            {
+                item.Value.Item.Cast(t);
+            }
+
         }
     }
 }
