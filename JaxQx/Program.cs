@@ -13,7 +13,7 @@ namespace JaxQx
     {
         public const string ChampionName = "Jax";
 
-        private static readonly Obj_AI_Hero Player = ObjectManager.Player;
+        public static readonly Obj_AI_Hero Player = ObjectManager.Player;
 
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
@@ -24,6 +24,11 @@ namespace JaxQx
 
         public static AssassinManager AssassinManager;
 
+        public static Items Items;
+
+        public static Extra Extra;
+
+        public static Utils Utils;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
 
@@ -68,6 +73,8 @@ namespace JaxQx
             R = new Spell(SpellSlot.R);
 
             Q.SetTargetted(0.50f, 75f);
+
+            Items = new Items();
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -117,35 +124,32 @@ namespace JaxQx
             // Lane Clear
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
-            Config.SubMenu("LaneClear")
-                .AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Under Turret Q").SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseWLaneClear", "Use W").SetValue(false));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
-            Config.SubMenu("LaneClear")
-                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-            Config.SubMenu("LaneClear")
-                .AddItem(
-                    new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow));
 
             // Jungling Farm
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJungleFarm", "Use W").SetValue(false));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
-            Config.SubMenu("JungleFarm")
-                .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
 
-            Config.SubMenu("JungleFarm")
-                .AddItem(
-                    new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
-                        new KeyBind("V".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)); ;
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "JungleFarm").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)); ;
 
-            // Extra
+            // Misc
             var misc = new Menu("Misc", "Misc");
-            Config.AddSubMenu(misc);
-            misc.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
-            misc.AddItem(new MenuItem("Misc.AutoW", "Auto Hit W if possible").SetValue(true));
+            {
+                misc.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
+                misc.AddItem(new MenuItem("Misc.AutoW", "Auto Hit W if possible").SetValue(true))
+                    .Permashow(true, "Jax| Auto hit W if possible");
+                Config.AddSubMenu(misc);
+            }
 
+            Extra = new Extra();
+            Utils = new Utils();
             // Drawing
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings")
@@ -186,11 +190,25 @@ namespace JaxQx
 
             Notifications.AddNotification(String.Format("{0} Loaded", ChampionName), 4000);
         }
+
         private static void OrbwalkingBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (args.Target is Obj_AI_Hero && W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>())
+            if (args.Target is Obj_AI_Hero)
             {
-                W.Cast();
+                if (W.IsReady() && Config.Item("Misc.AutoW").GetValue<bool>())
+                {
+                    W.Cast();
+                }
+
+                foreach (var item in
+                    Items.ItemDb.Where(
+                        i =>
+                        i.Value.ItemType == Items.EnumItemType.OnTarget
+                        && i.Value.TargetingType == Items.EnumItemTargettingType.EnemyHero && i.Value.Item.IsReady()))
+                {
+                    Game.PrintChat(item.Value.Item.Id.ToString());
+                    item.Value.Item.Cast();
+                }
             }
         }
 
@@ -241,7 +259,7 @@ namespace JaxQx
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
             }
 
-            if (Items.CanUseItem(3128))
+            if (LeagueSharp.Common.Items.CanUseItem(3128))
             {
                 fComboDamage += ObjectManager.Player.GetItemDamage(t, Damage.DamageItems.Botrk);
             }
@@ -357,7 +375,8 @@ namespace JaxQx
 
             if (ObjectManager.Player.Distance(t) <= E.Range)
             {
-                UseItems(t);
+                //CastItems();
+                //UseItems(t);
             }
 
             if (W.IsReady() && ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(t)) > 0)
@@ -545,24 +564,50 @@ namespace JaxQx
         {
             if (t == null) return;
 
-            int[] targeted = new[] { 3153, 3144, 3146, 3184 };
+            int[] targeted = new[] { 3153, 3144, 3146, 3184, 3748 };
             foreach (var itemId in
                 targeted.Where(
                     itemId =>
-                    Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                    LeagueSharp.Common.Items.HasItem(itemId) && LeagueSharp.Common.Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
                     && t.IsValidTarget(450)))
             {
-                Items.UseItem(itemId, t);
+                LeagueSharp.Common.Items.UseItem(itemId, t);
             }
 
             int[] nonTarget = new[] { 3180, 3143, 3131, 3074, 3077, 3142 };
             foreach (var itemId in
                 nonTarget.Where(
                     itemId =>
-                    Items.HasItem(itemId) && Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
+                    LeagueSharp.Common.Items.HasItem(itemId) && LeagueSharp.Common.Items.CanUseItem(itemId) && GetInventorySlot(itemId) != null
                     && t.IsValidTarget(450)))
             {
-                Items.UseItem(itemId);
+                LeagueSharp.Common.Items.UseItem(itemId);
+            }
+        }
+
+        private static void CastItems()
+        {
+            var t = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget())
+                return;
+
+            foreach (var item in Items.ItemDb)
+            {
+                if (item.Value.ItemType == Items.EnumItemType.AoE && item.Value.TargetingType == Items.EnumItemTargettingType.EnemyObjects)
+                {
+                    if (t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady())
+                    {
+                        item.Value.Item.Cast();
+                    }
+                }
+
+                if (item.Value.ItemType == Items.EnumItemType.Targeted && item.Value.TargetingType == Items.EnumItemTargettingType.EnemyHero)
+                {
+                    if (t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady())
+                    {
+                        item.Value.Item.Cast(t);
+                    }
+                }
             }
         }
     }

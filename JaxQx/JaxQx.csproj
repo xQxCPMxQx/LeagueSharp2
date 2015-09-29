@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JaxQx</RootNamespace>
     <AssemblyName>JaxQx</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PreBuildEvent />
     <OutputPath>bin\Release</OutputPath>
@@ -82,6 +82,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssassinManager.cs" />
+    <Compile Include="Extra.cs" />
+    <Compile Include="Items.cs" />
     <Compile Include="Jumper.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Polygon.cs" />
