@@ -1,8 +1,10 @@
 ﻿using LeagueSharp;
-using LeagueSharp.Common;
 using SharpDX;
+
 namespace XinZhao
 {
+    using LeagueSharp.Common;
+
     using XinZhao.Properties;
 
     internal class Sprite

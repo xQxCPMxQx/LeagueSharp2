@@ -71,6 +71,8 @@ namespace XinZhao
 
         public enum EnumItemType
         {
+            OnTarget,
+
             Targeted,
 
             AoE
@@ -123,7 +125,7 @@ namespace XinZhao
                             "Titanic Hydra Cleave",
                             new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
                             new LeagueSharp.Common.Items.Item(3748, Orbwalking.GetRealAutoAttackRange(null) + 65),
-                            EnumItemType.AoE,
+                            EnumItemType.OnTarget,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
