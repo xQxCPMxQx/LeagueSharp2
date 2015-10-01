@@ -377,26 +377,25 @@ namespace Olafisback
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.SpellDrawing", "Spell Drawing:"));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Draw.QRange", Tab + "Q range").SetValue(new Circle(true,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                    new MenuItem("Draw.QRange", Tab + "Q range").SetValue(
+                        new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Draw.Q2Range", Tab + "Short Q range").SetValue(new Circle(true,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                    new MenuItem("Draw.Q2Range", Tab + "Short Q range").SetValue(
+                        new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Draw.ERange", Tab + "E range").SetValue(new Circle(false,
-                        System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+                    new MenuItem("Draw.ERange", Tab + "E range").SetValue(
+                        new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeDrawing", "Axe Drawing:"));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("Draw.AxePosition", Tab + "Axe Position").SetValue(new Circle(true,
-                        System.Drawing.Color.GreenYellow)));
-            Config.SubMenu("Drawings")
-                .AddItem(new MenuItem("Draw.AxeTime", Tab + "Axe Time Remaining").SetValue(true));
+                    new MenuItem("Draw.AxePosition", Tab + "Axe Position").SetValue(
+                        new StringList(new[] { "Off", "Circle", "Line", "Both" }, 3)));
+            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeTime", Tab + "Axe Time Remaining").SetValue(true));
             Config.AddToMainMenu();
-
+            
             vText = new Font(
                 Drawing.Direct3DDevice,
                 new FontDescription
@@ -458,10 +457,40 @@ namespace Olafisback
         
         private static void Drawing_OnDraw(EventArgs args)
         {
-            var drawAxePosition = Config.Item("Draw.AxePosition").GetValue<Circle>();
-            if (drawAxePosition.Active && olafAxe.Object != null)
-                Render.Circle.DrawCircle(olafAxe.Object.Position, 150, drawAxePosition.Color, 6);
+            var drawAxePosition = Config.Item("Draw.AxePosition").GetValue<StringList>().SelectedIndex;
+            if (olafAxe.Object != null)
+            {
+                var exTime = TimeSpan.FromSeconds(olafAxe.ExpireTime - Game.Time).TotalSeconds;
+                var color = exTime > 4 ? System.Drawing.Color.Yellow : System.Drawing.Color.Red;
+                switch (drawAxePosition)
+                {
+                    case 1:
+                        Render.Circle.DrawCircle(olafAxe.Object.Position, 150, color, 6);
+                        break;
+                    case 2:
+                        {
+                            var line = new Geometry.Polygon.Line(
+                                Player.Position,
+                                olafAxe.AxePos,
+                                Player.Distance(olafAxe.AxePos));
+                            line.Draw(color, 2);
+                        }
+                        break;
+                    case 3:
+                        {
+                            Render.Circle.DrawCircle(olafAxe.Object.Position, 150, color, 6);
 
+                            var line = new Geometry.Polygon.Line(
+                                Player.Position,
+                                olafAxe.AxePos,
+                                Player.Distance(olafAxe.AxePos));
+                            line.Draw(color, 2);
+                        }
+                        break;
+
+
+                }
+            }
 
             if (Config.Item("Draw.AxeTime").GetValue<bool>() && olafAxe.Object != null)
             {
