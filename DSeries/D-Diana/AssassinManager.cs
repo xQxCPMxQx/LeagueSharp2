@@ -66,7 +66,7 @@ namespace D_Diana
             Program.Config.SubMenu("MenuAssassin").AddItem(new MenuItem("xM2", "Other Settings:"));
 
             Program.Config.SubMenu("MenuAssassin")
-                .AddItem(new MenuItem("AssassinSetClick", space + "Add/Remove with click").SetValue(true));
+                .AddItem(new MenuItem("AssassinSetClick", space + "Add/Remove with Click").SetValue(true));
             Program.Config.SubMenu("MenuAssassin")
                 .AddItem(
                     new MenuItem("AssassinReset", space + "Reset List").SetValue(new KeyBind("T".ToCharArray()[0],
@@ -85,7 +85,7 @@ namespace D_Diana
                 .AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
             Program.Config.SubMenu("MenuAssassin")
                 .SubMenu("Draw")
-                .AddItem(new MenuItem("DrawStatus", "Show status on the screen").SetValue(true));
+                .AddItem(new MenuItem("DrawStatus", "Show Status on Screen").SetValue(true));
 
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -116,7 +116,7 @@ namespace D_Diana
             {
                 ClearAssassinList();
                 Game.PrintChat(
-                    "<font color='#FFFFFF'>Reset Assassin List is Complete! Click on the enemy for Add/Remove.</font>");
+                    "<font color='#FFFFFF'>Reset Assassin List is Complete! Click on an enemy to Add/Remove.</font>");
             }
 
             if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)

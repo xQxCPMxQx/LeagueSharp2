@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -9,43 +9,43 @@ namespace D_Elise
 {
     class Program
     {
-        private const string ChampionName = "Elise";
+       private const string ChampionName = "Elise";
 
-        private static Orbwalking.Orbwalker _orbwalker;
+       private static Orbwalking.Orbwalker _orbwalker;
 
-        private static bool _human;
+       private static bool _human;
 
-        private static bool _spider;
+       private static bool _spider;
 
-        private static Spell _humanQ, _humanW, _humanE, _r, _spiderQ, _spiderW, _spiderE;
+       private static Spell _humanQ, _humanW, _humanE, _r, _spiderQ, _spiderW, _spiderE;
 
-        private static Menu _config;
+       private static Menu _config;
 
-        private static SpellSlot _igniteSlot;
+       private static SpellSlot _igniteSlot;
 
-        private static Obj_AI_Hero _player;
+       private static Obj_AI_Hero _player;
 
-        private static readonly float[] HumanQcd = { 6, 6, 6, 6, 6 };
+       private static readonly float[] HumanQcd = { 6, 6, 6, 6, 6 };
 
-        private static readonly float[] HumanWcd = { 12, 12, 12, 12, 12 };
+       private static readonly float[] HumanWcd = { 12, 12, 12, 12, 12 };
 
-        private static readonly float[] HumanEcd = { 14, 13, 12, 11, 10 };
+       private static readonly float[] HumanEcd = { 14, 13, 12, 11, 10 };
 
-        private static readonly float[] SpiderQcd = { 6, 6, 6, 6, 6 };
+       private static readonly float[] SpiderQcd = { 6, 6, 6, 6, 6 };
 
-        private static readonly float[] SpiderWcd = { 12, 12, 12, 12, 12 };
+       private static readonly float[] SpiderWcd = { 12, 12, 12, 12, 12 };
 
-        private static readonly float[] SpiderEcd = { 26, 23, 20, 17, 14 };
+       private static readonly float[] SpiderEcd = { 26, 23, 20, 17, 14 };
 
-        private static float _humQcd = 0, _humWcd = 0, _humEcd = 0;
+       private static float _humQcd = 0, _humWcd = 0, _humEcd = 0;
 
-        private static float _spidQcd = 0, _spidWcd = 0, _spidEcd = 0;
+       private static float _spidQcd = 0, _spidWcd = 0, _spidEcd = 0;
 
-        private static float _humaQcd = 0, _humaWcd = 0, _humaEcd = 0;
+       private static float _humaQcd = 0, _humaWcd = 0, _humaEcd = 0;
 
-        private static float _spideQcd = 0, _spideWcd = 0, _spideEcd = 0;
+       private static float _spideQcd = 0, _spideWcd = 0, _spideEcd = 0;
 
-       private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis, _zhonya;
+      // private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis, _zhonya;
 
        private static SpellSlot _smiteSlot = SpellSlot.Unknown;
 
@@ -78,13 +78,15 @@ namespace D_Elise
             _humanW.SetSkillshot(0.25f, 100f, 1000, true, SkillshotType.SkillshotLine);
             _humanE.SetSkillshot(0.25f, 55f, 1300, true, SkillshotType.SkillshotLine);
 
-            _bilge = new Items.Item(3144, 475f);
+/*          REMOVED THIS because Activator assemblies should probably handle these functions.
+			_bilge = new Items.Item(3144, 475f);
             _blade = new Items.Item(3153, 425f);
             _hydra = new Items.Item(3074, 250f);
             _tiamat = new Items.Item(3077, 250f);
             _rand = new Items.Item(3143, 490f);
             _lotis = new Items.Item(3190, 590f);
-            _zhonya = new Items.Item(3157, 10);
+            _zhonya = new Items.Item(3157, 10); 
+*/
 
             SetSmiteSlot();
             _igniteSlot = _player.GetSpellSlot("SummonerDot");
@@ -111,7 +113,7 @@ namespace D_Elise
             _config.SubMenu("Combo").AddItem(new MenuItem("UseSpiderW", "Spider W")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseSpiderE", "Spider E")).SetValue(true);
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("ActiveCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             //Harass
             _config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -121,43 +123,42 @@ namespace D_Elise
                 .AddItem(new MenuItem("Harrasmana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("ActiveHarass", "Harass Key").SetValue(new KeyBind("C".ToCharArray()[0],
+                    new MenuItem("ActiveHarass", "Harass").SetValue(new KeyBind("C".ToCharArray()[0],
                         KeyBindType.Press)));
-
-
+						
             _config.AddSubMenu(new Menu("Items", "items"));
             _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Tiamat", "Use Tiamat")).SetValue(true);
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Hydra", "Use Hydra")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Cutlass")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy HP <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or My HP < ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
+                .AddItem(new MenuItem("Bilgemyhp", "Or Self % HP < ").SetValue(new Slider(85, 1, 100)));
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use BotRK")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy HP <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or My HP <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Blademyhp", "Or Self % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items").AddSubMenu(new Menu("Defensive", "Defensive"));
             _config.SubMenu("items")
                 .SubMenu("Defense")
-                .AddItem(new MenuItem("Omen", "Use Randuin Omen"))
+                .AddItem(new MenuItem("Omen", "Use Randuin's Omen"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Defensive")
-                .AddItem(new MenuItem("Omenenemys", "Randuin if X Enemy").SetValue(new Slider(2, 1, 5)));
+                .AddItem(new MenuItem("Omenenemys", "Use Randuin's if Targets >=").SetValue(new Slider(2, 1, 5)));
             _config.SubMenu("items")
                 .SubMenu("Defensive")
                 .AddItem(new MenuItem("lotis", "Use Iron Solari"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Defensive")
-                .AddItem(new MenuItem("lotisminhp", "Solari if Ally HP <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("lotisminhp", "Use Solari if Ally % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Defensive")
                 .AddItem(new MenuItem("Zhonyas", "Use Zhonya's"))
@@ -179,9 +180,9 @@ namespace D_Elise
                 .SetValue(true);
             _config.SubMenu("Items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
-
-            //Farm
+                .AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
+            
+			//Farm Lane
             _config.AddSubMenu(new Menu("Farm", "Farm"));
             _config.SubMenu("Farm").AddItem(new MenuItem("HumanQFarm", "Human Q")).SetValue(true);
             _config.SubMenu("Farm").AddItem(new MenuItem("HumanWFarm", "Human W")).SetValue(true);
@@ -189,19 +190,19 @@ namespace D_Elise
             _config.SubMenu("Farm").AddItem(new MenuItem("SpiderWFarm", "Spider W")).SetValue(true);
             _config.SubMenu("Farm")
                 .AddItem(
-                    new MenuItem("Farm_R", "Auto Switch Forms (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
+                    new MenuItem("Farm_R", "Auto-Switch Forms (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
-            _config.SubMenu("Farm")
-                .AddItem(
-                    new MenuItem("ActiveFreeze", "Freeze Lane").SetValue(new KeyBind("X".ToCharArray()[0],
-                        KeyBindType.Press)));
+            // _config.SubMenu("Farm") REMOVED because Freeze Lane no longer part of orbwalker
+                // .AddItem(
+                    // new MenuItem("ActiveFreeze", "Freeze Lane").SetValue(new KeyBind("X".ToCharArray()[0],
+                        // KeyBindType.Press)));
             _config.SubMenu("Farm")
                 .AddItem(
                     new MenuItem("ClearActive", "Clear Lane").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
             _config.SubMenu("Farm").AddItem(new MenuItem("Lanemana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
 
-            //Farm
+            //Farm Jungle
             _config.AddSubMenu(new Menu("Jungle", "Jungle"));
             _config.SubMenu("Jungle").AddItem(new MenuItem("HumanQFarmJ", "Human Q")).SetValue(true);
             _config.SubMenu("Jungle").AddItem(new MenuItem("HumanWFarmJ", "Human W")).SetValue(true);
@@ -216,16 +217,16 @@ namespace D_Elise
             //Smite 
             _config.AddSubMenu(new Menu("Smite", "Smite"));
             _config.SubMenu("Smite").AddItem(new MenuItem("Usesmite", "Use Smite (Toggle)").SetValue(new KeyBind("H".ToCharArray()[0],KeyBindType.Toggle)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue Early ")).SetValue(true);
-            _config.SubMenu("Smite").AddItem(new MenuItem("manaJ", "Smite Blue Early if % Mana <").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red Early ")).SetValue(true);
-            _config.SubMenu("Smite").AddItem(new MenuItem("healthJ", "Smite Red Early if % HP <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Useblue", "Smite Blue-Camp Early")).SetValue(true);
+            _config.SubMenu("Smite").AddItem(new MenuItem("manaJ", "Smite Blue-Camp Earlyif % Mana <").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Usered", "Smite Red-Camp Early")).SetValue(true);
+            _config.SubMenu("Smite").AddItem(new MenuItem("healthJ", "Smite Red-Camp Earlyif % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("Smite").AddItem(new MenuItem("smitecombo", "Use Smite on Enemies")).SetValue(true);
             _config.Item("smitecombo").ValueChanged += Switchcombo;
-            _config.SubMenu("Smite").AddItem(new MenuItem("Smiteeee", "Smite Minion in Human E Path").SetValue(false));
+            _config.SubMenu("Smite").AddItem(new MenuItem("Smiteeee", "Smite Minion Blocking Human E Path").SetValue(false));
             _config.Item("Smiteeee").ValueChanged += Switchminion;
 
-            //misc
+            //Misc
             _config.AddSubMenu(new Menu("Misc", "Misc"));
             _config.SubMenu("Misc").AddItem(new MenuItem("usePackets", "Use Packets")).SetValue(true);
             _config.SubMenu("Misc").AddItem(new MenuItem("Spidergapcloser", "Spider E to Gapcloser")).SetValue(true);
@@ -236,7 +237,7 @@ namespace D_Elise
                     new MenuItem("autoE", "Human E with Very High Hitchance").SetValue(new KeyBind("T".ToCharArray()[0],
                         KeyBindType.Press)));
             _config.SubMenu("Misc")
-                .AddItem(new MenuItem("Echange", "E Hitchance in Combo").SetValue(
+                .AddItem(new MenuItem("Echange", "E Hit Chancechance in Combo").SetValue(
                     new StringList(new[] {"Low", "Medium", "High", "Very High"})));
 
 
@@ -258,11 +259,11 @@ namespace D_Elise
             _config.SubMenu("Drawings").AddItem(new MenuItem("SpiderDrawE", "Spider E")).SetValue(true);
             _config.SubMenu("Drawings").AddItem(new MenuItem("Drawsmite", "Draw Smite")).SetValue(true);
             _config.SubMenu("Drawings").AddItem(new MenuItem("drawmode", "Draw Smite Mode")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Use Lag Free Circles").SetValue(true));
+            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Use Lag-Free Circles").SetValue(true));
             _config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
+                .AddItem(new MenuItem("CircleQuality", "Circle Quality").SetValue(new Slider(100, 100, 10)));
             _config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
+                .AddItem(new MenuItem("CircleThickness", "Circle Thickness").SetValue(new Slider(1, 10, 1)));
 
             _config.AddToMainMenu();
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
@@ -270,10 +271,9 @@ namespace D_Elise
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.PrintChat("<font color='#881df2'>D-Elise by Diabaths</font> Loaded.");
-            Game.PrintChat(
-              "<font color='#FF0000'>If You like my work and want to support me, plz donate via Paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
-
+            //Game.PrintChat("<font color='#881df2'>D-Elise by Diabaths</font> Loaded.");
+            //Game.PrintChat(
+            //  "<font color='#FF0000'>If You like my work and want to support me, plz donate via Paypal in </font> <font //color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         }
         private static void Switchcombo(object sender, OnValueChangeEventArgs e)
         {
@@ -299,7 +299,7 @@ namespace D_Elise
             {
                 Smiteuse();
             }
-            if (_config.Item("ActiveFreeze").GetValue<KeyBind>().Active ||
+            if (//_config.Item("ActiveFreeze").GetValue<KeyBind>().Active ||
                 _config.Item("ClearActive").GetValue<KeyBind>().Active)
 
                 FarmLane();
@@ -345,7 +345,7 @@ namespace D_Elise
                 //Game.PrintChat("Spell name: " + args.SData.Name.ToString());
                 GetCDs(args);
         }
-        private static void Usepotion()
+/*         private static void Usepotion()
         {
             var mobs = MinionManager.GetMinions(_player.ServerPosition, _humanE.Range,
                 MinionTypes.All,
@@ -404,8 +404,8 @@ namespace D_Elise
                 }
             }
         }
-
-        private static void UseItemes(Obj_AI_Hero target)
+ */
+/*         private static void UseItemes(Obj_AI_Hero target)
         {
             var iBilge = _config.Item("Bilge").GetValue<bool>();
             var iBilgeEnemyhp = target.Health <=
@@ -466,7 +466,7 @@ namespace D_Elise
 
             }
         }
-
+ */
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(_humanW.Range, TargetSelector.DamageType.Magical);
@@ -655,7 +655,7 @@ namespace D_Elise
                             }
                         }
                 }
-                if (_config.Item("ActiveFreeze").GetValue<KeyBind>().Active)
+/*                 if (_config.Item("ActiveFreeze").GetValue<KeyBind>().Active)
                 {
                     foreach (var minion in allminions)
                         if (_human)
@@ -690,7 +690,7 @@ namespace D_Elise
                                 _spiderW.Cast();
                             }
                         }
-                }
+                } */
             }
         }
         //Credits to Kurisu
@@ -1040,32 +1040,32 @@ namespace D_Elise
             if (!_spider)
             {
                 if (_spideQcd == 0)
-                    Drawing.DrawText(elise[0] - 60, elise[1], Color.White, "SQ Rdy");
+                    Drawing.DrawText(elise[0] - 60, elise[1], Color.White, "S-Q Ready");
                 else
-                    Drawing.DrawText(elise[0] - 60, elise[1], Color.Orange, "SQ: " + _spideQcd.ToString("0.0"));
+                    Drawing.DrawText(elise[0] - 60, elise[1], Color.Orange, "S-Q: " + _spideQcd.ToString("0.0"));
                 if (_spideWcd == 0)
-                    Drawing.DrawText(elise[0] - 20, elise[1] + 30, Color.White, "SW Rdy");
+                    Drawing.DrawText(elise[0] - 20, elise[1] + 30, Color.White, "S-W Ready");
                 else
-                    Drawing.DrawText(elise[0] - 20, elise[1] + 30, Color.Orange, "SW: " + _spideWcd.ToString("0.0"));
+                    Drawing.DrawText(elise[0] - 20, elise[1] + 30, Color.Orange, "S-W: " + _spideWcd.ToString("0.0"));
                 if (_spideEcd == 0)
-                    Drawing.DrawText(elise[0], elise[1], Color.White, "SE Rdy");
+                    Drawing.DrawText(elise[0], elise[1], Color.White, "S-E Ready");
                 else
-                    Drawing.DrawText(elise[0], elise[1], Color.Orange, "SE: " + _spideEcd.ToString("0.0"));
+                    Drawing.DrawText(elise[0], elise[1], Color.Orange, "S-E: " + _spideEcd.ToString("0.0"));
             }
             else
             {
                 if (_humaQcd == 0)
-                    Drawing.DrawText(elise[0] - 60, elise[1], Color.White, "HQ Rdy");
+                    Drawing.DrawText(elise[0] - 60, elise[1], Color.White, "H-Q Ready");
                 else
-                    Drawing.DrawText(elise[0] - 60, elise[1], Color.Orange, "HQ: " + _humaQcd.ToString("0.0"));
+                    Drawing.DrawText(elise[0] - 60, elise[1], Color.Orange, "H-Q: " + _humaQcd.ToString("0.0"));
                 if (_humaWcd == 0)
-                    Drawing.DrawText(elise[0] - 20, elise[1] + 30, Color.White, "HW Rdy");
+                    Drawing.DrawText(elise[0] - 20, elise[1] + 30, Color.White, "H-W Ready");
                 else
-                    Drawing.DrawText(elise[0] - 20, elise[1] + 30, Color.Orange, "HW: " + _humaWcd.ToString("0.0"));
+                    Drawing.DrawText(elise[0] - 20, elise[1] + 30, Color.Orange, "H-W: " + _humaWcd.ToString("0.0"));
                 if (_humaEcd == 0)
-                    Drawing.DrawText(elise[0], elise[1], Color.White, "HE Rdy");
+                    Drawing.DrawText(elise[0], elise[1], Color.White, "H-E Ready");
                 else
-                    Drawing.DrawText(elise[0], elise[1], Color.Orange, "HE: " + _humaEcd.ToString("0.0"));
+                    Drawing.DrawText(elise[0], elise[1], Color.Orange, "H-E: " + _humaEcd.ToString("0.0"));
             }
         }
 
@@ -1089,4 +1089,3 @@ namespace D_Elise
         }
     }
 }
-

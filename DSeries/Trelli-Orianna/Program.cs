@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
@@ -177,57 +177,57 @@ namespace Orianna
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
             Config.AddSubMenu(new Menu("Combo", "Combo"));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "C Use Q").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "C Use W").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "C Use E").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "C Use R").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("UltKillable", "C Auto-Ult Killable").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("AutoW", "C Auto W Enemies").SetValue(false));
-            Config.SubMenu("Combo").AddItem(new MenuItem("AllIn", "C All in when killable").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("UltKillable", "Auto-Ult if Killable").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("AutoW", "Auto-W Enemies").SetValue(false));
+            Config.SubMenu("Combo").AddItem(new MenuItem("AllIn", "All-in if Killable").SetValue(true));
             Config.SubMenu("Combo")
-                .AddItem(new MenuItem("MinTargets", "C Minimum Targets to Ult").SetValue(new Slider(1, 5, 0)));
+                .AddItem(new MenuItem("MinTargets", "Min. Target(s) to Use R").SetValue(new Slider(1, 5, 0)));
             Config.SubMenu("Combo")
                 .AddItem(
-                    new MenuItem("UltMinToggle", "C Use Ult when >= min toggle").SetValue(
+                    new MenuItem("UltMinToggle", "Use R if >= X Target(s)").SetValue(
                         new KeyBind("U".ToCharArray()[0], KeyBindType.Toggle)));
             Config.SubMenu("Combo")
-                .AddItem(new MenuItem("HealthSliderE", "C Use E in combo if health <=").SetValue(new Slider(60, 100, 0)));
+                .AddItem(new MenuItem("HealthSliderE", "Use E in Combo if % HP <").SetValue(new Slider(60, 100, 0)));
             Config.SubMenu("Combo")
                 .AddItem(
-                    new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("ComboActive", "Combo").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
             Config.AddSubMenu(new Menu("Harass", "Harass"));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "H Use Q").SetValue(true));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "H Use W").SetValue(false));
-            Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "H Use E").SetValue(false));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(false));
+            Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(false));
             Config.SubMenu("Harass")
-                .AddItem(new MenuItem("ManaSliderHarass", "H Mana To Harass").SetValue(new Slider(50, 100, 0)));
+                .AddItem(new MenuItem("ManaSliderHarass", "Min. % Mana").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("HarassActive", "H Harass on hold").SetValue(new KeyBind("A".ToCharArray()[0],
+                    new MenuItem("HarassActive", "Harass").SetValue(new KeyBind("A".ToCharArray()[0],
                         KeyBindType.Press)));
             Config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("HarassActiveT", "H Harass toggle").SetValue(new KeyBind("L".ToCharArray()[0],
+                    new MenuItem("HarassActiveT", "Harass (Toggle)").SetValue(new KeyBind("L".ToCharArray()[0],
                         KeyBindType.Toggle)));
 
-            Config.AddSubMenu(new Menu("Farm", "Farm"));
-            Config.SubMenu("Farm").AddItem(new MenuItem("UseQFarm", "F Use Q").SetValue(true));
-            Config.SubMenu("Farm").AddItem(new MenuItem("UseWFarm", "F Use W").SetValue(true));
-            Config.SubMenu("Farm").AddItem(new MenuItem("UseEFarm", "F Use E").SetValue(true));
+            Config.AddSubMenu(new Menu("Lane Clear", "Farm"));
+            Config.SubMenu("Farm").AddItem(new MenuItem("UseQFarm", "Use Q").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("UseWFarm", "Use W").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("UseEFarm", "Use E").SetValue(true));
             Config.SubMenu("Farm")
-                .AddItem(new MenuItem("ManaSliderFarm", "F Mana To Farm").SetValue(new Slider(25, 100, 0)));
+                .AddItem(new MenuItem("ManaSliderFarm", "Min. % Mana").SetValue(new Slider(25, 100, 0)));
             Config.SubMenu("Farm")
                 .AddItem(
-                    new MenuItem("FarmActive", "Farm!").SetValue(new KeyBind("B".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("FarmActive", "Lane Clear").SetValue(new KeyBind("B".ToCharArray()[0], KeyBindType.Press)));
 
-            Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", "J Use Q").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", "J Use W").SetValue(true));
-            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "J Use E").SetValue(true));
+            Config.AddSubMenu(new Menu("Jungle Clear", "JungleFarm"));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", "Use Q").SetValue(true));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", "Use W").SetValue(true));
+            Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "Use E").SetValue(true));
             Config.SubMenu("JungleFarm")
                 .AddItem(
-                    new MenuItem("JungleFarmActive", "JungleFarm!").SetValue(new KeyBind("S".ToCharArray()[0],
+                    new MenuItem("JungleFarmActive", "Jungle Clear").SetValue(new KeyBind("S".ToCharArray()[0],
                         KeyBindType.Press)));
 
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
@@ -248,7 +248,7 @@ namespace Orianna
                     new MenuItem("DrawRRange", "Draw R Range").SetValue(new Circle(false,
                         Color.FromArgb(100, 255, 255, 255))));
 
-            Config.AddSubMenu(new Menu("Auto E Initiators", "AutoEInit"));
+            Config.AddSubMenu(new Menu("Auto-E Allied Initiators", "AutoEInit"));
             Config.SubMenu("AutoEInit").AddItem(new MenuItem("InitEnabled", "Enabled").SetValue(true));
             foreach (Obj_AI_Hero current in ObjectManager.Get<Obj_AI_Hero>())
             {
@@ -260,7 +260,7 @@ namespace Orianna
             }
 
             Config.AddSubMenu(new Menu("Debug", "Debug"));
-            Config.SubMenu("Debug").AddItem(new MenuItem("DebugR", "Enable Debug Ult")).SetValue(false);
+            Config.SubMenu("Debug").AddItem(new MenuItem("DebugR", "Enable Debug Mode")).SetValue(false);
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnUpdate;
@@ -1031,7 +1031,7 @@ namespace Orianna
             if (useE && E.IsReady())
             {
                 var collisionList = GetMinionsHitByE();
-                var hitCount = collisionList.Count;
+                vaR Hit ChanceCount = collisionList.Count;
                 var healthPer = ObjectManager.Player.Health / ObjectManager.Player.MaxHealth;
                 var manaPer = ObjectManager.Player.Mana / ObjectManager.Player.MaxMana;
                 if (hitCount >= 1 || (healthPer < 0.40 && manaPer >= 0.20))
@@ -1040,7 +1040,6 @@ namespace Orianna
                 }
             }
         }
-        
         #endregion
     }
 }

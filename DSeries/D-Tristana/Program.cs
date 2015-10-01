@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
@@ -74,27 +74,27 @@ namespace D_Tristana
             _config.SubMenu("Combo")
                 .AddItem(new MenuItem("Style", ""))
                 .SetValue(
-                    new StringList(new string[2] {"AP Style(effect Ayto lvl and W)", "AD Style(effect Ayto lvl and W)"}));
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseIgnitecombo", "Use Ignite(rush for it)")).SetValue(true);
+                    new StringList(new string[2] {"AP Tristana", "AD Tristana"}));
+            _config.SubMenu("Combo").AddItem(new MenuItem("UseIgnitecombo", "Use Ignite")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseQC", "Use Q")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseEC", "Use E")).SetValue(true);
-            _config.SubMenu("Combo").AddSubMenu(new Menu("AP Style", "AP Style"));
+            _config.SubMenu("Combo").AddSubMenu(new Menu("AP Tristana Options", "AP Style"));
             _config.SubMenu("Combo").SubMenu("AP Style").AddItem(new MenuItem("UseWCP", "Use W")).SetValue(true);
             _config.SubMenu("Combo")
                 .SubMenu("AP Style")
-                .AddItem(new MenuItem("apdiveintower", "dive in Tower with W"))
+                .AddItem(new MenuItem("apdiveintower", "Use W to Dive into Enemy Tower"))
                 .SetValue(true);
-            _config.SubMenu("Combo").AddSubMenu(new Menu("AD Style", "AD Style"));
+            _config.SubMenu("Combo").AddSubMenu(new Menu("AD Tristana Options", "AD Style"));
             _config.SubMenu("Combo").SubMenu("AD Style").AddItem(new MenuItem("UseWCD", "Use W")).SetValue(true);
             _config.SubMenu("Combo")
                 .SubMenu("AD Style")
-                .AddItem(new MenuItem("UseWHE", "Your HP% Use W >").SetValue(new Slider(65, 1, 100)));
+                .AddItem(new MenuItem("UseWHE", "Use W if Self % HP >").SetValue(new Slider(65, 1, 100)));
             _config.SubMenu("Combo")
                 .SubMenu("AD Style")
-                .AddItem(new MenuItem("EnemyC", "If Enemy in Range<").SetValue(new Slider(2, 1, 5)));
+                .AddItem(new MenuItem("EnemyC", "Use W if Enemy in Range <").SetValue(new Slider(2, 1, 5)));
             _config.SubMenu("Combo")
                 .SubMenu("AD Style")
-                .AddItem(new MenuItem("addiveintower", "dive in Tower with W"))
+                .AddItem(new MenuItem("addiveintower", "Use W to Dive into Enemy Tower"))
                 .SetValue(true);
             _config.SubMenu("Combo").AddSubMenu(new Menu("Use R", "Use R"));
             _config.SubMenu("Combo").SubMenu("Use R").AddItem(new MenuItem("UseRC", "Use R")).SetValue(true);
@@ -104,7 +104,7 @@ namespace D_Tristana
                     .AddItem(new MenuItem("castR" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
 
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("ActiveCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
 
             //Harass
@@ -113,108 +113,108 @@ namespace D_Tristana
             _config.SubMenu("Harass").AddItem(new MenuItem("UseEH", "Use E")).SetValue(true);
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("harasstoggle", "AutoHarass (toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
+                    new MenuItem("harasstoggle", "Auto-Harass (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
             _config.SubMenu("Harass")
-                .AddItem(new MenuItem("Harrasmana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Harrasmana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("ActiveHarass", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("ActiveHarass", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
-            _config.AddSubMenu(new Menu("items", "items"));
+            _config.AddSubMenu(new Menu("Items", "items"));
             _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Youmuu", "Use Youmuu's")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Cutlass")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
+                .AddItem(new MenuItem("Bilgemyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use BotRK")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Blademyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Hextech", "Hextech Gunblade"))
+                .AddItem(new MenuItem("Hextech", "Use Hextech Gunblade"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("HextechEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("HextechEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Hextechmyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Hextechmyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usehppotions", "Use Healt potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usehppotions", "Use Health Potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionhp", "If % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usemppotions", "Use Mana Potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
 
             _config.AddSubMenu(new Menu("Farm", "Farm"));
             _config.SubMenu("Farm").AddSubMenu(new Menu("Lane", "Lane"));
             _config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseQL", "Use Q")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseWL", "Use W(only with AP)")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseWL", "Use W (AP Tristana Only)")).SetValue(true);
             _config.SubMenu("Farm")
                 .SubMenu("Lane")
-                .AddItem(new MenuItem("UseWLane", "Your HP% Use W >").SetValue(new Slider(65, 1, 100)));
+                .AddItem(new MenuItem("UseWLane", "Use W if Self % HP >").SetValue(new Slider(65, 1, 100)));
             _config.SubMenu("Farm")
                 .SubMenu("Lane")
-                .AddItem(new MenuItem("Enemylane", "Enemy in R.Range <").SetValue(new Slider(2, 0, 5)));
+                .AddItem(new MenuItem("Enemylane", "Use R if Enemy in Range <").SetValue(new Slider(2, 0, 5)));
             _config.SubMenu("Farm").SubMenu("Lane").AddItem(new MenuItem("UseEL", "Use E")).SetValue(true);
             _config.SubMenu("Farm")
                 .SubMenu("Lane")
                 .AddItem(
-                    new MenuItem("ActiveLane", "Farm key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("ActiveLane", "Lane Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             _config.SubMenu("Farm")
                 .SubMenu("Lane")
-                .AddItem(new MenuItem("Lanemana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Lanemana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             //jungle
             _config.SubMenu("Farm").AddSubMenu(new Menu("Jungle", "Jungle"));
             _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseQJ", "Use Q")).SetValue(true);
             _config.SubMenu("Farm")
                 .SubMenu("Jungle")
-                .AddItem(new MenuItem("UseWJ", "Use W(only with AP)"))
+                .AddItem(new MenuItem("UseWJ", "Use W (AP Tristana Only)"))
                 .SetValue(true);
             _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseEJ", "Use E")).SetValue(true);
             _config.SubMenu("Farm")
                 .SubMenu("Jungle")
                 .AddItem(
-                    new MenuItem("ActiveJungle", "Jungle key").SetValue(new KeyBind("V".ToCharArray()[0],
+                    new MenuItem("ActiveJungle", "Jungle Clear").SetValue(new KeyBind("V".ToCharArray()[0],
                         KeyBindType.Press)));
             _config.SubMenu("Farm")
                 .SubMenu("Jungle")
-                .AddItem(new MenuItem("Junglemana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Junglemana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
 
             //Misc
             _config.AddSubMenu(new Menu("Misc", "Misc"));
             _config.SubMenu("Misc").AddSubMenu(new Menu("Use R", "Use R"));
-            _config.SubMenu("Misc").SubMenu("Use R").AddItem(new MenuItem("UseRM", "Use R KillSteal")).SetValue(true);
+            _config.SubMenu("Misc").SubMenu("Use R").AddItem(new MenuItem("UseRM", "Use R to Killsteal")).SetValue(true);
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != _player.Team))
                 _config.SubMenu("Misc")
                     .SubMenu("Use R")
                     .AddItem(new MenuItem("castRkill" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
             _config.SubMenu("Misc").AddItem(new MenuItem("useWK", "Use W KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("useEK", "Use E KillSteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("useEK", "Use E to Killsteal")).SetValue(true);
             _config.SubMenu("Misc").AddItem(new MenuItem("UseRGap", "Use R Gapclosers")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseRInter", "Use R Interrupt")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("AutoLevel", "Auto Level")).SetValue(false);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseRInter", "Use R to Interrupt")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("AutoLevel", "Auto-Level")).SetValue(false);
 
             //Damage after combo:
-            MenuItem dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
+            MenuItem dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw Combo Damage").SetValue(true);
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
             dmgAfterComboItem.ValueChanged +=
@@ -229,14 +229,14 @@ namespace D_Tristana
             _config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
             _config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
             _config.SubMenu("Drawings").AddItem(new MenuItem("damagetest", "Damage Text")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
+            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag-Free Circles").SetValue(true));
             _config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
+                .AddItem(new MenuItem("CircleQuality", "Circle Quality").SetValue(new Slider(100, 100, 10)));
             _config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
+                .AddItem(new MenuItem("CircleThickness", "Circle Thickness").SetValue(new Slider(1, 10, 1)));
 
             _config.AddToMainMenu();
-            Game.PrintChat("<font color='#881df2'>D-Tristana by Diabaths (WIP)</font> Loaded.");
+            //Game.PrintChat("<font color='#881df2'>D-Tristana by Diabaths (WIP)</font> Loaded.");
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
@@ -747,9 +747,3 @@ namespace D_Tristana
         }
     }
 }
-    
-
-
-
-
-

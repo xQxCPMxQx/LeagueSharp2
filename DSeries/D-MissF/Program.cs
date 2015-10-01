@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net;
 using LeagueSharp;
@@ -71,14 +71,14 @@ namespace D_MissF
             _config.SubMenu("Combo").AddItem(new MenuItem("UseQC", "Use Q")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseWC", "Use W")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("UseEC", "Use E")).SetValue(true);
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseRC", "Use R(target kilable)")).SetValue(true);
+            _config.SubMenu("Combo").AddItem(new MenuItem("UseRC", "Use R if Target is Killable")).SetValue(true);
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("autoattack", "Autoattack to calc. the ComboDmg").SetValue(new Slider(3, 1, 6)));
-            _config.SubMenu("Combo").AddItem(new MenuItem("UseRE", "AutoR Min Targ")).SetValue(true);
+                .AddItem(new MenuItem("autoattack", "Auto-Attack to Calculate Combo Damage").SetValue(new Slider(3, 1, 6)));
+            _config.SubMenu("Combo").AddItem(new MenuItem("UseRE", "Auto-R Against X Target(s)")).SetValue(true);
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("MinTargets", "Ult when>=min enemy(COMBO)").SetValue(new Slider(2, 1, 5)));
+                .AddItem(new MenuItem("MinTargets", "Use R When X Target(s) Hit in Combo").SetValue(new Slider(2, 1, 5)));
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("ActiveCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             //Harass
             _config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -86,91 +86,91 @@ namespace D_MissF
             _config.SubMenu("Harass").AddItem(new MenuItem("UseEH", "Use E")).SetValue(true);
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("harasstoggle", "AutoHarass (toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
+                    new MenuItem("harasstoggle", "Auto-Harass (Toggle)").SetValue(new KeyBind("G".ToCharArray()[0],
                         KeyBindType.Toggle)));
             _config.SubMenu("Harass")
-                .AddItem(new MenuItem("Harrasmana", "Minimum Mana").SetValue(new Slider(60, 1, 100)));
+                .AddItem(new MenuItem("Harrasmana", "Min. % Mana").SetValue(new Slider(60, 1, 100)));
             _config.SubMenu("Harass")
                 .AddItem(
-                    new MenuItem("ActiveHarass", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                    new MenuItem("ActiveHarass", "Harass").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             //LaneClear
             _config.AddSubMenu(new Menu("Farm", "Farm"));
-            _config.SubMenu("Farm").AddSubMenu(new Menu("LaneFarm", "LaneFarm"));
-            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseQL", "Q LaneClear")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseEL", "E LaneClear")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("lanemana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("Activelane", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+            _config.SubMenu("Farm").AddSubMenu(new Menu("Lane Clear", "LaneFarm"));
+            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseQL", "Use Q")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("UseEL", "Use E")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("lanemana", "Min. % Mana").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Farm").SubMenu("LaneFarm").AddItem(new MenuItem("Activelane", "Lane Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             _config.SubMenu("Farm").AddSubMenu(new Menu("LastHit", "LastHit"));
-            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseQLH", "Q LastHit")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseELH", "E LastHit")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("lastmana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("ActiveLast", "LastHit!").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
+            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseQLH", "Use Q")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("UseELH", "Use E")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("lastmana", "Min. % Mana").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Farm").SubMenu("LastHit").AddItem(new MenuItem("ActiveLast", "Last Hit").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
 
             _config.SubMenu("Farm").AddSubMenu(new Menu("Jungle", "Jungle"));
-            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseQJ", "Q Jungle")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseEJ", "E Jungle")).SetValue(true);
-            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("junglemana", "Minimum Mana% >").SetValue(new Slider(35, 1, 100)));
-            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("ActiveJungle", "Jungle!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseQJ", "Use Q")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("UseEJ", "Use E")).SetValue(true);
+            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("junglemana", "Min. % Mana").SetValue(new Slider(35, 1, 100)));
+            _config.SubMenu("Farm").SubMenu("Jungle").AddItem(new MenuItem("ActiveJungle", "Jungle").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             //items
             _config.AddSubMenu(new Menu("items", "items"));
             _config.SubMenu("items").AddSubMenu(new Menu("Offensive", "Offensive"));
             _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Youmuu", "Use Youmuu's")).SetValue(true);
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Bilge")).SetValue(true);
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Bilge", "Use Cutlass")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BilgeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Bilgemyhp", "Or your Hp < ").SetValue(new Slider(85, 1, 100)));
-            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use Blade")).SetValue(true);
+                .AddItem(new MenuItem("Bilgemyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
+            _config.SubMenu("items").SubMenu("Offensive").AddItem(new MenuItem("Blade", "Use BotRK")).SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("BladeEnemyhp", "If Enemy % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Offensive")
-                .AddItem(new MenuItem("Blademyhp", "Or Your  Hp <").SetValue(new Slider(85, 1, 100)));
+                .AddItem(new MenuItem("Blademyhp", "If Self % HP <").SetValue(new Slider(85, 1, 100)));
             _config.SubMenu("items").AddSubMenu(new Menu("Potions", "Potions"));
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usehppotions", "Use Healt potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usehppotions", "Use Health Potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionhp", "If Health % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionhp", "If % HP <").SetValue(new Slider(35, 1, 100)));
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usemppotions", "Use Mana potion/Flask/Biscuit"))
+                .AddItem(new MenuItem("usemppotions", "Use Mana Potion/Flask/Biscuit"))
                 .SetValue(true);
             _config.SubMenu("items")
                 .SubMenu("Potions")
-                .AddItem(new MenuItem("usepotionmp", "If Mana % <").SetValue(new Slider(35, 1, 100)));
+                .AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
 
             //Misc
             _config.AddSubMenu(new Menu("Misc", "Misc"));
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseQM", "Use Q KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseEM", "Use E KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("UseRM", "Use R KillSteal")).SetValue(true);
-            _config.SubMenu("Misc").AddItem(new MenuItem("Gap_E", "GapClosers E")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseQM", "Use Q to Killsteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseEM", "Use E to Killsteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("UseRM", "Use R to Killsteal")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("Gap_E", "Use E against Gapclosers")).SetValue(true);
             _config.SubMenu("Misc").AddItem(new MenuItem("skinMF", "Use Custom Skin").SetValue(false));
             _config.SubMenu("Misc").AddItem(new MenuItem("skinMiss", "Skin Changer").SetValue(new Slider(4, 1, 7)));
-            _config.SubMenu("Misc").AddItem(new MenuItem("usePackets", "Usepackes")).SetValue(true);
+            _config.SubMenu("Misc").AddItem(new MenuItem("usePackets", "Use Packets")).SetValue(true);
 
             //Drawings
             _config.AddSubMenu(new Menu("Drawings", "Drawings"));
             _config.SubMenu("Drawings").AddItem(new MenuItem("DrawQ", "Draw Q")).SetValue(true);
             _config.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
             _config.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
-            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag Free Circles").SetValue(true));
+            _config.SubMenu("Drawings").AddItem(new MenuItem("CircleLag", "Lag-Free Circles").SetValue(true));
             _config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleQuality", "Circles Quality").SetValue(new Slider(100, 100, 10)));
+                .AddItem(new MenuItem("CircleQuality", "Circle Quality").SetValue(new Slider(100, 100, 10)));
             _config.SubMenu("Drawings")
-                .AddItem(new MenuItem("CircleThickness", "Circles Thickness").SetValue(new Slider(1, 10, 1)));
+                .AddItem(new MenuItem("CircleThickness", "Circle Thickness").SetValue(new Slider(1, 10, 1)));
 
             _config.AddToMainMenu();
-            Game.PrintChat("<font color='#881df2'>D-MissFortune by Diabaths</font> Loaded.");
+            //Game.PrintChat("<font color='#881df2'>D-MissFortune by Diabaths</font> Loaded.");
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             
@@ -182,7 +182,7 @@ namespace D_MissF
                 GenModelPacket(_player.ChampionName, _config.Item("skinMiss").GetValue<Slider>().Value);
                 _lastSkin = _config.Item("skinMiss").GetValue<Slider>().Value;
             }
-           Game.PrintChat("<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
+           //Game.PrintChat("<font color='#FF0000'>If You like my work and want to support, and keep it always up to date plz donate via paypal in </font> <font //color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
         
         }
 

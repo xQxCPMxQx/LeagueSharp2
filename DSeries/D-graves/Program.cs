@@ -1,4 +1,4 @@
-﻿#region
+#region
 using System;
 using LeagueSharp;
 using System.Linq;
@@ -71,7 +71,7 @@ namespace D_Graves
             _config.SubMenu("Combo").AddItem(new MenuItem("UseEC", "Use E")).SetValue(true);
             _config.SubMenu("Combo").AddItem(new MenuItem("diveintower", "Dive In tower with E")).SetValue(true);
             _config.SubMenu("Combo")
-                .AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+                .AddItem(new MenuItem("ActiveCombo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             //Ulti Factions
             _config.AddSubMenu(new Menu("R Factions", "R Factions"));
