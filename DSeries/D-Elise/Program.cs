@@ -45,7 +45,7 @@ namespace D_Elise
 
        private static float _spideQcd = 0, _spideWcd = 0, _spideEcd = 0;
 
-      // private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis, _zhonya;
+       private static Items.Item _tiamat, _hydra, _blade, _bilge, _rand, _lotis, _zhonya;
 
        private static SpellSlot _smiteSlot = SpellSlot.Unknown;
 
@@ -78,7 +78,7 @@ namespace D_Elise
             _humanW.SetSkillshot(0.25f, 100f, 1000, true, SkillshotType.SkillshotLine);
             _humanE.SetSkillshot(0.25f, 55f, 1300, true, SkillshotType.SkillshotLine);
 
-/*          REMOVED THIS because Activator assemblies should probably handle these functions.
+          
 			_bilge = new Items.Item(3144, 475f);
             _blade = new Items.Item(3153, 425f);
             _hydra = new Items.Item(3074, 250f);
@@ -86,7 +86,7 @@ namespace D_Elise
             _rand = new Items.Item(3143, 490f);
             _lotis = new Items.Item(3190, 590f);
             _zhonya = new Items.Item(3157, 10); 
-*/
+
 
             SetSmiteSlot();
             _igniteSlot = _player.GetSpellSlot("SummonerDot");
@@ -345,7 +345,7 @@ namespace D_Elise
                 //Game.PrintChat("Spell name: " + args.SData.Name.ToString());
                 GetCDs(args);
         }
-/*         private static void Usepotion()
+         private static void Usepotion()
         {
             var mobs = MinionManager.GetMinions(_player.ServerPosition, _humanE.Range,
                 MinionTypes.All,
@@ -404,8 +404,8 @@ namespace D_Elise
                 }
             }
         }
- */
-/*         private static void UseItemes(Obj_AI_Hero target)
+ 
+        private static void UseItemes(Obj_AI_Hero target)
         {
             var iBilge = _config.Item("Bilge").GetValue<bool>();
             var iBilgeEnemyhp = target.Health <=
@@ -466,7 +466,7 @@ namespace D_Elise
 
             }
         }
- */
+ 
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(_humanW.Range, TargetSelector.DamageType.Magical);
