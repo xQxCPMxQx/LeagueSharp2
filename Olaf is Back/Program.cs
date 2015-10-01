@@ -347,11 +347,9 @@ namespace Olafisback
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForDragon", Tab + "Baron/Dragon:").SetValue(new StringList(new[] { "Off", "Dragon", "Baron", "Both" }, 3)));
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForBlueRed", Tab + "Blue/Red:").SetValue(new StringList(new[] { "Off", "Blue", "Red", "Both" }, 3)));
 
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJAutoAxe", "Auto-Catch Axe (Only in Jungle)").SetValue(false));
-
-
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             }
+
 
             /* [ Flee ] */
             var menuFlee = new Menu("Flee", "Flee");
@@ -403,12 +401,11 @@ namespace Olafisback
                 Drawing.Direct3DDevice,
                 new FontDescription
                 {
-                    FaceName = "Times New Roman",
-                    Height = 33,
+                    FaceName = "Segoe UI",
+                    Height = 39,
                     OutputPrecision = FontPrecision.Default,
-                    Quality = FontQuality.Default,
+                    Quality = FontQuality.ClearTypeNatural,
                 });
-
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 
@@ -674,116 +671,113 @@ namespace Olafisback
 
         private static void LaneClear()
         {
-            var allMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
-                MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+            var allMinions = MinionManager.GetMinions(
+                Player.ServerPosition,
+                Q.Range,
+                MinionTypes.All,
+                MinionTeam.Enemy,
+                MinionOrderTypes.MaxHealth);
 
-            if (allMinions.Count <= 0)
-                return;
+            if (allMinions.Count <= 0) return;
 
             if (Config.Item("LaneClearUseItems").GetValue<bool>())
             {
                 foreach (var item in from item in ItemDb
                                      where
-                                        item.Value.ItemType == EnumItemType.AoE && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
-                                     let 
-                                        iMinions = allMinions
+                                         item.Value.ItemType == EnumItemType.AoE
+                                         && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
+                                     let iMinions = allMinions
                                      where
-                                        item.Value.Item.IsReady() && iMinions[0].Distance(Player.Position) < item.Value.Item.Range
+                                         item.Value.Item.IsReady()
+                                         && iMinions[0].Distance(Player.Position) < item.Value.Item.Range
                                      select item)
                 {
                     item.Value.Item.Cast();
                 }
             }
 
-            if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady() && Player.HealthPercent > Config.Item("UseQFarmMinHealth").GetValue<Slider>().Value)
+            if (Config.Item("UseQFarm").GetValue<bool>() && Q.IsReady()
+                && Player.HealthPercent > Config.Item("UseQFarmMinMana").GetValue<Slider>().Value)
             {
                 var vParamQMinionCount = Config.Item("UseQFarmMinCount").GetValue<Slider>().Value;
 
                 var objAiHero = from x1 in ObjectManager.Get<Obj_AI_Minion>()
                                 where x1.IsValidTarget() && x1.IsEnemy
                                 select x1
-                                    into h
-                                    orderby h.Distance(Player) descending
-                                    select h
-                                        into x2
-                                        where x2.Distance(Player) < Q.Range - 20 && !x2.IsDead
-                                        select x2;
+                                into h
+                                orderby h.Distance(Player) descending
+                                select h
+                                into x2
+                                where x2.Distance(Player) < Q.Range - 20 && !x2.IsDead
+                                select x2;
 
                 var aiMinions = objAiHero as Obj_AI_Minion[] ?? objAiHero.ToArray();
 
                 var lastMinion = aiMinions.First();
 
-                var qMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Player.Distance(lastMinion.Position));
+                var qMinions = MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition,
+                    Player.Distance(lastMinion.Position));
 
-                var locQ = Q.GetLineFarmLocation(qMinions, Q.Width);
-
-                if (qMinions.Count == qMinions.Count(m => Player.Distance(m) < Q.Range)
-                    && locQ.MinionsHit >= vParamQMinionCount && locQ.Position.IsValid())
+                if (qMinions.Count > 0)
                 {
-                    Q.Cast(lastMinion.Position);
+                    var locQ = Q.GetLineFarmLocation(qMinions, Q.Width);
+
+                    if (qMinions.Count == qMinions.Count(m => Player.Distance(m) < Q.Range)
+                        && locQ.MinionsHit >= vParamQMinionCount && locQ.Position.IsValid())
+                    {
+                        Q.Cast(lastMinion.Position);
+                    }
                 }
             }
 
-            if (Config.Item("UseEFarm").GetValue<bool>() && Q.IsReady() && Player.HealthPercent > Config.Item("UseEFarmMinHealth").GetValue<Slider>().Value)
+            if (Config.Item("UseEFarm").GetValue<bool>() && E.IsReady()
+                && Player.HealthPercent > Config.Item("UseEFarmMinHealth").GetValue<Slider>().Value)
             {
                 var eMinions = MinionManager.GetMinions(Player.ServerPosition, E.Range);
-
-                var vParamESettings = Config.Item("UseEFarmSet").GetValue<StringList>().SelectedIndex;
-                switch (vParamESettings)
+                if (eMinions.Count > 0)
                 {
-                    case 0:
-                        {
-                            if (eMinions[0].IsValidTarget() &&
-                                eMinions[0].Health <= Player.GetSpellDamage(eMinions[0], SpellSlot.E))
+                    var eFarmSet = Config.Item("UseEFarmSet").GetValue<StringList>().SelectedIndex;
+                    switch (eFarmSet)
+                    {
+                        case 0:
+                            {
+                                if (eMinions[0].Health <= E.GetDamage(eMinions[0]))
+                                {
+                                    E.CastOnUnit(eMinions[0]);
+                                }
+                                break;
+                            }
+                        case 1:
+                            {
                                 E.CastOnUnit(eMinions[0]);
-                            break;
-                        }
-                    case 1:
-                        {
-                            if (eMinions[0].IsValidTarget())
-                                E.CastOnUnit(eMinions[0]);
-                            break;
-                        }
+                                break;
+                            }
+                    }
                 }
             }
         }
 
         private static void JungleFarm()
         {
-            if (Player.ManaPercent < Config.Item("UseQJFarmMinMana").GetValue<Slider>().Value)
-                return;
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral);
 
-            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
-                MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-
-            if (mobs == null)
+            if (mobs.Count <= 0)
+            {
                 return;
+            }
 
             var mob = mobs[0];
-
-            if (Config.Item("UseQJAutoAxe").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
-            {
-                string[] bigBoys = { "Baron", "Dragon", "Red", "Blue" };
-
-                foreach (
-                    var xbigBoys in
-                        bigBoys.Where(xbigBoys => olafAxe != null).Where(xbigBoys => mob.Name.Contains(xbigBoys)))
-                {
-                    ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, olafAxe.AxePos);
-                }
-            }
 
             if (Config.Item("JungleFarmUseItems").GetValue<bool>())
             {
                 foreach (var item in from item in ItemDb
                                      where
-                                        item.Value.ItemType == EnumItemType.AoE && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
-                                     let 
-                                        iMinions = mobs
-                                     where 
-                                        item.Value.Item.IsReady()
-                                     select 
-                                        item)
+                                         item.Value.ItemType == EnumItemType.AoE
+                                         && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
+                                     let iMinions = mobs
+                                     where item.Value.Item.IsReady() && iMinions[0].IsValidTarget(item.Value.Item.Range)
+                                     select item)
                 {
                     item.Value.Item.Cast();
                 }
@@ -793,45 +787,52 @@ namespace Olafisback
                     var youmuuBaron = Config.Item("UseJFarmYoumuuForDragon").GetValue<StringList>().SelectedIndex;
                     var youmuuRed = Config.Item("UseJFarmYoumuuForBlueRed").GetValue<StringList>().SelectedIndex;
 
-                    if (mob.Name.Contains("Dragon") && (youmuuBaron == (int)Mobs.Dragon || youmuuBaron == (int)Mobs.All)) { itemYoumuu.Cast(); }
+                    if (mob.Name.Contains("Dragon") && (youmuuBaron == (int)Mobs.Dragon || youmuuBaron == (int)Mobs.All))
+                    {
+                        itemYoumuu.Cast();
+                    }
 
-                    if (mob.Name.Contains("Baron") && (youmuuBaron == (int)Mobs.Baron || youmuuBaron == (int)Mobs.All)) itemYoumuu.Cast();
+                    if (mob.Name.Contains("Baron") && (youmuuBaron == (int)Mobs.Baron || youmuuBaron == (int)Mobs.All))
+                    {
+                        itemYoumuu.Cast();
+                    }
 
-                    if (mob.Name.Contains("Blue") && (youmuuRed == (int)Mobs.Blue || youmuuRed == (int)Mobs.All)) itemYoumuu.Cast();
+                    if (mob.Name.Contains("Blue") && (youmuuRed == (int)Mobs.Blue || youmuuRed == (int)Mobs.All))
+                    {
+                        itemYoumuu.Cast();
+                    }
 
-                    if (mob.Name.Contains("Red") && (youmuuRed == (int)Mobs.Red || youmuuRed == (int)Mobs.All)) itemYoumuu.Cast();
+                    if (mob.Name.Contains("Red") && (youmuuRed == (int)Mobs.Red || youmuuRed == (int)Mobs.All))
+                    {
+                        itemYoumuu.Cast();
+                    }
                 }
             }
 
             if (Config.Item("UseQJFarm").GetValue<bool>() && Q.IsReady())
             {
-                if (Player.Mana < Player.MaxMana / 100 * Config.Item("UseQJFarmMinMana").GetValue<Slider>().Value)
-                    return;
+                if (Player.Mana < Player.MaxMana / 100 * Config.Item("UseQJFarmMinMana").GetValue<Slider>().Value) return;
 
                 if (Q.IsReady()) Q.Cast(mob.Position - 20);
             }
 
             if (Config.Item("UseWJFarm").GetValue<bool>() && W.IsReady())
             {
-                if (Player.Mana < Player.MaxMana / 100 * Config.Item("UseWJFarmMinMana").GetValue<Slider>().Value)
-                    return;
+                if (Player.Mana < Player.MaxMana / 100 * Config.Item("UseWJFarmMinMana").GetValue<Slider>().Value) return;
 
-                if (mobs.Count >= 2 || mob.Health > Player.TotalAttackDamage * 2.5)
-                    W.Cast();
+                if (mobs.Count >= 2 || mob.Health > Player.TotalAttackDamage * 2.5) W.Cast();
             }
 
             if (Config.Item("UseEJFarm").GetValue<bool>() && E.IsReady())
             {
-                if (Player.Health < Player.MaxHealth / 100 * Config.Item("UseEJFarmMinHealth").GetValue<Slider>().Value)
-                    return;
+                if (Player.Health < Player.MaxHealth / 100 * Config.Item("UseEJFarmMinHealth").GetValue<Slider>().Value) return;
 
                 var vParamESettings = Config.Item("UseEJFarmSet").GetValue<StringList>().SelectedIndex;
                 switch (vParamESettings)
                 {
                     case 0:
                         {
-                            if (mob.Health <= Player.GetSpellDamage(mob, SpellSlot.E))
-                                E.CastOnUnit(mob);
+                            if (mob.Health <= Player.GetSpellDamage(mob, SpellSlot.E)) E.CastOnUnit(mob);
                             break;
                         }
                     case 1:
