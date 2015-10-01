@@ -78,8 +78,7 @@ namespace D_Elise
             _humanW.SetSkillshot(0.25f, 100f, 1000, true, SkillshotType.SkillshotLine);
             _humanE.SetSkillshot(0.25f, 55f, 1300, true, SkillshotType.SkillshotLine);
 
-          
-			_bilge = new Items.Item(3144, 475f);
+	    _bilge = new Items.Item(3144, 475f);
             _blade = new Items.Item(3153, 425f);
             _hydra = new Items.Item(3074, 250f);
             _tiamat = new Items.Item(3077, 250f);
@@ -87,12 +86,10 @@ namespace D_Elise
             _lotis = new Items.Item(3190, 590f);
             _zhonya = new Items.Item(3157, 10); 
 
-
             SetSmiteSlot();
             _igniteSlot = _player.GetSpellSlot("SummonerDot");
            
             _config = new Menu("D-Elise", "D-Elise", true);
-
 
             //TargetSelector
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
@@ -182,7 +179,7 @@ namespace D_Elise
                 .SubMenu("Potions")
                 .AddItem(new MenuItem("usepotionmp", "If % Mana <").SetValue(new Slider(35, 1, 100)));
             
-			//Farm Lane
+	    //Farm Lane
             _config.AddSubMenu(new Menu("Farm", "Farm"));
             _config.SubMenu("Farm").AddItem(new MenuItem("HumanQFarm", "Human Q")).SetValue(true);
             _config.SubMenu("Farm").AddItem(new MenuItem("HumanWFarm", "Human W")).SetValue(true);
@@ -237,9 +234,8 @@ namespace D_Elise
                     new MenuItem("autoE", "Human E with Very High Hitchance").SetValue(new KeyBind("T".ToCharArray()[0],
                         KeyBindType.Press)));
             _config.SubMenu("Misc")
-                .AddItem(new MenuItem("Echange", "E Hit Chancechance in Combo").SetValue(
+                .AddItem(new MenuItem("Echange", "Set E Hitchance in Combo").SetValue(
                     new StringList(new[] {"Low", "Medium", "High", "Very High"})));
-
 
             //Kill Steal
             _config.AddSubMenu(new Menu("Killsteal", "Ks"));
@@ -248,7 +244,6 @@ namespace D_Elise
             _config.SubMenu("Ks").AddItem(new MenuItem("HumanWKs", "Human W")).SetValue(true);
             _config.SubMenu("Ks").AddItem(new MenuItem("SpiderQKs", "Spider Q")).SetValue(true);
             _config.SubMenu("Ks").AddItem(new MenuItem("UseIgnite", "Use Ignite")).SetValue(true);
-
 
             //Drawings
             _config.AddSubMenu(new Menu("Drawings", "Drawings"));
@@ -382,7 +377,6 @@ namespace D_Elise
                         Items.UseItem(2003);
                     }
                 }
-
 
                 if (iusepotionmp && iusemppotion &&
                     !(ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true) ||
@@ -693,6 +687,7 @@ namespace D_Elise
                 } */
             }
         }
+        
         //Credits to Kurisu
         private static string Smitetype()
         {
@@ -736,7 +731,6 @@ namespace D_Elise
             float[] dmgs = { 370 + 20 * level, 330 + 30 * level, 240 + 40 * level, 100 + 50 * level };
             return (int)dmgs[index];
         }
-
 
         //New map Monsters Name By SKO
         private static void Smiteuse()
