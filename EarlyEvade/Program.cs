@@ -88,7 +88,7 @@ namespace EarlyEvadeWarning
                         Config.AddSubMenu(menuSub);
                     }
 
-                    if (e.ChampionName == "vayne")
+                    if (e.ChampionName == "Vayne")
                     {
                         var menuSub = new Menu("Vayne", "Vayne");
                         var menuSubSpell = new Menu("VayneE", "E Stun");
