@@ -88,7 +88,7 @@ namespace EarlyEvadeWarning
                         Config.AddSubMenu(menuSub);
                     }
 
-                    if (e.ChampionName == "Udyr")
+                    if (e.ChampionName == "vayne")
                     {
                         var menuSub = new Menu("Vayne", "Vayne");
                         var menuSubSpell = new Menu("VayneE", "E Stun");
@@ -121,6 +121,11 @@ namespace EarlyEvadeWarning
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (ObjectManager.Player.IsDead)
+            {
+                return;
+            }
+            
             if (!Config.Item("Enabled").GetValue<KeyBind>().Active)
             {
                 return;
