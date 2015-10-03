@@ -78,7 +78,7 @@ namespace MasterYiQx
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
             Config.SubMenu("Combo")
-                .AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+                .AddItem(new MenuItem("UseQComboDontUnderTurret", "Don't Q Under Enemy Turret").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
             Config.SubMenu("Combo")
@@ -90,10 +90,10 @@ namespace MasterYiQx
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             Config.SubMenu("Harass")
-                .AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+                .AddItem(new MenuItem("UseQHarassDontUnderTurret", "Don't Q Under Enemy Turret").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
             Config.SubMenu("Harass")
-                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                .AddItem(new MenuItem("HarassMana", "Min. Mana Percent:").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("Harass")
                 .AddItem(
                     new MenuItem("HarassActive", "Harass").SetValue(
@@ -103,10 +103,10 @@ namespace MasterYiQx
             Config.AddSubMenu(new Menu("LaneClear", "LaneClear"));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQLaneClear", "Use Q").SetValue(false));
             Config.SubMenu("LaneClear")
-                .AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Under Turret Q").SetValue(true));
+                .AddItem(new MenuItem("UseQLaneClearDontUnderTurret", "Don't Q Under Enemy Turret").SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("UseELaneClear", "Use E").SetValue(false));
             Config.SubMenu("LaneClear")
-                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent:").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("LaneClear")
                 .AddItem(
                     new MenuItem("LaneClearActive", "LaneClear").SetValue(
@@ -117,7 +117,7 @@ namespace MasterYiQx
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJungleFarm", "Use Q").SetValue(true));
             Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJungleFarm", "Use E").SetValue(false));
             Config.SubMenu("JungleFarm")
-                .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent:").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("JungleFarm")
                 .AddItem(
                     new MenuItem("JungleFarmActive", "JungleFarm").SetValue(
@@ -126,7 +126,7 @@ namespace MasterYiQx
             Config.AddSubMenu(new Menu("HealSettings", "HealSettings"));
             Config.SubMenu("HealSettings").AddItem(new MenuItem("HealUseW", "Use W").SetValue(true));
             Config.SubMenu("HealSettings")
-                .AddItem(new MenuItem("HealPercent", "Min. HP Percent").SetValue(new Slider(50, 100, 0)));
+                .AddItem(new MenuItem("HealPercent", "Min. Health Percent:").SetValue(new Slider(50, 100, 0)));
 
             Config.SubMenu("HealSettings")
                 .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent:").SetValue(new Slider(50, 100, 0)));
@@ -145,7 +145,7 @@ namespace MasterYiQx
             MenuTargetedItems.AddItem(new MenuItem("item3153", "Blade of the Ruined King").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3144", "Bilgewater Cutlass").SetValue(true));
             MenuTargetedItems.AddItem(new MenuItem("item3146", "Hextech Gunblade").SetValue(true));
-            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy ").SetValue(true));
+            MenuTargetedItems.AddItem(new MenuItem("item3184", "Entropy").SetValue(true));
 
             // Extras -> Use Items -> AOE Items
             MenuNonTargetedItems = new Menu("AOE Items", "menuNonTargetedItems");
@@ -174,7 +174,7 @@ namespace MasterYiQx
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             Config.SubMenu("Drawings")
                 .AddItem(
-                    new MenuItem("DrawQRange", "Q range").SetValue(
+                    new MenuItem("DrawQRange", "Q Range").SetValue(
                         new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             new PotionManager();
