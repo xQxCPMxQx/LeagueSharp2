@@ -275,7 +275,7 @@ namespace Olafisback
                         .AddItem(
                             new MenuItem("Harass.UseQ.Toggle", Tab + "Auto-Use Q").SetValue(
                                 new KeyBind("T".ToCharArray()[0],
-                                    KeyBindType.Toggle)));
+                                    KeyBindType.Toggle))).Permashow(true, "Olaf | Toggle Q");
                 }
                 Config.SubMenu("Harass")
                     .AddItem(
