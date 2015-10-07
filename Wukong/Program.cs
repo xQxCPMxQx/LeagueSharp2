@@ -26,6 +26,7 @@ namespace Wukong
         public static Spell R;
         public static SpellSlot SmiteSlot = SpellSlot.Unknown;
         public static Spell Smite;
+        private static bool monkeykingdecoystealth;
         private static readonly int[] SmitePurple = {3713, 3726, 3725, 3726, 3723};
         private static readonly int[] SmiteGrey = {3711, 3722, 3721, 3720, 3719};
         private static readonly int[] SmiteRed = {3715, 3718, 3717, 3716, 3714};
@@ -144,7 +145,7 @@ namespace Wukong
             // Extras -> Use Items 
             MenuMisc = new Menu("Misc", "Misc");
             Config.AddSubMenu(MenuMisc);
-            MenuMisc.AddItem(new MenuItem("Misc.AutoQ", "Auto Q if it Will Hit").SetValue(true));
+            MenuMisc.AddItem(new MenuItem("Misc.AutoQ", "Auto Q if it Will Hit").SetValue(new StringList(new []{ "Off", "On", "On: Just If I'm Visible" },1)));
             MenuMisc.AddItem(new MenuItem("Misc.BlockR", "Block R if it Won't Hit").SetValue(false));
             MenuMisc.AddItem(new MenuItem("InterruptSpells", "Interrupt Spells").SetValue(true));
 
@@ -206,8 +207,18 @@ namespace Wukong
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
-            Notifications.AddNotification(string.Format("{0} Loaded", ChampionName));
+            Obj_AI_Base.OnBuffAdd += (sender, eventArgs) =>
+            {
+                if (sender.IsMe && eventArgs.Buff.DisplayName == "MonkeyKingDecoyStealth")
+                    monkeykingdecoystealth = true;
+            };
 
+            Obj_AI_Base.OnBuffRemove += (sender, eventArgs) =>
+            {
+                if (sender.IsMe && eventArgs.Buff.DisplayName == "MonkeyKingDecoyStealth")
+                monkeykingdecoystealth = false;
+            };
+            Game.PrintChat(string.Format("{0} Loaded", ChampionName));
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -247,14 +258,30 @@ namespace Wukong
             if (!Orbwalking.CanMove(100))
                 return;
 
-            if (Config.Item("Misc.AutoQ").GetValue<bool>())
+            var miscAutoQ = Config.Item("Misc.AutoQ").GetValue<StringList>().SelectedIndex;
+            Obj_AI_Hero t;
+            switch (miscAutoQ)
             {
-                var t = TargetSelector.GetTarget(Q.Range - 20f, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget() && Q.IsReady())
-                {
-                    Q.CastOnUnit(t);
-                    Player.IssueOrder(GameObjectOrder.AttackTo, t);
-                }
+                    
+                case 1:
+                    t = TargetSelector.GetTarget(Q.Range - 20f, TargetSelector.DamageType.Physical);
+                    if (t.IsValidTarget() && Q.IsReady())
+                    {
+                        Q.CastOnUnit(t);
+                        Player.IssueOrder(GameObjectOrder.AttackTo, t);
+                    }
+                    break;
+                case 2:
+                    if (!monkeykingdecoystealth)
+                    {
+                        t = TargetSelector.GetTarget(Q.Range - 20f, TargetSelector.DamageType.Physical);
+                        if (t.IsValidTarget() && Q.IsReady())
+                        {
+                            Q.CastOnUnit(t);
+                            Player.IssueOrder(GameObjectOrder.AttackTo, t);
+                        }
+                    }
+                    break;
             }
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && (int) Game.Time > ultUsed + 4)
