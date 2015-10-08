@@ -84,7 +84,7 @@ namespace JaxQx
                     new StringList(new[] { "Single Target Select", "Multi Target Select" })))
                 .SetFontStyle(FontStyle.Regular, SharpDX.Color.LightCoral)
                 .SetTag(11);
-            this.Config.AddItem(new MenuItem("Range", "Range (Recommend: 1150):")).SetValue(new Slider(1150, (int)Program.E.Range, (int)Program.E.Range * 2)).SetTag(11);
+            this.Config.AddItem(new MenuItem("Range", "Range (Recommend: 1150):")).SetValue(new Slider(1150, (int)Program.Q.Range, (int)Program.Q.Range * 2)).SetTag(11);
 
             this.Config.AddItem(new MenuItem("Targets", "Targets:").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
             foreach (var e in HeroManager.Enemies)
@@ -184,7 +184,7 @@ namespace JaxQx
             }
 
             vDefaultRange = Math.Abs(vDefaultRange) < 0.00001
-                                ? Program.E.Range
+                                ? Program.Q.Range
                                 : this.Config.Item("Range").GetValue<Slider>().Value;
 
             var vEnemy =
