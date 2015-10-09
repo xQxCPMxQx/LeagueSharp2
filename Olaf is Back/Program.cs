@@ -789,7 +789,8 @@ namespace Olafisback
 
         private static void JungleFarm()
         {
-            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral);
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
+                MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0)
             {
