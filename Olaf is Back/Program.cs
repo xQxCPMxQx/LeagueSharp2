@@ -1,32 +1,46 @@
 #region
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using LeagueSharp;
-using LeagueSharp.Common;
-using SharpDX;
-using SharpDX.Direct3D9;
-using Color = SharpDX.Color;
-using Font = SharpDX.Direct3D9.Font;
+
+
 
 #endregion
 
 namespace Olafisback
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Linq;
+
+    using LeagueSharp;
+    using LeagueSharp.Common;
+
+    using SharpDX;
+    using SharpDX.Direct3D9;
+
+    using Color = SharpDX.Color;
+    using Font = SharpDX.Direct3D9.Font;
+
     internal class OlafAxe
     {
         public GameObject Object { get; set; }
+
         public float NetworkId { get; set; }
+
         public Vector3 AxePos { get; set; }
+
         public double ExpireTime { get; set; }
     }
 
     internal enum Mobs
     {
         Blue = 1,
+
         Red = 2,
+
         Dragon = 1,
+
         Baron = 2,
+
         All = 3
     }
 
@@ -36,7 +50,9 @@ namespace Olafisback
         private struct Tuple<TA, TB, TC> : IEquatable<Tuple<TA, TB, TC>>
         {
             private readonly TA item;
+
             private readonly TB itemType;
+
             private readonly TC targetingType;
 
             public Tuple(TA pItem, TB pItemType, TC pTargetingType)
@@ -48,17 +64,26 @@ namespace Olafisback
 
             public TA Item
             {
-                get { return this.item; }
+                get
+                {
+                    return this.item;
+                }
             }
 
             public TB ItemType
             {
-                get { return this.itemType; }
+                get
+                {
+                    return this.itemType;
+                }
             }
 
             public TC TargetingType
             {
-                get { return this.targetingType; }
+                get
+                {
+                    return this.targetingType;
+                }
             }
 
             public override int GetHashCode()
@@ -77,7 +102,7 @@ namespace Olafisback
 
             public bool Equals(Tuple<TA, TB, TC> other)
             {
-                return other.item.Equals(item) && other.itemType.Equals(this.itemType)
+                return other.item.Equals(this.item) && other.itemType.Equals(this.itemType)
                        && other.targetingType.Equals(this.targetingType);
             }
         }
@@ -85,51 +110,70 @@ namespace Olafisback
         private enum EnumItemType
         {
             OnTarget,
+
             Targeted,
+
             AoE
         }
 
         private enum EnumItemTargettingType
         {
-            Ally,
             EnemyHero,
+
             EnemyObjects
         }
 
         public static Obj_AI_Hero Player
         {
-            get { return ObjectManager.Player; }
+            get
+            {
+                return ObjectManager.Player;
+            }
         }
 
         private static string Tab
         {
-            get { return "       "; }
+            get
+            {
+                return "       ";
+            }
         }
+
         public const string ChampionName = "Olaf";
 
 
-        private static readonly OlafAxe olafAxe = new OlafAxe();
-        public static Font vText;
+        private static readonly OlafAxe OlafAxe = new OlafAxe();
+
+        public static Font TextAxe, TextLittle;
+
         public static int LastTickTime;
+
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
+
+        
+        public static AutoLevel AutoLevel;
 
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
 
         public static Spell Q;
+
         public static Spell Q2;
+
         public static Spell W;
+
         public static Spell E;
+
         public static Spell R;
 
-        public static SpellSlot IgniteSlot;
-
         private static Items.Item itemYoumuu;
-        private static Dictionary<string, Tuple<Items.Item, EnumItemType, EnumItemTargettingType>> ItemDb;
+
+        private static Dictionary<string, Tuple<Items.Item, EnumItemType, EnumItemTargettingType>> itemDb;
 
         //Menu
-        public static Menu Config;
+        public static Menu Config, MenuMisc, MenuCombo;
+
         //        private static GameObject _axeObj;
 
         private static void Main(string[] args)
@@ -139,8 +183,7 @@ namespace Olafisback
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            if (Player.CharData.BaseSkinName != ChampionName)
-                return;
+            if (Player.CharData.BaseSkinName != ChampionName) return;
 
             /* [ Spells ] */
             Q = new Spell(SpellSlot.Q, 1000);
@@ -154,82 +197,80 @@ namespace Olafisback
 
             SpellList.Add(Q);
             SpellList.Add(E);
-
-            IgniteSlot = Player.GetSpellSlot("SummonerDot");
-
+            
             /* [ Items ] */
             itemYoumuu = new Items.Item(3142, 225f);
 
-            ItemDb =
-                new Dictionary<string, Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>>
+            itemDb =
+                new Dictionary<string, Tuple<Items.Item, EnumItemType, EnumItemTargettingType>>
                     {
-                         {
+                        {
                             "Tiamat",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3077, 450f),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3077, 450f),
                             EnumItemType.AoE,
                             EnumItemTargettingType.EnemyObjects)
                         },
                         {
                             "Bilge",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3144, 450f),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3144, 450f),
                             EnumItemType.Targeted,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
                             "Blade",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3153, 450f),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3153, 450f),
                             EnumItemType.Targeted,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
                             "Hydra",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3074, 450f),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3074, 450f),
                             EnumItemType.AoE,
                             EnumItemTargettingType.EnemyObjects)
                         },
                         {
                             "Titanic Hydra Cleave",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3748, Orbwalking.GetRealAutoAttackRange(null) + 65),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3748, Orbwalking.GetRealAutoAttackRange(null) + 65),
                             EnumItemType.OnTarget,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
                             "Randiun",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3143, 490f),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3143, 490f),
                             EnumItemType.AoE,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
                             "Hextech",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3146, 750f),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3146, 750f),
                             EnumItemType.Targeted,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
                             "Entropy",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3184, 750f),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3184, 750f),
                             EnumItemType.Targeted,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
                             "Youmuu's Ghostblade",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3142, Orbwalking.GetRealAutoAttackRange(null) + 65),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3142, Orbwalking.GetRealAutoAttackRange(null) + 65),
                             EnumItemType.AoE,
                             EnumItemTargettingType.EnemyHero)
                         },
                         {
                             "Sword of the Divine",
-                            new Tuple<LeagueSharp.Common.Items.Item, EnumItemType, EnumItemTargettingType>(
-                            new LeagueSharp.Common.Items.Item(3131, Orbwalking.GetRealAutoAttackRange(null) + 65),
+                            new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3131, Orbwalking.GetRealAutoAttackRange(null) + 65),
                             EnumItemType.AoE,
                             EnumItemTargettingType.EnemyHero)
                         }
@@ -239,23 +280,21 @@ namespace Olafisback
             Config = new Menu(ChampionName, ChampionName, true);
 
             /* [ Target Selector ] */
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
+            //var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            //TargetSelector.AddToMenu(targetSelectorMenu);
+            //Config.AddSubMenu(targetSelectorMenu);
 
             /* [ Orbwalker ] */
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-
+            
             /* [ Combo ] */
-            Config.AddSubMenu(new Menu("Combo", "Combo"));
+            MenuCombo = new Menu("Combo", "Combo");
+            Config.AddSubMenu(MenuCombo);
             {
-                Config.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q")).SetValue(true);
-                Config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W")).SetValue(true);
-                Config.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E")).SetValue(true);
-                Config.SubMenu("Combo").AddItem(new MenuItem("UseItems", "Use Items")).SetValue(true);
-                Config.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)));
+                MenuCombo.AddItem(new MenuItem("UseQCombo", "Use Q")).SetValue(true);
             }
+            Config.AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press))).SetFontStyle(FontStyle.Regular, Color.GreenYellow);
 
             /* [ Harass ] */
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -265,22 +304,24 @@ namespace Olafisback
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseQ2Harass", Tab + "Use Q (Short-Range)").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", Tab + "Use E").SetValue(true));
                 Config.SubMenu("Harass").AddItem(new MenuItem("Mana Settings", "Mana Settings:"));
-                Config.SubMenu("Harass")
-                    .AddItem(
-                        new MenuItem("Harass.UseQ.MinMana", Tab + "Q Harass Min. Mana").SetValue(new Slider(30, 100, 0)));
+                Config.SubMenu("Harass").AddItem(new MenuItem("Harass.UseQ.MinMana", Tab + "Q Harass Min. Mana").SetValue(new Slider(30, 100, 0)));
 
                 Config.SubMenu("Harass").AddItem(new MenuItem("Toggle Settings", "Toggle Settings:"));
                 {
                     Config.SubMenu("Harass")
                         .AddItem(
                             new MenuItem("Harass.UseQ.Toggle", Tab + "Auto-Use Q").SetValue(
+<<<<<<< HEAD
+                                new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle)));
+=======
                                 new KeyBind("T".ToCharArray()[0],
                                     KeyBindType.Toggle))).Permashow(true, "Olaf | Toggle Q");
+>>>>>>> a3ff20864ca5024ca68a5313de63994d37a86230
                 }
                 Config.SubMenu("Harass")
                     .AddItem(
-                        new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0],
-                            KeyBindType.Press)));
+                        new MenuItem("HarassActive", "Harass!").SetValue(
+                            new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
             }
 
             /* [ Lane Clear ] */
@@ -288,25 +329,37 @@ namespace Olafisback
             {
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarm", "Use Q").SetValue(true)).ValueChanged +=
                     (sender, eventArgs) =>
-                    {
-                        Config.SubMenu("LaneClear").Item("UseQFarmMinCount").Show(eventArgs.GetNewValue<bool>());
-                        Config.SubMenu("LaneClear").Item("UseQFarmMinMana").Show(eventArgs.GetNewValue<bool>());
-                    };
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarmMinCount", Tab + "Min. Minion to Use Q").SetValue(new Slider(2, 5, 1)));
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarmMinMana", Tab + "Min. Mana to Use Q").SetValue(new Slider(30, 100, 0)));
+                        {
+                            Config.SubMenu("LaneClear").Item("UseQFarmMinCount").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("LaneClear").Item("UseQFarmMinMana").Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("LaneClear")
+                    .AddItem(
+                        new MenuItem("UseQFarmMinCount", Tab + "Min. Minion to Use Q").SetValue(new Slider(2, 5, 1)));
+                Config.SubMenu("LaneClear")
+                    .AddItem(
+                        new MenuItem("UseQFarmMinMana", Tab + "Min. Mana to Use Q").SetValue(new Slider(30, 100, 0)));
 
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarm", "Use E").SetValue(true)).ValueChanged +=
                     (sender, eventArgs) =>
-                    {
-                        Config.SubMenu("LaneClear").Item("UseEFarmSet").Show(eventArgs.GetNewValue<bool>());
-                        Config.SubMenu("LaneClear").Item("UseEFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
-                    };
+                        {
+                            Config.SubMenu("LaneClear").Item("UseEFarmSet").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("LaneClear").Item("UseEFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
+                        };
 
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmSet", Tab + "Use E:").SetValue(new StringList(new[] { "Last Hit", "Always" }, 0)));
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("UseEFarmMinHealth", Tab + "Min. Health to Use E").SetValue(new Slider(10, 100, 0)));
+                Config.SubMenu("LaneClear")
+                    .AddItem(
+                        new MenuItem("UseEFarmSet", Tab + "Use E:").SetValue(
+                            new StringList(new[] { "Last Hit", "Always" })));
+                Config.SubMenu("LaneClear")
+                    .AddItem(
+                        new MenuItem("UseEFarmMinHealth", Tab + "Min. Health to Use E").SetValue(new Slider(10, 100, 0)));
 
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseItems", "Use Items ").SetValue(true));
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "Lane Clear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("LaneClear")
+                    .AddItem(
+                        new MenuItem("LaneClearActive", "Lane Clear!").SetValue(
+                            new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             }
 
             /* [ Jungle Clear ] */
@@ -314,30 +367,66 @@ namespace Olafisback
             {
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarm", "Use Q").SetValue(true)).ValueChanged +=
                     (sender, eventArgs) =>
-                    {
-                        Config.SubMenu("JungleFarm").Item("UseQJFarmMinMana").Show(eventArgs.GetNewValue<bool>());
-                    };
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseQJFarmMinMana", Tab + "Min. Mana to Use Q").SetValue(new Slider(30, 100, 0)));
+                        {
+                            Config.SubMenu("JungleFarm").Item("UseQJFarmMinMana").Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("UseQJFarmMinMana", Tab + "Min. Mana to Use Q").SetValue(new Slider(30, 100, 0)));
                 /*---------------------------*/
 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarm", "Use W").SetValue(false)).ValueChanged +=
                     (sender, eventArgs) =>
-                    {
-                        Config.SubMenu("JungleFarm").Item("UseWJFarmMinMana").Show(eventArgs.GetNewValue<bool>());
-                    };
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseWJFarmMinMana", Tab + "Min. Man to Use W").SetValue(new Slider(30, 100, 0)));
+                        {
+                            Config.SubMenu("JungleFarm").Item("UseWJFarmMinMana").Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("UseWJFarmMinMana", Tab + "Min. Man to Use W").SetValue(new Slider(30, 100, 0)));
                 /*---------------------------*/
 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarm", "Use E").SetValue(false)).ValueChanged +=
                     (sender, eventArgs) =>
-                    {
-                        Config.SubMenu("JungleFarm").Item("UseEJFarmSet").Show(eventArgs.GetNewValue<bool>());
-                        Config.SubMenu("JungleFarm").Item("UseEJFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
-                    }; ;
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarmSet", Tab + "Use E:").SetValue(new StringList(new[] { "Last Hit", "Always" }, 1)));
-                Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseEJFarmMinHealth", Tab + "Min. Health to Use E").SetValue(new Slider(10, 100, 0)));
+                        {
+                            Config.SubMenu("JungleFarm").Item("UseEJFarmSet").Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("JungleFarm").Item("UseEJFarmMinHealth").Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("UseEJFarmSet", Tab + "Use E:").SetValue(
+                            new StringList(new[] { "Last Hit", "Always" }, 1)));
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("UseEJFarmMinHealth", Tab + "Min. Health to Use E").SetValue(
+                            new Slider(10, 100, 0)));
 
                 /*---------------------------*/
+<<<<<<< HEAD
+                Config.SubMenu("JungleFarm")
+                    .AddItem(new MenuItem("JungleFarmUseItems", "Use Items ").SetValue(true))
+                    .ValueChanged += (sender, eventArgs) =>
+                        {
+                            Config.SubMenu("JungleFarm")
+                                .Item("UseJFarmYoumuuForDragon")
+                                .Show(eventArgs.GetNewValue<bool>());
+                            Config.SubMenu("JungleFarm")
+                                .Item("UseJFarmYoumuuForBlueRed")
+                                .Show(eventArgs.GetNewValue<bool>());
+                        };
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("UseJFarmYoumuuForDragon", Tab + "Baron/Dragon:").SetValue(
+                            new StringList(new[] { "Off", "Dragon", "Baron", "Both" }, 3)));
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("UseJFarmYoumuuForBlueRed", Tab + "Blue/Red:").SetValue(
+                            new StringList(new[] { "Off", "Blue", "Red", "Both" }, 3)));
+
+                Config.SubMenu("JungleFarm")
+                    .AddItem(
+                        new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(
+                            new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+=======
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseItems", "Use Items ").SetValue(true)).ValueChanged +=
                     (sender, eventArgs) =>
                     {
@@ -348,6 +437,7 @@ namespace Olafisback
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("UseJFarmYoumuuForBlueRed", Tab + "Blue/Red:").SetValue(new StringList(new[] { "Off", "Blue", "Red", "Both" }, 3)));
 
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "Jungle Farm!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+>>>>>>> a3ff20864ca5024ca68a5313de63994d37a86230
             }
 
 
@@ -362,21 +452,35 @@ namespace Olafisback
             }
 
             /* [ Misc ] */
-            var menuMisc = new Menu("Misc", "Misc");
+            MenuMisc = new Menu("Misc", "Misc").SetFontStyle(FontStyle.Regular, Color.Aqua);
             {
-                menuMisc.AddItem(new MenuItem("Misc.AutoE", "Auto-Use E (If Enemy Hit)").SetValue(false));
-                menuMisc.AddItem(new MenuItem("Misc.AutoR", "Auto-Use R on Crowd-Control").SetValue(false));
-                Config.AddSubMenu(menuMisc);
+                MenuMisc.AddItem(new MenuItem("Misc.AutoE", "Auto-Use E (If Enemy Hit)").SetValue(false));
+                MenuMisc.AddItem(new MenuItem("Misc.AutoR", "Auto-Use R on Crowd-Control").SetValue(false));
+                Config.AddSubMenu(MenuMisc);
             }
+
+            Summoners.Initialize();
+            //PotionManager.Initialize();
+            AutoLevel = new AutoLevel();
             /* [ Other ] */
 
-            new PotionManager();
+            
 
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
 
-            Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.SpellDrawing", "Spell Drawing:"));
             Config.SubMenu("Drawings")
                 .AddItem(
+<<<<<<< HEAD
+                    new MenuItem("Draw.QRange", "Q range").SetValue(
+                        new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("Draw.Q2Range", "Short Q range").SetValue(
+                        new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
+            Config.SubMenu("Drawings")
+                .AddItem(
+                    new MenuItem("Draw.ERange", "E range").SetValue(
+=======
                     new MenuItem("Draw.QRange", Tab + "Q range").SetValue(
                         new Circle(true, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
             Config.SubMenu("Drawings")
@@ -386,6 +490,7 @@ namespace Olafisback
             Config.SubMenu("Drawings")
                 .AddItem(
                     new MenuItem("Draw.ERange", Tab + "E range").SetValue(
+>>>>>>> a3ff20864ca5024ca68a5313de63994d37a86230
                         new Circle(false, System.Drawing.Color.FromArgb(255, 255, 255, 255))));
 
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeDrawing", "Axe Drawing:"));
@@ -395,15 +500,35 @@ namespace Olafisback
                         new StringList(new[] { "Off", "Circle", "Line", "Both" }, 3)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeTime", Tab + "Axe Time Remaining").SetValue(true));
             Config.AddToMainMenu();
+<<<<<<< HEAD
+
+            TextAxe = new Font(
+=======
             
             vText = new Font(
+>>>>>>> a3ff20864ca5024ca68a5313de63994d37a86230
                 Drawing.Direct3DDevice,
                 new FontDescription
                 {
                     FaceName = "Segoe UI",
                     Height = 39,
                     OutputPrecision = FontPrecision.Default,
+<<<<<<< HEAD
+                    Quality = FontQuality.ClearTypeNatural
+                });
+
+
+            TextLittle = new Font(
+                Drawing.Direct3DDevice,
+                new FontDescription
+                {
+                    FaceName = "Segoe UI",
+                    Height = 15,
+                    OutputPrecision = FontPrecision.Default,
+                    Quality = FontQuality.ClearTypeNatural
+=======
                     Quality = FontQuality.ClearTypeNatural,
+>>>>>>> a3ff20864ca5024ca68a5313de63994d37a86230
                 });
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
@@ -420,10 +545,10 @@ namespace Olafisback
         {
             if (obj.Name == "olaf_axe_totem_team_id_green.troy")
             {
-                olafAxe.Object = obj;
-                olafAxe.ExpireTime = Game.Time + 8;
-                olafAxe.NetworkId = obj.NetworkId;
-                olafAxe.AxePos = obj.Position;
+                OlafAxe.Object = obj;
+                OlafAxe.ExpireTime = Game.Time + 8;
+                OlafAxe.NetworkId = obj.NetworkId;
+                OlafAxe.AxePos = obj.Position;
                 //_axeObj = obj;
                 //LastTickTime = Environment.TickCount;
             }
@@ -431,12 +556,13 @@ namespace Olafisback
 
         private static void GameObject_OnDelete(GameObject obj, EventArgs args)
         {
-            if (obj.Name == "olaf_axe_totem_team_id_green.troy")
+            if (obj.Name != "olaf_axe_totem_team_id_green.troy")
             {
-                olafAxe.Object = null;
-                //_axeObj = null;
-                LastTickTime = 0;
+                return;
             }
+
+            OlafAxe.Object = null;
+            LastTickTime = 0;
         }
 
         private static void OrbwalkingBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -444,19 +570,58 @@ namespace Olafisback
             if (args.Target is Obj_AI_Hero)
             {
                 foreach (var item in
-                    ItemDb.Where(
+                    itemDb.Where(
                         i =>
                         i.Value.ItemType == EnumItemType.OnTarget
                         && i.Value.TargetingType == EnumItemTargettingType.EnemyHero && i.Value.Item.IsReady()))
                 {
-                    Game.PrintChat(item.Value.Item.Id.ToString());
                     item.Value.Item.Cast();
+                }
+
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && W.IsReady()
+                    && args.Target.Health > Player.TotalAttackDamage * 2)
+                {
+                    W.Cast();
                 }
             }
         }
-        
+
         private static void Drawing_OnDraw(EventArgs args)
         {
+<<<<<<< HEAD
+            CountAa();
+
+            var drawAxePosition = Config.Item("Draw.AxePosition").GetValue<StringList>().SelectedIndex;
+            if (OlafAxe.Object != null)
+            {
+                var exTime = TimeSpan.FromSeconds(OlafAxe.ExpireTime - Game.Time).TotalSeconds;
+                var color = exTime > 4 ? System.Drawing.Color.Yellow : System.Drawing.Color.Red;
+                switch (drawAxePosition)
+                {
+                    case 1:
+                        Render.Circle.DrawCircle(OlafAxe.Object.Position, 150, color, 6);
+                        break;
+                    case 2:
+                        {
+                            var line = new Geometry.Polygon.Line(
+                                Player.Position,
+                                OlafAxe.AxePos,
+                                Player.Distance(OlafAxe.AxePos));
+                            line.Draw(color, 2);
+                        }
+                        break;
+                    case 3:
+                        {
+                            Render.Circle.DrawCircle(OlafAxe.Object.Position, 150, color, 6);
+
+                            var line = new Geometry.Polygon.Line(
+                                Player.Position,
+                                OlafAxe.AxePos,
+                                Player.Distance(OlafAxe.AxePos));
+                            line.Draw(color, 2);
+                        }
+                        break;
+=======
             var drawAxePosition = Config.Item("Draw.AxePosition").GetValue<StringList>().SelectedIndex;
             if (olafAxe.Object != null)
             {
@@ -489,17 +654,20 @@ namespace Olafisback
                         break;
 
 
+>>>>>>> a3ff20864ca5024ca68a5313de63994d37a86230
                 }
             }
 
-            if (Config.Item("Draw.AxeTime").GetValue<bool>() && olafAxe.Object != null)
+
+
+            if (Config.Item("Draw.AxeTime").GetValue<bool>() && OlafAxe.Object != null)
             {
-                var time = TimeSpan.FromSeconds(olafAxe.ExpireTime - Game.Time);
-                var pos = Drawing.WorldToScreen(olafAxe.AxePos);
+                var time = TimeSpan.FromSeconds(OlafAxe.ExpireTime - Game.Time);
+                var pos = Drawing.WorldToScreen(OlafAxe.AxePos);
                 var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
 
                 Color vTimeColor = time.TotalSeconds > 4 ? Color.White : Color.Red;
-                DrawText(vText, display, (int)pos.X - display.Length * 3, (int)pos.Y - 65, vTimeColor);
+                DrawText(TextAxe, display, (int)pos.X - display.Length * 3, (int)pos.Y - 65, vTimeColor);
             }
             /*
                         if (_axeObj != null)
@@ -516,10 +684,10 @@ namespace Olafisback
                     Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color, 1);
                 }
             }
-            var Q2Range = Config.Item("Draw.Q2Range").GetValue<Circle>();
-            if (Q2Range.Active)
+            var q2Range = Config.Item("Draw.Q2Range").GetValue<Circle>();
+            if (q2Range.Active)
             {
-                Render.Circle.DrawCircle(Player.Position, Q2.Range, Q2Range.Color, 1);
+                Render.Circle.DrawCircle(Player.Position, Q2.Range, q2Range.Color, 1);
             }
         }
 
@@ -536,8 +704,7 @@ namespace Olafisback
             if (E.IsReady() && Config.Item("Misc.AutoE").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    E.CastOnUnit(t);
+                if (t.IsValidTarget()) E.CastOnUnit(t);
             }
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -560,8 +727,7 @@ namespace Olafisback
                 Harass();
             }
 
-            if (Config.Item("Flee.Active").GetValue<KeyBind>().Active)
-                Flee();
+            if (Config.Item("Flee.Active").GetValue<KeyBind>().Active) Flee();
 
             if (R.IsReady() && Config.Item("Misc.AutoR").GetValue<bool>())
             {
@@ -572,11 +738,9 @@ namespace Olafisback
         private static void Combo()
         {
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            if (!t.IsValidTarget())
-                return;
+            if (!t.IsValidTarget()) return;
 
-            if (Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady() &&
-                Player.Distance(t.ServerPosition) <= Q.Range)
+            if (Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady() && Player.Distance(t.ServerPosition) <= Q.Range)
             {
                 PredictionOutput qPredictionOutput = Q.GetPrediction(t);
                 var castPosition = qPredictionOutput.CastPosition.Extend(ObjectManager.Player.Position, -100);
@@ -591,32 +755,23 @@ namespace Olafisback
                 }
             }
 
-            if (Config.Item("UseECombo").GetValue<bool>() && E.IsReady() && Player.Distance(t.ServerPosition) <= E.Range)
+            if (E.IsReady() && Player.Distance(t.ServerPosition) <= E.Range)
             {
                 E.CastOnUnit(t);
             }
 
-            if (Config.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Player.Distance(t.ServerPosition) <= 225f)
-            {
-                W.Cast();
-            }
+            CastItems(t);
 
-            if (Config.Item("UseItems").GetValue<bool>())
+            if (GetComboDamage(t) > t.Health && Summoners.IgniteSlot != SpellSlot.Unknown
+                && Player.Spellbook.CanUseSpell(Summoners.IgniteSlot) == SpellState.Ready)
             {
-                CastItems(t);
-            }
-
-            if (GetComboDamage(t) > t.Health && IgniteSlot != SpellSlot.Unknown
-                && Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-            {
-                Player.Spellbook.CastSpell(IgniteSlot, t);
+                Player.Spellbook.CastSpell(Summoners.IgniteSlot, t);
             }
         }
 
         private static void CastQ()
         {
-            if (!Q.IsReady())
-                return;
+            if (!Q.IsReady()) return;
 
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
@@ -641,8 +796,7 @@ namespace Olafisback
 
         private static void CastShortQ()
         {
-            if (!Q.IsReady())
-                return;
+            if (!Q.IsReady()) return;
 
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
@@ -659,19 +813,12 @@ namespace Olafisback
         private static void CastR()
         {
             BuffType[] buffList =
-            {
-                BuffType.Blind,
-                BuffType.Charm,
-                BuffType.Fear,
-                BuffType.Knockback,
-                BuffType.Knockup,
-                BuffType.Taunt,
-                BuffType.Slow,
-                BuffType.Silence,
-                BuffType.Disarm,
-                BuffType.Snare
-            };
+                {
+                    BuffType.Blind, BuffType.Charm, BuffType.Fear, BuffType.Knockback, BuffType.Knockup,
+                    BuffType.Taunt, BuffType.Slow, BuffType.Silence, BuffType.Disarm, BuffType.Snare
+                };
 
+            // ReSharper disable once UnusedVariable
             foreach (var b in buffList.Where(b => Player.HasBuffOfType(b)))
             {
                 R.Cast();
@@ -711,7 +858,7 @@ namespace Olafisback
 
             if (Config.Item("LaneClearUseItems").GetValue<bool>())
             {
-                foreach (var item in from item in ItemDb
+                foreach (var item in from item in itemDb
                                      where
                                          item.Value.ItemType == EnumItemType.AoE
                                          && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
@@ -789,8 +936,12 @@ namespace Olafisback
 
         private static void JungleFarm()
         {
+<<<<<<< HEAD
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral);
+=======
             var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
                 MinionOrderTypes.MaxHealth);
+>>>>>>> a3ff20864ca5024ca68a5313de63994d37a86230
 
             if (mobs.Count <= 0)
             {
@@ -801,7 +952,7 @@ namespace Olafisback
 
             if (Config.Item("JungleFarmUseItems").GetValue<bool>())
             {
-                foreach (var item in from item in ItemDb
+                foreach (var item in from item in itemDb
                                      where
                                          item.Value.ItemType == EnumItemType.AoE
                                          && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
@@ -878,20 +1029,26 @@ namespace Olafisback
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             if (Config.Item("Flee.UseQ").GetValue<bool>())
-                if (Q.IsReady())
+            {
+                foreach (var t in
+                    HeroManager.Enemies.Where(t => t.IsValidTarget(Q.Range)).OrderBy(t => t.Distance(Player.Position)))
                 {
-                    CastQ();
+                    if (Q.IsReady())
+                    {
+                        Q.Cast(t.Position);
+                    }
                 }
+            }
+
             if (Config.Item("Flee.UseYou").GetValue<bool>())
             {
-                if (itemYoumuu.IsReady())
-                    itemYoumuu.Cast();
+                if (itemYoumuu.IsReady()) itemYoumuu.Cast();
             }
         }
 
         private static void CastItems(Obj_AI_Hero t)
         {
-            foreach (var item in ItemDb)
+            foreach (var item in itemDb)
             {
                 if (item.Value.ItemType == EnumItemType.AoE
                     && item.Value.TargetingType == EnumItemTargettingType.EnemyHero)
@@ -906,30 +1063,59 @@ namespace Olafisback
             }
         }
 
-        private static float GetComboDamage(Obj_AI_Base vTarget)
+        private static float GetComboDamage(Obj_AI_Base t)
         {
             var fComboDamage = 0d;
 
-            if (Q.IsReady())
-                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.Q);
+            if (Q.IsReady()) fComboDamage += Q.GetDamage(t);
 
-            if (E.IsReady())
-                fComboDamage += Player.GetSpellDamage(vTarget, SpellSlot.E);
+            if (E.IsReady()) fComboDamage += E.GetDamage(t);
 
-            if (Items.CanUseItem(3146))
-                fComboDamage += Player.GetItemDamage(vTarget, Damage.DamageItems.Hexgun);
+            if (Items.CanUseItem(3146)) fComboDamage += Player.GetItemDamage(t, Damage.DamageItems.Hexgun);
 
-            if (IgniteSlot != SpellSlot.Unknown &&
-                Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                fComboDamage += Player.GetSummonerSpellDamage(vTarget, Damage.SummonerSpell.Ignite);
+            if (Summoners.IgniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(Summoners.IgniteSlot) == SpellState.Ready)
+            {
+                fComboDamage += Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
+            }
 
             return (float)fComboDamage;
         }
 
-        public static void DrawText(Font vFont, String vText, int vPosX, int vPosY, Color vColor)
+        private static void CountAa()
         {
-            vFont.DrawText(null, vText, vPosX + 2, vPosY + 2, vColor != Color.Black ? Color.Black : Color.White);
-            vFont.DrawText(null, vText, vPosX, vPosY, vColor);
+            int result = 0;
+
+            foreach (var e in HeroManager.Enemies.Where(e => e.Distance(Player.Position) < Q.Range * 3 && !e.IsDead && e.IsVisible))
+            {
+                var getComboDamage = GetComboDamage(e);
+                var str = " ";
+
+                if (e.Health < getComboDamage + Player.TotalAttackDamage * 5)
+                {
+                    result = (int)Math.Ceiling((e.Health - getComboDamage) / Player.TotalAttackDamage) + 1;
+                    if (e.Health < getComboDamage)
+                    {
+                        str = "Combo = Kill";
+                    }
+                    else
+                    {
+                        str = (getComboDamage > 0 ? "Combo " : "") + (result > 0 ? result + " x AA Damage = Kill" : "");
+                    }
+                }
+
+                DrawText(
+                    TextLittle,
+                    str,
+                    (int)e.HPBarPosition.X + 145,
+                    (int)e.HPBarPosition.Y + 5,
+                    result <= 4 ? Color.GreenYellow : Color.White);
+            }
+        }
+
+        public static void DrawText(Font vFont, String aText, int vPosX, int vPosY, Color vColor)
+        {
+            vFont.DrawText(null, aText, vPosX + 2, vPosY + 2, vColor != Color.Black ? Color.Black : Color.White);
+            vFont.DrawText(null, aText, vPosX, vPosY, vColor);
         }
     }
 }
