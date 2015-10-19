@@ -411,6 +411,15 @@ namespace Olafisback
                     OutputPrecision = FontPrecision.Default,
                     Quality = FontQuality.ClearTypeNatural,
                 });
+            TextLittle = new Font(
+                Drawing.Direct3DDevice,
+                new FontDescription
+                {
+                    FaceName = "Segoe UI",
+                    Height = 39,
+                    OutputPrecision = FontPrecision.Default,
+                    Quality = FontQuality.ClearTypeNatural,
+                });                
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 
