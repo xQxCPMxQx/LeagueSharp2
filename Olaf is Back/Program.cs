@@ -112,7 +112,7 @@ namespace Olafisback
 
 
         private static readonly OlafAxe olafAxe = new OlafAxe();
-        public static Font vText;
+        public static Font TextAxe, TextLittle;
         public static int LastTickTime;
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
@@ -402,7 +402,7 @@ namespace Olafisback
             Config.SubMenu("Drawings").AddItem(new MenuItem("Draw.AxeTime", Tab + "Axe Time Remaining").SetValue(true));
             Config.AddToMainMenu();
 
-            vText = new Font(
+            TextAxe = new Font(
                 Drawing.Direct3DDevice,
                 new FontDescription
                 {
@@ -544,7 +544,7 @@ namespace Olafisback
                 var display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
 
                 Color vTimeColor = time.TotalSeconds > 4 ? Color.White : Color.Red;
-                DrawText(vText, display, (int)pos.X - display.Length * 3, (int)pos.Y - 65, vTimeColor);
+                DrawText(TextAxe, display, (int)pos.X - display.Length * 3, (int)pos.Y - 65, vTimeColor);
             }
             /*
                         if (_axeObj != null)
@@ -966,10 +966,10 @@ namespace Olafisback
             return (float)fComboDamage;
         }
 
-        public static void DrawText(Font vFont, String vText, int vPosX, int vPosY, Color vColor)
+        public static void DrawText(Font aFont, String aText, int aPosX, int aPosY, Color aColor)
         {
-            vFont.DrawText(null, vText, vPosX + 2, vPosY + 2, vColor != Color.Black ? Color.Black : Color.White);
-            vFont.DrawText(null, vText, vPosX, vPosY, vColor);
+            aFont.DrawText(null, aText, aPosX + 2, aPosY + 2, aColor != Color.Black ? Color.Black : Color.White);
+            aFont.DrawText(null, aText, aPosX, aPosY, aColor);
         }
     }
 }
