@@ -416,7 +416,7 @@ namespace Olafisback
                 new FontDescription
                 {
                     FaceName = "Segoe UI",
-                    Height = 39,
+                    Height = 15,
                     OutputPrecision = FontPrecision.Default,
                     Quality = FontQuality.ClearTypeNatural,
                 });                
