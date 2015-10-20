@@ -136,7 +136,7 @@ namespace EarlyEvadeWarning
                 foreach (
                     var e in
                         HeroManager.Enemies.Where(
-                            e => e.ChampionName.ToLower() == "udyr" && e.Distance(ObjectManager.Player.Position) < 900))
+                            e => e.ChampionName.ToLower() == "vayne" && e.Distance(ObjectManager.Player.Position) < 900))
                 {
                     for (var i = 1; i < 8; i++)
                     {
