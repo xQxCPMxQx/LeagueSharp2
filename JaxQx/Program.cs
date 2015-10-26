@@ -33,6 +33,8 @@ namespace JaxQx
         public static Orbwalking.Orbwalker Orbwalker;
 
         private static bool shenBuffActive;
+        
+        private static bool eCounterStrike;
 
         public static AssassinManager AssassinManager;
 
@@ -214,11 +216,17 @@ namespace JaxQx
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
-            Obj_AI_Base.OnBuffRemove += (sender, eventArgs) =>
+   Obj_AI_Base.OnBuffRemove += (sender, eventArgs) =>
                 {
                     if (sender.IsMe && eventArgs.Buff.Name.ToLower() == "sheen")
                     {
                         shenBuffActive = false;
+                    }
+
+                    if (sender.IsMe && eventArgs.Buff.Name.ToLower() == "jaxcounterstrike")
+                    {
+
+                        eCounterStrike = false;
                     }
                 };
 
@@ -230,8 +238,13 @@ namespace JaxQx
                         shenBuffActive = true;
                     }
 
-                };
+                    if (sender.IsMe && eventArgs.Buff.Name.ToLower() == "jaxcounterstrike")
+                    {
 
+                        eCounterStrike = true;
+                    }
+                    
+                };
             Notifications.AddNotification(String.Format("{0} Loaded", ChampionName), 4000);
         }
 
@@ -423,6 +436,13 @@ namespace JaxQx
                         }
                         break;
                 }
+                
+                if (eCounterStrike && t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
+                {
+                    E.Cast();
+                    Game.PrintChat("E Activated");
+                }
+
             }
 
             if (Q.IsReady() && Player.Distance(t) >= minQRange && t.IsValidTarget(Q.Range))
