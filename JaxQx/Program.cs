@@ -440,7 +440,6 @@ namespace JaxQx
                 if (eCounterStrike && t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
                 {
                     E.Cast();
-                    Game.PrintChat("E Activated");
                 }
 
             }
