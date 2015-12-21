@@ -804,7 +804,7 @@ namespace LeeSin
 
             return pointList;
         }
-        private static void Insec ()
+        private static void Insec()
         {
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             if (!R.IsReady())
@@ -839,6 +839,7 @@ namespace LeeSin
             if (t.IsValidTarget(Q.Range) && QStage == QCastStage.IsReady)
             {
                 Combos.SmiteQCombo(Q);
+                Q.Cast(t);
             }
 
             foreach (var minions in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsEnemy && !o.IsDead && o.Health > Q.GetDamage(o) + 20 && o.Distance(InsecJumpPosition) < W.Range + 50 && o.IsValidTarget(Q.Range)))
