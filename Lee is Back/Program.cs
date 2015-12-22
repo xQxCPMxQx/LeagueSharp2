@@ -55,7 +55,7 @@ namespace LeeSin
         private static int canmove=1;
         private static int instypecheck;
         private static float wardTime;
-        private static float jumpTime;
+//        private static float jumpTime;
         private static float inscount;
         private static float counttime;
 
@@ -618,11 +618,6 @@ namespace LeeSin
                 return;
             }
 
-            if (Environment.TickCount < jumpTime + 50)
-            {
-                return;
-            }
-
             WardCastPosition = NavMesh.GetCollisionFlags(jumpPosition).HasFlag(CollisionFlags.Wall) ? ObjectManager.Player.GetPath(jumpPosition).Last(): jumpPosition;
 
             if (useAllyObjects)
@@ -638,7 +633,6 @@ namespace LeeSin
                 if (jumpObject != null)
                 {
                     W.CastOnUnit(jumpObject);
-                    jumpTime = Environment.TickCount;
                     //CastW(jumpObject);
                     return;
                 }
@@ -659,14 +653,12 @@ namespace LeeSin
             if (useWard && Items.GetWardSlot() != null && Items.GetWardSlot().Stacks != 0)
             {
                 PutWard(WardCastPosition);
-                jumpTime = Environment.TickCount;
                 return;
             }
 
             if (useFlash && ObjectManager.Player.Spellbook.CanUseSpell(flashSlot) == SpellState.Ready)
             {
                 ObjectManager.Player.Spellbook.CastSpell(flashSlot, jumpPosition);
-                jumpTime = Environment.TickCount;
                 return;
             }
         }
