@@ -338,11 +338,15 @@ namespace LeeSin
                 }
             }
 
+            if (Config.Item("Harass.QW").GetValue<KeyBind>().Active)
+            {
+                ModeHarass.HitAndRun();
+            }
+
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 Combo();
             }
-
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
             {
