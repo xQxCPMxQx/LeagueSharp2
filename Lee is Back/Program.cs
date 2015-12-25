@@ -922,11 +922,11 @@ namespace LeeSin
             }
         }
 
-        internal enum QCastStage { NotReady, IsReady, IsCasted }
-        internal enum WCastStage { NotReady, IsReady, IsCasted }
-        internal enum ECastStage { NotReady, IsReady, IsCasted }
+        public enum QCastStage { NotReady, IsReady, IsCasted }
+        public enum WCastStage { NotReady, IsReady, IsCasted }
+        public enum ECastStage { NotReady, IsReady, IsCasted }
         
-        private static QCastStage QStage
+        public static QCastStage QStage
         {
             get
             {
@@ -941,7 +941,7 @@ namespace LeeSin
 
             }
         }
-        private static WCastStage  WStage
+        public static WCastStage  WStage
         {
             get
             {
