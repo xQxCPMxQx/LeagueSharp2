@@ -220,7 +220,7 @@ namespace LeeSin
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
             //Drawing.OnDraw += Drawing_OnDraw_xQx;
             Drawing.OnDraw += Drawing_OnDraw_Insec;
-            Drawing.OnDraw += Drawing_OnDraw_GetBestPositionForWQCombo;
+            //Drawing.OnDraw += Drawing_OnDraw_GetBestPositionForWQCombo;
             Drawing.OnDraw += Drawing_OnDraw_Flee;
             //Drawing.OnDraw += Drawing_OnDraw_Enemy2;
             Drawing.OnDraw += Drawing_OnDraw_WJumpToEnemy;
