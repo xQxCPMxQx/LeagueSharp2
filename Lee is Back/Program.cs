@@ -1327,7 +1327,7 @@ namespace LeeSin
 
         private static void Drawing_OnDraw_Insec(EventArgs args)
         {
-            if (!R.IsReady())
+            if (!Config.Item("Insec").GetValue<KeyBind>().Active || !R.IsReady())
             {
                 return;
             }
