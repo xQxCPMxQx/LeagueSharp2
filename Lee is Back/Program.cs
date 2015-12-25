@@ -1342,12 +1342,12 @@ namespace LeeSin
             if (insecDirection != null)
             {
                 var t = AssassinManager.GetTarget(Q.Range * 2);
-                InsecJumpPosition = t.ServerPosition.Extend(insecDirection.Position, -150);
+                InsecJumpPosition = t.ServerPosition.Extend(insecDirection.Position, -220);
 
                 Render.Circle.DrawCircle(InsecJumpPosition, 150f, Color.Blue);
                 Render.Circle.DrawCircle(insecDirection.Position, 150f, Color.Red);
 
-                var tt = t.ServerPosition.Extend(insecDirection.Position, +300);
+                var tt = t.ServerPosition.Extend(insecDirection.Position, +500);
 
                 var startpos = t.Position;
                 var endpos = tt;
