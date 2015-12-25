@@ -184,14 +184,14 @@ namespace LeeSin
 
             Config.AddItem(new MenuItem("Insec", "Insec")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Aquamarine);
 
-            MenuFlee = new Menu("Flee", "Flee");
+            MenuFlee = new Menu("Flee / Ward Jump", "Flee");
             {
                 MenuFlee.AddItem(new MenuItem("Flee.UseQ", "Q:")).SetValue(true);
                 MenuFlee.AddItem(new MenuItem("Flee.UseW", "W:")).SetValue(true);
                 MenuFlee.AddItem(new MenuItem("Flee.Range", "Object Search Range")).SetValue(new Slider(250, 100, 350));
                 MenuFlee.AddItem(new MenuItem("Flee.Draw.W", "Draw W Range")).SetValue(new Circle(true, Color.Aqua));
                 MenuFlee.AddItem(new MenuItem("Flee.Draw", "Draw Object Search Range (Cursor)")).SetValue(new Circle(true, Color.Aqua));
-                MenuFlee.AddItem(new MenuItem("Flee.Active", "Flee Active!")).SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.IndianRed);
+                MenuFlee.AddItem(new MenuItem("Flee.Active", "Flee / Ward Jump Active!")).SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.IndianRed);
                 Config.AddSubMenu(MenuFlee);
             }
             
