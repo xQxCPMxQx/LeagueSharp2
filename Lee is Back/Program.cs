@@ -260,6 +260,17 @@ namespace LeeSin
                 return;
             }
 
+            toPolygon = new Geometry.Rectangle(t.Position.To2D(), t.Position.To2D().Extend(ObjectManager.Player.Position.To2D(), 800), 100).ToPolygon();
+
+            var enemyCount =
+                HeroManager.Enemies.Where(e => e.Distance(ObjectManager.Player) < 1050 && e.IsValidTarget(1050))
+                    .Count(e => toPolygon.IsInside(e.ServerPosition));
+
+            if (enemyCount <= hitCount + 1)
+            {
+                R.CastOnUnit(t);
+            }
+            /*
             List<Obj_AI_Hero> xEnemy = new List<Obj_AI_Hero>();
             foreach (
                 Obj_AI_Hero enemy in
@@ -290,6 +301,7 @@ namespace LeeSin
                 }
                 
             }
+            */
         }
 
         private static void Drawing_RKickWaveForKillableEnemy(EventArgs args)
