@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
+using System.IO;.
 using System.Linq;
 using System.Runtime.InteropServices;
 using LeagueSharp;
@@ -144,7 +144,7 @@ namespace LeeSin
             {
                 MenuHarass.AddItem(new MenuItem("Harass.Q", "Q:")).SetValue(new StringList(new[] {"Off", "Just IsReady Q", "Complete Q"}, 1));
                 MenuHarass.AddItem(new MenuItem("Harass.E", "E:")).SetValue(new StringList(new[] {"Off", "Manual: Just on Harass Mode", "Auto: If Can Hit to Enemy"}));
-                MenuHarass.AddItem(new MenuItem("Harass.QW", "Hit Q and Back W:")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Toggle));
+                MenuHarass.AddItem(new MenuItem("Harass.QW", "Hit Q and Back W:")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
                 MenuHarass.AddItem(new MenuItem("Harass.Items", "Use Tiamat/Hydra")).SetValue(true);
                 //                    menuHarass.AddItem(new MenuItem("UseQ1Har", "Use Q1 Harass")).SetValue(true);
                 //                  menuHarass.AddItem(new MenuItem("UseQ2Har",Harass.Active "Use Q2 Harass")).SetValue(true);
