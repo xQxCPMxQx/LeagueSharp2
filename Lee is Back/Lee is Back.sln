@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marksman", "..\..\Marksman\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JaxQx", "..\JaxQx\JaxQx.csproj", "{EF9CA7EE-D3C5-4938-92C2-A4438A904DDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orianna", "..\..\LeagueSharp\Orianna\Orianna.csproj", "{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,14 @@ Global
 		{EF9CA7EE-D3C5-4938-92C2-A4438A904DDA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EF9CA7EE-D3C5-4938-92C2-A4438A904DDA}.Release|x86.ActiveCfg = Release|x86
 		{EF9CA7EE-D3C5-4938-92C2-A4438A904DDA}.Release|x86.Build.0 = Release|x86
+		{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}.Debug|x86.Build.0 = Debug|Any CPU
+		{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}.Release|x86.ActiveCfg = Release|Any CPU
+		{9CA1BD82-3A37-4BA9-83FD-13B769CDBC64}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
