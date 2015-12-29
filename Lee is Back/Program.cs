@@ -958,7 +958,7 @@ namespace LeeSin
                 Q.Cast(t);
             }
 
-            foreach (var minions in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsEnemy && !o.IsDead && o.Health > Q.GetDamage(o) + 20 && o.Distance(InsecJumpPosition) < W.Range + 50 && o.IsValidTarget(Q.Range)))
+            foreach (var minions in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsEnemy && !o.IsDead && o.Health > Q.GetDamage(o) + 20 && o.Distance(InsecJumpPosition) < W.Range - 50 && o.IsValidTarget(Q.Range)))
             {
                     Q.Cast(minions);
                 Render.Circle.DrawCircle(minions.Position, 105f, Color.OrangeRed);
