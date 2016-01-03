@@ -158,11 +158,11 @@ namespace LeeSin
                 Config.AddSubMenu(MenuFlee);
             }
 
-            MenuKickWave = new Menu("R: Kick Wave", "RKickWave");
+            MenuKickWave = new Menu("R: Multiple Target", "RKickWave");
             {
-                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveForKill", "Kick Wave: For Killable Enemy!")).SetValue(true).SetFontStyle(FontStyle.Regular, R.MenuColor());
-                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveForDamage", "Kick Wave: If it'll Hit Enemy Count >")).SetValue(new StringList(new[] { "No", ">=2 target", ">=3 target", ">=4 target" }, 2)).SetFontStyle(FontStyle.Regular, R.MenuColor());
-                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveUseWard", "Use WardJump for Kick Wave Position")).SetValue(true).SetFontStyle(FontStyle.Regular, R.MenuColor());
+                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveForKill", "R Multiple Target: For Killable Enemy!")).SetValue(true).SetFontStyle(FontStyle.Regular, R.MenuColor());
+                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveForDamage", "R Multiple Target: If it'll Hit Enemy Count >")).SetValue(new StringList(new[] { "No", ">=2 target", ">=3 target", ">=4 target" }, 2)).SetFontStyle(FontStyle.Regular, R.MenuColor());
+                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveUseWard", "Use WardJump for Cast Position")).SetValue(true).SetFontStyle(FontStyle.Regular, R.MenuColor());
                 MenuKickWave.AddItem(new MenuItem("Draw.Custom", "Custom Draw").SetValue(new Slider(500, 0, 2500)));
                 Config.AddSubMenu(MenuKickWave);
             }
