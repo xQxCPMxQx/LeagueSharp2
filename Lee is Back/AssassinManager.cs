@@ -282,14 +282,14 @@ namespace LeeSin
             if (drawStatus == 3 || drawStatus == 4)
             {
                 foreach (
-                    LeagueSharp.Common.Geometry.Polygon.Line line in
+                    Geometry.Polygon.Line line in
                         HeroManager.Enemies.Where(
                             e =>
                                 e.IsVisible && !e.IsDead && LocalMenu.Item("enemy_" + e.ChampionName) != null &&
                                 LocalMenu.Item("enemy_" + e.ChampionName).GetValue<bool>())
                             .Select(
                                 e =>
-                                    new LeagueSharp.Common.Geometry.Polygon.Line(ObjectManager.Player.Position, e.Position,
+                                    new Geometry.Polygon.Line(ObjectManager.Player.Position, e.Position,
                                         ObjectManager.Player.Distance(e.Position))))
                 {
                     line.Draw(System.Drawing.Color.Wheat, 2);

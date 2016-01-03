@@ -1,14 +1,4 @@
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\LeeSin.exe.config
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\LeeSin.exe
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\LeeSin.pdb
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\clipper_library.dll
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\LeagueSharp.Common.dll
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\LeagueSharp.dll
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\SharpDX.Direct3D9.dll
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\SharpDX.dll
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\LeagueSharp.Sandbox.dll
 C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\obj\Debug\Lee is Back.csprojResolveAssemblyReference.cache
 C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\obj\Debug\LeeSin.Properties.Resources.resources
 C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\obj\Debug\Lee is Back.csproj.GenerateResource.Cache
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\obj\Debug\LeeSin.exe
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\obj\Debug\LeeSin.pdb
+C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\LeeSin.exe.config

@@ -30,6 +30,7 @@ namespace LeeSin
             if (QState == Program.QCastStage.IsReady)
             {
                 Q.Cast(t);
+                
             }
 
             Obj_AI_Base obj =

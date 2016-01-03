@@ -3,10 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
+using System.IO;.
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
 using LeagueSharp;
 using LeagueSharp.Common;
 using System.Threading.Tasks;
@@ -23,7 +22,6 @@ namespace LeeSin
     class Program
     {
         private const string ChampionName = "LeeSin";
-        private static Geometry.Polygon toPolygon;
 
         public static Spell Q, W, E, R;
         public static Menu Config;
@@ -108,7 +106,8 @@ namespace LeeSin
             SmiteDamageSlot = ObjectManager.Player.GetSpellSlot(SmitetypeDmg());
             SmiteHpSlot = ObjectManager.Player.GetSpellSlot(SmitetypeHp());
 
-            Config = new Menu("Lee is Back!", "Lee Is Back", true).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
+            Config = new Menu("Lee is Back!", "Lee Is Back", true).SetFontStyle(FontStyle.Regular,
+                SharpDX.Color.GreenYellow);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -125,8 +124,6 @@ namespace LeeSin
                 MenuCombo.AddItem(new MenuItem("Combo.W.UseNormal", "W: Normal Attack")).SetValue(false).SetFontStyle(FontStyle.Regular, W.MenuColor());
                 MenuCombo.AddItem(new MenuItem("Combo.W.JumpForQ", "W: Jump to the Best Position for Q").SetValue(new StringList(new[] { "Off", "Use Ward", "Use Ally Minion/Champion", "Both" }, 2))).SetFontStyle(FontStyle.Regular, W.MenuColor()); ;
                 MenuCombo.AddItem(new MenuItem("Combo.W.JumpToEnemyFoot", "W: Jump to the Enemy's Foot").SetValue(new StringList(new []{ "Off", "Use Ward", "Use Ally Minion/Champion", "Both" }, 2))).SetFontStyle(FontStyle.Regular, W.MenuColor()); ;
-                MenuCombo.AddItem(new MenuItem("Combo.R.UseRKickWaveForKill", "R: Kick Wave for Killable Enemy!")).SetValue(true).SetFontStyle(FontStyle.Regular, R.MenuColor());
-                MenuCombo.AddItem(new MenuItem("Combo.R.UseRKickWaveForDamage", "R: Kick Wave if it'll Hit >")).SetValue(new StringList(new [] { "No", ">=2 target", ">=3 target", ">=4 target" }, 2)).SetFontStyle(FontStyle.Regular, R.MenuColor());
 
                 Config.AddSubMenu(MenuCombo);
             }
@@ -216,127 +213,20 @@ namespace LeeSin
             new DamageIndicator();
 
             Game.OnUpdate += Game_OnUpdate;
-            Game.OnUpdate += Game_OnUpdate_RKillSteal;
             Game.OnUpdate += Game_OnUpdate_Insec;
-
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Game.OnWndProc += OnWndProc;
             Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
-            ////Drawing.OnDraw += Drawing_OnDraw_xQx;
-            /// lol to much ondraw Kappa
+            //Drawing.OnDraw += Drawing_OnDraw_xQx;
             Drawing.OnDraw += Drawing_OnDraw_Insec;
-            Drawing.OnDraw += Drawing_RKickWaveForKillableEnemy;
-            Drawing.OnDraw += Drawing_RKickWaveForHitToEnemy;
+            //Drawing.OnDraw += Drawing_OnDraw_GetBestPositionForWQCombo;
             Drawing.OnDraw += Drawing_OnDraw_Flee;
+            //Drawing.OnDraw += Drawing_OnDraw_Enemy2;
             Drawing.OnDraw += Drawing_OnDraw_WJumpToEnemy;
             Drawing.OnDraw += Drawing_OnDraw;
-            ////Drawing.OnDraw += Drawing_OnDraw_GetBestPositionForWQCombo;
-
-            ////Drawing.OnDraw += Drawing_OnDraw_Enemy2;
-
 
             DamageIndicator.DamageToUnit = ComboDamage;
-        }
-
-        private static void Drawing_RKickWaveForHitToEnemy(EventArgs args)
-        {
-            if (MenuCombo.Item("Combo.R.UseRKickWaveForDamage").GetValue<StringList>().SelectedIndex == 0 || !R.IsReady())
-            {
-                return;
-            }
-
-            var hitCount = MenuCombo.Item("Combo.R.UseRKickWaveForDamage").GetValue<StringList>().SelectedIndex;
-            
-            Obj_AI_Hero t =
-                HeroManager.Enemies.Where(
-                    e =>
-                        e.IsValidTarget(Q.Range + W.Range) && !e.IsDead && !e.IsZombie)
-                    .OrderBy(o => o.Distance(ObjectManager.Player.Position))
-                    .FirstOrDefault();
-
-            if (t == null)
-            {
-                return;
-            }
-
-            toPolygon = new Geometry.Rectangle(t.Position.To2D(), t.Position.To2D().Extend(ObjectManager.Player.Position.To2D(), 800), 100).ToPolygon();
-
-            var enemyCount =
-                HeroManager.Enemies.Where(e => e.Distance(ObjectManager.Player) < 1050 && e.IsValidTarget(1050))
-                    .Count(e => toPolygon.IsInside(e.ServerPosition));
-
-            if (enemyCount <= hitCount + 1)
-            {
-                R.CastOnUnit(t);
-            }
-            /*
-            List<Obj_AI_Hero> xEnemy = new List<Obj_AI_Hero>();
-            foreach (
-                Obj_AI_Hero enemy in
-                    HeroManager.Enemies.Where(
-                        e =>
-                            e.Distance(t.Position) < 2800 &&
-                            ObjectManager.Player.Distance(e) > ObjectManager.Player.Distance(t)))
-            {
-
-                //var tt = t.ServerPosition.Extend(ObjectManager.Player.Position, +800);
-                //var startpos = t.Position;
-                //var endpos = tt;
-                //var x = new LeagueSharp.Common.Geometry.Polygon.Rectangle(startpos, endpos, 145);
-                //x.Draw(Color.Blue, 3);
-                toPolygon = new Geometry.Rectangle(t.Position.To2D(), t.Position.To2D().Extend(ObjectManager.Player.Position.To2D(), -700), 210).ToPolygon();
-                //toPolygon.Draw(Color.Blue, 3);
-                if (toPolygon.IsInside(enemy.Position.To2D()))
-                {
-                    //if (xEnemy.Find(hero => hero.ChampionName != enemy.ChampionName) != null)
-                    xEnemy.Add(enemy);
-                    //Render.Circle.DrawCircle(enemy.Position, 150f, Color.Black);
-                    //R.CastOnUnit(enemy);
-                }
-                var xCount = xEnemy.Count + 1;
-                if (hitCount + 1 >= xEnemy.Count + 1 && t.IsValidTarget(R.Range))
-                {
-                    R.CastOnUnit(t);
-                }
-                
-            }
-            */
-        }
-
-        private static void Drawing_RKickWaveForKillableEnemy(EventArgs args)
-        {
-            if (!MenuCombo.Item("Combo.R.UseRKickWaveForKill").GetValue<bool>() || !R.IsReady())
-            {
-                return;
-            }
-
-            Obj_AI_Hero t =
-                HeroManager.Enemies.Where(
-                    e =>
-                        e.IsValidTarget(Q.Range + W.Range) && !e.IsDead && !e.IsZombie &&
-                        e.Distance(Game.CursorPos) < e.Distance(ObjectManager.Player.Position) &&
-                        /*if I'm fallowing the enemy*/
-                        !e.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && e.Health < e.MaxHealth * 0.14)
-                    .OrderByDescending(o => o.MaxHealth)
-                    .FirstOrDefault();
-            if (t == null)
-            {
-                return;
-            }
-
-            foreach (var enemy in HeroManager.Enemies.Where(e => e.Distance(t.Position) < 800 && e.NetworkId != t.NetworkId && ObjectManager.Player.Distance(e) < ObjectManager.Player.Distance(t)))
-            {
-                toPolygon = new Geometry.Rectangle(t.Position.To2D(), t.Position.To2D().Extend(ObjectManager.Player.Position.To2D(), 800), 100).ToPolygon();
-                toPolygon.Draw(Color.Blue, 3);
-
-                if (toPolygon.IsInside(enemy.Position.To2D()))
-                {
-                        //Render.Circle.DrawCircle(enemy.Position, 150f, Color.Black);
-                        R.CastOnUnit(enemy);
-                }
-            }
-
         }
 
         private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
@@ -413,16 +303,6 @@ namespace LeeSin
             }
         }
 
-        private static void Game_OnUpdate_RKillSteal(EventArgs args)
-        {
-            var t = AssassinManager.GetTarget(Q.Range + R.Range);
-            if (!t.IsValidTarget())
-            {
-                return;
-            }
-
-
-        }
         private static void Game_OnUpdate(EventArgs args)
         {
 
@@ -654,15 +534,14 @@ namespace LeeSin
                     ObjectManager.Player.Spellbook.CastSpell(SmiteDamageSlot, t);
                 }
             }
-
             if (t.HasBlindMonkBuff() && !t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && QStage == QCastStage.IsCasted)
             {
                 Q.Cast();
             }
 
-            if (t.IsValidTarget() && QStage == QCastStage.IsReady && t.IsValidTarget(Q.Range))
+            if (t.IsValidTarget() && Q.IsReady() && t.Distance(ObjectManager.Player.Position) < 1100)
             {
-                Q.Cast(t);
+                CastQ1(t);
             }
 
             if (t.HasBlindMonkBuff() && (ComboDamage(t) > t.Health || Environment.TickCount > QCastTime + 2500))
@@ -816,7 +695,7 @@ namespace LeeSin
                 return;
             }
 
-            if (pos.Distance(ObjectManager.Player.Position) < ObjectManager.Player.BoundingRadius)
+            if (pos.Distance(ObjectManager.Player.Position) < ObjectManager.Player.BoundingRadius*2)
             {
                 return;
             }
@@ -958,7 +837,7 @@ namespace LeeSin
                 Q.Cast(t);
             }
 
-            foreach (var minions in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsEnemy && !o.IsDead && o.Health > Q.GetDamage(o) + 20 && o.Distance(InsecJumpPosition) < W.Range - 50 && o.IsValidTarget(Q.Range)))
+            foreach (var minions in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsEnemy && !o.IsDead && o.Health > Q.GetDamage(o) + 20 && o.Distance(InsecJumpPosition) < W.Range + 50 && o.IsValidTarget(Q.Range)))
             {
                     Q.Cast(minions);
                 Render.Circle.DrawCircle(minions.Position, 105f, Color.OrangeRed);
@@ -1042,10 +921,10 @@ namespace LeeSin
             }
         }
 
-        internal enum QCastStage { NotReady, IsReady, IsCasted }
-        internal enum WCastStage { NotReady, IsReady, IsCasted }
-        internal enum ECastStage { NotReady, IsReady, IsCasted }
-
+        public enum QCastStage { NotReady, IsReady, IsCasted }
+        public enum WCastStage { NotReady, IsReady, IsCasted }
+        public enum ECastStage { NotReady, IsReady, IsCasted }
+        
         public static QCastStage QStage
         {
             get
@@ -1061,7 +940,6 @@ namespace LeeSin
 
             }
         }
-
         public static WCastStage  WStage
         {
             get
@@ -1149,10 +1027,7 @@ namespace LeeSin
 
         private static void CastQ1(Obj_AI_Base t)
         {
-            if (QStage != QCastStage.IsReady)
-            {
-                return;
-            }
+            if (QStage != QCastStage.IsReady) return;
             Q.Cast(t);
             return;
             var qpred = Q.GetPrediction(t);
@@ -1395,75 +1270,26 @@ namespace LeeSin
         private static void Drawing_OnDraw_WJumpToEnemy(EventArgs args)
         {
             if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+                return;
+            
+            var t = AssassinManager.GetTarget(W.Range + 100);
+
+            if (!t.IsValidTarget())
+                return;
+
+            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
             {
                 return;
             }
 
-            Obj_AI_Hero t =
-                HeroManager.Enemies.Where(
-                    e =>
-                        e.IsValidTarget(Q.Range + W.Range) && !e.IsDead && !e.IsZombie &&
-                        e.Distance(Game.CursorPos) < e.Distance(ObjectManager.Player.Position) &&
-                        /*if I'm fallowing the enemy*/
-                        !e.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
-                    .OrderByDescending(o => o.MaxHealth)
-                    .FirstOrDefault();
-
-            if (t == null)
-            {
-                var t1 = AssassinManager.GetTarget(Q.Range + W.Range);
-                var rektDamage = (R.IsReady() ? R.GetDamage(t1) : 0) + (QStage == QCastStage.IsReady ? Q.GetDamage(t1) : 0);
-
-                if (t1 != null && t1.Health < rektDamage)
-                {
-                    t = t1;
-                }
-                else
-                {
-                    return;
-                }
-            }
-
-
-            if (!CollisionObjects(ObjectManager.Player.Position, t.Position) && QStage == QCastStage.IsReady &&
-                t.IsValidTarget(Q.Range - 20))
+            if (!CollisionObjects(ObjectManager.Player.Position, t.Position) && QStage == QCastStage.IsReady)
             {
                 return;
             }
 
-            if (t.IsValidTarget(W.Range) && WStage == WCastStage.IsReady && (Q.Cooldown < 3 || E.Cooldown < 3))
+            if (QStage == QCastStage.NotReady && WStage == WCastStage.IsReady && (Q.Cooldown < 4 || E.Cooldown < 4))
             {
                 WardJump(t.Position);
-                return;
-            }
-
-            if (WStage == WCastStage.IsReady && (QStage == QCastStage.IsReady || Q.Cooldown < 2))
-            {
-                foreach (
-                    var enemyObjects in
-                        ObjectManager.Get<Obj_AI_Base>()
-                            .Where(
-                                e =>
-                                    e.IsEnemy && e.NetworkId != t.NetworkId && !e.IsDead &&
-                                    e.IsValidTarget(Q.Range + W.Range - 20)))
-                {
-                    toPolygon =
-                        new Geometry.Rectangle(t.Position.To2D(),
-                            t.Position.To2D()
-                                .Extend(ObjectManager.Player.Position.To2D(),
-                                    +(t.Distance(ObjectManager.Player.Position) - W.Range)), Q.Width + 25).ToPolygon();
-
-                    if (toPolygon.IsInside(enemyObjects.Position.To2D()))
-                    {
-                        //Render.Circle.DrawCircle(enemyObjects.Position, 100f, Color.Black);
-                        //toPolygon.Draw(Color.Red, 2);
-                        return;
-                    }
-
-                    //toPolygon.Draw(Color.White, 2);
-                    WardJump(t.ServerPosition.Extend(ObjectManager.Player.Position,
-                        +(t.Distance(ObjectManager.Player.Position) - W.Range)));
-                }
             }
         }
 
@@ -1537,11 +1363,11 @@ namespace LeeSin
 
                 var width = 2;
 
-                var x = new LeagueSharp.Common.Geometry.Polygon.Line(startpos, endpos);
+                var x = new Geometry.Polygon.Line(startpos, endpos);
                 x.Draw(Color.Blue, width);
-                var y = new LeagueSharp.Common.Geometry.Polygon.Line(endpos, endpos1);
+                var y = new Geometry.Polygon.Line(endpos, endpos1);
                 y.Draw(Color.Blue, width);
-                var z = new LeagueSharp.Common.Geometry.Polygon.Line(endpos, endpos2);
+                var z = new Geometry.Polygon.Line(endpos, endpos2);
                 z.Draw(Color.Blue, width);
             }
 
@@ -1927,7 +1753,7 @@ namespace LeeSin
 
                     if (ComboDamage(enemyVisible) > enemyVisible.Health)
                     {
-                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50, Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.White, "Combo=Rekt");
+                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50, Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.Red, "Combo=Rekt");
                     }
             }
 

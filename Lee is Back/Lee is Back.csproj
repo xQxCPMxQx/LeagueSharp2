@@ -65,7 +65,6 @@
     <Compile Include="DamageIndicator.cs" />
     <Compile Include="GameItems.cs" />
     <Compile Include="GameUtils.cs" />
-    <Compile Include="Geometry.cs" />
     <Compile Include="ModeHarass.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
