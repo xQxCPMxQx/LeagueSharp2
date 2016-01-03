@@ -1,4 +1,0 @@
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\obj\Debug\Lee is Back.csprojResolveAssemblyReference.cache
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\obj\Debug\LeeSin.Properties.Resources.resources
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\obj\Debug\Lee is Back.csproj.GenerateResource.Cache
-C:\Users\xQx\Documents\GitHub\LeagueSharp2\Lee is Back\bin\Release\LeeSin.exe.config

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using LeeSin.Properties;
@@ -14,7 +15,7 @@ namespace LeeSin
 
     internal enum TargetSelect
     {
-        LeeSing,
+        LeeSin,
         LeagueSharp
     }
 
@@ -24,7 +25,7 @@ namespace LeeSin
         public static Font Text;
 
         private static TargetSelect Selector => LocalMenu.Item("TS").GetValue<StringList>().SelectedIndex == 0
-            ? TargetSelect.LeeSing
+            ? TargetSelect.LeeSin
             : TargetSelect.LeagueSharp;
 
         public void Initialize()
@@ -57,7 +58,7 @@ namespace LeeSin
 
             LocalMenu.AddItem(
                 new MenuItem("TS", "Active Target Selector:").SetValue(
-                    new StringList(new[] { "LeeSing Target Selector", "L# Target Selector" })))
+                    new StringList(new[] { "LeeSin Target Selector", "L# Target Selector" })))
                 .SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)
                 .ValueChanged += (sender, args) =>
                 {
@@ -119,7 +120,7 @@ namespace LeeSin
             LocalMenu.AddItem(
                 new MenuItem("Draw.Range", Captions.MenuTab + "Range").SetValue(new Circle(true, System.Drawing.Color.Gray)).SetTag(11));
             LocalMenu.AddItem(
-                new MenuItem("Draw.Enemy", Captions.MenuTab + "Active Enemy").SetValue(new Circle(true,
+                new MenuItem("Draw.Enemy", Captions.MenuTab + "ActiveJungle Enemy").SetValue(new Circle(true,
                     System.Drawing.Color.GreenYellow)).SetTag(11));
             LocalMenu.AddItem(
                 new MenuItem("Draw.Status", Captions.MenuTab + "Show Enemy:").SetValue(
@@ -141,7 +142,7 @@ namespace LeeSin
                     i.Show();
                     switch (Selector)
                     {
-                        case TargetSelect.LeeSing:
+                        case TargetSelect.LeeSin:
                             if (i.Tag == 22)
                             {
                                 i.Show(false);
@@ -167,7 +168,7 @@ namespace LeeSin
 
         private void Game_OnWndProc(WndEventArgs args)
         {
-            if (Selector != TargetSelect.LeeSing)
+            if (Selector != TargetSelect.LeeSin)
             {
                 return;
             }
@@ -207,18 +208,32 @@ namespace LeeSin
             }
         }
 
-        public static Obj_AI_Hero GetTarget(float vDefaultRange = 0,TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        public static bool In<T>(T source, params T[] list)
         {
-            if (Selector != TargetSelect.LeeSing)
-            {
-                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
-            }
+            return list.Equals(source);
+        }
+        public static bool NotIn<T>(T source, params T[] list)
+        {
+            return !list.Equals(source);
+        }
+
+        public static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical, IEnumerable<Obj_AI_Hero> ignoredChamps = null)
+        {
+            //if (Selector != TargetSelect.LeeSin)
+            //{
+            //    return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
+            //}
 
             vDefaultRange = Math.Abs(vDefaultRange) < 0.00001 ? Program.Q.Range : LocalMenu.Item("Range").GetValue<Slider>().Value;
 
+            if (ignoredChamps == null)
+            {
+                ignoredChamps = new List<Obj_AI_Hero>();
+            }
+
             var vEnemy =
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(e => e.Team != ObjectManager.Player.Team && !e.IsDead && e.IsVisible)
+                HeroManager.Enemies.FindAll(hero =>ignoredChamps.All(ignored => ignored.NetworkId != hero.NetworkId))
+                    .Where(e => e.IsValidTarget(vDefaultRange))
                     .Where(e => LocalMenu.Item("enemy_" + e.ChampionName) != null)
                     .Where(e => LocalMenu.Item("enemy_" + e.ChampionName).GetValue<bool>())
                     .Where(e => ObjectManager.Player.Distance(e) < vDefaultRange);
@@ -247,7 +262,7 @@ namespace LeeSin
                 }
             }
 
-            if (Selector != TargetSelect.LeeSing)
+            if (Selector != TargetSelect.LeeSin)
             {
                 return;
             }
@@ -282,14 +297,14 @@ namespace LeeSin
             if (drawStatus == 3 || drawStatus == 4)
             {
                 foreach (
-                    Geometry.Polygon.Line line in
+                    LeagueSharp.Common.Geometry.Polygon.Line line in
                         HeroManager.Enemies.Where(
                             e =>
                                 e.IsVisible && !e.IsDead && LocalMenu.Item("enemy_" + e.ChampionName) != null &&
                                 LocalMenu.Item("enemy_" + e.ChampionName).GetValue<bool>())
                             .Select(
                                 e =>
-                                    new Geometry.Polygon.Line(ObjectManager.Player.Position, e.Position,
+                                    new LeagueSharp.Common.Geometry.Polygon.Line(ObjectManager.Player.Position, e.Position,
                                         ObjectManager.Player.Distance(e.Position))))
                 {
                     line.Draw(System.Drawing.Color.Wheat, 2);

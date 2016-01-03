@@ -3,8 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using LeagueSharp;
 using LeagueSharp.Common;
 using System.Threading.Tasks;
@@ -21,22 +23,27 @@ namespace LeeSin
     class Program
     {
         private const string ChampionName = "LeeSin";
+        private static Geometry.Polygon toPolygon;
 
         public static Spell Q, W, E, R;
         public static Menu Config;
         public static Orbwalking.Orbwalker Orbwalker;
         
         private static readonly Items.Item ItemYoumuu = new Items.Item(3142, 225f);
+        public static Menu MenuKeys { get; private set; }
         public static Menu MenuCombo { get; private set; }
+        public static Menu MenuKickWave { get; private set; }
         public static Menu MenuInsec { get; private set; }
+        public static Menu MenuInsecSettings { get; private set; }
         public static Menu MenuHarass { get; private set; }
         public static Menu MenuLane { get; private set; }
         public static Menu MenuJungle { get; private set; }
         public static Menu MenuFlee { get; private set; }
         public static Menu MenuMisc { get; private set; }
         public static Menu MenuDrawing { get; private set; }
-        
 
+        private static float wardRange = 625;
+        
         private static Obj_AI_Base insobj;
         private static SpellSlot igniteSlot;
         private static SpellSlot flashSlot;
@@ -45,27 +52,29 @@ namespace LeeSin
         public static Vector3 WardCastPosition;
         private static Vector3 insdirec;
         private static Vector3 InsecJumpPosition;
+        private static Vector3 InsecEndPosition = new Vector3();
         private static Vector3 movepoint;
         private static Vector3 jumppoint;
         private static Vector3 wpos;
         private static Vector3 wallcheck;
         private static Vector3 firstpos;
 
-        private static int canmove=1;
-        private static int instypecheck;
-        private static float wardTime;
+        static List<Obj_AI_Base> InsecDirection2 = new List<Obj_AI_Base>();
+        static Obj_AI_Base SelectedInsecDirectionIndex;
+
+
 //        private static float jumpTime;
-        private static float inscount;
-        private static float counttime;
+
 
         public static float QCastTime, Q2CastTime;
         public static float WCastTime;
         public static float ECastTime;
 
-        private static float casttime;
+        public static float LastSpellCastTime;
         private static bool walljump;
         private static bool checker;
 
+        private static Obj_AI_Base wardJumpObjectforFlee = null;
         private static Vector3 vCenterTop;
         private static Vector3 vCenterBottom;
         private static Vector3 vCenterLeft;
@@ -83,7 +92,9 @@ namespace LeeSin
 
         private static void Main(string[] args)
         {
+            
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+            Console.Clear();
         }
 
         private static void Game_OnGameLoad(EventArgs args)
@@ -92,11 +103,11 @@ namespace LeeSin
             {
                 return;
             }
-
+            
             Q = new Spell(SpellSlot.Q, 1060f);
             Q.SetSkillshot(0.25f, 70f, 1800f, true, SkillshotType.SkillshotLine);
 
-            W = new Spell(SpellSlot.W, 700f);
+            W = new Spell(SpellSlot.W, 670f);
             E = new Spell(SpellSlot.E, 430f);
             R = new Spell(SpellSlot.R, 375f);
 
@@ -105,8 +116,7 @@ namespace LeeSin
             SmiteDamageSlot = ObjectManager.Player.GetSpellSlot(SmitetypeDmg());
             SmiteHpSlot = ObjectManager.Player.GetSpellSlot(SmitetypeHp());
 
-            Config = new Menu("Lee is Back!", "Lee Is Back", true).SetFontStyle(FontStyle.Regular,
-                SharpDX.Color.GreenYellow);
+            Config = new Menu("Lee is Back!", "Lee Is Back", true).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
@@ -114,36 +124,65 @@ namespace LeeSin
 
             new AssassinManager().Initialize();
             new GameItems().Initialize();
-
-            MenuCombo = new Menu("Combo", "Combo");
+            MenuKeys = new Menu("Keys", "Keys").SetFontStyle(FontStyle.Regular, SharpDX.Color.IndianRed);
             {
-                MenuCombo.AddItem(new MenuItem("Combo.SmiteQ", "Combo: Smite + Q")).SetValue(new StringList(new[] {"Off", "On"}, 1)).SetFontStyle(FontStyle.Regular, R.MenuColor()); ;
-                MenuCombo.AddItem(new MenuItem("Combo.WJumpQ", "Combo: W + Q for the Far Enemy")).SetValue(new StringList(new[] {"Off", "On"}, 1)).SetFontStyle(FontStyle.Regular, R.MenuColor()); ;
-                MenuCombo.AddItem(new MenuItem("UseSmitecombo", "Use Smite(rush for it)")).SetValue(true);
-                MenuCombo.AddItem(new MenuItem("Combo.W.UseNormal", "W: Normal Attack")).SetValue(false).SetFontStyle(FontStyle.Regular, W.MenuColor());
-                MenuCombo.AddItem(new MenuItem("Combo.W.JumpForQ", "W: Jump to the Best Position for Q").SetValue(new StringList(new[] { "Off", "Use Ward", "Use Ally Minion/Champion", "Both" }, 2))).SetFontStyle(FontStyle.Regular, W.MenuColor()); ;
-                MenuCombo.AddItem(new MenuItem("Combo.W.JumpToEnemyFoot", "W: Jump to the Enemy's Foot").SetValue(new StringList(new []{ "Off", "Use Ward", "Use Ally Minion/Champion", "Both" }, 2))).SetFontStyle(FontStyle.Regular, W.MenuColor()); ;
-
-                Config.AddSubMenu(MenuCombo);
+                MenuKeys.AddItem(new MenuItem("Insec", "Insec")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Aquamarine);
+                MenuKeys.AddItem(new MenuItem("Flee.Active", "Flee / Ward Jump")).SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.IndianRed);
+                MenuKeys.AddItem(new MenuItem("Combo.Active", "Combo")).SetValue(new KeyBind(Config.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Yellow);
+                MenuKeys.AddItem(new MenuItem("Combo.WardJump", "Combo + Ward Jump to Far Enemy")).SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Yellow);
+                MenuKeys.AddItem(new MenuItem("Harass.QW", "Harass: Hit with Q -> Run with W:")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua);
+                MenuKeys.AddItem(new MenuItem("Lane.Active", "Lane Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
+                MenuKeys.AddItem(new MenuItem("Jungle.Active", "Jungle Clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
+                Config.AddSubMenu(MenuKeys);
             }
 
-            MenuInsec = new Menu("Insec Settings", "MenuInsec");
+            MenuInsec = new Menu("Insec Settings", "MenuInsec").SetFontStyle(FontStyle.Regular, SharpDX.Color.Yellow);
             {
-                MenuInsec.AddItem(new MenuItem("Insec.Priority.Ally", "Use Ally Champion/Minions")).SetValue(new StringList(new[] {"Don't Use", "1. Priority", "2. Priority", "3. Priority"}, 1));
-                MenuInsec.AddItem(new MenuItem("Insec.Priority.Ward", "Use Ward")).SetValue(new StringList(new[] {"Don't Use", "1. Priority", "2. Priority", "3. Priority"}, 2));
-                MenuInsec.AddItem(new MenuItem("Insec.Priority.Flash", "Use Flash")).SetValue(new StringList(new[] {"Don't Use", "1. Priority", "2. Priority", "3. Priority"}, 3));
+                var str = new[] {"Don't Insec", "Insec If Enemy Alone", "Just Ward", "Ward + Flash (If need)"};
+                foreach (var e in HeroManager.Enemies)
+                {
+                    MenuInsec.AddItem(new MenuItem("Insec." + e.ChampionName, e.ChampionName).SetValue(new StringList(str, 2)));
+                }
 
-                //                    menuInsec.AddItem(new MenuItem("Insec.UseMinion", "Use Minions")).SetValue(false);
-                //                  menuInsec.AddItem(new MenuItem("Insec.UseFlash", "Use Flash if No Wards")).SetValue(true);
                 MenuInsec.AddItem(new MenuItem("Insec.Draw", "Draw Insec Last Position")).SetValue(new Circle(true, Color.Aqua));
                 Config.AddSubMenu(MenuInsec);
             }
 
+            MenuFlee = new Menu("Flee / Ward Jump", "Flee");
+            {
+                MenuFlee.AddItem(new MenuItem("Flee.UseQ", "Q:")).SetValue(true);
+                MenuFlee.AddItem(new MenuItem("Flee.UseW", "W:")).SetValue(true);
+                MenuFlee.AddItem(new MenuItem("Flee.Range", "Object Search Range")).SetValue(new Slider(250, 100, 350));
+                MenuFlee.AddItem(new MenuItem("Flee.Draw.W", "Draw W Range")).SetValue(new Circle(true, Color.Aqua));
+                MenuFlee.AddItem(new MenuItem("Flee.Draw", "Draw Object Search Range (Cursor)")).SetValue(new Circle(true, Color.Aqua));
+                Config.AddSubMenu(MenuFlee);
+            }
+
+            MenuKickWave = new Menu("R: Kick Wave", "RKickWave");
+            {
+                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveForKill", "Kick Wave: For Killable Enemy!")).SetValue(true).SetFontStyle(FontStyle.Regular, R.MenuColor());
+                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveForDamage", "Kick Wave: If it'll Hit Enemy Count >")).SetValue(new StringList(new[] { "No", ">=2 target", ">=3 target", ">=4 target" }, 2)).SetFontStyle(FontStyle.Regular, R.MenuColor());
+                MenuKickWave.AddItem(new MenuItem("Combo.R.UseRKickWaveUseWard", "Use WardJump for Kick Wave Position")).SetValue(true).SetFontStyle(FontStyle.Regular, R.MenuColor());
+                MenuKickWave.AddItem(new MenuItem("Draw.Custom", "Custom Draw").SetValue(new Slider(500, 0, 2500)));
+                Config.AddSubMenu(MenuKickWave);
+            }
+
+            MenuCombo = new Menu("Combo", "Combo");
+            {
+                MenuCombo.AddItem(new MenuItem("Combo.SmiteQ", "Combo: Smite + Q")).SetValue(new StringList(new[] {"Off", "On"}, 1));
+                MenuCombo.AddItem(new MenuItem("Combo.WJumpQ", "Combo: W + Q for the Far Enemy")).SetValue(new StringList(new[] {"Off", "On"}, 1));
+                MenuCombo.AddItem(new MenuItem("UseSmitecombo", "Combo: Smite to Enemy")).SetValue(true);
+
+                MenuCombo.AddItem(new MenuItem("Combo.W.UseNormal", "W: Normal Attack")).SetValue(false).SetFontStyle(FontStyle.Regular, W.MenuColor());
+                MenuCombo.AddItem(new MenuItem("Combo.W.JumpToEnemyFoot", "W: Jump to the Enemy's Foot").SetValue(new StringList(new[] { "Off", "Use Ward", "Use Ally Minion/Champion", "Both" }, 2))).SetFontStyle(FontStyle.Regular, W.MenuColor()); ;
+                Config.AddSubMenu(MenuCombo);
+            }
+
             MenuHarass = new Menu("Harass", "Harass");
             {
-                MenuHarass.AddItem(new MenuItem("Harass.Q", "Q:")).SetValue(new StringList(new[] {"Off", "Just IsReady Q", "Complete Q"}, 1));
+                MenuHarass.AddItem(new MenuItem("Harass.Q", "Q:")).SetValue(new StringList(new[] {"Off", "Just Q1", "Q1 + Q2"}, 1));
                 MenuHarass.AddItem(new MenuItem("Harass.E", "E:")).SetValue(new StringList(new[] {"Off", "Manual: Just on Harass Mode", "Auto: If Can Hit to Enemy"}));
-                MenuHarass.AddItem(new MenuItem("Harass.QW", "Hit Q and Back W:")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press));
+                
                 MenuHarass.AddItem(new MenuItem("Harass.Items", "Use Tiamat/Hydra")).SetValue(true);
                 //                    menuHarass.AddItem(new MenuItem("UseQ1Har", "Use Q1 Harass")).SetValue(true);
                 //                  menuHarass.AddItem(new MenuItem("UseQ2Har",Harass.Active "Use Q2 Harass")).SetValue(true);
@@ -155,20 +194,20 @@ namespace LeeSin
                 MenuLane.AddItem(new MenuItem("Lane.UseQ", "Q:")).SetValue(true);
                 MenuLane.AddItem(new MenuItem("Lane.UseE", "E:")).SetValue(true);
                 MenuLane.AddItem(new MenuItem("Lane.UseItems", "Use Items")).SetValue(true);
-                MenuLane.AddItem(new MenuItem("Lane.Active", "Lane Clear!").SetValue(new KeyBind("V".ToCharArray()[0],KeyBindType.Press))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
                 MenuLane.AddItem(new MenuItem("UseQLH", "Q LastHit")).SetValue(true);
                 Config.AddSubMenu(MenuLane);
             }
 
             MenuJungle = new Menu("Jungle", "Jungle");
             {
+                MenuJungle.AddItem(new MenuItem("Jungle.UseQ", "Q:").SetValue(new StringList(new []{"Off", "On", "Just Big Mobs"}, 2))).SetFontStyle(FontStyle.Regular, Q.MenuColor());  
+                MenuJungle.AddItem(new MenuItem("Jungle.UseW", "W:")).SetValue(true).SetFontStyle(FontStyle.Regular, W.MenuColor());
+                MenuJungle.AddItem(new MenuItem("Jungle.UseE", "E:")).SetValue(true).SetFontStyle(FontStyle.Regular, E.MenuColor());
                 MenuJungle.AddItem(new MenuItem("Jungle.UseItems", "Use Items")).SetValue(true);
-                MenuJungle.AddItem(new MenuItem("Jungle.UseQ", "Q Jungle")).SetValue(true);
-                MenuJungle.AddItem(new MenuItem("Jungle.UseW", "W Jungle")).SetValue(true);
-                MenuJungle.AddItem(new MenuItem("Jungle.UseE", "E Jungle")).SetValue(true);
-                MenuJungle.AddItem(new MenuItem("PriW", "W>E? (off E>W)")).SetValue(true);
-                MenuJungle.AddItem(new MenuItem("Activejungle", "Jungle!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
-                MenuJungle.AddItem(new MenuItem("Jungle.StealAndRun", "Steal Dragon/Baron And Run!")).SetValue(true);
+
+                //MenuJungle.AddItem(new MenuItem("PriW", "W>E? (off E>W)")).SetValue(true);
+                //MenuJungle.AddItem(new MenuItem("Activejungle", "Jungle!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                MenuJungle.AddItem(new MenuItem("Jungle.StealAndRun", "[WIP] Steal Dragon/Baron And Run!")).SetValue(true);
                 Config.AddSubMenu(MenuJungle);
             }
 
@@ -181,19 +220,6 @@ namespace LeeSin
                 Config.AddSubMenu(MenuMisc);
             }
 
-            Config.AddItem(new MenuItem("Insec", "Insec")).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Aquamarine);
-
-            MenuFlee = new Menu("Flee / Ward Jump", "Flee");
-            {
-                MenuFlee.AddItem(new MenuItem("Flee.UseQ", "Q:")).SetValue(true);
-                MenuFlee.AddItem(new MenuItem("Flee.UseW", "W:")).SetValue(true);
-                MenuFlee.AddItem(new MenuItem("Flee.Range", "Object Search Range")).SetValue(new Slider(250, 100, 350));
-                MenuFlee.AddItem(new MenuItem("Flee.Draw.W", "Draw W Range")).SetValue(new Circle(true, Color.Aqua));
-                MenuFlee.AddItem(new MenuItem("Flee.Draw", "Draw Object Search Range (Cursor)")).SetValue(new Circle(true, Color.Aqua));
-                MenuFlee.AddItem(new MenuItem("Flee.Active", "Flee / Ward Jump Active!")).SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Regular, SharpDX.Color.IndianRed);
-                Config.AddSubMenu(MenuFlee);
-            }
-            
             //Drawings
             MenuDrawing = new Menu("Drawings", "Drawings");
             {
@@ -209,23 +235,192 @@ namespace LeeSin
             }
             Config.AddToMainMenu();
 
+            foreach (var i in Config.Children.Cast<Menu>().SelectMany(GetChildirens))
+            {
+                i.DisplayName = ":: " + i.DisplayName;
+            }
+
+
             new DamageIndicator();
 
             Game.OnUpdate += Game_OnUpdate;
+            Game.OnUpdate += Game_OnUpdate_RKillSteal;
             Game.OnUpdate += Game_OnUpdate_Insec;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+            Game.OnWndProc += OnWndProc_Flee;
             Game.OnWndProc += OnWndProc;
+            Game.OnWndProc += OnWndProc_Insec;
             Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
-            //Drawing.OnDraw += Drawing_OnDraw_xQx;
-            Drawing.OnDraw += Drawing_OnDraw_Insec;
-            //Drawing.OnDraw += Drawing_OnDraw_GetBestPositionForWQCombo;
-            Drawing.OnDraw += Drawing_OnDraw_Flee;
-            //Drawing.OnDraw += Drawing_OnDraw_Enemy2;
-            Drawing.OnDraw += Drawing_OnDraw_WJumpToEnemy;
-            Drawing.OnDraw += Drawing_OnDraw;
+            ////Drawing.OnDraw += Drawing_OnDraw_xQx;
+            /// lol to much ondraw Kappa
 
+            //Drawing.OnDraw += Drawing_OnDraw_ShowEnemyMinionsUnderAllyTurret;
+            Drawing.OnDraw += Drawing_OnDraw_Insec;
+            Drawing.OnDraw += Drawing_OnDraw_WardJumpObjectForFlee;
+            Drawing.OnDraw += Drawing_RKickWaveForKillableEnemy;
+            Drawing.OnDraw += Drawing_RKickWaveForHitToEnemy;
+            Drawing.OnDraw += Drawing_OnDraw_Flee;
+            Drawing.OnDraw += Drawing_OnDraw_JumpToEnemy;
+            Drawing.OnDraw += Drawing_OnDraw;
+            ////Drawing.OnDraw += Drawing_OnDraw_GetBestPositionForWQCombo;
+
+            ////Drawing.OnDraw += Drawing_OnDraw_Enemy2;
             DamageIndicator.DamageToUnit = ComboDamage;
+        }
+
+        internal enum QCastStage { NotReady, IsReady, IsCasted }
+        internal enum WCastStage { NotReady, IsReady, IsCasted }
+        internal enum ECastStage { NotReady, IsReady, IsCasted }
+
+        public static QCastStage QStage
+        {
+            get
+            {
+                if (!Q.IsReady()) { return QCastStage.NotReady; }
+                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).Name == "BlindMonkQOne" ? QCastStage.IsReady : QCastStage.IsCasted);
+            }
+        }
+
+        public static WCastStage WStage
+        {
+            get
+            {
+                if (!W.IsReady()) { return WCastStage.NotReady; }
+                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "blindmonkwtwo" ? WCastStage.IsCasted : WCastStage.IsReady);
+            }
+        }
+
+        public static ECastStage EStage
+        {
+            get
+            {
+                if (!E.IsReady()) { return ECastStage.NotReady; }
+                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Name == "BlindMonkEOne" ? ECastStage.IsReady : ECastStage.IsCasted);
+            }
+        }
+
+        public static bool HavePassiveBuff => ObjectManager.Player.HasBuff("blindmonkpassive_cosmetic");
+        private static IEnumerable<Menu> GetChildirens(Menu menu)
+        {
+            yield return menu;
+
+            foreach (var childChild in menu.Children.SelectMany(GetChildirens))
+                yield return childChild;
+        }
+
+        private static void Drawing_RKickWaveForHitToEnemy(EventArgs args)
+        {
+            if (Config.Item("Insec").GetValue<KeyBind>().Active || Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+            {
+                return;
+            }
+
+            if (MenuCombo.Item("Combo.R.UseRKickWaveForDamage").GetValue<StringList>().SelectedIndex == 0 || !R.IsReady())
+            {
+                return;
+            }
+
+            var hitCount = MenuCombo.Item("Combo.R.UseRKickWaveForDamage").GetValue<StringList>().SelectedIndex;
+            
+            Obj_AI_Hero t =
+                HeroManager.Enemies.Where(
+                    e =>
+                        e.IsValidTarget(Q.Range + W.Range) && !e.IsDead && !e.IsZombie)
+                    .OrderBy(o => o.Distance(ObjectManager.Player.Position))
+                    .FirstOrDefault();
+
+            if (t == null)
+            {
+                return;
+            }
+
+            toPolygon = new Geometry.Rectangle(t.Position.To2D(), t.Position.To2D().Extend(ObjectManager.Player.Position.To2D(), 800), 100).ToPolygon();
+
+            var enemyCount =
+                HeroManager.Enemies.Where(e => e.Distance(ObjectManager.Player) < 1100 && e.IsValidTarget(1100))
+                    .Count(e => e.NetworkId != t.NetworkId && !e.IsDead && toPolygon.IsInside(e.ServerPosition));
+
+            if (enemyCount == 0)
+            {
+                return;
+            }
+            
+            if (enemyCount + 1 <= hitCount + 1)
+            {
+                R.CastOnUnit(t);
+            }
+
+            //List<Obj_AI_Hero> xEnemy = new List<Obj_AI_Hero>();
+            //foreach (
+            //    Obj_AI_Hero enemy in
+            //        HeroManager.Enemies.Where(
+            //            e =>
+            //                e.Distance(t.Position) < 2800 &&
+            //                ObjectManager.Player.Distance(e) > ObjectManager.Player.Distance(t)))
+            //{
+
+            //    //var tt = t.ServerPosition.Extend(ObjectManager.Player.Position, +800);
+            //    //var startpos = t.Position;
+            //    //var endpos = tt;
+            //    //var x = new LeagueSharp.Common.Geometry.Polygon.Rectangle(startpos, endpos, 145);
+            //    //x.Draw(Color.Blue, 3);
+            //    toPolygon = new Geometry.Rectangle(t.Position.To2D(), t.Position.To2D().Extend(ObjectManager.Player.Position.To2D(), -700), 210).ToPolygon();
+            //    //toPolygon.Draw(Color.Blue, 3);
+            //    if (toPolygon.IsInside(enemy.Position.To2D()))
+            //    {
+            //        //if (xEnemy.Find(hero => hero.ChampionName != enemy.ChampionName) != null)
+            //        xEnemy.Add(enemy);
+            //        //Render.Circle.DrawCircle(enemy.Position, 150f, Color.Black);
+            //        //R.CastOnUnit(enemy);
+            //    }
+            //    var xCount = xEnemy.Count + 1;
+            //    if (hitCount + 1 >= xEnemy.Count + 1 && t.IsValidTarget(R.Range))
+            //    {
+            //        R.CastOnUnit(t);
+            //    }
+                
+            //}
+        }
+
+        private static void Drawing_RKickWaveForKillableEnemy(EventArgs args)
+        {
+            if (Config.Item("Insec").GetValue<KeyBind>().Active || Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+            {
+                return;
+            }
+
+            if (!MenuCombo.Item("Combo.R.UseRKickWaveForKill").GetValue<bool>() || !R.IsReady())
+            {
+                return;
+            }
+
+            Obj_AI_Hero t =
+                HeroManager.Enemies.Where(
+                    e =>
+                        e.IsValidTarget(Q.Range + W.Range) && !e.IsDead && !e.IsZombie &&
+                        e.Distance(Game.CursorPos) < e.Distance(ObjectManager.Player.Position) &&
+                        /*if I'm fallowing the enemy*/
+                        !e.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && e.Health < e.MaxHealth * 0.14)
+                    .OrderByDescending(o => o.MaxHealth)
+                    .FirstOrDefault();
+            if (t == null)
+            {
+                return;
+            }
+
+            foreach (var enemy in HeroManager.Enemies.Where(e => e.Distance(t.Position) < 800 && e.NetworkId != t.NetworkId && ObjectManager.Player.Distance(e) < ObjectManager.Player.Distance(t)))
+            {
+                toPolygon = new Geometry.Rectangle(t.Position.To2D(), t.Position.To2D().Extend(ObjectManager.Player.Position.To2D(), 800), 100).ToPolygon();
+                toPolygon.Draw(Color.Blue, 3);
+
+                if (toPolygon.IsInside(enemy.Position.To2D()))
+                {
+                        //Render.Circle.DrawCircle(enemy.Position, 150f, Color.Black);
+                        R.CastOnUnit(enemy);
+                }
+            }
+
         }
 
         private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
@@ -254,6 +449,16 @@ namespace LeeSin
         {
             if (args.Target is Obj_AI_Hero)
             {
+                if (MenuCombo.Item("Combo.W.UseNormal").GetValue<bool>() && WStage == WCastStage.IsReady)
+                {
+                    W.CastOnUnit(ObjectManager.Player);
+                }
+
+                if (WStage == WCastStage.IsCasted && Environment.TickCount > WCastTime + 2500)
+                {
+                    W.Cast();
+                }
+
                 foreach (
                     KeyValuePair
                         <string, GameItems.Tuple<Items.Item, GameItems.EnumItemType, GameItems.EnumItemTargettingType>>
@@ -291,19 +496,45 @@ namespace LeeSin
                 return;
             }
 
-            if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < t.Position.Distance(InsecJumpPosition))
+            if (ObjectManager.Player.Distance(InsecEndPosition) > t.Position.Distance(InsecEndPosition) && ObjectManager.Player.Distance(InsecJumpPosition) < 250)
             {
                 R.CastOnUnit(t);
+                return;
             }
 
-            if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < 200)
+            if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < t.Position.Distance(InsecJumpPosition) )
             {
                 R.CastOnUnit(t);
+                return;
+            }
+        }
+
+        private static void Game_OnUpdate_RKillSteal(EventArgs args)
+        {
+            var t = AssassinManager.GetTarget(Q.Range + R.Range);
+            if (!t.IsValidTarget())
+            {
+                return;
             }
         }
 
         private static void Game_OnUpdate(EventArgs args)
         {
+            if (wardJumpObjectforFlee != null && (wardJumpObjectforFlee.Distance(ObjectManager.Player.Position) > W.Range * 4 || wardJumpObjectforFlee.IsDead))
+            {
+                wardJumpObjectforFlee = null;
+            }
+
+            //foreach (var VARIABLE in ObjectManager.Get<Obj_AI_Base>().Where(o => o.Distance(ObjectManager.Player.Position)< Q.Range))
+            //{
+            //    Console.WriteLine(VARIABLE.SkinName.ToString());
+            //}
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+            {
+                ModeClear.Jungle.Active();
+                //JungleClear();
+                LaneClear();
+            }
 
 
             if (Config.Item("Flee.Active").GetValue<KeyBind>().Active)
@@ -318,22 +549,18 @@ namespace LeeSin
                     E.Cast();
                 }
 
-                if (WStage == WCastStage.IsCasted && Environment.TickCount > WCastTime + 2500)
-                {
-                    W.Cast();
-                }
-
                 if (Config.Item("Insec").GetValue<KeyBind>().Active)
                 {
+                    ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                     Insec();
                 }
             }
+
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 if (MenuCombo.Item("Combo.SmiteQ").GetValue<StringList>().SelectedIndex == 1)
                 {
                     Combos.SmiteQCombo(Q);
-                    Combos.ComboQwJumpRq();
                 }
             }
 
@@ -352,11 +579,6 @@ namespace LeeSin
                 Harass();
             }
 
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
-            {
-                JungleClear();
-                LaneClear();
-            }
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
             {
@@ -380,13 +602,37 @@ namespace LeeSin
             //    //}
 
             //}
+        }
 
+        private static void OnWndProc_Flee(WndEventArgs args)
+        {
+            if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)
+            {
+                return;
+            }
 
+            wardJumpObjectforFlee =
+                ObjectManager.Get<Obj_AI_Base>()
+                    .Where(
+                        hero =>
+                            hero.Distance(Game.CursorPos, true) < W.Range * 4 && hero.IsAlly && !hero.IsMe && !hero.IsDead &&
+                            !(hero.Name.IndexOf("turret", StringComparison.InvariantCultureIgnoreCase) >= 0))
+                    .OrderBy(h => h.Distance(Game.CursorPos, true)).FirstOrDefault();
+        }
 
+        private static void OnWndProc_Insec(WndEventArgs args)
+        {
+            if (args.Msg != 0x20a)
+            {
+                return;
+            }
 
+            SelectedInsecDirectionIndex = InsecDirection2.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+            
+            //Random rnd = new Random();
+            //int r = rnd.Next(InsecDirection2.Count);
 
-
-
+            //SelectedInsecDirectionIndex = InsecDirection2[r];
         }
 
         private static void OnWndProc(WndEventArgs args)
@@ -397,7 +643,7 @@ namespace LeeSin
                 if (args.Msg == 515)
                 {
                     insdirec = Game.CursorPos;
-                    instypecheck = 1;
+                    
                 }
 
                 var boohoo = ObjectManager.Get<Obj_AI_Base>()
@@ -410,7 +656,7 @@ namespace LeeSin
                 if (args.Msg == 513 && boohoo != null)
                 {
                     insobj = boohoo;
-                    instypecheck = 2;
+                    
                 }
             }
 
@@ -420,7 +666,7 @@ namespace LeeSin
         {
             if (sender.IsMe)
             {
-                casttime = Environment.TickCount;
+                LastSpellCastTime = Environment.TickCount;
             }
 
             if (sender.IsAlly || !sender.Type.Equals(GameObjectType.obj_AI_Hero) ||
@@ -489,16 +735,7 @@ namespace LeeSin
 
             return (float)damage;
         }
-        private static bool Passive()
-        {
-            if (ObjectManager.Player.HasBuff("blindmonkpassive_cosmetic"))
-            {
-                return true;
-            }
-            else
-                return false;
-        }
-
+        
         private static void Combo()
         {
             var t = AssassinManager.GetTarget(Q.Range);
@@ -514,12 +751,12 @@ namespace LeeSin
 
             if (Config.Item("Combo.W.UseNormal").GetValue<bool>() && t.Distance(ObjectManager.Player.Position) <= Orbwalking.GetRealAutoAttackRange(ObjectManager.Player))
             {
-                if (WStage == WCastStage.IsReady || !Passive())
+                if (WStage == WCastStage.IsReady || !HavePassiveBuff)
                 {
                     CastSelfW();
                 }
 
-                if (WStage == WCastStage.IsCasted && (!Passive() || Environment.TickCount > WCastTime + 2500))
+                if (WStage == WCastStage.IsCasted && (!HavePassiveBuff || Environment.TickCount > WCastTime + 2500))
                 {
                     W.Cast();
                 }
@@ -533,14 +770,15 @@ namespace LeeSin
                     ObjectManager.Player.Spellbook.CastSpell(SmiteDamageSlot, t);
                 }
             }
+
             if (t.HasBlindMonkBuff() && !t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) && QStage == QCastStage.IsCasted)
             {
                 Q.Cast();
             }
 
-            if (t.IsValidTarget() && Q.IsReady() && t.Distance(ObjectManager.Player.Position) < 1100)
+            if (t.IsValidTarget() && QStage == QCastStage.IsReady && t.IsValidTarget(Q.Range))
             {
-                CastQ1(t);
+                Q.Cast(t);
             }
 
             if (t.HasBlindMonkBuff() && (ComboDamage(t) > t.Health || Environment.TickCount > QCastTime + 2500))
@@ -620,7 +858,8 @@ namespace LeeSin
                 return;
             }
 
-            WardCastPosition = NavMesh.GetCollisionFlags(jumpPosition).HasFlag(CollisionFlags.Wall) ? ObjectManager.Player.GetPath(jumpPosition).Last(): jumpPosition;
+            //WardCastPosition = NavMesh.GetCollisionFlags(jumpPosition).HasFlag(CollisionFlags.Wall) ? ObjectManager.Player.GetPath(jumpPosition).Last(): jumpPosition;
+            WardCastPosition = jumpPosition;
 
             if (useAllyObjects)
             {
@@ -630,15 +869,16 @@ namespace LeeSin
                         .FirstOrDefault(
                             obj =>
                                 obj.IsAlly && !obj.IsMe && !(obj is Obj_AI_Turret) &&
-                                obj.Position.Distance(jumpPosition) <= MenuFlee.Item("Flee.Range").GetValue<Slider>().Value);
+                                obj.Position.Distance(ObjectManager.Player.Position) < W.Range &&
+                                obj.Position.Distance(WardCastPosition) <= MenuFlee.Item("Flee.Range").GetValue<Slider>().Value);
 
                 if (jumpObject != null)
                 {
                     W.CastOnUnit(jumpObject);
-                    //CastW(jumpObject);
                     return;
                 }
             }
+
             /*
             foreach (
                 var objects in
@@ -672,12 +912,6 @@ namespace LeeSin
                 return;
             }
 
-            if (Environment.TickCount < wardTime + 250)
-            {
-                return;
-            }
-
-            wardTime = Environment.TickCount;
             var ward = Items.GetWardSlot();
             if (ward.IsValidSlot() && ward.Stacks > 0)
             {
@@ -689,12 +923,49 @@ namespace LeeSin
         {
             var pos = Game.CursorPos;
             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, pos);
+            
+            toPolygon =
+                new Geometry.Rectangle(ObjectManager.Player.Position.To2D(),
+                    ObjectManager.Player.Position.To2D().Extend(pos.To2D(),ObjectManager.Player.Position.Distance(pos) < W.Range? W.Range: +ObjectManager.Player.Position.Distance(pos)),
+                    MenuFlee.Item("Flee.Range").GetValue<Slider>().Value).ToPolygon();
+
+                toPolygon.Draw(Color.Black, 2);
+
+
+            if (wardJumpObjectforFlee != null && WStage == WCastStage.IsReady)
+            {
+                Render.Circle.DrawCircle(wardJumpObjectforFlee.Position, 85f, Color.Coral);
+                W.CastOnUnit(wardJumpObjectforFlee);
+                return;
+            }
+
+            var jObjects = ObjectManager.Get<Obj_AI_Base>()
+                .OrderByDescending(obj => obj.Distance(ObjectManager.Player.ServerPosition))
+                .FirstOrDefault(obj => obj.IsAlly && !obj.IsMe && !obj.IsDead &&
+                                       !(obj.Name.IndexOf("turret", StringComparison.InvariantCultureIgnoreCase) >= 0) &&
+                                       obj.Distance(ObjectManager.Player.Position) <= W.Range &&
+                                       obj.Distance(ObjectManager.Player.Position) > Orbwalking.GetRealAutoAttackRange(null) + 100 && 
+                                       toPolygon.IsInside(obj.Position));
+
+            if (jObjects != null)
+            {
+                Render.Circle.DrawCircle(jObjects.Position, 85f, Color.Coral);
+                WardJump(jObjects.Position);
+                return;
+            }
+
+            //Render.Circle.DrawCircle(ObjectManager.Player.Position.Extend(pos, W.Range), 105f, Color.Black);
+            PutWard(ObjectManager.Player.Position.Extend(pos, wardRange));
+            
+            
+            return;
+            
             if (pos.IsWall())
             {
                 return;
             }
 
-            if (pos.Distance(ObjectManager.Player.Position) < ObjectManager.Player.BoundingRadius*2)
+            if (pos.Distance(ObjectManager.Player.Position) < ObjectManager.Player.BoundingRadius)
             {
                 return;
             }
@@ -800,174 +1071,97 @@ namespace LeeSin
         }
         private static void Insec()
         {
-            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             if (!R.IsReady())
             {
                 return;
             }
+            var ignoredEnemies = HeroManager.Enemies.Where(e => MenuInsec.Item("Insec." + e.ChampionName).GetValue<StringList>().SelectedIndex == 0).ToList();
 
-            var t = AssassinManager.GetTarget(Q.Range*2);
+            var t = AssassinManager.GetTarget(Q.Range * 2, TargetSelector.DamageType.Physical, ignoredEnemies);
             if (!t.IsValidTarget())
             {
                 return;
             }
-            
+
+            if (MenuInsec.Item("Insec." + t.ChampionName).GetValue<StringList>().SelectedIndex == 0)
+            {
+                return;
+                
+            }
+
             Obj_AI_Base insecDirection = ObjectManager.Get<Obj_AI_Base>()
                 .OrderBy(obj => obj.Distance(ObjectManager.Player.ServerPosition))
                 .FirstOrDefault(
                     obj =>
-                        obj.IsAlly && !obj.IsMe && !obj.IsMinion && (obj is Obj_AI_Turret || obj is Obj_AI_Hero) &&
-                        obj.Distance(ObjectManager.Player.Position) < Q.Range * 10);
+                        obj.IsAlly && !obj.IsMe && !obj.IsDead && !obj.IsMinion &&
+                        (obj is Obj_AI_Turret || obj is Obj_AI_Hero) &&
+                        obj.Distance(ObjectManager.Player.Position) < Q.Range*10);
 
             if (insecDirection == null)
             {
                 return;
             }
             
-            if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < W.Range)
+            if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < wardRange && ObjectManager.Player.Distance(InsecJumpPosition) > 120)
             {
                 WardJump(InsecJumpPosition);
                 return;
             }
-
+            
             if (t.IsValidTarget(Q.Range) && QStage == QCastStage.IsReady)
             {
                 Combos.SmiteQCombo(Q);
                 Q.Cast(t);
             }
 
-            foreach (var minions in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsEnemy && !o.IsDead && o.Health > Q.GetDamage(o) + 20 && o.Distance(InsecJumpPosition) < W.Range + 50 && o.IsValidTarget(Q.Range)))
+            foreach (
+                var minions in
+                    ObjectManager.Get<Obj_AI_Base>()
+                        .Where(
+                            o =>
+                                o.IsEnemy && !o.IsDead && o.Health > Q.GetDamage(o) + 20 &&
+                                o.Distance(InsecJumpPosition) < wardRange - 40 && o.IsValidTarget(Q.Range)))
             {
-                    Q.Cast(minions);
-                Render.Circle.DrawCircle(minions.Position, 105f, Color.OrangeRed);
-
+                Q.Cast(minions);
                 if (minions.HasBlindMonkBuff())
                 {
                     Q.Cast();
                 }
             }
 
-            
-            
-            if (ObjectManager.Get<Obj_AI_Base>().Where(o => o.HasBlindMonkBuff() && o.Distance(InsecJumpPosition) < W.Range).Any(obj => QStage == QCastStage.IsCasted))
+            if (ObjectManager.Get<Obj_AI_Base>().Where(o => o.HasBlindMonkBuff() && o.Distance(InsecJumpPosition) < wardRange).Any(obj => QStage == QCastStage.IsCasted))
             {
                 Q.Cast();
                 return;
             }
             
-            
             //if (insobj != null && instypecheck==2)
             //     insdirec = insobj.Position;
 
-             if (t.ServerPosition.Distance(insdirec) + 100 < ObjectManager.Player.Position.Distance(insdirec) && R.IsReady())
-             {
-                 R.CastOnUnit(t);
-                 if (LastCastedSpell.LastCastPacketSent.Slot == SpellSlot.R)
-                 {
-                     inscount = Environment.TickCount;
-                     canmove = 1;
-                 }
-             }
+            //if (t.ServerPosition.Distance(insdirec) + 100 < ObjectManager.Player.Position.Distance(insdirec) && R.IsReady())
+            //{
+            //    R.CastOnUnit(t);
+            //    if (LastCastedSpell.LastCastPacketSent.Slot == SpellSlot.R)
+            //    {
+            //        inscount = Environment.TickCount;
+            //        canmove = 1;
+            //    }
+            //}
 
-             if (canmove==1)
-             {
-                 ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-             }
-
-             if (!R.IsReady() ||((Items.GetWardSlot() == null || Items.GetWardSlot().Stacks == 0 || WStage != WCastStage.IsReady) && ObjectManager.Player.Spellbook.CanUseSpell(flashSlot) == SpellState.Cooldown))
-             {
-                 canmove = 1;
-                 return;
-             }
-             
-            if ((ObjectManager.Player.ServerPosition.Distance(InsecJumpPosition) > 600 || inscount + 500 > Environment.TickCount) && t.IsValidTarget() && QStage == QCastStage.IsReady)
-            {
-                var qpred = Q.GetPrediction(t);
-                if (qpred.Hitchance >= HitChance.Medium)
-                Q.Cast(t);
-                if (qpred.Hitchance == HitChance.Collision && Config.Item("Insec.UseMinion").GetValue<bool>())
-                {
-                    var enemyqtry = ObjectManager.Get<Obj_AI_Base>().Where(enemyq => (enemyq.IsValidTarget()||(enemyq.IsMinion&&enemyq.IsEnemy)) && enemyq.Distance(InsecJumpPosition)<500);
-                    foreach (var enemyhit in enemyqtry.OrderBy(enemyhit=>enemyhit.Distance(InsecJumpPosition)).Where(enemyhit => Q.GetPrediction(enemyhit).Hitchance >= HitChance.Medium && enemyhit.Distance(InsecJumpPosition) < 500 && ObjectManager.Player.GetSpellDamage(enemyhit, SpellSlot.Q)<enemyhit.Health))
-                    {
-                        Q.Cast(enemyhit);
-                    }
-                }
-            }
-            if (QStage == QCastStage.IsCasted)
-            {
-                var enemy = HeroManager.Enemies.FirstOrDefault(unit => unit.IsEnemy && unit.HasBlindMonkBuff());
-                if (enemy != null && enemy.Position.Distance(InsecJumpPosition) < 550)
-                {
-                    Q.Cast();
-                    canmove = 0;
-                }
-            }
-
-            if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < 600)
-            {
-                if ((Items.GetWardSlot() == null || Items.GetWardSlot().Stacks == 0 || WStage != WCastStage.IsReady) && Config.Item("Insec.UseFlash").GetValue<bool>()&&
-                    ObjectManager.Player.Spellbook.CanUseSpell(flashSlot) == SpellState.Ready&&ObjectManager.Player.Position.Distance(t.Position)<R.Range&& Environment.TickCount>counttime+3000)
-                {
-                    R.CastOnUnit(t);
-                    Utility.DelayAction.Add(Game.Ping + 125, () => ObjectManager.Player.Spellbook.CastSpell(flashSlot, InsecJumpPosition));
-                    canmove = 0;
-                }
-                else
-                WardJump(InsecJumpPosition);
-                counttime = Environment.TickCount;
-                canmove = 0;
-            }
-        }
-
-        public enum QCastStage { NotReady, IsReady, IsCasted }
-        public enum WCastStage { NotReady, IsReady, IsCasted }
-        public enum ECastStage { NotReady, IsReady, IsCasted }
-        
-        public static QCastStage QStage
-        {
-            get
-            {
-                if (!Q.IsReady())
-                {
-                    return QCastStage.NotReady;
-                }
-
-                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).Name == "BlindMonkQOne"
-                    ? QCastStage.IsReady
-                    : QCastStage.IsCasted);
-
-            }
-        }
-        public static WCastStage  WStage
-        {
-            get
-            {
-                if (!W.IsReady())
-                {
-                    return WCastStage.NotReady;
-                }
-
-                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "blindmonkwtwo"
-                    ? WCastStage.IsCasted
-                    : WCastStage.IsReady);
-
-            }
-        }
-
-        private static ECastStage EStage
-        {
-            get
-            {
-                if (!E.IsReady())
-                {
-                    return ECastStage.NotReady;
-                }
-
-                return (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Name == "BlindMonkEOne"
-                    ? ECastStage.IsReady
-                    : ECastStage.IsCasted);
-            }
+            //if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < 600)
+            //{
+            //    if ((Items.GetWardSlot() == null || Items.GetWardSlot().Stacks == 0 || WStage != WCastStage.IsReady) && Config.Item("Insec.UseFlash").GetValue<bool>() &&
+            //        ObjectManager.Player.Spellbook.CanUseSpell(flashSlot) == SpellState.Ready && ObjectManager.Player.Position.Distance(t.Position) < R.Range && Environment.TickCount > counttime + 3000)
+            //    {
+            //        R.CastOnUnit(t);
+            //        Utility.DelayAction.Add(Game.Ping + 125, () => ObjectManager.Player.Spellbook.CastSpell(flashSlot, InsecJumpPosition));
+            //        canmove = 0;
+            //    }
+            //    else
+            //        WardJump(InsecJumpPosition);
+            //    counttime = Environment.TickCount;
+            //    canmove = 0;
+            //}
         }
 
         private static void CastSelfW()
@@ -1007,7 +1201,7 @@ namespace LeeSin
                 return;
             }
 
-            if (EStage == ECastStage.IsCasted && ((Environment.TickCount > casttime + 200 && !Passive()) || Environment.TickCount > ECastTime + 2700))
+            if (EStage == ECastStage.IsCasted && ((Environment.TickCount > LastSpellCastTime + 200 && !HavePassiveBuff) || Environment.TickCount > ECastTime + 2700))
             {
                 E.Cast();
             }
@@ -1026,7 +1220,10 @@ namespace LeeSin
 
         private static void CastQ1(Obj_AI_Base t)
         {
-            if (QStage != QCastStage.IsReady) return;
+            if (QStage != QCastStage.IsReady)
+            {
+                return;
+            }
             Q.Cast(t);
             return;
             var qpred = Q.GetPrediction(t);
@@ -1100,9 +1297,9 @@ namespace LeeSin
             var useEl = Config.Item("Lane.UseE").GetValue<bool>();
             if (allMinionsQ.Count == 0)
                 return;
-            if (EStage == ECastStage.IsCasted && ((Environment.TickCount > casttime + 200 && !Passive()) || Environment.TickCount > ECastTime + 2700))
+            if (EStage == ECastStage.IsCasted && ((Environment.TickCount > LastSpellCastTime + 200 && !HavePassiveBuff) || Environment.TickCount > ECastTime + 2700))
                 E.Cast();
-            if (QStage == QCastStage.IsCasted && (Environment.TickCount > QCastTime + 2700 || Environment.TickCount > casttime + 200 && !Passive()))
+            if (QStage == QCastStage.IsCasted && (Environment.TickCount > QCastTime + 2700 || Environment.TickCount > LastSpellCastTime + 200 && !HavePassiveBuff))
                 Q.Cast();
 
             foreach (var minion in allMinionsQ)
@@ -1178,20 +1375,21 @@ namespace LeeSin
                 var mob = mobs[0];
 
                 if (QStage == QCastStage.IsCasted && (mob.Health < Q.GetDamage(mob) && ((mob.HasBuff("BlindMonkQOne") || mob.HasBuff("blindmonkqonechaos"))) ||
-                     Environment.TickCount > QCastTime + 2700 || ((Environment.TickCount > casttime + 200 && !Passive()))))
+                     Environment.TickCount > QCastTime + 2700 || ((Environment.TickCount > LastSpellCastTime + 200 && !HavePassiveBuff))))
                 {
                     Q.Cast();
                 }
 
-                if (WStage == WCastStage.IsCasted && ((Environment.TickCount > casttime + 200 && !Passive()) || Environment.TickCount > WCastTime + 2700))
+                if (WStage == WCastStage.IsCasted && ((Environment.TickCount > LastSpellCastTime + 200 && !HavePassiveBuff) || Environment.TickCount > WCastTime + 2700))
                     W.Cast();
-                if (EStage == ECastStage.IsCasted && ((Environment.TickCount > casttime + 200 && !Passive()) || Environment.TickCount > ECastTime + 2700))
+
+                if (EStage == ECastStage.IsCasted && ((Environment.TickCount > LastSpellCastTime + 200 && !HavePassiveBuff) || Environment.TickCount > ECastTime + 2700))
                     E.Cast();
-                if (!Passive() && useQ && Q.IsReady() && Environment.TickCount > casttime + 200 || mob.Health < Q.GetDamage(mob)*2)
+                if (!HavePassiveBuff && useQ && Q.IsReady() && Environment.TickCount > LastSpellCastTime + 200 || mob.Health < Q.GetDamage(mob)*2)
                     CastQ1(mob);
-                else if (!Passive() && Config.Item("PriW").GetValue<bool>() && useW && W.IsReady()&& Environment.TickCount>casttime+200)
+                else if (!HavePassiveBuff && Config.Item("PriW").GetValue<bool>() && useW && W.IsReady()&& Environment.TickCount>LastSpellCastTime+200)
                     CastSelfW();
-                else if (!Passive() && useE && E.IsReady() && mob.Distance(ObjectManager.Player.Position) < E.Range && Environment.TickCount > casttime + 200 || mob.Health < E.GetDamage(mob))
+                else if (!HavePassiveBuff && useE && E.IsReady() && mob.Distance(ObjectManager.Player.Position) < E.Range && Environment.TickCount > LastSpellCastTime + 200 || mob.Health < E.GetDamage(mob))
                     CastE1();
             
 
@@ -1260,35 +1458,89 @@ namespace LeeSin
             return sum / vectors.Length;
         }
 
-        private static bool CollisionObjects(Vector3 from, Vector3 to)
+        private static bool CollisionObjects(Vector3 from, Vector3 to, float width, float range)
         {
-            return Combos.QGetCollisionMinions(from, to, Q.Width, Q.Range, new CollisionableObjects[(int)CollisionableObjects.Minions]).Any();
+            return Combos.QGetCollisionMinions(from, to, width, range, new CollisionableObjects[(int)CollisionableObjects.Minions]).Any();
          
         }
 
-        private static void Drawing_OnDraw_WJumpToEnemy(EventArgs args)
+        private static void Drawing_OnDraw_JumpToEnemy(EventArgs args)
         {
+            if (MenuCombo.Item("Combo.W.JumpToEnemyFoot").GetValue<StringList>().SelectedIndex == 0)
+            {
+                return;
+            }
+
             if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
-                return;
-            
-            var t = AssassinManager.GetTarget(W.Range + 100);
-
-            if (!t.IsValidTarget())
-                return;
-
-            if (t.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
             {
                 return;
             }
 
-            if (!CollisionObjects(ObjectManager.Player.Position, t.Position) && QStage == QCastStage.IsReady)
+            Obj_AI_Hero t =
+                HeroManager.Enemies.Where(
+                    e =>
+                        e.IsValidTarget(Q.Range + PossibleJumpRange - 50) 
+                        && !e.IsDead 
+                        && !e.IsZombie 
+                        && e.Distance(Game.CursorPos) < e.Distance(ObjectManager.Player.Position) 
+                        && !e.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65) 
+                        && !e.HasBlindMonkBuff())
+                    .OrderByDescending(o => o.MaxHealth)
+                    .FirstOrDefault();
+
+            if (t == null)
             {
                 return;
             }
 
-            if (QStage == QCastStage.NotReady && WStage == WCastStage.IsReady && (Q.Cooldown < 4 || E.Cooldown < 4))
+            if (!CollisionObjects(ObjectManager.Player.Position, t.Position, Q.Width, Q.Range) && QStage == QCastStage.IsReady && t.IsValidTarget(Q.Range - 20))
+            {
+                return;
+            }
+
+            if (t.IsValidTarget(PossibleJumpRange) && WStage == WCastStage.IsReady && t.Health < ObjectManager.Player.TotalAttackDamage * 2 ? Q.Cooldown < 10 : Q.Cooldown < 3)
             {
                 WardJump(t.Position);
+                return;
+            }
+
+            if (WStage == WCastStage.IsReady && QStage == QCastStage.IsReady && !t.IsValidTarget(Q.Range) /*&& t.Health < ComboDamage(t)*/)
+            {
+                toPolygon =
+                    new Geometry.Rectangle(t.Position.To2D(),
+                        t.Position.To2D()
+                            .Extend(ObjectManager.Player.Position.To2D(),
+                                +(t.Distance(ObjectManager.Player.Position) - PossibleJumpRange)), Q.Width + 100)
+                        .ToPolygon();
+
+                //toPolygon.Draw(Color.Red, 3);
+
+                var startPos = t.ServerPosition.Extend(ObjectManager.Player.Position, +(t.Distance(ObjectManager.Player.Position) - PossibleJumpRange));
+
+                if (!CollisionObjects(startPos, t.Position, Q.Width + 25, Q.Range) && !startPos.IsWall())
+                {
+                    Render.Circle.DrawCircle(
+                        t.ServerPosition.Extend(ObjectManager.Player.Position,
+                            +(t.Distance(ObjectManager.Player.Position) - PossibleJumpRange)), 105f, Color.Yellow);
+                    WardJump(startPos);
+                }
+            }
+        }
+
+        private static float PossibleJumpRange
+        {
+            get
+            {
+                var jumpObject =
+                    ObjectManager.Get<Obj_AI_Base>()
+                        .OrderBy(obj => obj.Distance(ObjectManager.Player.ServerPosition))
+                        .FirstOrDefault(
+                            obj =>
+                                obj.IsAlly && !obj.IsMe && !(obj is Obj_AI_Turret) &&
+                                obj.Position.Distance(ObjectManager.Player.Position) < W.Range &&
+                                obj.Position.Distance(Game.CursorPos) <= MenuFlee.Item("Flee.Range").GetValue<Slider>().Value);
+
+                return jumpObject != null ? W.Range : wardRange;
             }
         }
 
@@ -1327,60 +1579,210 @@ namespace LeeSin
                 }
         }
 
-        private static void Drawing_OnDraw_Insec(EventArgs args)
+        private static void Drawing_OnDraw_ShowEnemyMinionsUnderAllyTurret(EventArgs args)
         {
-            if (!Config.Item("Insec").GetValue<KeyBind>().Active || !R.IsReady())
+            return;
+            var myTurret = ObjectManager.Get<Obj_AI_Turret>().Find(t => t.IsAlly && !t.IsDead && t.Distance(ObjectManager.Player.Position) < 1500);
+            if (myTurret == null)
+            {
+                return;
+            }
+            Render.Circle.DrawCircle(myTurret.Position, 850, Color.Black);
+
+            var enemy = HeroManager.Enemies.Find(t => !t.IsDead && t.Distance(myTurret) < 3000);
+            if (enemy == null)
+            {
+                return;
+            }
+            var tt = enemy.ServerPosition.Extend(myTurret.Position, +550);
+            var startpos = enemy.Position;
+            var endpos = tt;
+
+            var x = new LeagueSharp.Common.Geometry.Polygon.Rectangle(startpos, endpos, 145);
+            x.Draw(Color.Blue, 3);
+
+            var otherEnemyObjects = ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsEnemy && !o.IsDead && o.Distance(myTurret) < 900 && o.NetworkId != enemy.NetworkId && o.Health < myTurret.TotalAttackDamage * 2);
+
+            if (otherEnemyObjects.Count() < 2 && tt.Distance(myTurret.Position) < 1550)
+            {
+                Insec();
+                if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < enemy.Position.Distance(InsecJumpPosition))
+                {
+                    R.CastOnUnit(enemy);
+                }
+
+                if (ObjectManager.Player.Position.Distance(InsecJumpPosition) < 200)
+                {
+                    R.CastOnUnit(enemy);
+                }
+            }
+
+            /*
+            {
+                Render.Circle.DrawCircle(otherEnemyObjects.Position, otherEnemyObjects.BoundingRadius, Color.Aqua);
+            }
+            foreach (var enemies in ObjectManager.Get<Obj_AI_Base>().Where(o => o.IsEnemy && !o.IsDead))
+            {
+                
+            }
+           */
+        
+
+            //var insecKickWaveDistance = 650;
+            //if (enemy)
+            //var myTurret = ObjectManager.Get<Obj_AI_Turret>().Find(t => t.IsAlly && !t.IsDead && t.Distance(ObjectManager.Player.Position) < 950);
+            //var closesturretEnemy = HeroManager.Enemies.Find(t => !t.IsDead && t.Distance(enemy.Position) > 950);
+            //if (closesturretEnemy != null)
+            //{
+            //    Render.Circle.DrawCircle(closesturretEnemy.Position, 150f, Color.Black);
+            //}
+
+
+            //foreach (var turret in ObjectManager.Get<Obj_AI_Turret>())
+            //{
+                
+            //}
+        }
+
+        private static void Drawing_OnDraw_WardJumpObjectForFlee(EventArgs args)
+        {
+            if (WStage != WCastStage.IsReady)
             {
                 return;
             }
 
-            Obj_AI_Base insecDirection = ObjectManager.Get<Obj_AI_Base>()
-                .OrderBy(obj => obj.Distance(ObjectManager.Player.ServerPosition))
-                .FirstOrDefault(
-                    obj =>
-                        obj.IsAlly && !obj.IsMe && !obj.IsMinion && (obj is Obj_AI_Turret || obj is Obj_AI_Hero) &&
-                        obj.Distance(ObjectManager.Player.Position) < Q.Range * 10);
-
-            if (insecDirection != null)
+            if (wardJumpObjectforFlee != null && Config.Item("Flee.Active").GetValue<KeyBind>().Active)
             {
-                var t = AssassinManager.GetTarget(Q.Range * 2);
-                InsecJumpPosition = t.ServerPosition.Extend(insecDirection.Position, -220);
+                var x = new LeagueSharp.Common.Geometry.Polygon.Line(ObjectManager.Player.Position, wardJumpObjectforFlee.Position);
+                x.Draw(Color.Blue, 2);
+
+                Vector3[] vCent = new[] { ObjectManager.Player.Position, wardJumpObjectforFlee.Position };
+                var aX = Drawing.WorldToScreen(new Vector3(CenterOfVectors(vCent).X, CenterOfVectors(vCent).Y, CenterOfVectors(vCent).Z));
+                Drawing.DrawText(aX.X, aX.Y, Color.White, "Jump to Selected Object");
+            }
+        }
+
+        private static void Drawing_OnDraw_Insec(EventArgs args)
+        {
+            if (!Config.Item("Insec").GetValue<KeyBind>().Active /*|| !R.IsReady()*/)
+            {
+                return;
+            }
+
+            //InsecDirection2.Clear();
+            //foreach (var insecDirect in ObjectManager.Get<Obj_AI_Base>().OrderBy(obj => obj.NetworkId).Where(
+            //    obj =>
+            //            obj.IsAlly && !obj.IsMe && !obj.IsDead && !obj.IsMinion && (obj is Obj_AI_Turret || obj is Obj_AI_Hero) &&
+            //            obj.Distance(ObjectManager.Player.Position) < Q.Range * 4))
+            //{
+            //    InsecDirection2.Add(insecDirect);
+            //}
+            //if (SelectedInsecDirectionIndex == null)
+            //{
+            //    SelectedInsecDirectionIndex = InsecDirection2[0];
+            //}
+
+            //if (InsecDirection2.Count == 0)
+            //{
+            //    return;
+            //}
+
+            //if (SelectedInsecDirectionIndex != null)
+            //{
+            //    var ignoredEnemies =
+            //                       HeroManager.Enemies.Where(
+            //                           e => MenuInsec.Item("Insec." + e.ChampionName).GetValue<StringList>().SelectedIndex == 0)
+            //                           .ToList();
+
+            //    var t = AssassinManager.GetTarget(Q.Range * 2, TargetSelector.DamageType.Physical, ignoredEnemies);
+            //    InsecJumpPosition = t.ServerPosition.Extend(SelectedInsecDirectionIndex.Position, -220);
+
+            //    Render.Circle.DrawCircle(InsecJumpPosition, 150f, Color.Blue);
+            //    Render.Circle.DrawCircle(SelectedInsecDirectionIndex.Position, 150f, Color.Red);
+
+            //    InsecEndPosition = t.ServerPosition.Extend(SelectedInsecDirectionIndex.Position, +500);
+
+            //    var startpos = t.Position;
+            //    var endpos = InsecEndPosition;
+            //    var endpos1 = InsecEndPosition + (startpos - endpos).To2D().Normalized().Rotated(25 * (float)Math.PI / 180).To3D() * t.BoundingRadius * 2;
+            //    var endpos2 = InsecEndPosition + (startpos - endpos).To2D().Normalized().Rotated(-25 * (float)Math.PI / 180).To3D() * t.BoundingRadius * 2;
+
+            //    var width = 2;
+
+            //    var x = new LeagueSharp.Common.Geometry.Polygon.Line(startpos, endpos); x.Draw(Color.Blue, width);
+            //    var y = new LeagueSharp.Common.Geometry.Polygon.Line(endpos, endpos1); y.Draw(Color.Blue, width);
+            //    var z = new LeagueSharp.Common.Geometry.Polygon.Line(endpos, endpos2); z.Draw(Color.Blue, width);
+            //}
+
+            //return;
+
+            var ignoredEnemies =
+                HeroManager.Enemies.Where(
+                    e => MenuInsec.Item("Insec." + e.ChampionName).GetValue<StringList>().SelectedIndex == 0)
+                    .ToList();
+
+            var t = AssassinManager.GetTarget(Q.Range * 2, TargetSelector.DamageType.Physical, ignoredEnemies);
+
+            var turrents = from u in
+                ObjectManager.Get<Obj_AI_Base>()
+                    .Where(
+                        obj =>
+                            obj.IsAlly && !obj.IsMe && !obj.IsDead && !obj.IsMinion && obj is Obj_AI_Turret &&
+                            obj.Distance(ObjectManager.Player.Position) < Q.Range*5).OrderBy(obj => obj.Distance(ObjectManager.Player.Position))
+                           select u;
+
+            var allies = from u in
+                HeroManager.Allies
+                    .Where(
+                        obj =>
+                            !obj.IsMe && !obj.IsDead && !obj.IsMinion && obj.Health >= t.Health &&
+                            obj.Distance(ObjectManager.Player.Position) < Q.Range*5).OrderBy(obj => obj.Distance(ObjectManager.Player.Position))
+                select u;
+
+            var insecDirection = turrents.Union(allies).ToList();
+
+
+            //Obj_AI_Base insecDirection = ObjectManager.Get<Obj_AI_Base>()
+            //    .OrderBy(obj => obj.Distance(ObjectManager.Player.ServerPosition))
+            //    .FirstOrDefault(
+            //        obj =>
+            //            obj.IsAlly && !obj.IsMe && !obj.IsDead && !obj.IsMinion && (obj is Obj_AI_Turret || obj is Obj_AI_Hero) &&
+            //            obj.Distance(ObjectManager.Player.Position) < Q.Range * 10);
+
+
+                InsecJumpPosition = t.ServerPosition.Extend(insecDirection[0].Position, -220);
 
                 Render.Circle.DrawCircle(InsecJumpPosition, 150f, Color.Blue);
-                Render.Circle.DrawCircle(insecDirection.Position, 150f, Color.Red);
+                Render.Circle.DrawCircle(insecDirection[0].Position, 150f, Color.Red);
 
-                var tt = t.ServerPosition.Extend(insecDirection.Position, +500);
+                InsecEndPosition = t.ServerPosition.Extend(insecDirection[0].Position, +500);
 
                 var startpos = t.Position;
-                var endpos = tt;
-                var endpos1 = tt +
-                              (startpos - endpos).To2D().Normalized().Rotated(25 * (float)Math.PI / 180).To3D() *
-                              t.BoundingRadius * 2;
-                var endpos2 = tt +
-                              (startpos - endpos).To2D().Normalized().Rotated(-25 * (float)Math.PI / 180).To3D() *
-                              t.BoundingRadius * 2;
+                var endpos = InsecEndPosition;
+                var endpos1 = InsecEndPosition + (startpos - endpos).To2D().Normalized().Rotated(25 * (float)Math.PI / 180).To3D() * t.BoundingRadius * 2;
+                var endpos2 = InsecEndPosition + (startpos - endpos).To2D().Normalized().Rotated(-25 * (float)Math.PI / 180).To3D() * t.BoundingRadius * 2;
 
                 var width = 2;
 
-                var x = new Geometry.Polygon.Line(startpos, endpos);
-                x.Draw(Color.Blue, width);
-                var y = new Geometry.Polygon.Line(endpos, endpos1);
-                y.Draw(Color.Blue, width);
-                var z = new Geometry.Polygon.Line(endpos, endpos2);
-                z.Draw(Color.Blue, width);
-            }
-
+                var x = new LeagueSharp.Common.Geometry.Polygon.Line(startpos, endpos); x.Draw(Color.Blue, width);
+                var y = new LeagueSharp.Common.Geometry.Polygon.Line(endpos, endpos1); y.Draw(Color.Blue, width);
+                var z = new LeagueSharp.Common.Geometry.Polygon.Line(endpos, endpos2); z.Draw(Color.Blue, width);
         }
 
         private static void Drawing_OnDraw_Flee(EventArgs args)
         {
-            if (MenuFlee.Item("Flee.Active").GetValue<KeyBind>().Active)
+            //Render.Circle.DrawCircle(ObjectManager.Player.Position.Extend(Game.CursorPos, +W.Range), 150f, Color.Aqua);
+            if (wardJumpObjectforFlee != null)
+            {
+                Render.Circle.DrawCircle(wardJumpObjectforFlee.Position, 105f, Color.Aquamarine);
+            }
+
+            if (MenuKeys.Item("Flee.Active").GetValue<KeyBind>().Active)
             {
                 if (MenuFlee.Item("Flee.Draw").GetValue<Circle>().Active)
                 {
                     var fleeDraw = MenuFlee.Item("Flee.Draw").GetValue<Circle>();
-                    Render.Circle.DrawCircle(Game.CursorPos, MenuFlee.Item("Flee.Range").GetValue<Slider>().Value,
-                        fleeDraw.Color);
+                    Render.Circle.DrawCircle(Game.CursorPos, MenuFlee.Item("Flee.Range").GetValue<Slider>().Value, fleeDraw.Color);
 
                     var fleeDrawW = MenuFlee.Item("Flee.Draw.W").GetValue<Circle>();
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, fleeDrawW.Color);
@@ -1396,7 +1798,7 @@ namespace LeeSin
                 return;
             }
 
-            if (!CollisionObjects(ObjectManager.Player.ServerPosition, t.ServerPosition))
+            if (!CollisionObjects(ObjectManager.Player.ServerPosition, t.ServerPosition, Q.Width, Q.Range))
             {
                 return;
             }
@@ -1643,6 +2045,9 @@ namespace LeeSin
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            //Render.Circle.DrawCircle(ObjectManager.Player.Position, MenuKickWave.Item("Draw.Custom").GetValue<Slider>().Value, Color.Black);
+            Render.Circle.DrawCircle(ObjectManager.Player.Position, PossibleJumpRange, Color.Black);
+
             var drawW = MenuDrawing.Item("Draw.W").GetValue<StringList>().SelectedIndex;
             switch (drawW)
             {
@@ -1677,12 +2082,12 @@ namespace LeeSin
                     }
             }
 
-            if (Config.Item("Flee.Active").GetValue<KeyBind>().Active)
-            {
-                Render.Circle.DrawCircle(Game.CursorPos, 200, System.Drawing.Color.Blue);
-                Render.Circle.DrawCircle(jumppoint, 50, System.Drawing.Color.Red);
-                Render.Circle.DrawCircle(movepoint, 50, System.Drawing.Color.White);
-            }
+            //if (Config.Item("Flee.Active").GetValue<KeyBind>().Active)
+            //{
+            //    Render.Circle.DrawCircle(Game.CursorPos, 200, System.Drawing.Color.Blue);
+            //    Render.Circle.DrawCircle(jumppoint, 50, System.Drawing.Color.Red);
+            //    Render.Circle.DrawCircle(movepoint, 50, System.Drawing.Color.White);
+            //}
 
       
 
@@ -1752,7 +2157,7 @@ namespace LeeSin
 
                     if (ComboDamage(enemyVisible) > enemyVisible.Health)
                     {
-                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50, Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.Red, "Combo=Rekt");
+                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50, Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.White, "Combo=Rekt");
                     }
             }
 

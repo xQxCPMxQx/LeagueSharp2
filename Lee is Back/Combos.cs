@@ -37,20 +37,6 @@ namespace LeeSin
                 Collision.GetCollision(new List<Vector3> {targetposition}, input).OrderBy(obj => obj.Distance(source)).ToList();
         }
 
-        public static void ComboQwJumpRq()
-        {
-            var t = AssassinManager.GetTarget(Program.W.Range/2);
-            if (!t.IsValidTarget())
-            {
-                return;
-            }
-
-            if (Program.Q.CastIfWillHit(t))
-            {
-                Game.PrintChat("Can Cast");
-            }
-        }
-
         public static double CalculateDamage()
         {
             int level = ObjectManager.Player.Level;
@@ -65,9 +51,18 @@ namespace LeeSin
         }
         public static void SmiteQCombo(Spell spell)
         {
+            if (Program.QStage != Program.QCastStage.IsReady)
+            {
+                return;
+            }
 
             var t = AssassinManager.GetTarget(spell.Range);
             if (!t.IsValidTarget())
+            {
+                return;
+            }
+
+            if (t.HasBlindMonkBuff())
             {
                 return;
             }
