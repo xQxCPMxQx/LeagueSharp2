@@ -2046,7 +2046,7 @@ namespace LeeSin
         private static void Drawing_OnDraw(EventArgs args)
         {
             //Render.Circle.DrawCircle(ObjectManager.Player.Position, MenuKickWave.Item("Draw.Custom").GetValue<Slider>().Value, Color.Black);
-            Render.Circle.DrawCircle(ObjectManager.Player.Position, PossibleJumpRange, Color.Black);
+            //Render.Circle.DrawCircle(ObjectManager.Player.Position, PossibleJumpRange, Color.Black);
 
             var drawW = MenuDrawing.Item("Draw.W").GetValue<StringList>().SelectedIndex;
             switch (drawW)
