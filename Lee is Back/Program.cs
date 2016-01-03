@@ -929,7 +929,7 @@ namespace LeeSin
                     ObjectManager.Player.Position.To2D().Extend(pos.To2D(),ObjectManager.Player.Position.Distance(pos) < W.Range? W.Range: +ObjectManager.Player.Position.Distance(pos)),
                     MenuFlee.Item("Flee.Range").GetValue<Slider>().Value).ToPolygon();
 
-                toPolygon.Draw(Color.Black, 2);
+                //toPolygon.Draw(Color.Black, 2);
 
 
             if (wardJumpObjectforFlee != null && WStage == WCastStage.IsReady)
