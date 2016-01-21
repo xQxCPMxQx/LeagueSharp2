@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
 
 namespace LeeSin
 {
@@ -19,6 +20,20 @@ namespace LeeSin
 
     public static class GameUtils
     {
+
+    }
+
+    public static class DrawUtils
+    {
+        public static Vector3 CenterOfVectors(Vector3[] vectors)
+        {
+            var sum = Vector3.Zero;
+            if (vectors == null || vectors.Length == 0)
+                return sum;
+
+            sum = vectors.Aggregate(sum, (current, vec) => current + vec);
+            return sum / vectors.Length;
+        }
 
     }
 

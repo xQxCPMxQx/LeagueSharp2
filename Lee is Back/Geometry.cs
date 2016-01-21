@@ -16,6 +16,7 @@
 
 #region
 
+using System.Linq;
 using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
 using Paths = System.Collections.Generic.List<System.Collections.Generic.List<ClipperLib.IntPoint>>;
 using GamePath = System.Collections.Generic.List<SharpDX.Vector2>;
@@ -202,6 +203,11 @@ namespace LeeSin
             public bool IsInside(Vector2 point)
             {
                 return !IsOutside(point);
+            }
+
+            public bool IsInside(List<Vector2> point)
+            {
+                return point.Select(p => !IsOutside(p)).FirstOrDefault();
             }
 
             /// <summary>

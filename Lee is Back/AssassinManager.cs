@@ -100,8 +100,8 @@ namespace LeeSin
                     new StringList(new[] { "Single Target Select", "Multi Target Select" })))
                 .SetFontStyle(FontStyle.Regular, SharpDX.Color.LightCoral)
                 .SetTag(11);
-            LocalMenu.AddItem(new MenuItem("Range", "Range (Recommend: 1150):"))
-                .SetValue(new Slider(1150, (int)Program.Q.Range, (int)Program.Q.Range * 2))
+            LocalMenu.AddItem(new MenuItem("Range", "Range (Recommend: Max):"))
+                .SetValue(new Slider((int)Program.Q.Range * 2, (int)Program.Q.Range, (int)Program.Q.Range * 2))
                 .SetTag(11);
 
             LocalMenu.AddItem(

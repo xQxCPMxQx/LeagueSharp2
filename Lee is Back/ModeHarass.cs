@@ -38,7 +38,7 @@ namespace LeeSin
                         o =>
                             o.IsAlly && !o.IsDead && !o.IsMe &&
                             !(o.Name.IndexOf("turret", StringComparison.InvariantCultureIgnoreCase) >= 0) &&
-                            o.Distance(t.Position) < W.Range - 20
+                            o.Distance(t.Position) < W.Range - 10
                     )
                     .OrderByDescending(o => o.Distance(t.Position)).FirstOrDefault();
 
@@ -47,7 +47,7 @@ namespace LeeSin
                 return;
             }
 
-            if (t.HasBlindMonkBuff() && QState == Program.QCastStage.IsCasted && WState == Program.WCastStage.IsReady)
+            if (t.HasBlindMonkBuff() && QState == Program.QCastStage.IsCasted)
             {
                 Q.Cast();
             }
