@@ -714,7 +714,7 @@ namespace Olafisback
 
             Vector3 castPosition2;
 
-            if (!t.IsFacing(Player) && t.Path.Count() >= 1 && ObjectManager.Player.Distance(t.Position) < ObjectManager.Player.Distance(t.Path[0]) && ObjectManager.Player.Distance(t.Position) > Q.Range/3)
+            if (!t.IsFacing(Player) && ObjectManager.Player.Distance(t.Position) < ObjectManager.Player.Distance(t.Path[1]) && ObjectManager.Player.Distance(t.Position) > Q.Range/3)
             {
                 castPosition2 = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position)*t.MoveSpeed / 2;
                 Render.Circle.DrawCircle(castPosition2, 100f, System.Drawing.Color.Black);
