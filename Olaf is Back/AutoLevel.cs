@@ -16,21 +16,24 @@ namespace Olafisback
 
         public AutoLevel()
         {
-
             LocalMenu = new Menu("Auto Level", "Auto Level").SetFontStyle(FontStyle.Regular, Color.IndianRed);
-            LocalMenu.AddItem(new MenuItem("AutoLevel.Set", "at Start:").SetValue(new StringList(new[] { "Allways Off", "Allways On", "Remember Last Settings" }, 2)));
-            LocalMenu.AddItem(new MenuItem("AutoLevel.Active", "Auto Level Active!").SetValue(new KeyBind("L".ToCharArray()[0], KeyBindType.Toggle))).Permashow(true, "Olaf | Auto Level");
+            LocalMenu.AddItem(
+                new MenuItem("AutoLevel.Set", "at Start:").SetValue(
+                    new StringList(new[] {"Allways Off", "Allways On", "Remember Last Settings"}, 2)));
+            LocalMenu.AddItem(
+                new MenuItem("AutoLevel.Active", "Auto Level Active!").SetValue(new KeyBind("L".ToCharArray()[0],
+                    KeyBindType.Toggle))).Permashow(true, "Olaf | Auto Level");
 
             var championName = ObjectManager.Player.ChampionName.ToLowerInvariant();
 
             switch (championName)
             {
                 case "olaf":
-                    SpellLevels = new[] { 1, 2, 3, 1, 1, 4, 1, 3, 1, 3, 4, 3, 3, 2, 2, 4, 2, 2 };
+                    SpellLevels = new[] {1, 2, 3, 1, 1, 4, 1, 3, 1, 3, 4, 3, 3, 2, 2, 4, 2, 2};
                     LocalMenu.AddItem(new MenuItem("AutoLevel." + championName, GetLevelList(SpellLevels)));
                     break;
             }
-            
+
             switch (LocalMenu.Item("AutoLevel.Set").GetValue<StringList>().SelectedIndex)
             {
                 case 0:
@@ -39,21 +42,22 @@ namespace Olafisback
                     break;
 
                 case 1:
-                    LocalMenu.Item("AutoLevel.Active").SetValue(new KeyBind("L".ToCharArray()[0], KeyBindType.Toggle, true));
+                    LocalMenu.Item("AutoLevel.Active")
+                        .SetValue(new KeyBind("L".ToCharArray()[0], KeyBindType.Toggle, true));
                     break;
             }
-            
+
             Program.MenuMisc.AddSubMenu(LocalMenu);
-            
+
             Game.OnUpdate += Game_OnUpdate;
-            
+
         }
 
         private static string GetLevelList(int[] spellLevels)
         {
-            var a = new[] { "Q", "W", "E", "R" };
+            var a = new[] {"Q", "W", "E", "R"};
             var b = spellLevels.Aggregate("", (c, i) => c + (a[i - 1] + " - "));
-            return b != "" ? b.Substring(0, b.Length - (17 * 3)) : "";
+            return b != "" ? b.Substring(0, b.Length - (17*3)) : "";
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -73,7 +77,7 @@ namespace Olafisback
                 return;
             }
 
-            var level = new[] { 0, 0, 0, 0 };
+            var level = new[] {0, 0, 0, 0};
             for (var i = 0; i < ObjectManager.Player.Level; i++)
             {
                 level[SpellLevels[i] - 1] = level[SpellLevels[i] - 1] + 1;
