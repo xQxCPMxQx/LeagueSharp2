@@ -679,9 +679,13 @@ namespace Olafisback
             if (!t.IsValidTarget())
                 return;
 
-            if (Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady() && t.IsValidTarget(Q.Range))
+            if (Config.Item("UseQCombo").GetValue<bool>() && Q.IsReady() &&
+                Player.Distance(t.ServerPosition) <= Q.Range)
             {
-                CastQ();
+                PredictionOutput qPredictionOutput = Q.GetPrediction(t);
+                var castPosition = qPredictionOutput.CastPosition.Extend(ObjectManager.Player.Position, -100);
+
+                Q.Cast(Player.Distance(t.ServerPosition) >= 300 ? castPosition : qPredictionOutput.CastPosition);
             }
 
             if (E.IsReady() && Player.Distance(t.ServerPosition) <= E.Range)
