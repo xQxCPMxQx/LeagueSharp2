@@ -2,8 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -32,6 +34,7 @@ namespace Pantheon
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
         public static Spell E;
+        private static int eTick;
         public static Spell W;
         public static Spell R;
 
@@ -46,6 +49,13 @@ namespace Pantheon
         public static Menu Config;
         public static Menu menuMisc;
 
+        internal enum ECastStage
+        {
+            NotReady,
+            IsReady,
+            IsCasted
+        }
+
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -58,7 +68,7 @@ namespace Pantheon
 
             Q = new Spell(SpellSlot.Q, 620f);
             W = new Spell(SpellSlot.W, 620f);
-            E = new Spell(SpellSlot.E, 640f);
+            E = new Spell(SpellSlot.E, 600f);
             R = new Spell(SpellSlot.R, 5500f);
 
             Q.SetTargetted(0.2f, 1700f);
@@ -70,7 +80,7 @@ namespace Pantheon
             SpellList.Add(E);
             SpellList.Add(R);
 
-            Config = new Menu("xQx | Pantheon", "Pantheon", true);
+            Config = new Menu("Pantheon", "Pantheon", true).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
 
             var targetSelectorMenu = new Menu("Target Selector", "TargetSelector");
             TargetSelector.AddToMenu(targetSelectorMenu);
@@ -265,32 +275,48 @@ namespace Pantheon
 
             Config.AddToMainMenu();
 
+            foreach (var i in Config.Children.Cast<Menu>().SelectMany(GetChildirens))
+            {
+                i.DisplayName = ":: " + i.DisplayName;
+            }
+
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += DrawingOnOnEndScene;
-            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
-            Notifications.AddNotification(string.Format("{0} Loaded", ChampionName), 4000);
+
+            Game.PrintChat(
+                "<font color='#ff3232'>Pantheon: </font><font color='#d4d4d4'><font color='#FFFFFF'> Loaded </font>");
+        }
+
+
+
+        private static IEnumerable<Menu> GetChildirens(Menu menu)
+        {
+            yield return menu;
+
+            foreach (var childChild in menu.Children.SelectMany(GetChildirens))
+                yield return childChild;
+        }
+
+
+        static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (args.Slot == SpellSlot.E)
+            {
+                eTick = Environment.TickCount;
+            }
+
+            if (Environment.TickCount - 1000 < eTick && (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W))
+            {
+                args.Process = false;
+            }
         }
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs arg)
         {
-            if (!sender.IsMe)
-                return;
 
-            if (arg.SData.Name.ToLower().Contains("pantheonq") || arg.SData.Name.ToLower().Contains("pantheonw"))
-            {
-                usedSpell = true;
-            }
-            else if (arg.SData.Name.ToLower().Contains("pantheone") || Player.HasBuff("sound", true))
-            {
-                usedSpell = true;
-            }
-            else if (arg.SData.Name.ToLower().Contains("attack"))
-            {
-                usedSpell = false;
-            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -396,7 +422,8 @@ namespace Pantheon
             {
                 Q.CastOnUnit(t);
             }
-            else if (E.IsReady() && !Player.HasBuff("sound", true) && !Q.IsReady() && !W.IsReady())
+            else if (E.IsReady() && !Player.HasBuff("sound", true) && !Q.IsReady() && !W.IsReady() &&
+                     t.IsValidTarget(E.Range))
             {
                 E.Cast(t.Position);
             }
@@ -513,7 +540,6 @@ namespace Pantheon
             var mob = mobs[0];
             var useQ = Config.Item("Jungle.UseQ").GetValue<StringList>().SelectedIndex;
             var useW = Config.Item("Jungle.UseW").GetValue<StringList>().SelectedIndex;
-
             switch (useQ)
             {
                 case 1:
@@ -596,7 +622,6 @@ namespace Pantheon
                     if (minions.Distance(Player.Position) > Orbwalking.GetRealAutoAttackRange(null) + 65)
                         Q.Cast(minions);
                 }
-
             }
 
             if (useE)
@@ -668,7 +693,6 @@ namespace Pantheon
 
             }
         }
-
 
         private static void Ping(Vector2 position)
         {
