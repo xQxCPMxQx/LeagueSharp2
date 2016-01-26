@@ -52,7 +52,7 @@ namespace Zed
                 _player = ObjectManager.Player;
                 if (ObjectManager.Player.BaseSkinName != ChampionName) return;
                 _q = new Spell(SpellSlot.Q, 900f);
-                _w = new Spell(SpellSlot.W, 550f);
+                _w = new Spell(SpellSlot.W, 700f);
                 _e = new Spell(SpellSlot.E, 270f);
                 _r = new Spell(SpellSlot.R, 650f);
 
