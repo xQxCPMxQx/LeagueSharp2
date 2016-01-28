@@ -396,7 +396,7 @@ namespace Olafisback
             /* [ Misc ] */
             MenuMisc = new Menu("Misc", "Misc");
             {
-                MenuMisc.AddItem(new MenuItem("Misc.AutoE", "Auto-Use E (If Enemy Hit)").SetValue(false));
+                MenuMisc.AddItem(new MenuItem("Misc.AutoE", "Auto-Use E (If Enemy Hit)").SetValue(new StringList(new [] {"Off", "On", "On: Don't use Under Turret"}, 1)));
                 MenuMisc.AddItem(new MenuItem("Misc.AutoR", "Auto-Use R on Crowd-Control").SetValue(false));
                 Config.AddSubMenu(MenuMisc);
             }
@@ -637,11 +637,30 @@ namespace Olafisback
                 }
             }
 
-            if (E.IsReady() && Config.Item("Misc.AutoE").GetValue<bool>())
+            if (E.IsReady() )
             {
-                var t = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                    E.CastOnUnit(t);
+				var castE = Config.Item("Misc.AutoE").GetValue<StringList>().SelectedIndex;
+				var t = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+				
+				if (!t.IsValidTarget())
+				{
+					return;
+				}
+
+				if (t.Health < E.GetDamage(t))
+				{
+					E.CastOnUnit(t);
+				}
+				
+				if (castE == 1)
+				{
+					E.CastOnUnit(t);
+				}
+                
+				if (castE == 2 && !t.UnderTurret())
+				{
+					E.CastOnUnit(t);
+				}
             }
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -718,20 +737,20 @@ namespace Olafisback
 
             Vector3 castPosition2;
 
-            if (!t.IsFacing(Player) && ObjectManager.Player.Distance(t.Position) < ObjectManager.Player.Distance(t.Path[1]) && ObjectManager.Player.Distance(t.Position) > Q.Range/3)
-            {
-                castPosition2 = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position)*t.MoveSpeed / 2;
-                Render.Circle.DrawCircle(castPosition2, 100f, System.Drawing.Color.Black);
-            }
-            else
-            {
-                castPosition2 = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position) * 20;
-            }
-            if (castPosition2 != Vector3.Zero && ObjectManager.Player.Distance(castPosition2) <= Q.Range)
-            {
-                Q.Cast(castPosition2);
-            }
-            return;
+            //if (!t.IsFacing(Player) && ObjectManager.Player.Distance(t.Position) < ObjectManager.Player.Distance(t.Path[1]) && ObjectManager.Player.Distance(t.Position) > Q.Range/3)
+            //{
+            //    castPosition2 = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position)*t.MoveSpeed / 2;
+            //    Render.Circle.DrawCircle(castPosition2, 100f, System.Drawing.Color.Black);
+            //}
+            //else
+            //{
+            //    castPosition2 = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position) * 20;
+            //}
+            //if (castPosition2 != Vector3.Zero && ObjectManager.Player.Distance(castPosition2) <= Q.Range)
+            //{
+            //    Q.Cast(castPosition2);
+            //}
+            //return;
 
 
             if (t.IsValidTarget())
