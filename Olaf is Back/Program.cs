@@ -732,35 +732,16 @@ namespace Olafisback
                 return;
 
             var t = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            if (!t.IsValidTarget())
-                return;
-
-            Vector3 castPosition2;
-
-            //if (!t.IsFacing(Player) && ObjectManager.Player.Distance(t.Position) < ObjectManager.Player.Distance(t.Path[1]) && ObjectManager.Player.Distance(t.Position) > Q.Range/3)
-            //{
-            //    castPosition2 = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position)*t.MoveSpeed / 2;
-            //    Render.Circle.DrawCircle(castPosition2, 100f, System.Drawing.Color.Black);
-            //}
-            //else
-            //{
-            //    castPosition2 = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position) * 20;
-            //}
-            //if (castPosition2 != Vector3.Zero && ObjectManager.Player.Distance(castPosition2) <= Q.Range)
-            //{
-            //    Q.Cast(castPosition2);
-            //}
-            //return;
-
 
             if (t.IsValidTarget())
             {
                 Vector3 castPosition;
                 PredictionOutput qPredictionOutput = Q.GetPrediction(t);
 
-                if (!t.IsFacing(Player) && t.Path.Count() >= 1 ) // target is running
+                if (!t.IsFacing(Player) && t.Path.Count() >= 1) // target is running
                 {
-                    castPosition = Q.GetPrediction(t).CastPosition + Vector3.Normalize(t.ServerPosition - Player.Position)*t.MoveSpeed/2;
+                    castPosition = Q.GetPrediction(t).CastPosition
+                                   + Vector3.Normalize(t.ServerPosition - Player.Position) * t.MoveSpeed / 2;
                 }
                 else
                 {
