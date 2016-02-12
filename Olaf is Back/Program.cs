@@ -433,7 +433,9 @@ namespace Olafisback
 
         private static void GameObject_OnCreate(GameObject obj, EventArgs args)
         {
-            if (obj.Name == "olaf_axe_totem_team_id_green.troy")
+            
+            //if (obj.Name == "olaf_axe_totem_team_id_green.troy")
+            if (obj.Name == "olaf_axe_trigger.troy")
             {
                 olafAxe.Object = obj;
                 olafAxe.ExpireTime = Game.Time + 8;
