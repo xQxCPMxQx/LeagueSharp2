@@ -373,7 +373,7 @@ namespace Olafisback
                     Game.PrintChat((i / 250 - 1).ToString());
                     strE[i / 250 - 1] = "Add " + i + " ms. delay for who visible instantly (Shaco/Rengar etc.)";
                 }
-                MenuMisc.AddItem(new MenuItem("Misc.AutoE.Delay", "E:").SetValue(new StringList(strE, 0))).SetFontStyle(FontStyle.Regular, Q.MenuColor()); ;
+                MenuMisc.AddItem(new MenuItem("Misc.AutoE.Delay", "E:").SetValue(new StringList(strE, 0)));
             
                 MenuMisc.AddItem(new MenuItem("Misc.AutoR", "Auto-Use R on Crowd-Control").SetValue(false));
                 Config.AddSubMenu(MenuMisc);
