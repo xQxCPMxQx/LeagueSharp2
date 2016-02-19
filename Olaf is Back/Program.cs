@@ -367,6 +367,14 @@ namespace Olafisback
             MenuMisc = new Menu("Misc", "Misc");
             {
                 MenuMisc.AddItem(new MenuItem("Misc.AutoE", "Auto-Use E (If Enemy Hit)").SetValue(false));
+                string[] strE = new string[1000/250];
+                for (var i = 250; i <= 1000; i += 250)
+                {
+                    Game.PrintChat((i / 250 - 1).ToString());
+                    strE[i / 250 - 1] = "Add " + i + " ms. delay for who visible instantly (Shaco/Rengar etc.)";
+                }
+                MenuMisc.AddItem(new MenuItem("Misc.AutoE.Delay", "E:").SetValue(new StringList(strE, 0))).SetFontStyle(FontStyle.Regular, Q.MenuColor()); ;
+            
                 MenuMisc.AddItem(new MenuItem("Misc.AutoR", "Auto-Use R on Crowd-Control").SetValue(false));
                 Config.AddSubMenu(MenuMisc);
             }
@@ -422,13 +430,50 @@ namespace Olafisback
                 });
             Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
-
+            new Helper();
+            
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate;
             GameObject.OnCreate += GameObject_OnCreate;
             GameObject.OnDelete += GameObject_OnDelete;
             Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
             Game.PrintChat("<font color='#FFFFFF'>Olaf is Back V2</font> <font color='#70DBDB'> Loaded!</font>");
+        }
+
+        internal class EnemyHeros
+        {
+            public Obj_AI_Hero Player;
+            public int LastSeen;
+
+            public EnemyHeros(Obj_AI_Hero player)
+            {
+                Player = player;
+            }
+        }
+
+        internal class Helper
+        {
+            public static List<EnemyHeros> EnemyInfo = new List<EnemyHeros>();
+
+            public Helper()
+            {
+                var champions = ObjectManager.Get<Obj_AI_Hero>().ToList();
+
+                EnemyInfo = HeroManager.Enemies.Select(e => new EnemyHeros(e)).ToList();
+
+                Game.OnUpdate += Game_OnGameUpdate;
+            }
+
+            private void Game_OnGameUpdate(EventArgs args)
+            {
+                foreach (EnemyHeros enemyInfo in EnemyInfo)
+                {
+                    if (!enemyInfo.Player.IsVisible)
+                        enemyInfo.LastSeen = Environment.TickCount;
+                    
+                    Console.WriteLine(enemyInfo.Player.ChampionName + " : " + (Environment.TickCount - enemyInfo.LastSeen).ToString());
+                }
+            }
         }
 
         private static void GameObject_OnCreate(GameObject obj, EventArgs args)
@@ -594,7 +639,8 @@ namespace Olafisback
             {
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
-                    E.CastOnUnit(t);
+                    CastE(t);
+                    //E.CastOnUnit(t);
             }
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -650,7 +696,8 @@ namespace Olafisback
 
             if (E.IsReady() && Player.Distance(t.ServerPosition) <= E.Range)
             {
-                E.CastOnUnit(t);
+                CastE(t);
+                //E.CastOnUnit(t);
             }
 
             if (W.IsReady() && Player.Distance(t.ServerPosition) <= 225f)
@@ -667,6 +714,24 @@ namespace Olafisback
             }
         }
 
+        private static void CastE(AttackableUnit t)
+        {
+            if (!E.IsReady() && !t.IsValidTarget(E.Range))
+            {
+                return;
+            }
+
+            foreach (var enemy in Helper.EnemyInfo.Where(
+                x =>
+                    !x.Player.IsDead &&
+                    Environment.TickCount - x.LastSeen >=
+                    (MenuMisc.Item("Misc.AutoE.Delay").GetValue<StringList>().SelectedIndex + 1)*250 &&
+                    x.Player.NetworkId == t.NetworkId).Select(x => x.Player).Where(enemy => enemy != null))
+            {
+                E.CastOnUnit(enemy);
+            }
+
+        }
         private static void CastQ()
         {
             if (!Q.IsReady())
@@ -745,10 +810,10 @@ namespace Olafisback
                 CastShortQ();
             }
 
-            if (E.IsReady() && Config.Item("UseEHarass").GetValue<bool>()
-                && Player.Distance(t.ServerPosition) <= E.Range)
+            if (E.IsReady() && Config.Item("UseEHarass").GetValue<bool>() && Player.Distance(t.ServerPosition) <= E.Range)
             {
-                E.CastOnUnit(t);
+                CastE(t);
+                //E.CastOnUnit(t);
             }
         }
 
