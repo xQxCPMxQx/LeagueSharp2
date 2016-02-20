@@ -370,7 +370,6 @@ namespace Olafisback
                 string[] strE = new string[1000/250];
                 for (var i = 250; i <= 1000; i += 250)
                 {
-                    Game.PrintChat((i / 250 - 1).ToString());
                     strE[i / 250 - 1] = "Add " + i + " ms. delay for who visible instantly (Shaco/Rengar etc.)";
                 }
                 MenuMisc.AddItem(new MenuItem("Misc.AutoE.Delay", "E:").SetValue(new StringList(strE, 0)));
@@ -470,8 +469,6 @@ namespace Olafisback
                 {
                     if (!enemyInfo.Player.IsVisible)
                         enemyInfo.LastSeen = Environment.TickCount;
-                    
-                    Console.WriteLine(enemyInfo.Player.ChampionName + " : " + (Environment.TickCount - enemyInfo.LastSeen).ToString());
                 }
             }
         }
