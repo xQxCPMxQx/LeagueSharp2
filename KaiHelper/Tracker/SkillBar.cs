@@ -14,17 +14,16 @@ namespace KaiHelper.Tracker
 {
     public class SkillBar
     {
-        private readonly Dictionary<string, Texture> _summonerSpellTextures =
-            new Dictionary<string, Texture>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, Texture> summonerSpellTextures = new Dictionary<string, Texture>(StringComparer.InvariantCultureIgnoreCase);
 
         public Texture ButtonRedTexture;
         public Texture FrameLevelTexture;
         public Texture HudTexture;
         public Menu MenuSkillBar;
         public Font SmallText;
-        public SpellSlot[] SpellSlots = { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R };
+        public SpellSlot[] SpellSlots = {SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R};
         public Sprite Sprite;
-        public SpellSlot[] SummonerSpellSlots = { SpellSlot.Summoner1, SpellSlot.Summoner2 };
+        public SpellSlot[] SummonerSpellSlots = {SpellSlot.Summoner1, SpellSlot.Summoner2};
 
         public SkillBar(Menu config)
         {
@@ -32,19 +31,11 @@ namespace KaiHelper.Tracker
             MenuSkillBar.AddItem(new MenuItem("OnAllies", "On Allies").SetValue(false));
             MenuSkillBar.AddItem(new MenuItem("OnEnemies", "On Enemies").SetValue(true));
             Sprite = new Sprite(Drawing.Direct3DDevice);
-            HudTexture = Texture.FromMemory(
-                Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(Resources.main, typeof(byte[])), 127, 41,
-                0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            FrameLevelTexture = Texture.FromMemory(
-                Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(Resources.spell_level, typeof(byte[])),
-                2, 3, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            ButtonRedTexture = Texture.FromMemory(
-                Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(Resources.disable, typeof(byte[])), 14,
-                14, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            SmallText = new Font(
-                Drawing.Direct3DDevice,
-                new FontDescription
-                {
+            HudTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(Resources.main, typeof (byte[])), 127, 41, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            FrameLevelTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(Resources.spell_level, typeof (byte[])), 2, 3, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            ButtonRedTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(Resources.disable, typeof (byte[])), 14, 14, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            SmallText = new Font(Drawing.Direct3DDevice, new FontDescription
+            {
                     FaceName = "Calibri",
                     Height = 13,
                     OutputPrecision = FontPrecision.Default,
@@ -70,29 +61,29 @@ namespace KaiHelper.Tracker
                 {
                     if (SummonerSpellSlots.Contains(spellDataInst.Slot))
                     {
-                        if (!_summonerSpellTextures.ContainsKey(spellDataInst.Name))
+                        if (!summonerSpellTextures.ContainsKey(spellDataInst.Name))
                         {
                             if (spellDataInst.Name == "summonersmite")
                             {
-                                _summonerSpellTextures.Add(spellDataInst.Name, GetTexture(spellDataInst.Name));
-                                _summonerSpellTextures.Add("itemsmiteaoe", GetTexture(spellDataInst.Name));
-                                _summonerSpellTextures.Add("s5_summonersmiteduel", GetTexture(spellDataInst.Name));
-                                _summonerSpellTextures.Add(
-                                    "s5_summonersmiteplayerganker", GetTexture(spellDataInst.Name));
-                                _summonerSpellTextures.Add("s5_summonersmitequick", GetTexture(spellDataInst.Name));
+                                summonerSpellTextures.Add(spellDataInst.Name, GetTexture(spellDataInst.Name));
+                                summonerSpellTextures.Add("itemsmiteaoe", GetTexture(spellDataInst.Name));
+                                summonerSpellTextures.Add("s5_summonersmiteduel", GetTexture(spellDataInst.Name));
+                                summonerSpellTextures.Add("s5_summonersmiteplayerganker", GetTexture(spellDataInst.Name));
+                                summonerSpellTextures.Add("s5_summonersmitequick", GetTexture(spellDataInst.Name));
                             }
                             else
                             {
-                                _summonerSpellTextures.Add(spellDataInst.Name, GetTexture(spellDataInst.Name));
+                                Game.PrintChat(spellDataInst.Name.ToString());
+                                summonerSpellTextures.Add(spellDataInst.Name, GetTexture(spellDataInst.Name));
                             }
                         }
                     }
                 }
                 foreach (SpellSlot spellSlot in SpellSlots)
                 {
-                    if (!_summonerSpellTextures.ContainsKey(champion.ChampionName + "_" + spellSlot))
+                    if (!summonerSpellTextures.ContainsKey(champion.ChampionName + "_" + spellSlot))
                     {
-                        _summonerSpellTextures.Add(
+                        summonerSpellTextures.Add(
                             champion.ChampionName + "_" + spellSlot,
                             GetTexture(champion.ChampionName + "_" + spellSlot, false));
                     }
@@ -107,11 +98,11 @@ namespace KaiHelper.Tracker
             if (!summoner)
             {
                 return Texture.FromMemory(
-                    Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(bitmap, typeof(byte[])), 14, 14, 0,
+                    Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(bitmap, typeof (byte[])), 14, 14, 0,
                     Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             }
             return Texture.FromMemory(
-                Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(bitmap, typeof(byte[])), 12, 240, 0,
+                Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(bitmap, typeof (byte[])), 12, 240, 0,
                 Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
         }
 
@@ -145,17 +136,17 @@ namespace KaiHelper.Tracker
                         SpellDataInst summonerSpell = hero.Spellbook.GetSpell(SummonerSpellSlots[index]);
                         float t = summonerSpell.CooldownExpires - Game.Time;
                         float percent = (Math.Abs(summonerSpell.Cooldown) > float.Epsilon)
-                            ? t / summonerSpell.Cooldown
+                            ? t/summonerSpell.Cooldown
                             : 1f;
-                        int n = (t > 0) ? (int) (19 * (1f - percent)) : 19;
+                        int n = (t > 0) ? (int) (19*(1f - percent)) : 19;
                         string s = string.Format(t < 1f ? "{0:0.0}" : "{0:0}", t);
                         if (t > 0)
                         {
-                            Helper.DrawText(SmallText, s, x - 10, y + 2 + 19 * index, new ColorBGRA(255, 255, 255, 255));
+                            Helper.DrawText(SmallText, s, x - 10, y + 2 + 19*index, new ColorBGRA(255, 255, 255, 255));
                         }
                         Sprite.Draw(
-                            _summonerSpellTextures[summonerSpell.Name], new ColorBGRA(255, 255, 255, 255),
-                            new Rectangle(0, 12 * n, 12, 12), new Vector3(-x - 3, -y - 3 - 18 * index, 0));
+                            summonerSpellTextures[summonerSpell.Name], new ColorBGRA(255, 255, 255, 255),
+                            new Rectangle(0, 12*n, 12, 12), new Vector3(-x - 3, -y - 3 - 18*index, 0));
                     }
                     for (int index = 0; index < SpellSlots.Length; index++)
                     {
@@ -169,19 +160,19 @@ namespace KaiHelper.Tracker
                                 {
                                     Sprite.Draw(
                                         FrameLevelTexture, new ColorBGRA(255, 255, 255, 255), new Rectangle(0, 0, 2, 3),
-                                        new Vector3(-x - 18 - index * 17 - j * 3, -y - 36, 0));
+                                        new Vector3(-x - 18 - index*17 - j*3, -y - 36, 0));
                                 }
                             }
                         }
                         Sprite.Draw(
-                            _summonerSpellTextures[hero.ChampionName + "_" + spellSlot],
+                            summonerSpellTextures[hero.ChampionName + "_" + spellSlot],
                             new ColorBGRA(255, 255, 255, 255), new Rectangle(0, 0, 14, 14),
-                            new Vector3(-x - 21 - index * 17, -y - 20, 0));
+                            new Vector3(-x - 21 - index*17, -y - 20, 0));
                         if (spell.State == SpellState.Cooldown || spell.State == SpellState.NotLearned)
                         {
                             Sprite.Draw(
                                 ButtonRedTexture, new ColorBGRA(0, 0, 0, 180), new Rectangle(0, 0, 14, 14),
-                                new Vector3(-x - 21 - index * 17, -y - 20, 0));
+                                new Vector3(-x - 21 - index*17, -y - 20, 0));
                         }
                     }
                     Sprite.End();
@@ -196,7 +187,7 @@ namespace KaiHelper.Tracker
                         }
                         string s = string.Format(t < 1f ? "{0:0.0}" : "{0:0}", t);
                         Helper.DrawText(
-                            SmallText, s, x + 16 + index * 17 + 12, y + 21, new ColorBGRA(255, 255, 255, 255));
+                            SmallText, s, x + 16 + index*17 + 12, y + 21, new ColorBGRA(255, 255, 255, 255));
                     }
                 }
             }

@@ -44,7 +44,7 @@ namespace KaiHelper.Tracker
             }
             foreach (Obj_AI_Turret turret in ObjectManager.Get<Obj_AI_Turret>())
             {
-                if ((turret.HealthPercentage() == 100))
+                if ((Math.Abs(turret.HealthPercent - 100) < 0.00001))
                 {
                     continue;
                 }
@@ -52,7 +52,7 @@ namespace KaiHelper.Tracker
                 switch (MenuHealthTurret.Item("TIHealth").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
-                        health = (int) turret.HealthPercentage();
+                        health = (int) turret.HealthPercent;
                         break;
 
                     case 1:
@@ -60,7 +60,7 @@ namespace KaiHelper.Tracker
                         break;
                 }
                 Vector2 pos = Drawing.WorldToMinimap(turret.Position);
-                var perHealth = (int) turret.HealthPercentage();
+                var perHealth = (int) turret.HealthPercent;
                 if (perHealth >= 75)
                 {
                     Helper.DrawText(

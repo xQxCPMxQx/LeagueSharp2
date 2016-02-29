@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using KaiHelper.Activator;
 using KaiHelper.Misc;
@@ -24,13 +26,34 @@ namespace KaiHelper
             new WayPoint(MainMenu);
             new WardDetector(MainMenu);
             new HealthTurret(MainMenu);
+
+            AutoBushRevealer.Initialize(MainMenu);
+
             //Menu Timer = MainMenu.AddSubMenu(new Menu("Timer", "Timer"));
             //Menu Range = MainMenu.AddSubMenu(new Menu("Range", "Range"));
             new Vision(MainMenu);
             //Menu ActivatorMenu = MainMenu.AddSubMenu(new Menu("Activator", "Activator"));
             new AutoPot(MainMenu);
+
+
+
+            foreach (var i in MainMenu.Children.Cast<Menu>().SelectMany(GetChildirens))
+            {
+                i.DisplayName = ":: " + i.DisplayName;
+            }
+
+
+
             MainMenu.AddToMainMenu();
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+        }
+
+        private static IEnumerable<Menu> GetChildirens(Menu menu)
+        {
+            yield return menu;
+
+            foreach (var childChild in menu.Children.SelectMany(GetChildirens))
+                yield return childChild;
         }
 
         private static void Game_OnGameLoad(EventArgs args)

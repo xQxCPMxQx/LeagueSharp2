@@ -11,37 +11,36 @@ namespace KaiHelper.Misc
 {
     internal class Vision
     {
-        private readonly Menu _menu;
-        private List<Vector2> _pointList;
-        private Vector3 _position;
-        private int _range;
+        private readonly Menu menu;
+        private List<Vector2> pointList;
+        private Vector3 position;
+        private int range;
         public Vision(Menu menu)
         {
-            _menu = menu.AddSubMenu(new Menu("Enemy vision", "Enemyvision"));
-            _menu.AddItem(new MenuItem("VongTron", "Only Circle").SetValue(false));
-            _menu.AddItem(new MenuItem("NguoiChoiTest", "Test by me").SetValue(false));
-            _menu.AddItem(new MenuItem("Active", "Active").SetValue(false));
+            this.menu = menu.AddSubMenu(new Menu("Enemy vision", "Enemyvision"));
+            this.menu.AddItem(new MenuItem("VongTron", "Only Circle").SetValue(false));
+            this.menu.AddItem(new MenuItem("NguoiChoiTest", "Test by me").SetValue(false));
+            this.menu.AddItem(new MenuItem("Active", "Active").SetValue(false));
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Game_OnDraw;
         }
 
         void Game_OnGameUpdate(EventArgs args)
         {
-            if (!_menu.Item("Active").GetValue<bool>())
+            if (!menu.Item("Active").GetValue<bool>())
             {
                 return;
             }
+
             var result = new Obj_AI_Base();
-            if (_menu.Item("NguoiChoiTest").GetValue<bool>())
+            if (menu.Item("NguoiChoiTest").GetValue<bool>())
             {
                 result = ObjectManager.Player;
             }
             else
             {
                 float dist = float.MaxValue;
-                foreach (Obj_AI_Base objectEnemy in ObjectManager.Get<Obj_AI_Base>().Where(o =>
-                    o.Team != ObjectManager.Player.Team &&
-                    !o.IsDead &&!o.Name.ToUpper().StartsWith("SRU")))
+                foreach (var objectEnemy in HeroManager.Enemies.Where(e => !e.IsDead))
                 {
                     float distance = Vector3.Distance(ObjectManager.Player.Position, objectEnemy.Position);
                     if (!(distance < dist))
@@ -52,18 +51,18 @@ namespace KaiHelper.Misc
                     result = objectEnemy;
                 }
             }
-            _position = result.Position;
+            position = result.Position;
             if (result is Obj_AI_Hero || result is Obj_AI_Turret)
             {
-                _range = 1300;
+                range = 1300;
             }
             else
             {
                 var rangeWard = Ward.IsWard(result.SkinName);
                  if (rangeWard==0)
-                     _range = 1200;
+                     range = 1200;
             }
-            _pointList = RangePoints(result.Position, _range);
+            pointList = RangePoints(result.Position, range);
         }
 
         public static bool LaVatCan(Vector3 position)
@@ -123,18 +122,18 @@ namespace KaiHelper.Misc
         }
         private void Game_OnDraw(EventArgs args)
         {
-            if (!_menu.Item("Active").GetValue<bool>())
+            if (!menu.Item("Active").GetValue<bool>())
             {
                 return;
             }
-            if (_menu.Item("VongTron").GetValue<bool>())
+            if (menu.Item("VongTron").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(_position, _range, Color.PaleVioletRed);
+                Render.Circle.DrawCircle(position, range, Color.PaleVioletRed);
                 return;
             }
-            for (int i = 0; i < _pointList.Count - 1; i++)
+            for (int i = 0; i < pointList.Count - 1; i++)
             {
-                Drawing.DrawLine(_pointList[i], _pointList[i + 1], 1, Color.PaleVioletRed);
+                Drawing.DrawLine(pointList[i], pointList[i + 1], 1, Color.PaleVioletRed);
             }
         }
     }

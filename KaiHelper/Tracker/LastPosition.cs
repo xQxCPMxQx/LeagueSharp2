@@ -145,20 +145,11 @@ namespace KaiHelper.Tracker
             }
             public Obj_AI_Hero Champion { get; private set; }
 
-            private bool TrackerCondition
-            {
-                get { return !Champion.IsVisible && !Champion.IsDead && Menu.Item("ALP").GetValue<bool>(); }
-            }
+            private bool TrackerCondition => !Champion.IsVisible && !Champion.IsDead && Menu.Item("ALP").GetValue<bool>();
 
-            public float Opacity
-            {
-                get { return (float)Menu.Item("Opacity").GetValue<Slider>().Value / 100; }
-            }
+            public float Opacity => (float)Menu.Item("Opacity").GetValue<Slider>().Value / 100;
 
-            private float Scale
-            {
-                get { return (float)Menu.Item("Scale").GetValue<Slider>().Value / 100; }
-            }
+            private float Scale => (float)Menu.Item("Scale").GetValue<Slider>().Value / 100;
         }
     }
 }

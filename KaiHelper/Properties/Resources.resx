@@ -1243,49 +1243,49 @@
   <data name="spell_level" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\HUD\spell_level.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerbarrier" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerBarrier" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerbarrier.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerboost" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerBoost" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerboost.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerclairvoyance" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerClairvoyance" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerclairvoyance.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerdot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerDot" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerdot.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerexhaust" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerExhaust" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerexhaust.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerflash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerFlash" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerflash.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerhaste" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerHaste" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerhaste.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerheal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerHeal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerheal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonermana" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerMana" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonermana.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerodinGarrison" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerOdinGarrison" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerodinGarrison.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerpororecall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerPororecall" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerpororecall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerporothrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerPorothrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerporothrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerrevive" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerRevive" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerrevive.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="summonersmite" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonersmite.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="summonerteleport" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="SummonerTeleport" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SSpell\summonerteleport.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Swain_E" type="System.Resources.ResXFileRef, System.Windows.Forms">
