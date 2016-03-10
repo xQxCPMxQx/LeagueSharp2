@@ -58,6 +58,9 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clipper_library">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\clipper_library.dll</HintPath>
+    </Reference>
     <Reference Include="LeagueSharp, Version=1.0.0.25, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.dll</HintPath>
@@ -84,16 +87,41 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Allies.cs" />
-    <Compile Include="Enemies.cs" />
+    <Compile Include="Common\AutoBushManager.cs" />
+    <Compile Include="Common\AutoLevelManager.cs" />
+    <Compile Include="Common\SummonerManager.cs" />
+    <Compile Include="Modes\ModeDrawing.cs" />
+    <Compile Include="Common\Geometry.cs" />
+    <Compile Include="Modes\ModeCombo.cs" />
+    <Compile Include="Champion\PlayerSpells.cs" />
+    <Compile Include="Modes\ModeUlti.cs" />
+    <Compile Include="Modes\ModeSelector.cs" />
+    <Compile Include="Common\ItemManager.cs" />
+    <Compile Include="Modes\MenuConfig.cs" />
+    <Compile Include="Modes\ModeJungle.cs" />
+    <Compile Include="Modes\ModePerma.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PlayerSpells.cs" />
-    <Compile Include="UltiStatus.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Champion\SpiritUnit.cs" />
+    <Compile Include="Common\DrawHelper.cs" />
+    <Compile Include="ToList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\selectedchampion.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
