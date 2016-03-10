@@ -103,9 +103,16 @@ namespace Shen.Modes
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnDraw += DrawingOnOnDrawUlti;
             Game.OnUpdate += GameOnOnUpdate;
-            // Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
         }
 
+        private static void WProtection()
+        {
+            foreach (var ally in HeroManager.Allies.Where(ally => ally.IsMe && ally.IsDead && LocalMenu.Item(ally.ChampionName + ".UseW").GetValue<StringList>().SelectedIndex == 1))
+            {
+                
+            }
+        }
         private static void DrawingOnOnDrawUlti(EventArgs args)
         {
             var ally = GetHelplessAlly;
@@ -175,9 +182,15 @@ namespace Shen.Modes
             if (!sender.IsMe && sender.IsEnemy && sender is Obj_AI_Hero && args.Target.IsAlly)
             {
                 var ally = args.Target as Obj_AI_Hero;
-                if (ally != null)
+                if (ally != null && !ally.IsDead)
                 {
-                    Game.PrintChat(sender.CharData.BaseSkinName + " Attack -> " + ally.CharData.BaseSkinName);
+                    if (W.IsReady() &&
+                        LocalMenu.Item(ally.ChampionName + ".UseW").GetValue<StringList>().SelectedIndex == 1 &&
+                        ally.NetworkId == args.Target.NetworkId &&
+                        ally.Position.Distance(Shen.Champion.SpiritUnit.SwordUnit.Position) < 350)
+                    {
+                        W.Cast();
+                    }
                 }
             }
         }
