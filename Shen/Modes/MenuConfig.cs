@@ -33,7 +33,7 @@ namespace Shen.Modes
             ModeJungle.Initialize(LocalMenu);
             ModeDrawing.Initialize(LocalMenu);
             
-            //ModePerma.Initialize(LocalMenu);
+            ModePerma.Initialize(LocalMenu);
 
             SpiritUnit.Initialize();
             

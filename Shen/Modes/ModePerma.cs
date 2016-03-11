@@ -17,8 +17,8 @@ namespace Shen.Modes
         public static void Initialize(LeagueSharp.Common.Menu MenuConfig)
         {
             LocalMenu = MenuConfig;
-            LocalMenu.AddItem(new MenuItem("Combo.FlashE", "Flash + E:").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
-            LocalMenu.AddItem(new MenuItem("Flee", "Flee").SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(System.Drawing.FontStyle.Regular, SharpDX.Color.Coral));
+            LocalMenu.AddItem(new MenuItem("Perma.FlashE", "Flash + E:").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+            LocalMenu.AddItem(new MenuItem("Perma.Flee", "Flee").SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(System.Drawing.FontStyle.Regular, SharpDX.Color.Coral));
 
             Game.OnUpdate += GameOnOnUpdate;
         }
