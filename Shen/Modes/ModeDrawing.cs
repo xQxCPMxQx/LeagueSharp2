@@ -21,14 +21,21 @@ namespace Shen.Modes
             {
                 var menuSword = new LeagueSharp.Common.Menu("Sword", "Menu.Sword");
                 {
-                    menuSword.AddItem(new MenuItem("Draw.SwordPosition", "Draw: Sword Position").SetValue(new Circle(true, Color.Red)));
-                    menuSword.AddItem(new MenuItem("Draw.SwordHitPosition", "Draw: Sword Enemy Hit Position").SetValue(new Circle(true, Color.Wheat)));
+                    menuSword.AddItem(
+                        new MenuItem("Draw.SwordPosition", "Draw: Sword Position").SetValue(new Circle(true, Color.Red)));
+                    menuSword.AddItem(
+                        new MenuItem("Draw.SwordHitPosition", "Draw: Sword Enemy Hit Position").SetValue(new Circle(
+                            true, Color.Wheat)));
                     LocalMenu.AddSubMenu(menuSword);
                 }
-                LocalMenu.AddItem(new MenuItem("Draw.Q", "Q: Extra AA Range").SetValue(new Circle(true, Color.Gray))).SetFontStyle(FontStyle.Regular, Shen.Champion.PlayerSpells.W.MenuColor());
-                LocalMenu.AddItem(new MenuItem("Draw.W", "W: Effect Range").SetValue(new Circle(true, Color.Gray))).SetFontStyle(FontStyle.Regular, Shen.Champion.PlayerSpells.W.MenuColor());
-                LocalMenu.AddItem(new MenuItem("Draw.E", "E: Range").SetValue(new Circle(false, Color.Gray))).SetFontStyle(FontStyle.Regular, Shen.Champion.PlayerSpells.R.MenuColor());
-                LocalMenu.AddItem(new MenuItem("Draw.EF", "Flash + E Range").SetValue(new Circle(false, Color.Gray))).SetFontStyle(FontStyle.Regular, Shen.Champion.PlayerSpells.E.MenuColor());
+                LocalMenu.AddItem(new MenuItem("Draw.Q", "Q: Extra AA Range").SetValue(new Circle(true, Color.Gray)))
+                    .SetFontStyle(FontStyle.Regular, Shen.Champion.PlayerSpells.W.MenuColor());
+                LocalMenu.AddItem(new MenuItem("Draw.W", "W: Effect Range").SetValue(new Circle(true, Color.Gray)))
+                    .SetFontStyle(FontStyle.Regular, Shen.Champion.PlayerSpells.W.MenuColor());
+                LocalMenu.AddItem(new MenuItem("Draw.E", "E: Range").SetValue(new Circle(false, Color.GreenYellow)))
+                    .SetFontStyle(FontStyle.Regular, Shen.Champion.PlayerSpells.R.MenuColor());
+                LocalMenu.AddItem(new MenuItem("Draw.EF", "Flash + E Range").SetValue(new Circle(false, Color.Coral)))
+                    .SetFontStyle(FontStyle.Regular, Shen.Champion.PlayerSpells.E.MenuColor());
                 menuConfig.AddSubMenu(LocalMenu);
             }
 
@@ -37,7 +44,6 @@ namespace Shen.Modes
 
         private static void DrawingOnOnDraw(EventArgs args)
         {
-
             var drawQ = LocalMenu.Item("Draw.Q").GetValue<Circle>();
             if (drawQ.Active && Shen.Champion.PlayerSpells.Q.Level > 0)
             {
@@ -56,6 +62,13 @@ namespace Shen.Modes
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Shen.Champion.PlayerSpells.E.Range, drawE.Color);
             }
 
+            var drawEf = LocalMenu.Item("Draw.EF").GetValue<Circle>();
+            if (drawEf.Active)
+            {
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Shen.Champion.PlayerSpells.E.Range + 430,
+                    drawEf.Color);
+            }
+
             if (ObjectManager.Player.IsDead)
             {
                 return;
@@ -68,7 +81,8 @@ namespace Shen.Modes
                 {
                     Render.Circle.DrawCircle(Shen.Champion.SpiritUnit.SwordUnit.Position, 350f, drawSwordPosition.Color);
                 }
-                var drawSwordHitPosition = Shen.Modes.ModeDrawing.LocalMenu.Item("Draw.SwordHitPosition").GetValue<Circle>();
+                var drawSwordHitPosition =
+                    Shen.Modes.ModeDrawing.LocalMenu.Item("Draw.SwordHitPosition").GetValue<Circle>();
                 if (drawSwordHitPosition.Active)
                 {
                     var toPolygon = new Common.Geometry.Rectangle(ObjectManager.Player.Position.To2D(),
@@ -79,7 +93,5 @@ namespace Shen.Modes
                 }
             }
         }
-
-    
     }
 }

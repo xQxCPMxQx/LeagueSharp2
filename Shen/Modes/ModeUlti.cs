@@ -115,6 +115,11 @@ namespace Shen.Modes
         }
         private static void DrawingOnOnDrawUlti(EventArgs args)
         {
+            if (!R.IsReady())
+            {
+                return;
+            }
+
             var ally = GetHelplessAlly;
             if (ally != null)
             {
@@ -179,10 +184,10 @@ namespace Shen.Modes
 
         public static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!sender.IsMe && sender.IsEnemy && sender is Obj_AI_Hero && args.Target.IsAlly)
+            if (!sender.IsMe && sender.IsEnemy && sender is Obj_AI_Hero && args.Target.IsAlly && args.Target is Obj_AI_Hero && !args.Target.IsMe)
             {
                 var ally = args.Target as Obj_AI_Hero;
-                if (ally != null && !ally.IsDead)
+                if (!ally.IsDead)
                 {
                     if (W.IsReady() &&
                         LocalMenu.Item(ally.ChampionName + ".UseW").GetValue<StringList>().SelectedIndex == 1 &&
