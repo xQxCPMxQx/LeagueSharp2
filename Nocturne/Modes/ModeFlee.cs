@@ -25,11 +25,31 @@ namespace Nocturne.Modes
             PlayerMenu.MenuConfig.AddSubMenu(LocalMenu);
 
             Game.OnUpdate += OnUpdate;
+            Drawing.OnDraw += delegate(EventArgs args)
+            {
+                if (LocalMenu.Item("Flee.DrawMouse").GetValue<StringList>().SelectedIndex == 1)
+                {
+                    Render.Circle.DrawCircle(Game.CursorPos, 300f, System.Drawing.Color.Red);
+                }
+            };
         }
 
         private static void OnUpdate(EventArgs args)
         {
+            if (!PlayerMenu.MenuKeys.Item("Key.Flee").GetValue<KeyBind>().Active)
+            {
+                return;
+            }
 
+            if (LocalMenu.Item("Flee.UseQ").GetValue<StringList>().SelectedIndex == 1 && PlayerSpells.Q.IsReady())
+            {
+                PlayerSpells.Q.Cast(Game.CursorPos);
+            }
+
+            if (LocalMenu.Item("Flee.Youmuu").GetValue<StringList>().SelectedIndex == 1 && Common.ItemManager.Youmuu.IsReady())
+            {
+                Common.ItemManager.Youmuu.Cast();
+            }
         }
     }
 }
