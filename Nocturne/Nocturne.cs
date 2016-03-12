@@ -49,11 +49,6 @@ namespace Nocturne
             Console.Clear();
         }
 
-      
-
-     
-
-
         public static float GetComboDamage(Obj_AI_Base t)
         {
             var fComboDamage = 0d;
@@ -63,14 +58,14 @@ namespace Nocturne
                 fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q);
             }
 
-            if (PlayerSpells.W.IsReady())
-            {
-                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
-            }
-
             if (PlayerSpells.E.IsReady())
             {
                 fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.E);
+            }
+
+            if (PlayerSpells.R.IsReady())
+            {
+                fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.R);
             }
 
             if (Common.SummonerManager.IgniteSlot != SpellSlot.Unknown
@@ -90,14 +85,6 @@ namespace Nocturne
 
         private static void Game_OnUpdate(EventArgs args)
         {
-
-            foreach (var buff in ObjectManager.Player.Buffs.Where(b => b.DisplayName.Contains("usk")))
-            {
-                //Blue Buff: CrestoftheAncientGolem
-                //Q Buff: NocturneDuskbringer
-              //  Console.WriteLine(buff.DisplayName + " : " + buff.StartTime + " : " + buff.EndTime);
-            }
-            //Console.WriteLine(@"_____________________________________________");
             if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 ExecuteCombo();
@@ -106,7 +93,6 @@ namespace Nocturne
             if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
                 ExecuteLane();
-                
             }
         }
 

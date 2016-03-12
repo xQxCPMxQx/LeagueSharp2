@@ -47,7 +47,8 @@ namespace Nocturne.Modes
                 return;
             }
 
-            if (MenuLocal.Item("Combo.Q").GetValue<bool>() && Q.IsReady() && t.IsValidTarget(Q.Range))
+            if (MenuLocal.Item("Combo.Q").GetValue<bool>() && Q.IsReady() && t.IsValidTarget(Q.Range) &&
+                !ObjectManager.Player.HasNocturneParanoia())
             {
                 Q.Cast(t);
             }
