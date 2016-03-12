@@ -82,15 +82,15 @@ namespace Nocturne.Common
         /// </summary>
         public static Vector2 PositionAfter(this GamePath self, int t, int speed, int delay = 0)
         {
-            var distance = Math.Max(0, t - delay) * speed / 1000;
+            var distance = Math.Max(0, t - delay)*speed/1000;
             for (var i = 0; i <= self.Count - 2; i++)
             {
                 var from = self[i];
                 var to = self[i + 1];
-                var d = (int)to.Distance(from);
+                var d = (int) to.Distance(from);
                 if (d > distance)
                 {
-                    return from + distance * (to - from).Normalized();
+                    return from + distance*(to - from).Normalized();
                 }
                 distance -= d;
             }
@@ -153,15 +153,15 @@ namespace Nocturne.Common
             {
                 var result = new Polygon();
                 var outRadius = (overrideWidth > 0
-                                     ? overrideWidth
-                                     : (offset + this.Radius) / (float)Math.Cos(2 * Math.PI / CircleLineSegmentN));
+                    ? overrideWidth
+                    : (offset + this.Radius)/(float) Math.Cos(2*Math.PI/CircleLineSegmentN));
 
                 for (var i = 1; i <= CircleLineSegmentN; i++)
                 {
-                    var angle = i * 2 * Math.PI / CircleLineSegmentN;
+                    var angle = i*2*Math.PI/CircleLineSegmentN;
                     var point = new Vector2(
-                        this.Center.X + outRadius * (float)Math.Cos(angle),
-                        this.Center.Y + outRadius * (float)Math.Sin(angle));
+                        this.Center.X + outRadius*(float) Math.Cos(angle),
+                        this.Center.Y + outRadius*(float) Math.Sin(angle));
                     result.Add(point);
                 }
 
@@ -170,6 +170,7 @@ namespace Nocturne.Common
 
             #endregion
         }
+
         public class Circle2
         {
             #region Fields
@@ -201,12 +202,15 @@ namespace Nocturne.Common
             public Polygon2 ToPolygon(int offset = 0, float overrideWidth = -1)
             {
                 var result = new Polygon2();
-                var outRadius = (overrideWidth > 0 ? overrideWidth : (offset + this.Radius) / (float)Math.Cos(2 * Math.PI / MaxLineSegmentN));
+                var outRadius = (overrideWidth > 0
+                    ? overrideWidth
+                    : (offset + this.Radius)/(float) Math.Cos(2*Math.PI/MaxLineSegmentN));
 
                 for (var i = MaxLineSegmentN; i >= CurrentLineSegmentN; i--)
                 {
-                    var angle = i * 2 * Math.PI / MaxLineSegmentN;
-                    var point = new Vector2(this.Center.X + outRadius * (float)Math.Cos(angle), this.Center.Y + outRadius * (float)Math.Sin(angle));
+                    var angle = i*2*Math.PI/MaxLineSegmentN;
+                    var point = new Vector2(this.Center.X + outRadius*(float) Math.Cos(angle),
+                        this.Center.Y + outRadius*(float) Math.Sin(angle));
                     result.Add(point);
                 }
 
@@ -407,17 +411,17 @@ namespace Nocturne.Common
                 var result = new Polygon();
 
                 result.Add(
-                    this.RStart + (overrideWidth > 0 ? overrideWidth : this.Width + offset) * this.Perpendicular
-                    - offset * this.Direction);
+                    this.RStart + (overrideWidth > 0 ? overrideWidth : this.Width + offset)*this.Perpendicular
+                    - offset*this.Direction);
                 result.Add(
-                    this.RStart - (overrideWidth > 0 ? overrideWidth : this.Width + offset) * this.Perpendicular
-                    - offset * this.Direction);
+                    this.RStart - (overrideWidth > 0 ? overrideWidth : this.Width + offset)*this.Perpendicular
+                    - offset*this.Direction);
                 result.Add(
-                    this.REnd - (overrideWidth > 0 ? overrideWidth : this.Width + offset) * this.Perpendicular
-                    + offset * this.Direction);
+                    this.REnd - (overrideWidth > 0 ? overrideWidth : this.Width + offset)*this.Perpendicular
+                    + offset*this.Direction);
                 result.Add(
-                    this.REnd + (overrideWidth > 0 ? overrideWidth : this.Width + offset) * this.Perpendicular
-                    + offset * this.Direction);
+                    this.REnd + (overrideWidth > 0 ? overrideWidth : this.Width + offset)*this.Perpendicular
+                    + offset*this.Direction);
 
                 return result;
             }
@@ -455,24 +459,24 @@ namespace Nocturne.Common
                 var result = new Polygon();
 
                 var outRadius = (offset + this.Radius + this.RingRadius)
-                                / (float)Math.Cos(2 * Math.PI / CircleLineSegmentN);
+                                /(float) Math.Cos(2*Math.PI/CircleLineSegmentN);
                 var innerRadius = this.Radius - this.RingRadius - offset;
 
                 for (var i = 0; i <= CircleLineSegmentN; i++)
                 {
-                    var angle = i * 2 * Math.PI / CircleLineSegmentN;
+                    var angle = i*2*Math.PI/CircleLineSegmentN;
                     var point = new Vector2(
-                        this.Center.X - outRadius * (float)Math.Cos(angle),
-                        this.Center.Y - outRadius * (float)Math.Sin(angle));
+                        this.Center.X - outRadius*(float) Math.Cos(angle),
+                        this.Center.Y - outRadius*(float) Math.Sin(angle));
                     result.Add(point);
                 }
 
                 for (var i = 0; i <= CircleLineSegmentN; i++)
                 {
-                    var angle = i * 2 * Math.PI / CircleLineSegmentN;
+                    var angle = i*2*Math.PI/CircleLineSegmentN;
                     var point = new Vector2(
-                        this.Center.X + innerRadius * (float)Math.Cos(angle),
-                        this.Center.Y - innerRadius * (float)Math.Sin(angle));
+                        this.Center.X + innerRadius*(float) Math.Cos(angle),
+                        this.Center.Y - innerRadius*(float) Math.Sin(angle));
                     result.Add(point);
                 }
 
@@ -513,16 +517,16 @@ namespace Nocturne.Common
             public Polygon ToPolygon(int offset = 0)
             {
                 var result = new Polygon();
-                var outRadius = (this.Radius + offset) / (float)Math.Cos(2 * Math.PI / CircleLineSegmentN);
+                var outRadius = (this.Radius + offset)/(float) Math.Cos(2*Math.PI/CircleLineSegmentN);
 
                 result.Add(this.Center);
-                var Side1 = this.Direction.Rotated(-this.Angle * 0.5f);
+                var Side1 = this.Direction.Rotated(-this.Angle*0.5f);
 
                 for (var i = 0; i <= CircleLineSegmentN; i++)
                 {
-                    var cDirection = Side1.Rotated(i * this.Angle / CircleLineSegmentN).Normalized();
+                    var cDirection = Side1.Rotated(i*this.Angle/CircleLineSegmentN).Normalized();
                     result.Add(
-                        new Vector2(this.Center.X + outRadius * cDirection.X, this.Center.Y + outRadius * cDirection.Y));
+                        new Vector2(this.Center.X + outRadius*cDirection.X, this.Center.Y + outRadius*cDirection.Y));
                 }
 
                 return result;

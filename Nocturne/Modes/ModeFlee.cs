@@ -29,42 +29,7 @@ namespace Nocturne.Modes
 
         private static void OnUpdate(EventArgs args)
         {
-            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Mixed)
-            {
-                return;
-            }
 
-            Execute();
-            ExecuteToggle();
-        }
-
-        private static void ExecuteToggle()
-        {
-            
-        }
-
-        private static void Execute()
-        {
-            var useQ = LocalMenu.Item("Harass.UseQ").GetValue<StringList>().SelectedIndex;
-            if (useQ == 0)
-            {
-                return;
-            }
-
-            if (ObjectManager.Player.ManaPercent < ManaManager.HarassMinManaPercent)
-            {
-                return;
-            }
-            var t = TargetSelector.GetTarget(PlayerSpells.Q.Range, TargetSelector.DamageType.Physical);
-            if (!t.IsValidTarget())
-            {
-                return;
-            }
-
-            if (PlayerSpells.Q.IsReady() && ObjectManager.Player.Distance(t.ServerPosition) <= PlayerSpells.Q.Range)
-            {
-                PlayerSpells.Q.ModeCast(t);
-            }
         }
     }
 }

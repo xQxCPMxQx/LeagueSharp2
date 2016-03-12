@@ -10,7 +10,7 @@ namespace Nocturne.Common
     {
         public static Items.Item Youmuu = new Items.Item(3142, 225f);
         public static Dictionary<string, Tuple<Items.Item, EnumItemType, EnumItemTargettingType>> ItemDb;
-        
+
         public struct Tuple<TA, TB, TC> : IEquatable<Tuple<TA, TB, TC>>
         {
             private readonly TA item;
@@ -45,23 +45,32 @@ namespace Nocturne.Common
 
             public bool Equals(Tuple<TA, TB, TC> other)
             {
-                return other.item.Equals(item) && other.itemType.Equals(itemType) && other.targetingType.Equals(targetingType);
+                return other.item.Equals(item) && other.itemType.Equals(itemType) &&
+                       other.targetingType.Equals(targetingType);
             }
         }
 
         public enum EnumItemType
         {
-            OnTarget, Targeted, AoE
+            OnTarget,
+            Targeted,
+            AoE
         }
 
         public enum EnumItemTargettingType
         {
-            Ally, EnemyHero, EnemyObjects
+            Ally,
+            EnemyHero,
+            EnemyObjects
         }
 
         internal enum Mobs
         {
-            Blue = 1, Red = 2, Dragon = 1, Baron = 2, All = 3
+            Blue = 1,
+            Red = 2,
+            Dragon = 1,
+            Baron = 2,
+            All = 3
         }
 
         public static void Load()
@@ -71,43 +80,56 @@ namespace Nocturne.Common
                 {
                     {
                         "Tiamat",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3077, 450f), EnumItemType.AoE,EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3077, 450f),
+                            EnumItemType.AoE, EnumItemTargettingType.EnemyHero)
                     },
                     {
                         "Bilge",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3144, 450f), EnumItemType.Targeted,EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3144, 450f),
+                            EnumItemType.Targeted, EnumItemTargettingType.EnemyHero)
                     },
                     {
                         "Blade",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3153, 450f), EnumItemType.Targeted,EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3153, 450f),
+                            EnumItemType.Targeted, EnumItemTargettingType.EnemyHero)
                     },
                     {
                         "Hydra",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3074, 450f), EnumItemType.AoE,EnumItemTargettingType.EnemyObjects)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3074, 450f),
+                            EnumItemType.AoE, EnumItemTargettingType.EnemyObjects)
                     },
                     {
                         "Titanic Hydra Cleave",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3748, Orbwalking.GetRealAutoAttackRange(null) + 65),EnumItemType.OnTarget, EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3748, Orbwalking.GetRealAutoAttackRange(null) + 65), EnumItemType.OnTarget,
+                            EnumItemTargettingType.EnemyHero)
                     },
                     {
                         "Randiun",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3143, 490f), EnumItemType.AoE,EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3143, 490f),
+                            EnumItemType.AoE, EnumItemTargettingType.EnemyHero)
                     },
                     {
                         "Hextech",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3146, 750f), EnumItemType.Targeted,EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3146, 750f),
+                            EnumItemType.Targeted, EnumItemTargettingType.EnemyHero)
                     },
                     {
                         "Entropy",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3184, 750f), EnumItemType.Targeted,EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3184, 750f),
+                            EnumItemType.Targeted, EnumItemTargettingType.EnemyHero)
                     },
                     {
                         "Youmuu's Ghostblade",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3142, Orbwalking.GetRealAutoAttackRange(null) + 65),EnumItemType.AoE, EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3142, Orbwalking.GetRealAutoAttackRange(null) + 65), EnumItemType.AoE,
+                            EnumItemTargettingType.EnemyHero)
                     },
                     {
                         "Sword of the Divine",
-                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(new Items.Item(3131, Orbwalking.GetRealAutoAttackRange(null) + 65),EnumItemType.AoE, EnumItemTargettingType.EnemyHero)
+                        new Tuple<Items.Item, EnumItemType, EnumItemTargettingType>(
+                            new Items.Item(3131, Orbwalking.GetRealAutoAttackRange(null) + 65), EnumItemType.AoE,
+                            EnumItemTargettingType.EnemyHero)
                     }
                 };
         }
@@ -126,11 +148,11 @@ namespace Nocturne.Common
                 foreach (
                     var item in
                         ItemDb.Where(
-                                i =>
-                                    i.Value.ItemType == EnumItemType.OnTarget 
-                                    && i.Value.TargetingType == EnumItemTargettingType.EnemyHero 
-                                    && i.Value.Item.IsReady())
-                                    )
+                            i =>
+                                i.Value.ItemType == EnumItemType.OnTarget
+                                && i.Value.TargetingType == EnumItemTargettingType.EnemyHero
+                                && i.Value.Item.IsReady())
+                    )
                 {
                     item.Value.Item.Cast();
                 }
@@ -186,14 +208,17 @@ namespace Nocturne.Common
                 return;
             }
 
-            if (Modes.ModeLane.LocalMenu.Item("Lane.Item").GetValue<StringList>().SelectedIndex == 1 || ObjectManager.Player.UnderAllyTurret())
+            if (Modes.ModeLane.LocalMenu.Item("Lane.Item").GetValue<StringList>().SelectedIndex == 1 ||
+                ObjectManager.Player.UnderAllyTurret())
             {
                 foreach (var item in from item in ItemDb
                     where
                         item.Value.ItemType == EnumItemType.AoE
                         && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
                     let iMinions =
-                        MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(null) + 65, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth)
+                        MinionManager.GetMinions(ObjectManager.Player.ServerPosition,
+                            Orbwalking.GetRealAutoAttackRange(null) + 65, MinionTypes.All, MinionTeam.Enemy,
+                            MinionOrderTypes.MaxHealth)
                     where
                         item.Value.Item.IsReady() && iMinions.Count() >= 3
                     select item)
@@ -210,13 +235,15 @@ namespace Nocturne.Common
                 return;
             }
 
-            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(null) + 65, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition,
+                Orbwalking.GetRealAutoAttackRange(null) + 65, MinionTypes.All, MinionTeam.Neutral,
+                MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0)
             {
                 return;
             }
-            
+
             var mob = mobs[0];
 
             if (Modes.ModeJungle.LocalMenu.Item("Jungle.Item").GetValue<StringList>().SelectedIndex == 1)
@@ -226,9 +253,15 @@ namespace Nocturne.Common
                         item.Value.ItemType == EnumItemType.AoE
                         && item.Value.TargetingType == EnumItemTargettingType.EnemyObjects
                     let iMinions =
-                        MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Orbwalking.GetRealAutoAttackRange(null) + 65, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth)
+                        MinionManager.GetMinions(ObjectManager.Player.ServerPosition,
+                            Orbwalking.GetRealAutoAttackRange(null) + 65, MinionTypes.All, MinionTeam.Neutral,
+                            MinionOrderTypes.MaxHealth)
                     where
-                        item.Value.Item.IsReady() && (iMinions.Count() >= 2 || ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Blue || ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Red || ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Baron || ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Dragon)
+                        item.Value.Item.IsReady() &&
+                        (iMinions.Count() >= 2 || ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Blue ||
+                         ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Red ||
+                         ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Baron ||
+                         ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Dragon)
                     select item)
                 {
                     item.Value.Item.Cast();
@@ -238,14 +271,19 @@ namespace Nocturne.Common
 
             if (Youmuu.IsReady() && mob.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
             {
-                var youmuuBaron = Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BaronDragon").GetValue<StringList>().SelectedIndex;
-                var youmuuRed = Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BlueRed").GetValue<StringList>().SelectedIndex;
+                var youmuuBaron =
+                    Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BaronDragon").GetValue<StringList>().SelectedIndex;
+                var youmuuRed =
+                    Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BlueRed").GetValue<StringList>().SelectedIndex;
 
                 if (
-                    (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Dragon && (youmuuBaron == 1 || youmuuBaron == 3))
-                    || (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Baron && (youmuuBaron == 2 || youmuuBaron == 3))
+                    (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Dragon &&
+                     (youmuuBaron == 1 || youmuuBaron == 3))
+                    ||
+                    (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Baron && (youmuuBaron == 2 || youmuuBaron == 3))
                     || (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Red && (youmuuRed == 1 || youmuuBaron == 3))
-                    || (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Blue && (youmuuRed == 2 || youmuuBaron == 3)))
+                    ||
+                    (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Blue && (youmuuRed == 2 || youmuuBaron == 3)))
                 {
                     Youmuu.Cast();
                 }

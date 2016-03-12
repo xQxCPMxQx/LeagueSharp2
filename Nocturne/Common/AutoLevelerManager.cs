@@ -18,16 +18,17 @@ namespace Nocturne.Common
             LocalMenu = new Menu("Auto Level", "Auto Level").SetFontStyle(FontStyle.Regular, Color.Aquamarine);
             LocalMenu.AddItem(
                 new MenuItem("AutoLevel.Set", "at Start:").SetValue(
-                    new StringList(new[] { "Allways Off", "Allways On", "Remember Last Settings" }, 2)));
+                    new StringList(new[] {"Allways Off", "Allways On", "Remember Last Settings"}, 2)));
             LocalMenu.AddItem(
                 new MenuItem("AutoLevel.Active", "Auto Level Active!").SetValue(new KeyBind("L".ToCharArray()[0],
-                    KeyBindType.Toggle))).Permashow(true, ObjectManager.Player.ChampionName + " : " + "Auto Level Up", Colors.ColorPermaShow);
+                    KeyBindType.Toggle)))
+                .Permashow(true, ObjectManager.Player.ChampionName + " : " + "Auto Level Up", Colors.ColorPermaShow);
 
             var championName = ObjectManager.Player.ChampionName.ToLowerInvariant();
             switch (championName)
             {
                 case "nocturne":
-                    SpellLevels = new[] { 1, 2, 3, 1, 1, 4, 1, 3, 1, 3, 4, 3, 3, 2, 2, 4, 2, 2 };
+                    SpellLevels = new[] {1, 2, 3, 1, 1, 4, 1, 3, 1, 3, 4, 3, 3, 2, 2, 4, 2, 2};
                     LocalMenu.AddItem(new MenuItem("AutoLevel." + championName, GetLevelList(SpellLevels)));
                     break;
             }
@@ -53,9 +54,9 @@ namespace Nocturne.Common
 
         private static string GetLevelList(int[] spellLevels)
         {
-            var a = new[] { "Q", "W", "E", "R" };
+            var a = new[] {"Q", "W", "E", "R"};
             var b = spellLevels.Aggregate("", (c, i) => c + (a[i - 1] + " - "));
-            return b != "" ? b.Substring(0, b.Length - (17 * 3)) : "";
+            return b != "" ? b.Substring(0, b.Length - (17*3)) : "";
         }
 
         private static int GetRandomDelay
@@ -85,7 +86,7 @@ namespace Nocturne.Common
                 return;
             }
 
-            var level = new[] { 0, 0, 0, 0 };
+            var level = new[] {0, 0, 0, 0};
             for (var i = 0; i < ObjectManager.Player.Level; i++)
             {
                 level[SpellLevels[i] - 1] = level[SpellLevels[i] - 1] + 1;

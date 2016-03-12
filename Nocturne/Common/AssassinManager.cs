@@ -24,6 +24,7 @@ namespace Nocturne.Common
     internal class Sprite
     {
         private static Spell Q => PlayerSpells.Q;
+
         private static Vector2 DrawPosition
         {
             get
@@ -32,7 +33,7 @@ namespace Nocturne.Common
                 if (KillableEnemy == null || (drawStatus != 2 && drawStatus != 3))
                     return new Vector2(0f, 0f);
 
-                return new Vector2(KillableEnemy.HPBarPosition.X + KillableEnemy.BoundingRadius / 2f,
+                return new Vector2(KillableEnemy.HPBarPosition.X + KillableEnemy.BoundingRadius/2f,
                     KillableEnemy.HPBarPosition.Y - 70);
             }
         }
@@ -65,6 +66,7 @@ namespace Nocturne.Common
             }.Add();
         }
     }
+
     internal class AssassinManager
     {
         public static Menu LocalMenu;
@@ -78,10 +80,11 @@ namespace Nocturne.Common
             get
             {
                 return LocalMenu.Item("TS").GetValue<StringList>().SelectedIndex == 0
-                           ? TargetSelect.Nocturne
-                           : TargetSelect.LeagueSharp;
+                    ? TargetSelect.Nocturne
+                    : TargetSelect.LeagueSharp;
             }
         }
+
         public static void Initialize()
         {
             Text = new Font(
@@ -95,14 +98,18 @@ namespace Nocturne.Common
                     Quality = FontQuality.ClearTypeNatural
                 });
 
-            LocalMenu = new Menu("Target Selector", "AssassinTargetSelector").SetFontStyle(FontStyle.Regular, SharpDX.Color.Cyan);
+            LocalMenu = new Menu("Target Selector", "AssassinTargetSelector").SetFontStyle(FontStyle.Regular,
+                SharpDX.Color.Cyan);
 
             var menuTargetSelector = new Menu("Target Selector", "TargetSelector");
             {
                 TargetSelector.AddToMenu(menuTargetSelector);
             }
 
-            LocalMenu.AddItem(new MenuItem("TS", "Active Target Selector:").SetValue(new StringList(new[] { "Nocturne Target Selector", "L# Target Selector" }))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)
+            LocalMenu.AddItem(
+                new MenuItem("TS", "Active Target Selector:").SetValue(
+                    new StringList(new[] {"Nocturne Target Selector", "L# Target Selector"})))
+                .SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow)
                 .ValueChanged += (sender, args) =>
                 {
                     LocalMenu.Items.ForEach(
@@ -130,23 +137,34 @@ namespace Nocturne.Common
 
             LocalMenu.AddItem(
                 new MenuItem("Set", "Target Select Mode:").SetValue(
-                    new StringList(new[] { "Single Target Select", "Multi Target Select" })))
+                    new StringList(new[] {"Single Target Select", "Multi Target Select"})))
                 .SetFontStyle(FontStyle.Regular, SharpDX.Color.LightCoral)
                 .SetTag(11);
-            LocalMenu.AddItem(new MenuItem("Range", "Range (Recommend: 1150):")).SetValue(new Slider((int)(Q.Range * 1.3), (int) Q.Range, (int)Q.Range * 2)).SetTag(11);
+            LocalMenu.AddItem(new MenuItem("Range", "Range (Recommend: 1150):"))
+                .SetValue(new Slider((int) (Q.Range*1.3), (int) Q.Range, (int) Q.Range*2))
+                .SetTag(11);
 
-            LocalMenu.AddItem(new MenuItem("Targets", "Targets:").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
+            LocalMenu.AddItem(
+                new MenuItem("Targets", "Targets:").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
             foreach (var e in HeroManager.Enemies)
             {
-                LocalMenu.AddItem(new MenuItem("enemy_" + e.ChampionName, string.Format("{0}Focus {1}", Tab, e.ChampionName)).SetValue(false)).SetTag(12);
+                LocalMenu.AddItem(
+                    new MenuItem("enemy_" + e.ChampionName, string.Format("{0}Focus {1}", Tab, e.ChampionName)).SetValue
+                        (false)).SetTag(12);
 
             }
             //foreach (var langItem in HeroManager.Enemies.Select(e =>LocalMenu.AddItem(new MenuItem("enemy_" + e.ChampionName,string.Format("{0}Focus {1}", Tab, e.ChampionName)).SetValue(false)).SetTag(12)))
 
-            LocalMenu.AddItem(new MenuItem("Draw.Title", "Drawings").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
-            LocalMenu.AddItem(new MenuItem("Draw.Range", Tab + "Range").SetValue(new Circle(true, Color.Gray)).SetTag(11));
-            LocalMenu.AddItem(new MenuItem("Draw.Enemy", Tab + "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)).SetTag(11));
-            LocalMenu.AddItem(new MenuItem("Draw.Status", Tab + "Show Enemy:").SetValue(new StringList(new[] { "Off", "Notification Text", "Sprite", "Both" }, 0)));
+            LocalMenu.AddItem(
+                new MenuItem("Draw.Title", "Drawings").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua).SetTag(11));
+            LocalMenu.AddItem(new MenuItem("Draw.Range", Tab + "Range").SetValue(new Circle(true, Color.Gray))
+                .SetTag(11));
+            LocalMenu.AddItem(
+                new MenuItem("Draw.Enemy", Tab + "Active Enemy").SetValue(new Circle(true, Color.GreenYellow))
+                    .SetTag(11));
+            LocalMenu.AddItem(
+                new MenuItem("Draw.Status", Tab + "Show Enemy:").SetValue(
+                    new StringList(new[] {"Off", "Notification Text", "Sprite", "Both"}, 0)));
             PlayerMenu.MenuConfig.AddSubMenu(LocalMenu);
 
             Game.OnWndProc += Game_OnWndProc;
@@ -199,11 +217,11 @@ namespace Nocturne.Common
             if (args.Msg == 0x201)
             {
                 foreach (var objAiHero in from hero in HeroManager.Enemies
-                                          where
-                                              hero.Distance(Game.CursorPos) < 150f && hero != null && hero.IsVisible
-                                              && !hero.IsDead
-                                          orderby hero.Distance(Game.CursorPos) descending
-                                          select hero)
+                    where
+                        hero.Distance(Game.CursorPos) < 150f && hero != null && hero.IsVisible
+                        && !hero.IsDead
+                    orderby hero.Distance(Game.CursorPos) descending
+                    select hero)
                 {
                     if (objAiHero != null && objAiHero.IsVisible && !objAiHero.IsDead)
                     {
@@ -226,7 +244,8 @@ namespace Nocturne.Common
             }
         }
 
-        public static Obj_AI_Hero GetTarget(float vDefaultRange = 0, TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
+        public static Obj_AI_Hero GetTarget(float vDefaultRange = 0,
+            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
         {
             if (Selector != TargetSelect.Nocturne)
             {
@@ -234,8 +253,8 @@ namespace Nocturne.Common
             }
 
             vDefaultRange = Math.Abs(vDefaultRange) < 0.00001
-                                ? Q.Range
-                                : LocalMenu.Item("Range").GetValue<Slider>().Value;
+                ? Q.Range
+                : LocalMenu.Item("Range").GetValue<Slider>().Value;
 
             var vEnemy =
                 ObjectManager.Get<Obj_AI_Hero>()
@@ -267,7 +286,7 @@ namespace Nocturne.Common
                 var t = GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
-                    Render.Circle.DrawCircle(t.Position, (float)(t.BoundingRadius * 1.5), drawEnemy.Color);
+                    Render.Circle.DrawCircle(t.Position, (float) (t.BoundingRadius*1.5), drawEnemy.Color);
                 }
             }
 
@@ -288,29 +307,29 @@ namespace Nocturne.Common
                 foreach (var e in
                     HeroManager.Enemies.Where(
                         e =>
-                        e.IsVisible && !e.IsDead && LocalMenu.Item("enemy_" + e.ChampionName) != null
-                        && LocalMenu.Item("enemy_" + e.ChampionName).GetValue<bool>()))
+                            e.IsVisible && !e.IsDead && LocalMenu.Item("enemy_" + e.ChampionName) != null
+                            && LocalMenu.Item("enemy_" + e.ChampionName).GetValue<bool>()))
                 {
                     DrawText(
                         Text,
                         "1st Priority Target",
-                        e.HPBarPosition.X + e.BoundingRadius / 2f - (e.CharData.BaseSkinName.Length / 2f) - 27,
+                        e.HPBarPosition.X + e.BoundingRadius/2f - (e.CharData.BaseSkinName.Length/2f) - 27,
                         e.HPBarPosition.Y - 23,
                         SharpDX.Color.Black);
 
                     DrawText(
                         Text,
                         "1st Priority Target",
-                        e.HPBarPosition.X + e.BoundingRadius / 2f - (e.CharData.BaseSkinName.Length / 2f) - 29,
+                        e.HPBarPosition.X + e.BoundingRadius/2f - (e.CharData.BaseSkinName.Length/2f) - 29,
                         e.HPBarPosition.Y - 25,
                         SharpDX.Color.IndianRed);
                 }
             }
         }
+
         public static void DrawText(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {
-            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
+            vFont.DrawText(null, vText, (int) vPosX, (int) vPosY, vColor);
         }
-
     }
 }

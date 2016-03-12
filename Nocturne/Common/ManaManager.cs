@@ -19,7 +19,7 @@ namespace Nocturne.Common
             ByName,
             ByType
         }
-            
+
         public enum MobTypes
         {
             None,
@@ -46,38 +46,66 @@ namespace Nocturne.Common
             LocalMenu = new Menu("Mana Settings", "MinMana").SetFontStyle(FontStyle.Regular, Color.Aquamarine);
             mainMenu.AddSubMenu(LocalMenu);
             {
-                LocalMenu.AddItem(new MenuItem("MinMana.Enable", "Quick Enable/Disable Minimum Mana Control!").SetValue(new KeyBind("M".ToCharArray()[0], KeyBindType.Toggle, true)).SetFontStyle(FontStyle.Regular, Color.Aqua)).Permashow(true, ObjectManager.Player.ChampionName + " : " + "Mana Control", Colors.ColorPermaShow);
+                LocalMenu.AddItem(
+                    new MenuItem("MinMana.Enable", "Quick Enable/Disable Minimum Mana Control!").SetValue(
+                        new KeyBind("M".ToCharArray()[0], KeyBindType.Toggle, true))
+                        .SetFontStyle(FontStyle.Regular, Color.Aqua))
+                    .Permashow(true, ObjectManager.Player.ChampionName + " : " + "Mana Control", Colors.ColorPermaShow);
 
-                var menuLane = new Menu("Lane Clear Min. Mana Control", "MinMana.Menu.Lane").SetFontStyle(FontStyle.Regular, Color.Coral);
+                var menuLane =
+                    new Menu("Lane Clear Min. Mana Control", "MinMana.Menu.Lane").SetFontStyle(FontStyle.Regular,
+                        Color.Coral);
                 {
-                    menuLane.AddItem(new MenuItem("MinMana.Lane.Alone", "I'm Alone %").SetValue(new Slider(30, 100, 0))).SetFontStyle(FontStyle.Regular, Color.LightSkyBlue);
-                    menuLane.AddItem(new MenuItem("MinMana.Lane.Enemy", "I'm NOT Alone (Enemy Close) %").SetValue(new Slider(60, 100, 0))).SetFontStyle(FontStyle.Regular, Color.IndianRed);
+                    menuLane.AddItem(new MenuItem("MinMana.Lane.Alone", "I'm Alone %").SetValue(new Slider(30, 100, 0)))
+                        .SetFontStyle(FontStyle.Regular, Color.LightSkyBlue);
+                    menuLane.AddItem(
+                        new MenuItem("MinMana.Lane.Enemy", "I'm NOT Alone (Enemy Close) %").SetValue(new Slider(60, 100,
+                            0))).SetFontStyle(FontStyle.Regular, Color.IndianRed);
                     LocalMenu.AddSubMenu(menuLane);
                 }
 
-                var menuJungle = new Menu("Jungle Clear Min. Mana Control", "MinMana.Menu.Jungle").SetFontStyle(FontStyle.Regular, Color.DarkSalmon);
+                var menuJungle =
+                    new Menu("Jungle Clear Min. Mana Control", "MinMana.Menu.Jungle").SetFontStyle(FontStyle.Regular,
+                        Color.DarkSalmon);
                 {
-                    menuJungle.AddItem(new MenuItem("MinMana.Jungle.AllyBig", "Ally: Big Mob %").SetValue(new Slider(50, 100, 0))).SetFontStyle(FontStyle.Regular, Color.LightGreen);
-                    menuJungle.AddItem(new MenuItem("MinMana.Jungle.AllySmall", "Ally: Small Mob %").SetValue(new Slider(50, 100, 0))).SetFontStyle(FontStyle.Regular, Color.LightGreen);
+                    menuJungle.AddItem(
+                        new MenuItem("MinMana.Jungle.AllyBig", "Ally: Big Mob %").SetValue(new Slider(50, 100, 0)))
+                        .SetFontStyle(FontStyle.Regular, Color.LightGreen);
+                    menuJungle.AddItem(
+                        new MenuItem("MinMana.Jungle.AllySmall", "Ally: Small Mob %").SetValue(new Slider(50, 100, 0)))
+                        .SetFontStyle(FontStyle.Regular, Color.LightGreen);
 
-                    menuJungle.AddItem(new MenuItem("MinMana.Jungle.EnemyBig", "Enemy: Big Mob %").SetValue(new Slider(30, 100, 0))).SetFontStyle(FontStyle.Regular, Color.IndianRed);
-                    menuJungle.AddItem(new MenuItem("MinMana.Jungle.EnemySmall", "Enemy: Small Mob %").SetValue(new Slider(30, 100, 0))).SetFontStyle(FontStyle.Regular, Color.IndianRed);
+                    menuJungle.AddItem(
+                        new MenuItem("MinMana.Jungle.EnemyBig", "Enemy: Big Mob %").SetValue(new Slider(30, 100, 0)))
+                        .SetFontStyle(FontStyle.Regular, Color.IndianRed);
+                    menuJungle.AddItem(
+                        new MenuItem("MinMana.Jungle.EnemySmall", "Enemy: Small Mob %").SetValue(new Slider(30, 100, 0)))
+                        .SetFontStyle(FontStyle.Regular, Color.IndianRed);
 
-                    menuJungle.AddItem(new MenuItem("MinMana.Jungle.BigBoys", "Baron/Dragon/RH %").SetValue(new Slider(70, 100, 0))).SetFontStyle(FontStyle.Regular, Color.Aqua);
+                    menuJungle.AddItem(
+                        new MenuItem("MinMana.Jungle.BigBoys", "Baron/Dragon/RH %").SetValue(new Slider(70, 100, 0)))
+                        .SetFontStyle(FontStyle.Regular, Color.Aqua);
                     LocalMenu.AddSubMenu(menuJungle);
                 }
 
-                LocalMenu.AddItem(new MenuItem("MinMana.Jungle.DontCheckEnemyBuff", "Don't check min. mana if I'm taking:").SetValue(new StringList(new []{"Off", "Ally Buff", "Enemy Buff", "Both"}, 3))).SetFontStyle(FontStyle.Regular, Color.Wheat);
-                LocalMenu.AddItem(new MenuItem("MinMana.Jungle.DontCheckBlueBuff", "Don't check min. mana if I have Blue Buff").SetValue(true)).SetFontStyle(FontStyle.Regular, Color.Wheat);
+                LocalMenu.AddItem(
+                    new MenuItem("MinMana.Jungle.DontCheckEnemyBuff", "Don't check min. mana if I'm taking:").SetValue(
+                        new StringList(new[] {"Off", "Ally Buff", "Enemy Buff", "Both"}, 3)))
+                    .SetFontStyle(FontStyle.Regular, Color.Wheat);
+                LocalMenu.AddItem(
+                    new MenuItem("MinMana.Jungle.DontCheckBlueBuff", "Don't check min. mana if I have Blue Buff")
+                        .SetValue(true)).SetFontStyle(FontStyle.Regular, Color.Wheat);
 
-                LocalMenu.AddItem(new MenuItem("MinMana.Jungle.Default", "Load Recommended Settings").SetValue(true)).SetFontStyle(FontStyle.Bold, Color.GreenYellow).ValueChanged +=
-                (sender, args) =>
-                {
-                    if (args.GetNewValue<bool>() == true)
+                LocalMenu.AddItem(new MenuItem("MinMana.Jungle.Default", "Load Recommended Settings").SetValue(true))
+                    .SetFontStyle(FontStyle.Bold, Color.GreenYellow)
+                    .ValueChanged +=
+                    (sender, args) =>
                     {
-                        LoadDefaultSettings();
-                    }
-                };
+                        if (args.GetNewValue<bool>() == true)
+                        {
+                            LoadDefaultSettings();
+                        }
+                    };
             }
         }
 
@@ -86,8 +114,6 @@ namespace Nocturne.Common
             LocalMenu.Item("MinMana.Enable")
                 .SetValue("Quick Enable/Disable Minimum Mana Control!")
                 .SetValue(new KeyBind("M".ToCharArray()[0], KeyBindType.Toggle, true));
-            
-            
 
             LocalMenu.Item("MinMana.Lane.Alone").SetValue(new Slider(30, 100, 0));
             LocalMenu.Item("MinMana.Lane.Enemy").SetValue(new Slider(60, 100, 0));
@@ -97,15 +123,16 @@ namespace Nocturne.Common
             LocalMenu.Item("MinMana.Jungle.AllySmall").SetValue(new Slider(50, 100, 0));
             LocalMenu.Item("MinMana.Jungle.EnemySmall").SetValue(new Slider(30, 100, 0));
             LocalMenu.Item("MinMana.Jungle.BigBoys").SetValue(new Slider(70, 100, 0));
-            
-            LocalMenu.Item("MinMana.Jungle.DontCheckEnemyBuff").SetValue(new StringList(new[] {"Off", "Ally Buff", "Enemy Buff", "Both"}, 3));
+
+            LocalMenu.Item("MinMana.Jungle.DontCheckEnemyBuff")
+                .SetValue(new StringList(new[] {"Off", "Ally Buff", "Enemy Buff", "Both"}, 3));
             LocalMenu.Item("MinMana.Jungle.DontCheckBlueBuff").SetValue(true);
         }
 
         public static GameObjectTeam GetMobTeam(this Obj_AI_Base mob, float range)
         {
             mobTeams = new Dictionary<Vector2, GameObjectTeam>();
-            if (Game.MapId == (GameMapId)11)
+            if (Game.MapId == (GameMapId) 11)
             {
                 mobTeams.Add(new Vector2(7756f, 4118f), GameObjectTeam.Order); // blue team :red;
                 mobTeams.Add(new Vector2(3824f, 7906f), GameObjectTeam.Order); // blue team :blue
@@ -169,7 +196,10 @@ namespace Nocturne.Common
                 Obj_AI_Base oMob =
                     (from fBigBoys in
                         new[]
-                        {"SRU_Baron", "SRU_Dragon", "SRU_RiftHerald", "SRU_Blue", "SRU_Gromp", "SRU_Murkwolf", "SRU_Razorbeak", "SRU_Red", "SRU_Krug", "Sru_Crab"}
+                        {
+                            "SRU_Baron", "SRU_Dragon", "SRU_RiftHerald", "SRU_Blue", "SRU_Gromp", "SRU_Murkwolf",
+                            "SRU_Razorbeak", "SRU_Red", "SRU_Krug", "Sru_Crab"
+                        }
                         where
                             fBigBoys == mob.SkinName
                         select mob)
@@ -184,8 +214,17 @@ namespace Nocturne.Common
             return MobTypes.Small;
         }
 
-        public static float HarassMinManaPercent => LocalMenu.Item("MinMana.Enable").GetValue<KeyBind>().Active ? LocalMenu.Item("MinMana.Harass").GetValue<Slider>().Value : 0f;
-        public static float ToggleMinManaPercent => LocalMenu.Item("MinMana.Enable").GetValue<KeyBind>().Active ? LocalMenu.Item("MinMana.Toggle").GetValue<Slider>().Value : 0f;
+        public static float HarassMinManaPercent
+            =>
+                LocalMenu.Item("MinMana.Enable").GetValue<KeyBind>().Active
+                    ? LocalMenu.Item("MinMana.Harass").GetValue<Slider>().Value
+                    : 0f;
+
+        public static float ToggleMinManaPercent
+            =>
+                LocalMenu.Item("MinMana.Enable").GetValue<KeyBind>().Active
+                    ? LocalMenu.Item("MinMana.Toggle").GetValue<Slider>().Value
+                    : 0f;
 
         public static float LaneMinManaPercent
         {
@@ -193,7 +232,9 @@ namespace Nocturne.Common
             {
                 if (LocalMenu.Item("MinMana.Enable").GetValue<KeyBind>().Active)
                 {
-                    return HeroManager.Enemies.Find(e => e.IsValidTarget(2000) && !e.IsZombie) == null ? LocalMenu.Item("MinMana.Lane.Alone").GetValue<Slider>().Value : LocalMenu.Item("MinMana.Lane.Enemy").GetValue<Slider>().Value;
+                    return HeroManager.Enemies.Find(e => e.IsValidTarget(2000) && !e.IsZombie) == null
+                        ? LocalMenu.Item("MinMana.Lane.Alone").GetValue<Slider>().Value
+                        : LocalMenu.Item("MinMana.Lane.Enemy").GetValue<Slider>().Value;
                 }
 
                 return 0f;
@@ -202,50 +243,59 @@ namespace Nocturne.Common
 
         public static float JungleMinManaPercent(Obj_AI_Base mob)
         {
-                // Enable / Disable Min Mana
-                if (!LocalMenu.Item("MinMana.Enable").GetValue<KeyBind>().Active)
-                {
-                    return 0f;
-                }
-
-                // Don't Control Min Mana 
-                if (LocalMenu.Item("MinMana.Jungle.DontCheckBlueBuff").GetValue<bool>() && ObjectManager.Player.HasBuffInst("CrestoftheAncientGolem"))
-                {
-                    return 0f;
-                }
-
-                var dontCheckMinMana = LocalMenu.Item("MinMana.Jungle.DontCheckEnemyBuff").GetValue<StringList>().SelectedIndex;
-
-                if ((dontCheckMinMana == 1 || dontCheckMinMana == 3) && mob.GetMobTeam(Q.Range) == (GameObjectTeam)ObjectManager.Player.Team && (mob.SkinName == "SRU_Blue" || mob.SkinName == "SRU_Red"))
-                {
-                    return 0f;
-                }
-
-                if ((dontCheckMinMana == 2 || dontCheckMinMana == 3) && mob.GetMobTeam(Q.Range) != (GameObjectTeam)ObjectManager.Player.Team && (mob.SkinName == "SRU_Blue" || mob.SkinName == "SRU_Red"))
-                {
-                    return 0f;
-                }
-
-                // Return Min Mana Baron / Dragon
-                if (GetMobType(mob) == MobTypes.Baron || GetMobType(mob) == MobTypes.Dragon)
-                {
-                    return LocalMenu.Item("MinMana.Jungle.BigBoys").GetValue<Slider>().Value;
-                }
-
-                // Return Min Mana Ally Big / Small
-                if (mob.GetMobTeam(Q.Range) == (GameObjectTeam)ObjectManager.Player.Team)
-                {
-                    return GetMobType(mob) == MobTypes.Big ? LocalMenu.Item("MinMana.Jungle.AllyBig").GetValue<Slider>().Value : LocalMenu.Item("MinMana.Jungle.AllySmall").GetValue<Slider>().Value;
-                }
-
-                // Return Min Mana Enemy Big / Small
-                if (mob.GetMobTeam(Q.Range) != (GameObjectTeam)ObjectManager.Player.Team)
-                {
-                    return GetMobType(mob) == MobTypes.Big ? LocalMenu.Item("MinMana.Jungle.EnemyBig").GetValue<Slider>().Value : LocalMenu.Item("MinMana.Jungle.EnemySmall").GetValue<Slider>().Value;
-                }
-
+            // Enable / Disable Min Mana
+            if (!LocalMenu.Item("MinMana.Enable").GetValue<KeyBind>().Active)
+            {
                 return 0f;
+            }
 
+            // Don't Control Min Mana 
+            if (LocalMenu.Item("MinMana.Jungle.DontCheckBlueBuff").GetValue<bool>() &&
+                ObjectManager.Player.HasBuffInst("CrestoftheAncientGolem"))
+            {
+                return 0f;
+            }
+
+            var dontCheckMinMana =
+                LocalMenu.Item("MinMana.Jungle.DontCheckEnemyBuff").GetValue<StringList>().SelectedIndex;
+
+            if ((dontCheckMinMana == 1 || dontCheckMinMana == 3) &&
+                mob.GetMobTeam(Q.Range) == (GameObjectTeam) ObjectManager.Player.Team &&
+                (mob.SkinName == "SRU_Blue" || mob.SkinName == "SRU_Red"))
+            {
+                return 0f;
+            }
+
+            if ((dontCheckMinMana == 2 || dontCheckMinMana == 3) &&
+                mob.GetMobTeam(Q.Range) != (GameObjectTeam) ObjectManager.Player.Team &&
+                (mob.SkinName == "SRU_Blue" || mob.SkinName == "SRU_Red"))
+            {
+                return 0f;
+            }
+
+            // Return Min Mana Baron / Dragon
+            if (GetMobType(mob) == MobTypes.Baron || GetMobType(mob) == MobTypes.Dragon)
+            {
+                return LocalMenu.Item("MinMana.Jungle.BigBoys").GetValue<Slider>().Value;
+            }
+
+            // Return Min Mana Ally Big / Small
+            if (mob.GetMobTeam(Q.Range) == (GameObjectTeam) ObjectManager.Player.Team)
+            {
+                return GetMobType(mob) == MobTypes.Big
+                    ? LocalMenu.Item("MinMana.Jungle.AllyBig").GetValue<Slider>().Value
+                    : LocalMenu.Item("MinMana.Jungle.AllySmall").GetValue<Slider>().Value;
+            }
+
+            // Return Min Mana Enemy Big / Small
+            if (mob.GetMobTeam(Q.Range) != (GameObjectTeam) ObjectManager.Player.Team)
+            {
+                return GetMobType(mob) == MobTypes.Big
+                    ? LocalMenu.Item("MinMana.Jungle.EnemyBig").GetValue<Slider>().Value
+                    : LocalMenu.Item("MinMana.Jungle.EnemySmall").GetValue<Slider>().Value;
+            }
+
+            return 0f;
         }
     }
 }

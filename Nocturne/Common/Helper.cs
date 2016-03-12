@@ -44,15 +44,17 @@ namespace Nocturne.Common
             }
             return string.Format("{0:D}", t.Seconds);
         }
+
         public static void DrawText(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {
-            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
+            vFont.DrawText(null, vText, (int) vPosX, (int) vPosY, vColor);
         }
 
         public static bool HasSheenBuff(this Obj_AI_Base obj)
         {
             return obj.Buffs.Any(buff => buff.Name.ToLower() == "sheen");
         }
+
         public static bool HasNocturneUnspeakableHorror(this Obj_AI_Base obj)
         {
             return obj.Buffs.Any(buff => buff.DisplayName == "NocturneUnspeakableHorror");
@@ -72,7 +74,7 @@ namespace Nocturne.Common
         {
             return obj.Buffs.Any(buff => buff.DisplayName == buffName);
         }
-        
+
         public static bool HasBlueBuff(this Obj_AI_Base obj)
         {
             return obj.Buffs.Any(buff => buff.DisplayName == "CrestoftheAncientGolem");
@@ -96,19 +98,32 @@ namespace Nocturne.Common
         {
             switch (spell.Slot)
             {
-                case SpellSlot.Q: { return SharpDX.Color.LightSalmon; }
+                case SpellSlot.Q:
+                {
+                    return SharpDX.Color.LightSalmon;
+                }
 
-                case SpellSlot.W: { return SharpDX.Color.DarkSeaGreen; }
+                case SpellSlot.W:
+                {
+                    return SharpDX.Color.DarkSeaGreen;
+                }
 
-                case SpellSlot.E: { return SharpDX.Color.Aqua; }
+                case SpellSlot.E:
+                {
+                    return SharpDX.Color.Aqua;
+                }
 
-                case SpellSlot.R: { return SharpDX.Color.Yellow; }
+                case SpellSlot.R:
+                {
+                    return SharpDX.Color.Yellow;
+                }
             }
 
             return SharpDX.Color.Wheat;
         }
 
-        public static void DrawRange(this Spell spell, System.Drawing.Color color, bool draw = true, bool checkCoolDown = false)
+        public static void DrawRange(this Spell spell, System.Drawing.Color color, bool draw = true,
+            bool checkCoolDown = false)
         {
             if (!draw)
             {

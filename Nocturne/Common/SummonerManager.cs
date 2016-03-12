@@ -15,10 +15,10 @@ namespace Nocturne.Common
         public static SpellSlot FlashSlot = SpellSlot.Unknown;
         public static SpellSlot TeleportSlot = ObjectManager.Player.GetSpellSlot("SummonerTeleport");
 
-        private static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };
-        private static readonly int[] SmiteGrey = { 3711, 3722, 3721, 3720, 3719 };
-        private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
-        private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
+        private static readonly int[] SmitePurple = {3713, 3726, 3725, 3726, 3723};
+        private static readonly int[] SmiteGrey = {3711, 3722, 3721, 3720, 3719};
+        private static readonly int[] SmiteRed = {3715, 3718, 3717, 3716, 3714};
+        private static readonly int[] SmiteBlue = {3706, 3710, 3709, 3708, 3707};
 
         private static string Smitetype
         {
@@ -87,7 +87,7 @@ namespace Nocturne.Common
             }
 
             if (IgniteSlot != SpellSlot.Unknown
-               && ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                && ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health
                     && ObjectManager.Player.Distance(t) <= 500)
@@ -123,7 +123,8 @@ namespace Nocturne.Common
         {
             var range = 700f;
             var use = PlayerMenu.MenuConfig.Item("Spells.Smite").GetValue<bool>();
-            var itemCheck = SmiteBlue.Any(i => LeagueSharp.Common.Items.HasItem(i)) || SmiteRed.Any(i => LeagueSharp.Common.Items.HasItem(i));
+            var itemCheck = SmiteBlue.Any(i => LeagueSharp.Common.Items.HasItem(i)) ||
+                            SmiteRed.Any(i => LeagueSharp.Common.Items.HasItem(i));
             if (itemCheck && use &&
                 ObjectManager.Player.Spellbook.CanUseSpell(SmiteSlot) == SpellState.Ready &&
                 t.Distance(ObjectManager.Player.Position) < range)

@@ -18,6 +18,7 @@ namespace Nocturne.Modes
         private static Spell W => PlayerSpells.W;
         private static Spell E => PlayerSpells.E;
         private static Spell R => PlayerSpells.R;
+
         public static void Initialize()
         {
             MenuLocal = new Menu("Combo", "Combo").SetFontStyle(FontStyle.Regular, Color.Aqua);
@@ -53,7 +54,8 @@ namespace Nocturne.Modes
                 Q.ModeCast(t);
             }
 
-            if (MenuLocal.Item("Combo.Q").GetValue<bool>() && Q.IsReady() && t.IsValidTarget(Q.Range) && t.HasNocturneUnspeakableHorror())
+            if (MenuLocal.Item("Combo.Q").GetValue<bool>() && Q.IsReady() && t.IsValidTarget(Q.Range) &&
+                t.HasNocturneUnspeakableHorror())
             {
                 Q.ModeCast(t);
             }
@@ -63,7 +65,5 @@ namespace Nocturne.Modes
                 E.CastOnUnit(t);
             }
         }
-
-
     }
 }

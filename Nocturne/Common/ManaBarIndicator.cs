@@ -65,7 +65,7 @@ namespace Nocturne.Common
 
         internal static void Initialize(Menu mainMenu)
         {
-            DxLine = new Line(DxDevice) { Width = 4 };
+            DxLine = new Line(DxDevice) {Width = 4};
 
             Drawing.OnPreReset += DrawingOnOnPreReset;
             Drawing.OnPostReset += DrawingOnOnPostReset;
@@ -76,41 +76,47 @@ namespace Nocturne.Common
             {
                 var color = new ColorBGRA(255, 255, 255, 255);
 
-                var qMana = new[] { 0, 40, 50, 60, 70, 80 };
-                var wMana = new[] { 0, 60, 70, 80, 90, 100 }; // W Mana Cost doesnt works :/
-                var eMana = new[] { 0, 50, 50, 50, 50, 50 };
-                var rMana = new[] { 0, 100, 100, 100 };
+                var qMana = new[] {0, 40, 50, 60, 70, 80};
+                var wMana = new[] {0, 60, 70, 80, 90, 100}; // W Mana Cost doesnt works :/
+                var eMana = new[] {0, 50, 50, 50, 50, 50};
+                var rMana = new[] {0, 100, 100, 100};
 
-                    var totalCostMana = 0;
+                var totalCostMana = 0;
 
-                    if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.Q").GetValue<bool>())
-                    {
-                        totalCostMana += qMana[Q.Level];
-                    }
+                if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.Q").GetValue<bool>())
+                {
+                    totalCostMana += qMana[Q.Level];
+                }
 
-                    if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.W").GetValue<bool>())
-                    {
-                        totalCostMana += wMana[W.Level];
-                    }
+                if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.W").GetValue<bool>())
+                {
+                    totalCostMana += wMana[W.Level];
+                }
 
-                    if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.E").GetValue<bool>())
-                    {
-                        totalCostMana += eMana[E.Level];
-                    }
+                if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.E").GetValue<bool>())
+                {
+                    totalCostMana += eMana[E.Level];
+                }
 
-                    if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.R").GetValue<bool>())
-                    {
-                        totalCostMana += rMana[R.Level];
-                    }
-                    
-                    DrawManaPercent(totalCostMana, totalCostMana > ObjectManager.Player.Mana ? new ColorBGRA(255, 0, 0, 255) : new ColorBGRA(255, 255, 255, 255));
+                if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.R").GetValue<bool>())
+                {
+                    totalCostMana += rMana[R.Level];
+                }
+
+                DrawManaPercent(totalCostMana,
+                    totalCostMana > ObjectManager.Player.Mana
+                        ? new ColorBGRA(255, 0, 0, 255)
+                        : new ColorBGRA(255, 255, 255, 255));
 
             };
         }
 
         private static Vector2 Offset => new Vector2(34, 9);
 
-        public static Vector2 StartPosition => new Vector2(ObjectManager.Player.HPBarPosition.X + Offset.X, ObjectManager.Player.HPBarPosition.Y + Offset.Y + 8);
+        public static Vector2 StartPosition
+            =>
+                new Vector2(ObjectManager.Player.HPBarPosition.X + Offset.X,
+                    ObjectManager.Player.HPBarPosition.Y + Offset.Y + 8);
 
         private static void CurrentDomainOnDomainUnload(object sender, EventArgs eventArgs)
         {
@@ -129,12 +135,12 @@ namespace Nocturne.Common
 
         private static float GetManaProc(float manaPer)
         {
-            return (manaPer / ObjectManager.Player.MaxMana);
+            return (manaPer/ObjectManager.Player.MaxMana);
         }
 
         private static Vector2 GetHpPosAfterDmg(float mana)
         {
-            float w = Width / ObjectManager.Player.MaxMana * mana;
+            float w = Width/ObjectManager.Player.MaxMana*mana;
             return new Vector2(StartPosition.X + w, StartPosition.Y);
         }
 
@@ -149,7 +155,7 @@ namespace Nocturne.Common
         {
             DxLine.Begin();
             DxLine.Draw(
-                new[] { new Vector2((int)pos.X, (int)pos.Y + 4f), new Vector2((int)pos.X + 2, (int)pos.Y + 4f) },
+                new[] {new Vector2((int) pos.X, (int) pos.Y + 4f), new Vector2((int) pos.X + 2, (int) pos.Y + 4f)},
                 color);
             DxLine.End();
         }
