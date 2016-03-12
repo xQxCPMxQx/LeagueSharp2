@@ -23,7 +23,7 @@ namespace Shen.Champion
             W = new Spell(SpellSlot.W);
 
             E = new Spell(SpellSlot.E, 480f);
-            E.SetSkillshot(0.20f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            E.SetSkillshot(0.20f, 80f, float.MaxValue, false, SkillshotType.SkillshotLine);
             SpellList.Add(E);
 
             R = new Spell(SpellSlot.R);
