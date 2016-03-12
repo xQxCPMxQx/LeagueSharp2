@@ -31,13 +31,15 @@ namespace Nocturne.Modes
 
         private static void OnUpdate(EventArgs args)
         {
-            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Mixed)
+            if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
             {
-                return;
+                ExecuteHarass();
             }
             
-            Execute();
-            ExecuteToggle();
+            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+            {
+                ExecuteToggle();
+            }
         }
 
         private static void ExecuteToggle()
@@ -48,16 +50,23 @@ namespace Nocturne.Modes
             }
 
             var modeToggle = LocalMenu.Item("Harass.ToggleQEP").GetValue<StringList>().SelectedIndex;
+            if (modeToggle == 0)
+            {
+                return;
+            }
+
+            var t = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+
             switch (modeToggle)
             {
+
                 case 1:
                 {
                     if (Q.IsReady())
                     {
-                        var t1 = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                        if (t1.IsValidTarget(Q.Range))
+                        if (t.IsValidTarget(Q.Range))
                         {
-                            Q.ModeCast(t1);
+                            Q.ModeCast(t);
                         }
                     }
                     break;
@@ -67,10 +76,9 @@ namespace Nocturne.Modes
                 {
                     if (E.IsReady())
                     {
-                        var t1 = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                        if (t1.IsValidTarget(E.Range))
+                        if (t.IsValidTarget(E.Range))
                         {
-                            E.CastOnUnit(t1);
+                            E.CastOnUnit(t);
                         }
                     }
                     break;
@@ -80,15 +88,10 @@ namespace Nocturne.Modes
                     {
                         if (Q.IsReady() && E.IsReady())
                         {
-                            var t1 = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                            if (t1.IsValidTarget(E.Range))
+                            if (t.IsValidTarget(E.Range))
                             {
-                                E.CastOnUnit(t1);
-
-                                if (t1.HasNocturneUnspeakableHorror())
-                                {
-                                    Q.ModeCast(t1);
-                                }
+                                E.CastOnUnit(t);
+                                Q.ModeCast(t);
                             }
                         }
                         break;
@@ -98,15 +101,10 @@ namespace Nocturne.Modes
                     {
                         if (Q.IsReady() && E.IsReady() && ObjectManager.Player.HasPassive())
                         {
-                            var t1 = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                            if (t1.IsValidTarget(E.Range))
+                            if (t.IsValidTarget(E.Range))
                             {
-                                E.CastOnUnit(t1);
-
-                                if (t1.HasNocturneUnspeakableHorror())
-                                {
-                                    Q.ModeCast(t1);
-                                }
+                                E.CastOnUnit(t);
+                                Q.ModeCast(t);
                             }
                         }
                         break;
@@ -114,7 +112,7 @@ namespace Nocturne.Modes
             }
         }
 
-        private static void Execute()
+        private static void ExecuteHarass()
         {
             var useQ = LocalMenu.Item("Harass.UseQ").GetValue<StringList>().SelectedIndex;
             if (useQ == 0)

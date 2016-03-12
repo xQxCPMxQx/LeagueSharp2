@@ -53,6 +53,10 @@ namespace Nocturne
         {
             var fComboDamage = 0d;
 
+            if (ObjectManager.Player.HasPassive())
+            {
+                fComboDamage += ObjectManager.Player.TotalAttackDamage*1.2;
+            }
             if (PlayerSpells.Q.IsReady())
             {
                 fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q);
