@@ -14,11 +14,15 @@ namespace Nocturne.Modes
     {
         public static Menu LocalMenu { get; private set; }
 
+        private static Spell Q => PlayerSpells.Q;
+        private static Spell E => PlayerSpells.E;
+
         public static void Initialize()
         {
             LocalMenu = new Menu("Harass", "Harass");
             {
                 LocalMenu.AddItem(new MenuItem("Harass.UseQ", "Q:").SetValue(new StringList(new[] {"Off", "On"}, 1)).SetFontStyle(FontStyle.Regular, PlayerSpells.Q.MenuColor()));
+                LocalMenu.AddItem(new MenuItem("Harass.ToggleQEP", "Toggle:").SetValue(new StringList(new[] { "Off", "Q", "E", "E + Q Combo", "E + Q + Passive AA Combo" }, 4)).SetFontStyle(FontStyle.Regular, PlayerSpells.W.MenuColor()));
             }
             PlayerMenu.MenuConfig.AddSubMenu(LocalMenu);
 
@@ -38,24 +42,76 @@ namespace Nocturne.Modes
 
         private static void ExecuteToggle()
         {
-            if (!PlayerMenu.MenuKeys.Item("Key.HarassToggle").GetValue<KeyBind>().Active)
+            if (!PlayerMenu.MenuKeys.Item("Key.HarassToggle").GetValue<KeyBind>().Active || ObjectManager.Player.ManaPercent < ManaManager.HarassMinManaPercent)
             {
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercent < ManaManager.HarassMinManaPercent)
+            var modeToggle = LocalMenu.Item("Harass.ToggleQEP").GetValue<StringList>().SelectedIndex;
+            switch (modeToggle)
             {
-                return;
+                case 1:
+                {
+                    if (Q.IsReady())
+                    {
+                        var t1 = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                        if (t1.IsValidTarget(Q.Range))
+                        {
+                            Q.ModeCast(t1);
+                        }
+                    }
+                    break;
+                }
+
+                case 2:
+                {
+                    if (E.IsReady())
+                    {
+                        var t1 = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                        if (t1.IsValidTarget(E.Range))
+                        {
+                            E.CastOnUnit(t1);
+                        }
+                    }
+                    break;
+                }
+
+                case 3:
+                    {
+                        if (Q.IsReady() && E.IsReady())
+                        {
+                            var t1 = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                            if (t1.IsValidTarget(E.Range))
+                            {
+                                E.CastOnUnit(t1);
+
+                                if (t1.HasNocturneUnspeakableHorror())
+                                {
+                                    Q.ModeCast(t1);
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+                case 4:
+                    {
+                        if (Q.IsReady() && E.IsReady() && ObjectManager.Player.HasPassive())
+                        {
+                            var t1 = AssassinManager.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                            if (t1.IsValidTarget(E.Range))
+                            {
+                                E.CastOnUnit(t1);
+
+                                if (t1.HasNocturneUnspeakableHorror())
+                                {
+                                    Q.ModeCast(t1);
+                                }
+                            }
+                        }
+                        break;
+                    }
             }
-
-
-            var t = TargetSelector.GetTarget(PlayerSpells.Q.Range, TargetSelector.DamageType.Physical);
-            if (!t.IsValidTarget())
-            {
-                return;
-            }
-
-            PlayerSpells.Q.ModeCast(t);
         }
 
         private static void Execute()

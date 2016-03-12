@@ -58,6 +58,11 @@ namespace Nocturne.Common
             return obj.Buffs.Any(buff => buff.DisplayName == "NocturneUnspeakableHorror");
         }
 
+        public static bool HasPassive(this Obj_AI_Base obj)
+        {
+            return obj.PassiveCooldownEndTime - (Game.Time - 15.5) <= 0;
+        }
+
         public static bool HasNocturneParanoia(this Obj_AI_Base obj)
         {
             return obj.Buffs.Any(buff => buff.DisplayName == "NocturneParanoiaTarget");

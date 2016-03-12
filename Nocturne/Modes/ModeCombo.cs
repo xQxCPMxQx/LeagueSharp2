@@ -22,7 +22,7 @@ namespace Nocturne.Modes
         {
             MenuLocal = new Menu("Combo", "Combo").SetFontStyle(FontStyle.Regular, Color.Aqua);
             MenuLocal.AddItem(new MenuItem("Combo.Q", "Q:").SetValue(true).SetFontStyle(FontStyle.Regular, PlayerSpells.Q.MenuColor()));
-            MenuLocal.AddItem(new MenuItem("Combo.E", "E:").SetValue(true).SetFontStyle(FontStyle.Regular, PlayerSpells.Q.MenuColor()));
+            MenuLocal.AddItem(new MenuItem("Combo.E", "E:").SetValue(true).SetFontStyle(FontStyle.Regular, PlayerSpells.E.MenuColor()));
 
             PlayerMenu.MenuConfig.AddSubMenu(MenuLocal);
             Game.OnUpdate += OnUpdate;
@@ -50,7 +50,12 @@ namespace Nocturne.Modes
             if (MenuLocal.Item("Combo.Q").GetValue<bool>() && Q.IsReady() && t.IsValidTarget(Q.Range) &&
                 !ObjectManager.Player.HasNocturneParanoia())
             {
-                Q.Cast(t);
+                Q.ModeCast(t);
+            }
+
+            if (MenuLocal.Item("Combo.Q").GetValue<bool>() && Q.IsReady() && t.IsValidTarget(Q.Range) && t.HasNocturneUnspeakableHorror())
+            {
+                Q.ModeCast(t);
             }
 
             if (MenuLocal.Item("Combo.E").GetValue<bool>() && E.IsReady() && t.IsValidTarget(E.Range))
