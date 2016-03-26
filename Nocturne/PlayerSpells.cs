@@ -62,6 +62,7 @@ namespace Nocturne
                 return;
             }
 
+            
             if (spell.Slot == SpellSlot.Q)
             {
                 if (spell.IsReady() && spell.ModeCanCast(t) && ObjectManager.Player.Distance(t.ServerPosition) <= spell.Range) 

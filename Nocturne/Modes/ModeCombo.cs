@@ -25,13 +25,13 @@ namespace Nocturne.Modes
             MenuLocal.AddItem(new MenuItem("Combo.Q", "Q:").SetValue(true).SetFontStyle(FontStyle.Regular, PlayerSpells.Q.MenuColor()));
             MenuLocal.AddItem(new MenuItem("Combo.E", "E:").SetValue(true).SetFontStyle(FontStyle.Regular, PlayerSpells.E.MenuColor()));
 
-            PlayerMenu.MenuConfig.AddSubMenu(MenuLocal);
+            ModeConfig.MenuConfig.AddSubMenu(MenuLocal);
             Game.OnUpdate += OnUpdate;
         }
 
         private static void OnUpdate(EventArgs args)
         {
-            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+            if (ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
             {
                 return;
             }
@@ -41,7 +41,7 @@ namespace Nocturne.Modes
 
         private static void ExecuteCombo()
         {
-            var t = AssassinManager.GetTarget(R.Range);
+            var t = CommonTargetSelector.GetTarget(R.Range);
 
             if (!t.IsValidTarget())
             {

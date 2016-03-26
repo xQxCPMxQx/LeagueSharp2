@@ -51,7 +51,7 @@ namespace Nocturne.Modes
 
         private static void OnUpdate(EventArgs args)
         {
-            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+            if (ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
             {
                 return;
             }
@@ -75,7 +75,7 @@ namespace Nocturne.Modes
 
             var mob = mobs[0];
 
-            if (ObjectManager.Player.ManaPercent < ManaManager.JungleMinManaPercent(mob))
+            if (ObjectManager.Player.ManaPercent < CommonManaManager.JungleMinManaPercent(mob))
             {
                 return;
             }
@@ -86,7 +86,7 @@ namespace Nocturne.Modes
             {
                 if (LocalMenu.Item("Jungle.UseQ.Big1").GetValue<StringList>().SelectedIndex != 0)
                 {
-                    if (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Blue || ManaManager.GetMobType(mob) == ManaManager.MobTypes.Red)
+                    if (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Blue || CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Red)
                     {
                         if (PlayerSpells.Q.IsReady())
                         {
@@ -97,7 +97,7 @@ namespace Nocturne.Modes
 
                 if (LocalMenu.Item("Jungle.UseQ.Big2").GetValue<StringList>().SelectedIndex != 0)
                 {
-                    if (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Baron || ManaManager.GetMobType(mob) == ManaManager.MobTypes.Dragon)
+                    if (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Baron || CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Dragon)
                     {
                         if (PlayerSpells.Q.IsReady())
                         {
@@ -110,10 +110,10 @@ namespace Nocturne.Modes
                 {
                     if (LocalMenu.Item("Jungle.UseQ.Big3").GetValue<StringList>().SelectedIndex != 0)
                     {
-                        if (ManaManager.GetMobType(mob, ManaManager.FromMobClass.ByType) == ManaManager.MobTypes.Big &&
+                        if (CommonManaManager.GetMobType(mob, CommonManaManager.FromMobClass.ByType) == CommonManaManager.MobTypes.Big &&
                             (
-                                ManaManager.GetMobType(mob) != ManaManager.MobTypes.Dragon || ManaManager.GetMobType(mob) != ManaManager.MobTypes.Baron
-                                || ManaManager.GetMobType(mob) != ManaManager.MobTypes.Red || ManaManager.GetMobType(mob) != ManaManager.MobTypes.Blue)
+                                CommonManaManager.GetMobType(mob) != CommonManaManager.MobTypes.Dragon || CommonManaManager.GetMobType(mob) != CommonManaManager.MobTypes.Baron
+                                || CommonManaManager.GetMobType(mob) != CommonManaManager.MobTypes.Red || CommonManaManager.GetMobType(mob) != CommonManaManager.MobTypes.Blue)
                             )
                         {
                             if (PlayerSpells.Q.IsReady())
@@ -125,7 +125,7 @@ namespace Nocturne.Modes
 
                     if (LocalMenu.Item("Jungle.UseQ.Small").GetValue<StringList>().SelectedIndex != 0)
                     {
-                        if (ManaManager.GetMobType(mob, ManaManager.FromMobClass.ByType) != ManaManager.MobTypes.Big)
+                        if (CommonManaManager.GetMobType(mob, CommonManaManager.FromMobClass.ByType) != CommonManaManager.MobTypes.Big)
                         {
                             if (mobs.Count >= LocalMenu.Item("Jungle.UseQ.Small").GetValue<StringList>().SelectedIndex)
                             {
@@ -143,7 +143,7 @@ namespace Nocturne.Modes
             {
                 if (LocalMenu.Item("Jungle.UseE.Big1").GetValue<StringList>().SelectedIndex != 0)
                 {
-                    if (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Blue || ManaManager.GetMobType(mob) == ManaManager.MobTypes.Red)
+                    if (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Blue || CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Red)
                     {
                         if (PlayerSpells.E.IsReady())
                         {
@@ -154,7 +154,7 @@ namespace Nocturne.Modes
 
                 if (LocalMenu.Item("Jungle.UseE.Big2").GetValue<StringList>().SelectedIndex != 0)
                 {
-                    if (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Baron || ManaManager.GetMobType(mob) == ManaManager.MobTypes.Dragon)
+                    if (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Baron || CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Dragon)
                     {
                         if (PlayerSpells.E.IsReady())
                         {
@@ -165,10 +165,10 @@ namespace Nocturne.Modes
 
                 if (LocalMenu.Item("Jungle.UseE.Big3").GetValue<StringList>().SelectedIndex != 0)
                 {
-                    if (ManaManager.GetMobType(mob, ManaManager.FromMobClass.ByType) == ManaManager.MobTypes.Big &&
+                    if (CommonManaManager.GetMobType(mob, CommonManaManager.FromMobClass.ByType) == CommonManaManager.MobTypes.Big &&
                         (
-                            ManaManager.GetMobType(mob) != ManaManager.MobTypes.Dragon || ManaManager.GetMobType(mob) != ManaManager.MobTypes.Baron
-                            || ManaManager.GetMobType(mob) != ManaManager.MobTypes.Red || ManaManager.GetMobType(mob) != ManaManager.MobTypes.Blue)
+                            CommonManaManager.GetMobType(mob) != CommonManaManager.MobTypes.Dragon || CommonManaManager.GetMobType(mob) != CommonManaManager.MobTypes.Baron
+                            || CommonManaManager.GetMobType(mob) != CommonManaManager.MobTypes.Red || CommonManaManager.GetMobType(mob) != CommonManaManager.MobTypes.Blue)
                         )
                     {
                         if (PlayerSpells.E.IsReady())
@@ -180,7 +180,7 @@ namespace Nocturne.Modes
 
                 if (LocalMenu.Item("Jungle.UseE.Big4").GetValue<StringList>().SelectedIndex != 0)
                 {
-                    if (ManaManager.GetMobType(mob, ManaManager.FromMobClass.ByType) != ManaManager.MobTypes.Big)
+                    if (CommonManaManager.GetMobType(mob, CommonManaManager.FromMobClass.ByType) != CommonManaManager.MobTypes.Big)
                     {
                         if (PlayerSpells.E.IsReady())
                         {

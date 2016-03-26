@@ -9,7 +9,7 @@ namespace Nocturne.Common
 {
     using System.Linq;
 
-    internal static class ManaBarIndicator
+    internal static class CommonManaBar
     {
         public static Line DxLine;
 

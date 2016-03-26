@@ -6,7 +6,7 @@ using LeagueSharp.Common;
 
 namespace Nocturne.Common
 {
-    internal class ItemManager
+    internal class CommonItems
     {
         public static Items.Item Youmuu = new Items.Item(3142, 225f);
         public static Dictionary<string, Tuple<Items.Item, EnumItemType, EnumItemTargettingType>> ItemDb;
@@ -143,7 +143,7 @@ namespace Nocturne.Common
 
         private static void OrbwalkingBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (args.Target is Obj_AI_Hero && PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (args.Target is Obj_AI_Hero && Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 foreach (
                     var item in
@@ -168,10 +168,10 @@ namespace Nocturne.Common
 
         private static void ExecuteComboMode()
         {
-            if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-
-                var t = AssassinManager.GetTarget(PlayerSpells.Q.Range);
+                
+                var t = CommonTargetSelector.GetTarget(PlayerSpells.Q.Range);
                 if (!t.IsValidTarget())
                 {
                     return;
@@ -182,28 +182,28 @@ namespace Nocturne.Common
                         ItemDb.Where(
                             item =>
                                 item.Value.ItemType == EnumItemType.AoE &&
-                                item.Value.TargetingType == EnumItemTargettingType.EnemyObjects)
+                                (item.Value.TargetingType == EnumItemTargettingType.EnemyObjects || item.Value.TargetingType == EnumItemTargettingType.EnemyHero))
                             .Where(item => t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady()))
                 {
                     item.Value.Item.Cast();
                 }
 
-                foreach (
-                    var item in
-                        ItemDb.Where(
-                            item =>
-                                item.Value.ItemType == EnumItemType.Targeted &&
-                                item.Value.TargetingType == EnumItemTargettingType.EnemyHero)
-                            .Where(item => t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady()))
-                {
-                    item.Value.Item.Cast(t);
-                }
+                //foreach (
+                //    var item in
+                //        ItemDb.Where(
+                //            item =>
+                //                item.Value.ItemType == EnumItemType.Targeted &&
+                //                item.Value.TargetingType == EnumItemTargettingType.EnemyHero)
+                //            .Where(item => t.IsValidTarget(item.Value.Item.Range) && item.Value.Item.IsReady()))
+                //{
+                //    item.Value.Item.Cast(t);
+                //}
             }
         }
 
         private static void ExecuteLaneMode()
         {
-            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+            if (Modes.ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
             {
                 return;
             }
@@ -230,7 +230,7 @@ namespace Nocturne.Common
 
         private static void ExecuteJungleMode()
         {
-            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+            if (Modes.ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
             {
                 return;
             }
@@ -258,10 +258,10 @@ namespace Nocturne.Common
                             MinionOrderTypes.MaxHealth)
                     where
                         item.Value.Item.IsReady() &&
-                        (iMinions.Count() >= 2 || ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Blue ||
-                         ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Red ||
-                         ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Baron ||
-                         ManaManager.GetMobType(iMinions[0]) == ManaManager.MobTypes.Dragon)
+                        (iMinions.Count() >= 2 || CommonManaManager.GetMobType(iMinions[0]) == CommonManaManager.MobTypes.Blue ||
+                         CommonManaManager.GetMobType(iMinions[0]) == CommonManaManager.MobTypes.Red ||
+                         CommonManaManager.GetMobType(iMinions[0]) == CommonManaManager.MobTypes.Baron ||
+                         CommonManaManager.GetMobType(iMinions[0]) == CommonManaManager.MobTypes.Dragon)
                     select item)
                 {
                     item.Value.Item.Cast();
@@ -277,13 +277,13 @@ namespace Nocturne.Common
                     Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BlueRed").GetValue<StringList>().SelectedIndex;
 
                 if (
-                    (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Dragon &&
+                    (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Dragon &&
                      (youmuuBaron == 1 || youmuuBaron == 3))
                     ||
-                    (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Baron && (youmuuBaron == 2 || youmuuBaron == 3))
-                    || (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Red && (youmuuRed == 1 || youmuuBaron == 3))
+                    (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Baron && (youmuuBaron == 2 || youmuuBaron == 3))
+                    || (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Red && (youmuuRed == 1 || youmuuBaron == 3))
                     ||
-                    (ManaManager.GetMobType(mob) == ManaManager.MobTypes.Blue && (youmuuRed == 2 || youmuuBaron == 3)))
+                    (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Blue && (youmuuRed == 2 || youmuuBaron == 3)))
                 {
                     Youmuu.Cast();
                 }

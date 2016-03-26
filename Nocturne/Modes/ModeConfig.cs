@@ -8,9 +8,9 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using Color = SharpDX.Color;
 
-namespace Nocturne
+namespace Nocturne.Modes
 {
-    internal class PlayerMenu
+    internal class ModeConfig
     {
         public static Orbwalking.Orbwalker Orbwalker;
         public static Menu MenuConfig { get; private set; }
@@ -28,10 +28,10 @@ namespace Nocturne
             Orbwalker = new Orbwalking.Orbwalker(MenuConfig.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
 
-            Common.AssassinManager.Initialize();
-            Common.AutoLevelerManager.Initialize();
-            Common.AutoBushManager.Initialize();
-            Common.Helper.Initialize();
+            Common.CommonTargetSelector.Initialize();
+            Common.CommonAutoLevel.Initialize();
+            Common.CommonAutoBush.Initialize();
+            Common.CommonHelper.Initialize();
             
             /*
                 MenuCombo = new Menu("Combo", "ExecuteCombo");
@@ -57,8 +57,8 @@ namespace Nocturne
                 MenuConfig.AddSubMenu(MenuFarming);
             }
 
-            Common.ManaManager.Initialize(MenuFarming);
-            Common.MobManager.Initialize(MenuFarming);
+            Common.CommonManaManager.Initialize(MenuFarming);
+            Common.CommonJungleTimer.Initialize(MenuFarming);
 
             // Misc
             MenuMisc = new Menu("Misc", "Misc");
@@ -71,7 +71,9 @@ namespace Nocturne
             MenuConfig.AddItem(new MenuItem("Pc.Mode", "How is your own Computer:").SetValue(new StringList(new[] { "New Computer", "Old Computer" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
 
             new PlayerDrawings().Initialize();
-            
+                    
+            Evade.EvadeMain.Initialize();
+
             MenuConfig.AddToMainMenu();
 
             

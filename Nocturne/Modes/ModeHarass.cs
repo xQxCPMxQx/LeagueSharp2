@@ -24,19 +24,19 @@ namespace Nocturne.Modes
                 LocalMenu.AddItem(new MenuItem("Harass.UseQ", "Q:").SetValue(new StringList(new[] {"Off", "On"}, 1)).SetFontStyle(FontStyle.Regular, PlayerSpells.Q.MenuColor()));
                 LocalMenu.AddItem(new MenuItem("Harass.ToggleQEP", "Toggle:").SetValue(new StringList(new[] { "Off", "Q", "E", "E + Q Combo", "E + Q + Passive AA Combo" }, 4)).SetFontStyle(FontStyle.Regular, PlayerSpells.W.MenuColor()));
             }
-            PlayerMenu.MenuConfig.AddSubMenu(LocalMenu);
+            ModeConfig.MenuConfig.AddSubMenu(LocalMenu);
 
             Game.OnUpdate += OnUpdate;
         }
 
         private static void OnUpdate(EventArgs args)
         {
-            if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
+            if (ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
             {
                 ExecuteHarass();
             }
             
-            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+            if (ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
             {
                 ExecuteToggle();
             }
@@ -44,7 +44,7 @@ namespace Nocturne.Modes
 
         private static void ExecuteToggle()
         {
-            if (!PlayerMenu.MenuKeys.Item("Key.HarassToggle").GetValue<KeyBind>().Active || ObjectManager.Player.ManaPercent < ManaManager.HarassMinManaPercent)
+            if (!ModeConfig.MenuKeys.Item("Key.HarassToggle").GetValue<KeyBind>().Active || ObjectManager.Player.ManaPercent < CommonManaManager.HarassMinManaPercent)
             {
                 return;
             }
@@ -55,7 +55,7 @@ namespace Nocturne.Modes
                 return;
             }
 
-            var t = AssassinManager.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
             switch (modeToggle)
             {
@@ -120,7 +120,7 @@ namespace Nocturne.Modes
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercent < ManaManager.HarassMinManaPercent)
+            if (ObjectManager.Player.ManaPercent < CommonManaManager.HarassMinManaPercent)
             {
                 return;
             }

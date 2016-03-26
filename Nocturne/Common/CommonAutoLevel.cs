@@ -7,7 +7,7 @@ using Color = SharpDX.Color;
 
 namespace Nocturne.Common
 {
-    internal class AutoLevelerManager
+    internal class CommonAutoLevel
     {
         public static Menu LocalMenu;
 
@@ -46,7 +46,7 @@ namespace Nocturne.Common
                     break;
             }
 
-            PlayerMenu.MenuConfig.AddSubMenu(LocalMenu);
+            Modes.ModeConfig.MenuConfig.AddSubMenu(LocalMenu);
 
             Game.OnUpdate += Game_OnUpdate;
 

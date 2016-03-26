@@ -42,7 +42,7 @@ namespace Nocturne.Modes
 
         private static void OnUpdate(EventArgs args)
         {
-            if (PlayerMenu.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+            if (ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
             {
                 return;
             }
@@ -70,7 +70,7 @@ namespace Nocturne.Modes
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercent < ManaManager.LaneMinManaPercent)
+            if (ObjectManager.Player.ManaPercent < CommonManaManager.LaneMinManaPercent)
             {
                 return;
             }

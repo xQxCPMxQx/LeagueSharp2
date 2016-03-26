@@ -67,10 +67,10 @@ namespace Nocturne.Common
         }
     }
 
-    internal class AutoBushManager
+    internal class CommonAutoBush
     {
         private static Spell ChampionSpell;
-        private static Menu Config => PlayerMenu.MenuConfig;
+        private static Menu Config => Modes.ModeConfig.MenuConfig;
 
         static readonly List<KeyValuePair<int, String>> _wards = new List<KeyValuePair<int, String>> //insertion order
         {

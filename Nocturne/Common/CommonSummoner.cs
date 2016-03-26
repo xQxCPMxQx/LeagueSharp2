@@ -8,7 +8,7 @@ using LeagueSharp.Common;
 
 namespace Nocturne.Common
 {
-    internal class SummonerManager
+    internal class CommonSummoner
     {
         public static SpellSlot SmiteSlot = SpellSlot.Unknown;
         public static SpellSlot IgniteSlot = SpellSlot.Unknown;
@@ -53,13 +53,13 @@ namespace Nocturne.Common
             SetSmiteSlot();
             if (SmiteSlot != SpellSlot.Unknown)
             {
-                PlayerMenu.MenuConfig.AddItem(new MenuItem("Spells.Smite", "Use Smite to Enemy!").SetValue(true));
+                Modes.ModeConfig.MenuConfig.AddItem(new MenuItem("Spells.Smite", "Use Smite to Enemy!").SetValue(true));
             }
 
             SetIgniteSlot();
             if (IgniteSlot != SpellSlot.Unknown)
             {
-                PlayerMenu.MenuConfig.AddItem(new MenuItem("Spells.Ignite", "Use Ignite!").SetValue(true));
+                Modes.ModeConfig.MenuConfig.AddItem(new MenuItem("Spells.Ignite", "Use Ignite!").SetValue(true));
             }
 
             SetFlatSlot();
@@ -69,7 +69,7 @@ namespace Nocturne.Common
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 UseSpells();
         }
 
@@ -122,7 +122,7 @@ namespace Nocturne.Common
         private static void SmiteOnTarget(Obj_AI_Hero t)
         {
             var range = 700f;
-            var use = PlayerMenu.MenuConfig.Item("Spells.Smite").GetValue<bool>();
+            var use = Modes.ModeConfig.MenuConfig.Item("Spells.Smite").GetValue<bool>();
             var itemCheck = SmiteBlue.Any(i => LeagueSharp.Common.Items.HasItem(i)) ||
                             SmiteRed.Any(i => LeagueSharp.Common.Items.HasItem(i));
             if (itemCheck && use &&
@@ -136,7 +136,7 @@ namespace Nocturne.Common
         private static void IgniteOnTarget(Obj_AI_Hero t)
         {
             var range = 550f;
-            var use = PlayerMenu.MenuConfig.Item("Spells.Ignite").GetValue<bool>();
+            var use = Modes.ModeConfig.MenuConfig.Item("Spells.Ignite").GetValue<bool>();
             if (use && ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                 t.Distance(ObjectManager.Player.Position) < range &&
                 ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite) > t.Health)

@@ -15,7 +15,7 @@ using Font = SharpDX.Direct3D9.Font;
 
 namespace Nocturne.Common
 {
-    internal class MobManager
+    internal class CommonJungleTimer
     {
         public static Menu LocalMenu { get; private set; }
         public static Menu SubMenuBuffs { get; private set; }
@@ -24,7 +24,7 @@ namespace Nocturne.Common
 
         private static SharpDX.Direct3D9.Font mapFont;
         private static SharpDX.Direct3D9.Font miniMapFont;
-        private static int _nextTime;
+        private static int nextTime;
 
 
         public static void Initialize(Menu mainMenu)
@@ -101,9 +101,9 @@ namespace Nocturne.Common
                 return;
             }
 
-            if ((int) Game.ClockTime - _nextTime >= 0)
+            if ((int) Game.ClockTime - nextTime >= 0)
             {
-                _nextTime = (int) Game.ClockTime + 1;
+                nextTime = (int) Game.ClockTime + 1;
                 IEnumerable<Obj_AI_Base> minions =
                     ObjectManager.Get<Obj_AI_Base>()
                         .Where(minion => !minion.IsDead && minion.IsValid && minion.Name.ToUpper().StartsWith("SRU"));
@@ -159,11 +159,11 @@ namespace Nocturne.Common
             {
                 int timeClock = jungleCamp.NextRespawnTime - (int) Game.ClockTime;
                 string time = LocalMenu.Item("BuffManager.JungleTimerFormat").GetValue<StringList>().SelectedIndex == 0
-                    ? Helper.FormatTime(timeClock)
+                    ? CommonHelper.FormatTime(timeClock)
                     : timeClock.ToString(CultureInfo.InvariantCulture);
 
                 Vector2 pos = Drawing.WorldToScreen(jungleCamp.Position);
-                Helper.DrawText(mapFont, time, (int) pos.X, (int) pos.Y - 15, Color.White);
+                CommonHelper.DrawText(mapFont, time, (int) pos.X, (int) pos.Y - 15, Color.White);
             }
         }
 
@@ -178,11 +178,11 @@ namespace Nocturne.Common
             {
                 int timeClock = jungleCamp.NextRespawnTime - (int) Game.ClockTime;
                 string time = LocalMenu.Item("BuffManager.JungleTimerFormat").GetValue<StringList>().SelectedIndex == 0
-                    ? Helper.FormatTime(timeClock)
+                    ? CommonHelper.FormatTime(timeClock)
                     : timeClock.ToString(CultureInfo.InvariantCulture);
 
                 Vector2 pos = Drawing.WorldToMinimap(jungleCamp.Position);
-                Helper.DrawText(miniMapFont, time, (int) pos.X, (int) pos.Y - 8, Color.White);
+                CommonHelper.DrawText(miniMapFont, time, (int) pos.X, (int) pos.Y - 8, Color.White);
             }
         }
     }

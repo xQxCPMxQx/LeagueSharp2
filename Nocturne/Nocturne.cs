@@ -8,7 +8,7 @@ using LeagueSharp.Common;
 using Nocturne.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
-using Geometry = Nocturne.Common.Geometry;
+using Geometry = Nocturne.Common.CommonGeometry;
 
 #endregion
 
@@ -18,9 +18,9 @@ namespace Nocturne
     {
 
         
-        public static Common.ItemManager Items;
+        public static Common.CommonItems Items;
         
-        //private static readonly NocturneQ nocturneQ = new NocturneQ();
+        //private static readonly NocturneQ NocturneQ = new NocturneQ();
         //Menu
         
         public static void Initialize()
@@ -31,21 +31,21 @@ namespace Nocturne
         private static void Game_OnGameLoad(EventArgs args)
         {
             PlayerSpells.Initialize();
-            PlayerMenu.Initialize();
+            Modes.ModeConfig.Initialize();
             
             Modes.ModeCombo.Initialize();
             Modes.ModeHarass.Initialize();
 //            Modes.ModeLane.Initialize();
   //          Modes.ModeJungle.Initialize();
-            Common.ItemManager.Initialize();
-            //Common.Items.In
+            Common.CommonItems.Initialize();
             
-            Items = new Common.ItemManager();
+            Items = new Common.CommonItems();
 
             //Create the menu
 
             Game.OnUpdate += Game_OnUpdate;
-            Game.PrintChat($"{Program.ChampionName} Loaded");
+            Game.PrintChat("<font color='#ff3232'>Successfully Loaded: </font><font color='#d4d4d4'><font color='#FFFFFF'>" +  Program.ChampionName + "</font>");
+
             Console.Clear();
         }
 
@@ -57,6 +57,7 @@ namespace Nocturne
             {
                 fComboDamage += ObjectManager.Player.TotalAttackDamage*1.2;
             }
+
             if (PlayerSpells.Q.IsReady())
             {
                 fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q);
@@ -70,10 +71,16 @@ namespace Nocturne
             if (PlayerSpells.R.IsReady())
             {
                 fComboDamage += ObjectManager.Player.GetSpellDamage(t, SpellSlot.R);
+                fComboDamage += ObjectManager.Player.TotalAttackDamage * 3;
             }
 
-            if (Common.SummonerManager.IgniteSlot != SpellSlot.Unknown
-                && ObjectManager.Player.Spellbook.CanUseSpell(Common.SummonerManager.IgniteSlot) == SpellState.Ready)
+            if (CommonItems.Youmuu.IsReady())
+            {
+                fComboDamage += ObjectManager.Player.TotalAttackDamage * 3;
+            }
+
+            if (Common.CommonSummoner.IgniteSlot != SpellSlot.Unknown
+                && ObjectManager.Player.Spellbook.CanUseSpell(Common.CommonSummoner.IgniteSlot) == SpellState.Ready)
             {
                 fComboDamage += ObjectManager.Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Ignite);
             }
@@ -89,12 +96,12 @@ namespace Nocturne
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 ExecuteCombo();
             }
 
-            if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+            if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
                 ExecuteLane();
             }

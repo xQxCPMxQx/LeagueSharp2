@@ -40,7 +40,7 @@ namespace Nocturne.Common
     /// <summary>
     ///     Class that contains the geometry related methods.
     /// </summary>
-    public static class Geometry
+    public static class CommonGeometry
     {
         #region Constants
 

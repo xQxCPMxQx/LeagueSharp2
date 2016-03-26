@@ -29,7 +29,7 @@ namespace Nocturne.Common
         {
             get
             {
-                var drawStatus = AssassinManager.LocalMenu.Item("Draw.Status").GetValue<StringList>().SelectedIndex;
+                var drawStatus = CommonTargetSelector.LocalMenu.Item("Draw.Status").GetValue<StringList>().SelectedIndex;
                 if (KillableEnemy == null || (drawStatus != 2 && drawStatus != 3))
                     return new Vector2(0f, 0f);
 
@@ -47,7 +47,7 @@ namespace Nocturne.Common
         {
             get
             {
-                var t = AssassinManager.GetTarget(Q.Range);
+                var t = CommonTargetSelector.GetTarget(Q.Range);
 
                 if (t.IsValidTarget())
                     return t;
@@ -67,7 +67,7 @@ namespace Nocturne.Common
         }
     }
 
-    internal class AssassinManager
+    internal class CommonTargetSelector
     {
         public static Menu LocalMenu;
         public static Font Text;
@@ -165,7 +165,7 @@ namespace Nocturne.Common
             LocalMenu.AddItem(
                 new MenuItem("Draw.Status", Tab + "Show Enemy:").SetValue(
                     new StringList(new[] {"Off", "Notification Text", "Sprite", "Both"}, 0)));
-            PlayerMenu.MenuConfig.AddSubMenu(LocalMenu);
+            Modes.ModeConfig.MenuConfig.AddSubMenu(LocalMenu);
 
             Game.OnWndProc += Game_OnWndProc;
             Drawing.OnDraw += Drawing_OnDraw;

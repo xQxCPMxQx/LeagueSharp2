@@ -9,7 +9,7 @@ using Font = SharpDX.Direct3D9.Font;
 namespace Nocturne.Common
 {
 
-    public static class Helper
+    public static class CommonHelper
     {
         public static Font Text, TextLittle;
         public static string Tab => "       ";

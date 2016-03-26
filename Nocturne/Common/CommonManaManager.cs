@@ -9,7 +9,7 @@ using Color = SharpDX.Color;
 
 namespace Nocturne.Common
 {
-    internal static class ManaManager
+    internal static class CommonManaManager
     {
         public static Menu LocalMenu { get; private set; }
         public static Spell Q => PlayerSpells.Q;

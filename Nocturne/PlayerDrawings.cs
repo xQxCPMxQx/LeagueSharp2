@@ -5,7 +5,7 @@ using LeagueSharp.Common;
 using Nocturne.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
-using Geometry = Nocturne.Common.Geometry;
+using CommonGeometry = Nocturne.Common.CommonGeometry;
 
 namespace Nocturne
 {
@@ -122,6 +122,7 @@ namespace Nocturne
                 for (int i = 0; i < 2; i++)
                 {
                     MenuLocal.AddItem(new MenuItem(pcMode[i] + "DrawKillableEnemy", "Killable Enemy Notification").SetValue(true));
+                    MenuLocal.AddItem(new MenuItem(pcMode[i] + "DrawKillableEnemyMini", "Killable Enemy [Mini Map]").SetValue(new Circle(true, Color.GreenYellow)));
                 }
 
                 for (int i = 0; i < 2; i++)
@@ -151,9 +152,9 @@ namespace Nocturne
                         InitializeRefreshMenuItems();
                     };
 
-                ManaBarIndicator.Initialize(MenuLocal);
+                CommonManaBar.Initialize(MenuLocal);
             }
-            PlayerMenu.MenuConfig.AddSubMenu(MenuLocal);
+            Modes.ModeConfig.MenuConfig.AddSubMenu(MenuLocal);
             InitializeRefreshMenuItems();
 
             Game.OnUpdate += GameOnOnUpdate;
@@ -162,6 +163,7 @@ namespace Nocturne
 
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += DrawingOnOnEndScene;
+            
 
             //Obj_AI_Base.OnBuffAdd += (sender, args) =>
             //{
@@ -171,7 +173,7 @@ namespace Nocturne
 
             //    if (args.Buff.DisplayName == "CrestoftheAncientGolem")
             //    {
-                    
+
             //        if (BlueBuff.EndTime < Game.Time)
             //        {
             //            BlueBuff.StartTime = args.Buff.StartTime;
@@ -261,17 +263,17 @@ namespace Nocturne
         {
             get
             {
-                if (PlayerMenu.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 0)
+                if (Modes.ModeConfig.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 0)
                 {
                     return PcMode.NewComputer;
                 }
 
-                if (PlayerMenu.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 1)
+                if (Modes.ModeConfig.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 1)
                 {
                     return PcMode.NormalComputer;
                 }
 
-                if (PlayerMenu.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 2)
+                if (Modes.ModeConfig.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 2)
                 {
                     return PcMode.OldComputer;
                 }
@@ -286,7 +288,7 @@ namespace Nocturne
             {
                 //Game.PrintChat("MenuConfig:" + pcMode[PlayerMenu.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex]);
                 //Game.PrintChat("Draw: " + pcMode[MenuLocal.Item("DrawPc.Mode").GetValue<StringList>().SelectedIndex]);
-                return pcMode[PlayerMenu.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex];
+                return pcMode[Modes.ModeConfig.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex];
             }
         }
 
@@ -353,7 +355,7 @@ namespace Nocturne
 
         private static void DrawQBuffStatus()
         {
-            if (PlayerMenu.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None)
+            if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None)
             {
                 return;
             }
@@ -370,16 +372,34 @@ namespace Nocturne
 
         private static void DrawHorror()
         {
-            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && MenuLocal.Item(GetPcModeStringValue + "DrawEStatus").GetValue<StringList>().SelectedIndex == 1 & t.HasNocturneUnspeakableHorror())
+
+            foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => !o.IsDead))
             {
-                if (NocturneUnspeakableHorror.EndTime >= Game.Time)
+                if (obj.IsValidTarget(E.Range) && MenuLocal.Item(GetPcModeStringValue + "DrawEStatus").GetValue<StringList>().SelectedIndex == 1 & obj.HasNocturneUnspeakableHorror())
                 {
-                    var circle = new Geometry.Circle2(t.Position.To2D(), 180f, Game.Time * 100 - NocturneUnspeakableHorror.StartTime * 100, NocturneUnspeakableHorror.EndTime * 100 - NocturneUnspeakableHorror.StartTime * 100).ToPolygon();
-                    circle.Draw(Color.Red, 3);
-                    // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
+                    if (NocturneUnspeakableHorror.EndTime >= Game.Time)
+                    {
+                        var circle =
+                            new CommonGeometry.Circle2(obj.Position.To2D(), 180f,
+                                Game.Time*100 - NocturneUnspeakableHorror.StartTime*100,
+                                NocturneUnspeakableHorror.EndTime*100 - NocturneUnspeakableHorror.StartTime*100)
+                                .ToPolygon();
+                        circle.Draw(Color.Red, 5);
+                        // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
+                    }
                 }
+
             }
+            //var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            //if (t.IsValidTarget() && MenuLocal.Item(GetPcModeStringValue + "DrawEStatus").GetValue<StringList>().SelectedIndex == 1 & t.HasNocturneUnspeakableHorror())
+            //{
+            //    if (NocturneUnspeakableHorror.EndTime >= Game.Time)
+            //    {
+            //        var circle = new Geometry.Circle2(t.Position.To2D(), 180f, Game.Time * 100 - NocturneUnspeakableHorror.StartTime * 100, NocturneUnspeakableHorror.EndTime * 100 - NocturneUnspeakableHorror.StartTime * 100).ToPolygon();
+            //        circle.Draw(Color.Red, 3);
+            //        // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
+            //    }
+            //}
 
         }
         private static void DrawRStatus()
@@ -388,7 +408,7 @@ namespace Nocturne
             {
                 if (NocturneParanoia.EndTime >= Game.Time)
                 {
-                    var circle = new Geometry.Circle2(ObjectManager.Player.Position.To2D(), 180f, Game.Time * 100 - NocturneParanoia.StartTime * 100, NocturneParanoia.EndTime * 100 - NocturneParanoia.StartTime * 100).ToPolygon();
+                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 180f, Game.Time * 100 - NocturneParanoia.StartTime * 100, NocturneParanoia.EndTime * 100 - NocturneParanoia.StartTime * 100).ToPolygon();
                     circle.Draw(Color.Coral, 3);
                     // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
                 }
@@ -403,8 +423,8 @@ namespace Nocturne
             {
                 if (BlueBuff.EndTime >= Game.Time)
                 {
-                    var circle = new Geometry.Circle2(ObjectManager.Player.Position.To2D(), 150f, Game.Time - BlueBuff.StartTime, BlueBuff.EndTime - BlueBuff.StartTime ).ToPolygon();
-                    circle.Draw(Color.Blue, 3);
+                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 150f, Game.Time - BlueBuff.StartTime, BlueBuff.EndTime - BlueBuff.StartTime ).ToPolygon();
+                    circle.Draw(Color.Blue, 2);
                  //   Drawing.DrawCircle(ObjectManager.Player.Position, 150f, System.Drawing.Color.DarkBlue);
                 }
             }
@@ -413,8 +433,8 @@ namespace Nocturne
             {
                 if (RedBuff.EndTime >= Game.Time)
                 {
-                    var circle = new Geometry.Circle2(ObjectManager.Player.Position.To2D(), 130f, Game.Time - RedBuff.StartTime, RedBuff.EndTime - RedBuff.StartTime).ToPolygon();
-                    circle.Draw(Color.Red, 3);
+                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 130f, Game.Time - RedBuff.StartTime, RedBuff.EndTime - RedBuff.StartTime).ToPolygon();
+                    circle.Draw(Color.Red, 2);
                     //Drawing.DrawCircle(ObjectManager.Player.Position, 130f, System.Drawing.Color.IndianRed);
                 }
             }
@@ -425,11 +445,26 @@ namespace Nocturne
             if (MenuLocal.Item(GetPcModeStringValue + "DrawRRange").GetValue<StringList>().SelectedIndex == 2 || MenuLocal.Item(GetPcModeStringValue + "DrawRRange").GetValue<StringList>().SelectedIndex == 3)
             {
             #pragma warning disable 618
-                Utility.DrawCircle(ObjectManager.Player.Position, R.Range, R.IsReady() ? Color.GreenYellow: Color.DimGray, thickness: 1, quality: 23, onMinimap: true);
+                Utility.DrawCircle(ObjectManager.Player.Position, R.Range, R.IsReady() ? Color.Coral: Color.DimGray, thickness: 1, quality: 23, onMinimap: true);
             #pragma warning restore 618
             }
+
+            var drawKillableEnemyMini = MenuLocal.Item(GetPcModeStringValue + "DrawKillableEnemyMini").GetValue<Circle>();
+            if (drawKillableEnemyMini.Active)
+            {
+                foreach (
+                    var e in
+                        HeroManager.Enemies.Where(
+                            e => e.IsVisible && !e.IsDead && !e.IsZombie && e.Health < Nocturne.GetComboDamage(e)))
+                {
+                    if ((int) Game.Time%2 == 1)
+                    {
+                        Utility.DrawCircle(e.Position, 850, drawKillableEnemyMini.Color, 2, 30, true);
+                    }
+                }
+            }
         }
-        
+
         private static void DrawSpells()
         {
             var drawQ = MenuLocal.Item(GetPcModeStringValue + "DrawQRange").GetValue<Circle>();
@@ -458,7 +493,7 @@ namespace Nocturne
                 var t = KillableEnemyAa;
                 if (t.Item1 != null && t.Item1.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 800) && t.Item2 > 0)
                 {
-                    Helper.DrawText(Helper.Text, $"{t.Item1.ChampionName}: {t.Item2} x AA Damage = Kill", (int)t.Item1.HPBarPosition.X + 65, (int)t.Item1.HPBarPosition.Y + 5, SharpDX.Color.White);
+                    CommonHelper.DrawText(CommonHelper.Text, $"{t.Item1.ChampionName}: {t.Item2} x AA Damage = Kill", (int)t.Item1.HPBarPosition.X + 65, (int)t.Item1.HPBarPosition.Y + 5, SharpDX.Color.White);
                 }
             }
         }
