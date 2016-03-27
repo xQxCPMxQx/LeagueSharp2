@@ -13,7 +13,7 @@ namespace Nocturne.Common
 
         public static int[] SpellLevels;
 
-        public static void Initialize()
+        public static void Initialize(Menu ParentMenu)
         {
             LocalMenu = new Menu("Auto Level", "Auto Level").SetFontStyle(FontStyle.Regular, Color.Aquamarine);
             LocalMenu.AddItem(
@@ -46,7 +46,7 @@ namespace Nocturne.Common
                     break;
             }
 
-            Modes.ModeConfig.MenuConfig.AddSubMenu(LocalMenu);
+            ParentMenu.AddSubMenu(LocalMenu);
 
             Game.OnUpdate += Game_OnUpdate;
 

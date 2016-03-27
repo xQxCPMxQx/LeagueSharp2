@@ -27,7 +27,7 @@ namespace Nocturne.Common
         private static int nextTime;
 
 
-        public static void Initialize(Menu mainMenu)
+        public static void Initialize(Menu ParentMenu)
         {
             LocalMenu = new Menu("Buff Manager", "BuffManager").SetFontStyle(FontStyle.Regular, Color.Aquamarine);
             {
@@ -87,7 +87,7 @@ namespace Nocturne.Common
                 mapFont = new Font(Drawing.Direct3DDevice, new System.Drawing.Font("Calibri", 16));
                 miniMapFont = new Font(Drawing.Direct3DDevice, new System.Drawing.Font("Calibri", 8));
             }
-            mainMenu.AddSubMenu(LocalMenu);
+            ParentMenu.AddSubMenu(LocalMenu);
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += Drawing_OnEndScene;
@@ -96,6 +96,11 @@ namespace Nocturne.Common
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            if (!LocalMenu.Item("JungleActive").GetValue<bool>())
+            {
+                return;
+            }
+
             if (LocalMenu.Item("BuffManager.Active").GetValue<StringList>().SelectedIndex == 0)
             {
                 return;
@@ -150,6 +155,11 @@ namespace Nocturne.Common
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (!LocalMenu.Item("JungleActive").GetValue<bool>())
+            {
+                return;
+            }
+
             if (LocalMenu.Item("BuffManager.Active").GetValue<StringList>().SelectedIndex == 0)
             {
                 return;
@@ -169,6 +179,11 @@ namespace Nocturne.Common
 
         private static void Drawing_OnEndScene(EventArgs args)
         {
+            if (!LocalMenu.Item("JungleActive").GetValue<bool>())
+            {
+                return;
+            }
+
             if (LocalMenu.Item("BuffManager.Active").GetValue<StringList>().SelectedIndex == 0)
             {
                 return;

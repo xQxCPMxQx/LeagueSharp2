@@ -92,11 +92,10 @@ namespace Nocturne.Common
 
         private static Menu menu;
 
-        public static void Initialize()
+        public static void Initialize(Menu ParentMenu)
         {
-            menu =
-                Config.AddSubMenu(new Menu("Auto Bush Revealer", "AutoBushRevealer").SetFontStyle(FontStyle.Regular,
-                    Color.Aquamarine));
+            menu = new Menu("Auto Bush Revealer", "AutoBushRevealer").SetFontStyle(FontStyle.Regular, Color.Aquamarine);
+            ParentMenu.AddSubMenu(menu);
 
             var useWardsMenu = new Menu("Use Wards: ", "AutoBushUseWards");
             menu.AddSubMenu(useWardsMenu);

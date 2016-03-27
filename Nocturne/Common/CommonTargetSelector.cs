@@ -85,7 +85,7 @@ namespace Nocturne.Common
             }
         }
 
-        public static void Initialize()
+        public static void Initialize(Menu ParentMenu)
         {
             Text = new Font(
                 Drawing.Direct3DDevice,
@@ -165,7 +165,7 @@ namespace Nocturne.Common
             LocalMenu.AddItem(
                 new MenuItem("Draw.Status", Tab + "Show Enemy:").SetValue(
                     new StringList(new[] {"Off", "Notification Text", "Sprite", "Both"}, 0)));
-            Modes.ModeConfig.MenuConfig.AddSubMenu(LocalMenu);
+            ParentMenu.AddSubMenu(LocalMenu);
 
             Game.OnWndProc += Game_OnWndProc;
             Drawing.OnDraw += Drawing_OnDraw;

@@ -106,6 +106,7 @@ namespace Nocturne.Evade
             DangerousTargetedSpells.Add(new DangerousSpells("zed", SpellSlot.R));
             DangerousTargetedSpells.Add(new DangerousSpells("tristana", SpellSlot.R));
             DangerousTargetedSpells.Add(new DangerousSpells("syndra", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("nasus", SpellSlot.W));
         }
 
         public static bool Evading
@@ -1271,7 +1272,7 @@ namespace Nocturne.Evade
             {
                 var heropos = Drawing.WorldToScreen(ObjectManager.Player.Position);
                 var enabled = Config.Menu.Item("Enabled").GetValue<KeyBind>().Active;
-                Drawing.DrawText(heropos.X, heropos.Y, enabled ? Color.GreenYellow : Color.Gray, "W Shield: " + (enabled ? "ON" : "Off"));
+                Drawing.DrawText(heropos.X - 20, heropos.Y -20, enabled ? Color.GreenYellow : Color.Gray, "W Shield: " + (enabled ? "ON" : "Off"));
             }
 
             var Border = Config.Menu.Item("Border").GetValue<Slider>().Value;

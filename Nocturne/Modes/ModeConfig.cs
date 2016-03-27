@@ -19,6 +19,7 @@ namespace Nocturne.Modes
         public static Menu MenuFarming { get; private set; }
         public static Menu MenuFlee { get; private set; }
         public static Menu MenuMisc { get; private set; }
+        public static Menu MenuTools { get; private set; }
         // to-do: add ganker mode combo mode + use Q with E Combo
         public static void Initialize()
         {
@@ -28,11 +29,12 @@ namespace Nocturne.Modes
             Orbwalker = new Orbwalking.Orbwalker(MenuConfig.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
 
-            Common.CommonTargetSelector.Initialize();
-            Common.CommonAutoLevel.Initialize();
-            Common.CommonAutoBush.Initialize();
+            MenuTools = new Menu("Tools", "Tools");
+            Common.CommonTargetSelector.Initialize(MenuTools);
+            Common.CommonAutoLevel.Initialize(MenuTools);
+            Common.CommonAutoBush.Initialize(MenuTools);
             Common.CommonHelper.Initialize();
-            
+            MenuConfig.AddSubMenu(MenuTools);
             /*
                 MenuCombo = new Menu("Combo", "ExecuteCombo");
                 MenuConfig.AddSubMenu(MenuCombo);
@@ -50,6 +52,7 @@ namespace Nocturne.Modes
                 MenuConfig.AddSubMenu(MenuKeys);
             }
 
+
             MenuFarming = new Menu("Farm", "Farm");
             {
                 Modes.ModeLane.Initialize(MenuFarming);
@@ -60,18 +63,11 @@ namespace Nocturne.Modes
             Common.CommonManaManager.Initialize(MenuFarming);
             Common.CommonJungleTimer.Initialize(MenuFarming);
 
-            // Misc
-            MenuMisc = new Menu("Misc", "Misc");
-            {
-                MenuMisc.AddItem(new MenuItem("InterruptSpells", "W: Interrupt Spells").SetValue(true));
-                MenuConfig.AddSubMenu(MenuMisc);
-            }
-
             MenuConfig.AddItem(new MenuItem("Game.Mode", "Game Mode:").SetValue(new StringList(new[] { "Auto", "Gank Mode", "Assassin Mode" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
             MenuConfig.AddItem(new MenuItem("Pc.Mode", "How is your own Computer:").SetValue(new StringList(new[] { "New Computer", "Old Computer" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
 
             new PlayerDrawings().Initialize();
-                    
+
             Evade.EvadeMain.Initialize();
 
             MenuConfig.AddToMainMenu();

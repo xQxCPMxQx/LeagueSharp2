@@ -373,33 +373,33 @@ namespace Nocturne
         private static void DrawHorror()
         {
 
-            foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => !o.IsDead))
-            {
-                if (obj.IsValidTarget(E.Range) && MenuLocal.Item(GetPcModeStringValue + "DrawEStatus").GetValue<StringList>().SelectedIndex == 1 & obj.HasNocturneUnspeakableHorror())
-                {
-                    if (NocturneUnspeakableHorror.EndTime >= Game.Time)
-                    {
-                        var circle =
-                            new CommonGeometry.Circle2(obj.Position.To2D(), 180f,
-                                Game.Time*100 - NocturneUnspeakableHorror.StartTime*100,
-                                NocturneUnspeakableHorror.EndTime*100 - NocturneUnspeakableHorror.StartTime*100)
-                                .ToPolygon();
-                        circle.Draw(Color.Red, 5);
-                        // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
-                    }
-                }
-
-            }
-            //var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            //if (t.IsValidTarget() && MenuLocal.Item(GetPcModeStringValue + "DrawEStatus").GetValue<StringList>().SelectedIndex == 1 & t.HasNocturneUnspeakableHorror())
+            //foreach (var obj in ObjectManager.Get<Obj_AI_Base>().Where(o => !o.IsDead))
             //{
-            //    if (NocturneUnspeakableHorror.EndTime >= Game.Time)
+            //    if (obj.IsValidTarget(E.Range) && MenuLocal.Item(GetPcModeStringValue + "DrawEStatus").GetValue<StringList>().SelectedIndex == 1 & obj.HasNocturneUnspeakableHorror())
             //    {
-            //        var circle = new Geometry.Circle2(t.Position.To2D(), 180f, Game.Time * 100 - NocturneUnspeakableHorror.StartTime * 100, NocturneUnspeakableHorror.EndTime * 100 - NocturneUnspeakableHorror.StartTime * 100).ToPolygon();
-            //        circle.Draw(Color.Red, 3);
-            //        // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
+            //        if (NocturneUnspeakableHorror.EndTime >= Game.Time)
+            //        {
+            //            var circle =
+            //                new CommonGeometry.Circle2(obj.Position.To2D(), 180f,
+            //                    Game.Time*100 - NocturneUnspeakableHorror.StartTime*100,
+            //                    NocturneUnspeakableHorror.EndTime*100 - NocturneUnspeakableHorror.StartTime*100)
+            //                    .ToPolygon();
+            //            circle.Draw(Color.Red, 5);
+            //            // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
+            //        }
             //    }
+
             //}
+            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget() && MenuLocal.Item(GetPcModeStringValue + "DrawEStatus").GetValue<StringList>().SelectedIndex == 1 & t.HasNocturneUnspeakableHorror())
+            {
+                if (NocturneUnspeakableHorror.EndTime >= Game.Time)
+                {
+                    var circle = new CommonGeometry.Circle2(t.Position.To2D(), 180f, Game.Time * 100 - NocturneUnspeakableHorror.StartTime * 100, NocturneUnspeakableHorror.EndTime * 100 - NocturneUnspeakableHorror.StartTime * 100).ToPolygon();
+                    circle.Draw(Color.Red, 3);
+                    // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
+                }
+            }
 
         }
         private static void DrawRStatus()

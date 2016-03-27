@@ -46,6 +46,7 @@ namespace Nocturne.Modes
             {
                 return;
             }
+
             Execute();
         }
         static List<Obj_AI_Base> Q_GetCollisionMinions(Obj_AI_Hero source, Vector3 targetposition)
