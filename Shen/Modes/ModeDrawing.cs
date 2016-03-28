@@ -6,7 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
+using Shen.Champion;
 using Shen.Common;
+using Color = System.Drawing.Color;
 
 namespace Shen.Modes
 {
@@ -44,6 +47,11 @@ namespace Shen.Modes
 
         private static void DrawingOnOnDraw(EventArgs args)
         {
+            if (ObjectManager.Player.IsDead)
+            {
+                return;
+            }
+
             var drawQ = LocalMenu.Item("Draw.Q").GetValue<Circle>();
             if (drawQ.Active && Shen.Champion.PlayerSpells.Q.Level > 0)
             {
@@ -63,9 +71,9 @@ namespace Shen.Modes
             }
 
             var drawEf = LocalMenu.Item("Draw.EF").GetValue<Circle>();
-            if (drawEf.Active)
+            if (drawEf.Active && ModePerma.FlashEActive)
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, Shen.Champion.PlayerSpells.E.Range + 430,
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Shen.Champion.PlayerSpells.E.Range + 410,
                     drawEf.Color);
             }
 
@@ -89,7 +97,7 @@ namespace Shen.Modes
                         Shen.Champion.SpiritUnit.SwordUnit.Position.To2D(), 50);
                     var x = toPolygon.ToPolygon();
 
-                    x.Draw(drawSwordHitPosition.Color, 2);
+                    x.Draw(drawSwordHitPosition.Color, 1);
                 }
             }
         }

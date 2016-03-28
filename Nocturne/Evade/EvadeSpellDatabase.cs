@@ -244,12 +244,12 @@ namespace Nocturne.Evade
 
             #endregion
 
-            #region Udyr
+            #region Nocturne
 
-            if (ObjectManager.Player.ChampionName == "Udyr")
+            if (ObjectManager.Player.ChampionName == "Nocturne")
             {
                 spell = new MoveBuffData(
-                    "Udyr E", SpellSlot.E, 100, 3,
+                    "Nocturne E", SpellSlot.E, 100, 3,
                     () =>
                         ObjectManager.Player.MoveSpeed *
                         (1 + 0.1f + 0.05f * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level));

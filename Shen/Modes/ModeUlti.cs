@@ -43,23 +43,23 @@ namespace Shen.Modes
         {
             LocalMenu = new LeagueSharp.Common.Menu("Team Mate Settings", "TeamMates").SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
 
-            var menuImportant = new LeagueSharp.Common.Menu("Important Ally", "Menu.Important");
+            //var menuImportant = new LeagueSharp.Common.Menu("Important Ally", "Menu.Important");
             
-            string[] strImportantAlly = new string[5];
-            strImportantAlly[0] = "No one are important!";
+            //string[] strImportantAlly = new string[5];
+            //strImportantAlly[0] = "No one are important!";
 
-            List<Obj_AI_Hero> allyList = HeroManager.Allies.Where(a => !a.IsMe).ToList();
+            //List<Obj_AI_Hero> allyList = HeroManager.Allies.Where(a => !a.IsMe).ToList();
 
-            for (int i = 0; i < allyList.Count; i++)
-            {
-                strImportantAlly[i + 1] = allyList[i].CharData.BaseSkinName;
-            }
+            //for (int i = 0; i < allyList.Count; i++)
+            //{
+            //    strImportantAlly[i + 1] = allyList[i].CharData.BaseSkinName;
+            //}
 
-            menuImportant.AddItem(new MenuItem("Important.Champion", "Ally Champion:").SetValue(new StringList(strImportantAlly, 0)).SetFontStyle(FontStyle.Regular, Color.GreenYellow));
-            menuImportant.AddItem(new MenuItem("Important.ShowStatus", "Show Important Ally HP Status").SetValue(new StringList(new []{"Off", "On"}, 1)).SetFontStyle(FontStyle.Regular, Color.Aqua));
-            menuImportant.AddItem(new MenuItem("Important.ShowPosition", "Show Important Ally Position in Team Fight").SetValue(new Circle(true, System.Drawing.Color.Aqua)).SetFontStyle(FontStyle.Regular, Color.Aqua));
+            //menuImportant.AddItem(new MenuItem("Important.Champion", "Ally Champion:").SetValue(new StringList(strImportantAlly, 0)).SetFontStyle(FontStyle.Regular, Color.GreenYellow));
+            //menuImportant.AddItem(new MenuItem("Important.ShowStatus", "Show Important Ally HP Status").SetValue(new StringList(new []{"Off", "On"}, 1)).SetFontStyle(FontStyle.Regular, Color.Aqua));
+            //menuImportant.AddItem(new MenuItem("Important.ShowPosition", "Show Important Ally Position in Team Fight").SetValue(new Circle(true, System.Drawing.Color.Aqua)).SetFontStyle(FontStyle.Regular, Color.Aqua));
 
-            LocalMenu.AddSubMenu(menuImportant);
+            //LocalMenu.AddSubMenu(menuImportant);
 
             foreach (var ally in HeroManager.Allies.Where(a => !a.IsMe))
             {

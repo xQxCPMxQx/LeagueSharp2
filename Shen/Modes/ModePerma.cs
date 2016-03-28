@@ -1,6 +1,8 @@
 ﻿using System;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
+using Shen.Champion;
 
 namespace Shen.Modes
 {
@@ -29,18 +31,21 @@ namespace Shen.Modes
             {
                 ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 
-                var t = Modes.ModeSelector.GetTarget(E.Range + 430, LeagueSharp.Common.TargetSelector.DamageType.Physical);
+                var t = Modes.ModeSelector.GetTarget(E.Range + 500, LeagueSharp.Common.TargetSelector.DamageType.Physical);
+                
                 if (!t.IsValidTarget() || !E.IsReady() || ObjectManager.Player.Spellbook.CanUseSpell(Common.SummonerManager.FlashSlot) != SpellState.Ready)
                 {
                     return;
                 }
 
-                if (ObjectManager.Player.Distance(t) > E.Range && E.IsReady() && t != null &&
+                var hithere = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position) * 60;
+                if (ObjectManager.Player.Distance(t) > E.Range && E.IsReady() &&
+                    ObjectManager.Player.Position.Distance(hithere) <= 430 + E.Range &&
                     Common.SummonerManager.FlashSlot != SpellSlot.Unknown &&
                     ObjectManager.Player.Spellbook.CanUseSpell(Common.SummonerManager.FlashSlot) == SpellState.Ready)
                 {
-                    ObjectManager.Player.Spellbook.CastSpell(Common.SummonerManager.FlashSlot, t.ServerPosition);
-                    Utility.DelayAction.Add(100, () => E.Cast(t.Position));
+                        ObjectManager.Player.Spellbook.CastSpell(Common.SummonerManager.FlashSlot, t.ServerPosition);
+                        Utility.DelayAction.Add(100, () => Shen.Champion.PlayerSpells.E.Cast(hithere));
                 }
             }
 

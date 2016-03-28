@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
 
 namespace Shen.Champion
 {
@@ -22,8 +23,8 @@ namespace Shen.Champion
 
             W = new Spell(SpellSlot.W);
 
-            E = new Spell(SpellSlot.E, 480f);
-            E.SetSkillshot(0.20f, 80f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            E = new Spell(SpellSlot.E, 540f);
+            E.SetSkillshot(0.20f, 100f, float.MaxValue, false, SkillshotType.SkillshotLine);
             SpellList.Add(E);
 
             R = new Spell(SpellSlot.R);
@@ -31,9 +32,13 @@ namespace Shen.Champion
 
         public static void CastE(Obj_AI_Base t)
         {
-            var ePrediction = Shen.Champion.PlayerSpells.E.GetPrediction(t);
-            var hithere = ePrediction.CastPosition.Extend(ObjectManager.Player.Position, -140);
-            if (ePrediction.Hitchance >= HitChance.High)
+            if (!E.CanCast(t))
+            {
+                return;
+            }
+
+            var hithere = t.Position + Vector3.Normalize(t.ServerPosition - ObjectManager.Player.Position) * 60;
+            if (hithere.Distance(ObjectManager.Player.Position) < PlayerSpells.E.Range)
             {
                 Shen.Champion.PlayerSpells.E.Cast(hithere);
             }

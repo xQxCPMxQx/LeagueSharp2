@@ -7,7 +7,7 @@ using SharpDX;
 using Color = System.Drawing.Color;
 using CommonGeometry = Nocturne.Common.CommonGeometry;
 
-namespace Nocturne
+namespace Nocturne.Modes
 {
     using System.Linq;
     using LeagueSharp;
@@ -50,7 +50,7 @@ namespace Nocturne
         OldComputer
     }
 
-    internal class PlayerDrawings
+    internal class ModeDraw
     {
         public static Menu MenuLocal { get; private set; }
         public static Menu SubMenuSpells { get; private set; }
@@ -460,6 +460,7 @@ namespace Nocturne
                     if ((int) Game.Time%2 == 1)
                     {
                         Utility.DrawCircle(e.Position, 850, drawKillableEnemyMini.Color, 2, 30, true);
+                        Render.Circle.CreateVertexes();
                     }
                 }
             }

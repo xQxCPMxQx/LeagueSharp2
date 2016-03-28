@@ -116,7 +116,7 @@
     <Compile Include="Modes\ModeCombo.cs" />
     <Compile Include="Modes\ModePerma.cs" />
     <Compile Include="Nocturne.cs" />
-    <Compile Include="PlayerDrawings.cs" />
+    <Compile Include="Modes\ModeDraw.cs" />
     <Compile Include="Common\CommonItems.cs" />
     <Compile Include="Common\CommonAutoLevel.cs" />
     <Compile Include="Common\CommonManaManager.cs" />

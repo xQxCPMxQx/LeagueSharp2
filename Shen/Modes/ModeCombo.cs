@@ -61,7 +61,7 @@ namespace Shen.Modes
                 var t = Modes.ModeSelector.GetTarget(E.Range, LeagueSharp.Common.TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget(E.Range) && t.UnderAllyTurret())
                 {
-                    E.Cast(t);
+                    PlayerSpells.CastE(t);
                 }
             }
 
@@ -82,7 +82,7 @@ namespace Shen.Modes
 
             if (LocalMenu.Item("Combo.UseE").GetValue<StringList>().SelectedIndex == 1 && t.UnderAllyTurret() && E.IsReady())
             {
-                E.Cast(t);
+                PlayerSpells.CastE(t);
             }
 
             if (Q.IsReady() && t.IsValidTarget(Q.Range))
@@ -92,7 +92,7 @@ namespace Shen.Modes
 
             if (E.IsReady())
             {
-                E.Cast(t.Position);
+                PlayerSpells.CastE(t);
             }
 
 

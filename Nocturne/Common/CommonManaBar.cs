@@ -16,7 +16,7 @@ namespace Nocturne.Common
         public static Device DxDevice = Drawing.Direct3DDevice;
 
         public static float Width = 104;
-        public static Menu LocalMenu => PlayerDrawings.SubMenuManaBarIndicator;
+        public static Menu LocalMenu => Modes.ModeDraw.SubMenuManaBarIndicator;
         private static Spell Q => PlayerSpells.Q;
         private static Spell W => PlayerSpells.W;
         private static Spell E => PlayerSpells.E;
@@ -83,22 +83,22 @@ namespace Nocturne.Common
 
                 var totalCostMana = 0;
 
-                if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.Q").GetValue<bool>())
+                if (LocalMenu.Item(Modes.ModeDraw.GetPcModeStringValue + "DrawManaBar.Q").GetValue<bool>())
                 {
                     totalCostMana += qMana[Q.Level];
                 }
 
-                if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.W").GetValue<bool>())
+                if (LocalMenu.Item(Modes.ModeDraw.GetPcModeStringValue + "DrawManaBar.W").GetValue<bool>())
                 {
                     totalCostMana += wMana[W.Level];
                 }
 
-                if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.E").GetValue<bool>())
+                if (LocalMenu.Item(Modes.ModeDraw.GetPcModeStringValue + "DrawManaBar.E").GetValue<bool>())
                 {
                     totalCostMana += eMana[E.Level];
                 }
 
-                if (LocalMenu.Item(PlayerDrawings.GetPcModeStringValue + "DrawManaBar.R").GetValue<bool>())
+                if (LocalMenu.Item(Modes.ModeDraw.GetPcModeStringValue + "DrawManaBar.R").GetValue<bool>())
                 {
                     totalCostMana += rMana[R.Level];
                 }

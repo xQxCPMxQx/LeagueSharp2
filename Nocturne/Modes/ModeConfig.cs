@@ -66,7 +66,7 @@ namespace Nocturne.Modes
             MenuConfig.AddItem(new MenuItem("Game.Mode", "Game Mode:").SetValue(new StringList(new[] { "Auto", "Gank Mode", "Assassin Mode" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
             MenuConfig.AddItem(new MenuItem("Pc.Mode", "How is your own Computer:").SetValue(new StringList(new[] { "New Computer", "Old Computer" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
 
-            new PlayerDrawings().Initialize();
+            new ModeDraw().Initialize();
 
             Evade.EvadeMain.Initialize();
 
