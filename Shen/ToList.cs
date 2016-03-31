@@ -9,20 +9,6 @@ namespace Shen
     class ToList
     {
 
-        // Menüleri Düzenle
-        //// R için Menü Oluştur
-        /// Combo Menu Oluştur
-        /// Harass Menu Oluştur
-        /// Jungle Menu Oluştur
-        /// Drawings Menu Oluştur
-        /// Misc Menu Oluştur 
-        /// 
-        /// 
-        /// 
-        /// 
-        /// 
-        /// 
-        /// 
-        /// 
+       
     }
 }
