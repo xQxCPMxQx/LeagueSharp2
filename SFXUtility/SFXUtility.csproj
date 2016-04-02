@@ -1,0 +1,392 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2D7486BB-8A00-4CDB-AE64-8BF17463B518}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SFXUtility</RootNamespace>
+    <AssemblyName>SFXUtility</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+    <OutputPath>bin\Release</OutputPath>
+    <PrimaryVersionType>AssemblyVersionAttribute</PrimaryVersionType>
+    <AssemblyInfoFilePath>Properties\AssemblyInfo.cs</AssemblyInfoFilePath>
+    <UpdateAssemblyVersion>True</UpdateAssemblyVersion>
+    <UpdateAssemblyFileVersion>True</UpdateAssemblyFileVersion>
+    <UpdateAssemblyInfoVersion>True</UpdateAssemblyInfoVersion>
+    <AssemblyVersionSettings>None.None.IncrementOnDemandWithReset.Increment</AssemblyVersionSettings>
+    <AssemblyFileVersionSettings>None.None.IncrementOnDemandWithReset.Increment</AssemblyFileVersionSettings>
+    <AssemblyInfoVersionSettings>None.None.IncrementOnDemandWithReset.Increment</AssemblyInfoVersionSettings>
+    <AssemblyVersion>0.9.0.12</AssemblyVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>5</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LeagueSharp">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp.Common">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Bootstrap.cs" />
+    <Compile Include="Classes\Base.cs" />
+    <Compile Include="Classes\ImageLoader.cs" />
+    <Compile Include="Classes\MDrawing.cs" />
+    <Compile Include="Classes\Parent.cs" />
+    <Compile Include="Classes\Report.cs" />
+    <Compile Include="Data\Altars.cs" />
+    <Compile Include="Data\Items.cs" />
+    <Compile Include="Data\Relics.cs" />
+    <Compile Include="Data\Jungle.cs" />
+    <Compile Include="Data\Summoners.cs" />
+    <Compile Include="Features\Activators\Activators.cs" />
+    <Compile Include="Features\Activators\AntiRengar.cs" />
+    <Compile Include="Features\Activators\KillSteal.cs" />
+    <Compile Include="Features\Activators\Revealer.cs" />
+    <Compile Include="Features\Detectors\Detectors.cs" />
+    <Compile Include="Features\Detectors\Gank.cs" />
+    <Compile Include="Features\Detectors\Replay.cs" />
+    <Compile Include="Features\Drawings\Clock.cs" />
+    <Compile Include="Features\Drawings\Drawings.cs" />
+    <Compile Include="Features\Drawings\LaneMomentum.cs" />
+    <Compile Include="Features\Drawings\WallJumpSpot.cs" />
+    <Compile Include="Features\Events\AutoLeveler.cs" />
+    <Compile Include="Features\Activators\Potion.cs" />
+    <Compile Include="Features\Activators\Smite.cs" />
+    <Compile Include="Features\Drawings\Health.cs" />
+    <Compile Include="Features\Events\Events.cs" />
+    <Compile Include="Features\Events\Game.cs" />
+    <Compile Include="Features\Others\AntiFountain.cs" />
+    <Compile Include="Features\Activators\AutoJump.cs" />
+    <Compile Include="Features\Others\Flash.cs" />
+    <Compile Include="Features\Others\Humanize.cs" />
+    <Compile Include="Features\Drawings\DamageIndicator.cs" />
+    <Compile Include="Features\Others\AutoLantern.cs" />
+    <Compile Include="Features\Others\MoveTo.cs" />
+    <Compile Include="Features\Others\Others.cs" />
+    <Compile Include="Features\Drawings\PerfectWard.cs" />
+    <Compile Include="Features\Others\Ping.cs" />
+    <Compile Include="Features\Others\TurnAround.cs" />
+    <Compile Include="Features\Timers\Altar.cs" />
+    <Compile Include="Features\Timers\Relic.cs" />
+    <Compile Include="Features\Timers\Inhibitor.cs" />
+    <Compile Include="Features\Trackers\Sidebar.cs" />
+    <Compile Include="Features\Trackers\Destination.cs" />
+    <Compile Include="Features\Drawings\Clone.cs" />
+    <Compile Include="Features\Timers\Cooldown.cs" />
+    <Compile Include="Features\Trackers\LastPosition.cs" />
+    <Compile Include="Features\Detectors\Teleport.cs" />
+    <Compile Include="Features\Timers\Ability.cs" />
+    <Compile Include="Features\Timers\Jungle.cs" />
+    <Compile Include="Features\Drawings\LasthitMarker.cs" />
+    <Compile Include="Features\Drawings\Range.cs" />
+    <Compile Include="Features\Timers\Timers.cs" />
+    <Compile Include="Features\Trackers\Trackers.cs" />
+    <Compile Include="Features\Trackers\Ward.cs" />
+    <Compile Include="Features\Drawings\Waypoint.cs" />
+    <Compile Include="Features\Events\Trinket.cs" />
+    <Compile Include="Classes\Child.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="Interfaces\IChild.cs" />
+    <Compile Include="Library\Draw.cs" />
+    <Compile Include="Library\Extensions\LeagueSharp\Obj_AI_HeroExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\BitmapExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\CharExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\ColorExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\DictionaryExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\FloatExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\IntegerExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\ListExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\ObjectExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\OtherExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\StringExtensions.cs" />
+    <Compile Include="Library\Extensions\SharpDX\FontExtension.cs" />
+    <Compile Include="Library\Extensions\SharpDX\SpriteExtension.cs" />
+    <Compile Include="Library\Extensions\SharpDX\VectorExtensions.cs" />
+    <Compile Include="Library\GameObjects.cs" />
+    <Compile Include="Library\Logger\ConsoleLogger.cs" />
+    <Compile Include="Library\Logger\FileLogger.cs" />
+    <Compile Include="Library\Logger\ILogger.cs" />
+    <Compile Include="Library\Logger\SimpleFileLogger.cs" />
+    <Compile Include="Library\MinionManager.cs" />
+    <Compile Include="Library\ProducerConsumer.cs" />
+    <Compile Include="Library\Reset.cs" />
+    <Compile Include="Library\Update.cs" />
+    <Compile Include="Library\Utils.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SFXUtility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\default.licenseheader">
+      <Link>default.licenseheader</Link>
+    </None>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icon.ico" />
+    <Content Include="Resources\CD\CD_Hud.png" />
+    <Content Include="Resources\CD\CD_HudSelf.png" />
+    <Content Include="Resources\CD\CD_summonerbarrier.png" />
+    <Content Include="Resources\CD\CD_summonerboost.png" />
+    <Content Include="Resources\CD\CD_summonerdot.png" />
+    <Content Include="Resources\CD\CD_summonerexhaust.png" />
+    <Content Include="Resources\CD\CD_summonerflash.png" />
+    <Content Include="Resources\CD\CD_summonerhaste.png" />
+    <Content Include="Resources\CD\CD_summonerheal.png" />
+    <Content Include="Resources\CD\CD_summonersmite.png" />
+    <Content Include="Resources\CD\CD_summonerteleport.png" />
+    <Content Include="Resources\Champions\Aatrox.png" />
+    <Content Include="Resources\Champions\Ahri.png" />
+    <Content Include="Resources\Champions\Akali.png" />
+    <Content Include="Resources\Champions\Alistar.png" />
+    <Content Include="Resources\Champions\Amumu.png" />
+    <Content Include="Resources\Champions\Anivia.png" />
+    <Content Include="Resources\Champions\Annie.png" />
+    <Content Include="Resources\Champions\Ashe.png" />
+    <Content Include="Resources\Champions\Azir.png" />
+    <Content Include="Resources\Champions\Bard.png" />
+    <Content Include="Resources\Champions\Blitzcrank.png" />
+    <Content Include="Resources\Champions\Brand.png" />
+    <Content Include="Resources\Champions\Braum.png" />
+    <Content Include="Resources\Champions\Caitlyn.png" />
+    <Content Include="Resources\Champions\Cassiopeia.png" />
+    <Content Include="Resources\Champions\Chogath.png" />
+    <Content Include="Resources\Champions\Corki.png" />
+    <Content Include="Resources\Champions\Darius.png" />
+    <Content Include="Resources\Champions\Diana.png" />
+    <Content Include="Resources\Champions\Draven.png" />
+    <Content Include="Resources\Champions\DrMundo.png" />
+    <Content Include="Resources\Champions\Ekko.png" />
+    <Content Include="Resources\Champions\Elise.png" />
+    <Content Include="Resources\Champions\Evelynn.png" />
+    <Content Include="Resources\Champions\Ezreal.png" />
+    <Content Include="Resources\Champions\FiddleSticks.png" />
+    <Content Include="Resources\Champions\Fiora.png" />
+    <Content Include="Resources\Champions\Fizz.png" />
+    <Content Include="Resources\Champions\Galio.png" />
+    <Content Include="Resources\Champions\Gangplank.png" />
+    <Content Include="Resources\Champions\Garen.png" />
+    <Content Include="Resources\Champions\Gnar.png" />
+    <Content Include="Resources\Champions\Gragas.png" />
+    <Content Include="Resources\Champions\Graves.png" />
+    <Content Include="Resources\Champions\Hecarim.png" />
+    <Content Include="Resources\Champions\Heimerdinger.png" />
+    <Content Include="Resources\Champions\Illaoi.png" />
+    <Content Include="Resources\Champions\Irelia.png" />
+    <Content Include="Resources\Champions\Janna.png" />
+    <Content Include="Resources\Champions\JarvanIV.png" />
+    <Content Include="Resources\Champions\Jax.png" />
+    <Content Include="Resources\Champions\Jayce.png" />
+    <Content Include="Resources\Champions\Jinx.png" />
+    <Content Include="Resources\Champions\Kalista.png" />
+    <Content Include="Resources\Champions\Karma.png" />
+    <Content Include="Resources\Champions\Karthus.png" />
+    <Content Include="Resources\Champions\Kassadin.png" />
+    <Content Include="Resources\Champions\Katarina.png" />
+    <Content Include="Resources\Champions\Kayle.png" />
+    <Content Include="Resources\Champions\Kennen.png" />
+    <Content Include="Resources\Champions\Khazix.png" />
+    <Content Include="Resources\Champions\Kindred.png" />
+    <Content Include="Resources\Champions\KogMaw.png" />
+    <Content Include="Resources\Champions\Leblanc.png" />
+    <Content Include="Resources\Champions\LeeSin.png" />
+    <Content Include="Resources\Champions\Leona.png" />
+    <Content Include="Resources\Champions\Lissandra.png" />
+    <Content Include="Resources\Champions\Lucian.png" />
+    <Content Include="Resources\Champions\Lulu.png" />
+    <Content Include="Resources\Champions\Lux.png" />
+    <Content Include="Resources\Champions\Malphite.png" />
+    <Content Include="Resources\Champions\Malzahar.png" />
+    <Content Include="Resources\Champions\Maokai.png" />
+    <Content Include="Resources\Champions\MasterYi.png" />
+    <Content Include="Resources\Champions\MissFortune.png" />
+    <Content Include="Resources\Champions\MonkeyKing.png" />
+    <Content Include="Resources\Champions\Mordekaiser.png" />
+    <Content Include="Resources\Champions\Morgana.png" />
+    <Content Include="Resources\Champions\Nami.png" />
+    <Content Include="Resources\Champions\Nasus.png" />
+    <Content Include="Resources\Champions\Nautilus.png" />
+    <Content Include="Resources\Champions\Nidalee.png" />
+    <Content Include="Resources\Champions\Nocturne.png" />
+    <Content Include="Resources\Champions\Nunu.png" />
+    <Content Include="Resources\Champions\Olaf.png" />
+    <Content Include="Resources\Champions\Orianna.png" />
+    <Content Include="Resources\Champions\Pantheon.png" />
+    <Content Include="Resources\Champions\Poppy.png" />
+    <Content Include="Resources\Champions\Quinn.png" />
+    <Content Include="Resources\Champions\Rammus.png" />
+    <Content Include="Resources\Champions\RekSai.png" />
+    <Content Include="Resources\Champions\Renekton.png" />
+    <Content Include="Resources\Champions\Rengar.png" />
+    <Content Include="Resources\Champions\Riven.png" />
+    <Content Include="Resources\Champions\Rumble.png" />
+    <Content Include="Resources\Champions\Ryze.png" />
+    <Content Include="Resources\Champions\Sejuani.png" />
+    <Content Include="Resources\Champions\Shaco.png" />
+    <Content Include="Resources\Champions\Shen.png" />
+    <Content Include="Resources\Champions\Shyvana.png" />
+    <Content Include="Resources\Champions\Singed.png" />
+    <Content Include="Resources\Champions\Sion.png" />
+    <Content Include="Resources\Champions\Sivir.png" />
+    <Content Include="Resources\Champions\Skarner.png" />
+    <Content Include="Resources\Champions\Sona.png" />
+    <Content Include="Resources\Champions\Soraka.png" />
+    <Content Include="Resources\Champions\Swain.png" />
+    <Content Include="Resources\Champions\Syndra.png" />
+    <Content Include="Resources\Champions\TahmKench.png" />
+    <Content Include="Resources\Champions\Talon.png" />
+    <Content Include="Resources\Champions\Taric.png" />
+    <Content Include="Resources\Champions\Teemo.png" />
+    <Content Include="Resources\Champions\Thresh.png" />
+    <Content Include="Resources\Champions\Tristana.png" />
+    <Content Include="Resources\Champions\Trundle.png" />
+    <Content Include="Resources\Champions\Tryndamere.png" />
+    <Content Include="Resources\Champions\TwistedFate.png" />
+    <Content Include="Resources\Champions\Twitch.png" />
+    <Content Include="Resources\Champions\Udyr.png" />
+    <Content Include="Resources\Champions\Urgot.png" />
+    <Content Include="Resources\Champions\Varus.png" />
+    <Content Include="Resources\Champions\Vayne.png" />
+    <Content Include="Resources\Champions\Veigar.png" />
+    <Content Include="Resources\Champions\Velkoz.png" />
+    <Content Include="Resources\Champions\Vi.png" />
+    <Content Include="Resources\Champions\Viktor.png" />
+    <Content Include="Resources\Champions\Vladimir.png" />
+    <Content Include="Resources\Champions\Volibear.png" />
+    <Content Include="Resources\Champions\Warwick.png" />
+    <Content Include="Resources\Champions\Xerath.png" />
+    <Content Include="Resources\Champions\XinZhao.png" />
+    <Content Include="Resources\Champions\Yasuo.png" />
+    <Content Include="Resources\Champions\Yorick.png" />
+    <Content Include="Resources\Champions\Zac.png" />
+    <Content Include="Resources\Champions\Zed.png" />
+    <Content Include="Resources\Champions\Ziggs.png" />
+    <Content Include="Resources\Champions\Zilean.png" />
+    <Content Include="Resources\Champions\Zyra.png" />
+    <Content Include="Resources\LP\LP_Default.png" />
+    <Content Include="Resources\LP\LP_Teleport.png" />
+    <Content Include="Resources\RC\RC_On.png" />
+    <Content Include="Resources\SB\SB_Default.png" />
+    <Content Include="Resources\SB\SB_Hud.png" />
+    <Content Include="Resources\SB\SB_Invisible.png" />
+    <Content Include="Resources\SB\SB_RecallAbort.png" />
+    <Content Include="Resources\SB\SB_RecallFinish.png" />
+    <Content Include="Resources\SB\SB_RecallStart.png" />
+    <Content Include="Resources\SB\SB_summonerbarrier.jpg" />
+    <Content Include="Resources\SB\SB_summonerboost.jpg" />
+    <Content Include="Resources\SB\SB_summonerdot.jpg" />
+    <Content Include="Resources\SB\SB_summonerexhaust.jpg" />
+    <Content Include="Resources\SB\SB_summonerflash.jpg" />
+    <Content Include="Resources\SB\SB_summonerhaste.jpg" />
+    <Content Include="Resources\SB\SB_summonerheal.jpg" />
+    <Content Include="Resources\SB\SB_summonersmite.jpg" />
+    <Content Include="Resources\SB\SB_summonerteleport.jpg" />
+    <Content Include="Resources\SB\SB_Ultimate.png" />
+    <Content Include="Resources\WT\WT_Green.png" />
+    <Content Include="Resources\WT\WT_Pink.png" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
