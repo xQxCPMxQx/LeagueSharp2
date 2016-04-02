@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{31B301BD-5D6C-480E-B631-D587C7EDE566}</ProjectGuid>
+    <ProjectGuid>{D286BC19-5DE5-4797-A7DB-21E1B3AE1D96}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Nocturne</RootNamespace>
@@ -143,6 +143,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\selectedchampion.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\killableenemy.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

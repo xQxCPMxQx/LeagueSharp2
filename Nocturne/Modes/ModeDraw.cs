@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using LeagueSharp.Common;
 using Nocturne.Common;
+using Nocturne.Properties;
 using SharpDX;
 using Color = System.Drawing.Color;
 using CommonGeometry = Nocturne.Common.CommonGeometry;
@@ -72,7 +73,13 @@ namespace Nocturne.Modes
         {
             MenuLocal = new Menu("Drawings", "Drawings");
             {
-                
+
+                MenuLocal.AddItem(
+                 new MenuItem("DrawPc.Mode", "Adjust settings to your own computer:").SetValue(new StringList(new[] { "New Computer", "Old Computer" }, 0)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Coral)).ValueChanged +=
+                 (sender, args) =>
+                 {
+                     InitializeRefreshMenuItems();
+                 };
 
                 SubMenuManaBarIndicator = new Menu("Mana Bar Combo Indicator", "ManaBarIndicator");
                 {
@@ -145,17 +152,14 @@ namespace Nocturne.Modes
                         };
                     }
                 }
-                MenuLocal.AddItem(
-                    new MenuItem("DrawPc.Mode", "Adjust settings to your own computer:").SetValue(new StringList(new[] { "New Computer", "Old Computer" }, 0)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Coral)).ValueChanged +=
-                    (sender, args) =>
-                    {
-                        InitializeRefreshMenuItems();
-                    };
+             
 
                 CommonManaBar.Initialize(MenuLocal);
             }
             Modes.ModeConfig.MenuConfig.AddSubMenu(MenuLocal);
             InitializeRefreshMenuItems();
+
+            //Sprite.Initialize();
 
             Game.OnUpdate += GameOnOnUpdate;
             GameObject.OnCreate += GameObject_OnCreate;
@@ -263,17 +267,17 @@ namespace Nocturne.Modes
         {
             get
             {
-                if (Modes.ModeConfig.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 0)
+                if (MenuLocal.Item("DrawPc.Mode").GetValue<StringList>().SelectedIndex == 0)
                 {
                     return PcMode.NewComputer;
                 }
 
-                if (Modes.ModeConfig.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 1)
+                if (MenuLocal.Item("DrawPc.Mode").GetValue<StringList>().SelectedIndex == 1)
                 {
                     return PcMode.NormalComputer;
                 }
 
-                if (Modes.ModeConfig.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex == 2)
+                if (MenuLocal.Item("DrawPc.Mode").GetValue<StringList>().SelectedIndex == 2)
                 {
                     return PcMode.OldComputer;
                 }
@@ -282,15 +286,7 @@ namespace Nocturne.Modes
             }
         }
 
-        public static string GetPcModeStringValue
-        {
-            get
-            {
-                //Game.PrintChat("MenuConfig:" + pcMode[PlayerMenu.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex]);
-                //Game.PrintChat("Draw: " + pcMode[MenuLocal.Item("DrawPc.Mode").GetValue<StringList>().SelectedIndex]);
-                return pcMode[Modes.ModeConfig.MenuConfig.Item("Pc.Mode").GetValue<StringList>().SelectedIndex];
-            }
-        }
+        public static string GetPcModeStringValue => pcMode[MenuLocal.Item("DrawPc.Mode").GetValue<StringList>().SelectedIndex];
 
         private static void InitializeRefreshMenuItems()
         {
@@ -487,6 +483,18 @@ namespace Nocturne.Modes
             }
         }
 
+        public static Obj_AI_Hero GetKillableEnemy
+        {
+            get
+            {
+                if (MenuLocal.Item(GetPcModeStringValue + "DrawKillableEnemy").GetValue<bool>())
+                {
+                    return HeroManager.Enemies.FirstOrDefault(e => e.IsVisible && !e.IsDead && !e.IsZombie && e.Health < Nocturne.GetComboDamage(e));
+                }
+                return null;
+            }
+        }
+
         private static void KillableEnemy()
         {
             if (MenuLocal.Item(GetPcModeStringValue + "DrawKillableEnemy").GetValue<bool>())
@@ -494,7 +502,8 @@ namespace Nocturne.Modes
                 var t = KillableEnemyAa;
                 if (t.Item1 != null && t.Item1.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 800) && t.Item2 > 0)
                 {
-                    CommonHelper.DrawText(CommonHelper.Text, $"{t.Item1.ChampionName}: {t.Item2} x AA Damage = Kill", (int)t.Item1.HPBarPosition.X + 65, (int)t.Item1.HPBarPosition.Y + 5, SharpDX.Color.White);
+                    //CommonHelper.DrawText(CommonHelper.Text, $"{t.Item1.ChampionName}: {t.Item2} x AA Damage = Kill", (int)t.Item1.HPBarPosition.X + 65, (int)t.Item1.HPBarPosition.Y + 5, SharpDX.Color.White);
+                    CommonHelper.DrawText(CommonHelper.Text, $"{t.Item1.ChampionName}: {t.Item2} Combo = Kill", (int)t.Item1.HPBarPosition.X + 85, (int)t.Item1.HPBarPosition.Y + 5, SharpDX.Color.GreenYellow);
                 }
             }
         }
@@ -522,14 +531,13 @@ namespace Nocturne.Modes
             get
             {
                 var x = 0;
-                var t = TargetSelector.GetTarget(Orbwalking.GetRealAutoAttackRange(null) + 800, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
                 {
                     if (t.IsValidTarget())
                     {
-                        if (t.Health
-                            < ObjectManager.Player.TotalAttackDamage
-                            * (1 / ObjectManager.Player.AttackCastDelay > 1500 ? 12 : 8))
-                        {
+                        //if (t.Health < ObjectManager.Player.TotalAttackDamage * (1 / ObjectManager.Player.AttackCastDelay > 1500 ? 12 : 8))
+                            if (t.Health < Nocturne.GetComboDamage(t))
+                            {
                             x = (int)Math.Ceiling(t.Health / ObjectManager.Player.TotalAttackDamage);
                         }
                         return new Tuple<Obj_AI_Hero, int>(t, x);
@@ -538,6 +546,49 @@ namespace Nocturne.Modes
                 }
                 return new Tuple<Obj_AI_Hero, int>(t, x);
             }
+        }
+    }
+
+    internal class Sprite
+    {
+        private static Spell Q => PlayerSpells.Q;
+
+        private static Vector2 DrawPosition
+        {
+            get
+            {
+                var drawStatus = CommonTargetSelector.LocalMenu.Item("Draw.Status").GetValue<StringList>().SelectedIndex;
+                if (KillableEnemy == null || (drawStatus != 2 && drawStatus != 3))
+                    return new Vector2(0f, 0f);
+
+                return new Vector2(KillableEnemy.HPBarPosition.X + KillableEnemy.BoundingRadius / 2f,
+                    KillableEnemy.HPBarPosition.Y - 70);
+            }
+        }
+
+        private static bool DrawSprite => true;
+
+        private static Obj_AI_Hero KillableEnemy
+        {
+            get
+            {
+                var t = ModeDraw.GetKillableEnemy;
+
+                if (t.IsValidTarget())
+                    return t;
+
+                return null;
+            }
+        }
+
+        internal static void Initialize()
+        {
+            new Render.Sprite(Resources.killableenemy, new Vector2())
+            {
+                PositionUpdate = () => DrawPosition,
+                Scale = new Vector2(1f, 1f),
+                VisibleCondition = sender => DrawSprite
+            }.Add();
         }
     }
 }

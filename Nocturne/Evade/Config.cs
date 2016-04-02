@@ -55,7 +55,7 @@ namespace Nocturne.Evade
 
         public static void CreateMenu()
         {
-            Menu = new Menu("W - Shield", "WShield").SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
+            Menu = new Menu("W: Shield", "WShield").SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
 
             //Create the evade spells submenus.
             var evadeSpells = new Menu("Enemy Spells", "evadeSpells");
@@ -95,10 +95,10 @@ namespace Nocturne.Evade
                 }
             }
 
-            skillShots.AddItem(new MenuItem("MinionCollision", "Minion collision").SetValue(true).Show(false));
-            skillShots.AddItem(new MenuItem("HeroCollision", "Hero collision").SetValue(true).Show(false));
-            skillShots.AddItem(new MenuItem("YasuoCollision", "Yasuo wall collision").SetValue(true).Show(false));
-            skillShots.AddItem(new MenuItem("EnableCollision", "Enabled").SetValue(true).Show(false));
+            skillShots.AddItem(new MenuItem("MinionCollision", "Minion collision").SetValue(true).Show(true));
+            skillShots.AddItem(new MenuItem("HeroCollision", "Hero collision").SetValue(true).Show(true));
+            skillShots.AddItem(new MenuItem("YasuoCollision", "Yasuo wall collision").SetValue(true).Show(true));
+            skillShots.AddItem(new MenuItem("EnableCollision", "Enabled").SetValue(true).Show(true));
 
             Menu.AddSubMenu(skillShots);
 
@@ -118,7 +118,7 @@ namespace Nocturne.Evade
             {
                 misc.AddItem(new MenuItem("BlockSpells", "Block spells while evading").SetValue(new StringList(new[] {"No", "Only dangerous", "Always"}, 1)));
                 misc.AddItem(new MenuItem("DisableFow", "Disable fog of war dodging").SetValue(true)).Show(true);
-                misc.AddItem(new MenuItem("ShowEvadeStatus", "Show Status").SetValue(false));
+                misc.AddItem(new MenuItem("ShowEvadeStatus", "Show Status").SetValue(true));
                 Menu.AddSubMenu(misc);
             }
 

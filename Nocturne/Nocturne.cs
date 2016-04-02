@@ -33,7 +33,7 @@ namespace Nocturne
             PlayerSpells.Initialize();
             Modes.ModeConfig.Initialize();
             
-            Modes.ModeCombo.Initialize();
+            
             //Modes.ModeHarass.Initialize();
 //            Modes.ModeLane.Initialize();
   //          Modes.ModeJungle.Initialize();

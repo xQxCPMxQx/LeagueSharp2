@@ -52,23 +52,25 @@ namespace Nocturne.Modes
                 MenuConfig.AddSubMenu(MenuKeys);
             }
 
-
+            Modes.ModeCombo.Initialize();
+            Evade.EvadeMain.Initialize();
             MenuFarming = new Menu("Farm", "Farm");
             {
                 Modes.ModeLane.Initialize(MenuFarming);
                 Modes.ModeJungle.Initialize(MenuFarming);
                 MenuConfig.AddSubMenu(MenuFarming);
             }
+            Modes.ModeFlee.Initialize(MenuConfig);
 
             Common.CommonManaManager.Initialize(MenuFarming);
             Common.CommonJungleTimer.Initialize(MenuFarming);
 
-            MenuConfig.AddItem(new MenuItem("Game.Mode", "Game Mode:").SetValue(new StringList(new[] { "Auto", "Gank Mode", "Assassin Mode" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
-            MenuConfig.AddItem(new MenuItem("Pc.Mode", "How is your own Computer:").SetValue(new StringList(new[] { "New Computer", "Old Computer" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
+            //MenuConfig.AddItem(new MenuItem("Game.Mode", "Game Mode:").SetValue(new StringList(new[] { "Auto", "Ganker Mode", "Assassin Mode" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
+            //MenuConfig.AddItem(new MenuItem("Pc.Mode", "How is your own Computer:").SetValue(new StringList(new[] { "New Computer", "Old Computer" }, 0)).SetFontStyle(FontStyle.Regular, Color.Coral));
 
             new ModeDraw().Initialize();
 
-            Evade.EvadeMain.Initialize();
+            
 
             MenuConfig.AddToMainMenu();
 

@@ -271,22 +271,38 @@ namespace Nocturne.Common
 
             if (Youmuu.IsReady() && mob.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
             {
-                var youmuuBaron =
-                    Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BaronDragon").GetValue<StringList>().SelectedIndex;
-                var youmuuRed =
-                    Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BlueRed").GetValue<StringList>().SelectedIndex;
+                var youmuuBaron = Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BaronDragon").GetValue<StringList>().SelectedIndex;
+                var youmuuRed = Modes.ModeJungle.LocalMenu.Item("Jungle.Youmuu.BlueRed").GetValue<StringList>().SelectedIndex;
 
-                if (
-                    (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Dragon &&
-                     (youmuuBaron == 1 || youmuuBaron == 3))
-                    ||
-                    (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Baron && (youmuuBaron == 2 || youmuuBaron == 3))
-                    || (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Red && (youmuuRed == 1 || youmuuBaron == 3))
-                    ||
-                    (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Blue && (youmuuRed == 2 || youmuuBaron == 3)))
+                if (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Dragon && (youmuuBaron == 1 || youmuuBaron == 3))
                 {
                     Youmuu.Cast();
                 }
+
+                if (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Baron && (youmuuBaron == 2 || youmuuBaron == 3))
+                {
+                    Youmuu.Cast();
+                }
+
+                if (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Red && (youmuuRed == 1 || youmuuRed == 3))
+                {
+                    Youmuu.Cast();
+                }
+
+                if (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Blue && (youmuuRed == 2 || youmuuRed == 3))
+                {
+                    Youmuu.Cast();
+                }
+
+                //if ((CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Dragon && (youmuuBaron == 1 || youmuuBaron == 3))
+                //    ||
+                //    (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Baron && (youmuuBaron == 2 || youmuuBaron == 3))
+                //    || (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Red && (youmuuRed == 1 || youmuuBaron == 3))
+                //    ||
+                //    (CommonManaManager.GetMobType(mob) == CommonManaManager.MobTypes.Blue && (youmuuRed == 2 || youmuuBaron == 3)))
+                //{
+                //    Youmuu.Cast();
+                //}
             }
         }
     }

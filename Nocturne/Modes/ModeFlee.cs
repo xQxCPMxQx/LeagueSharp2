@@ -14,7 +14,7 @@ namespace Nocturne.Modes
     {
         public static Menu LocalMenu { get; private set; }
 
-        public static void Initialize()
+        public static void Initialize(Menu ParentMenu)
         {
             LocalMenu = new Menu("Flee", "Flee");
             {
@@ -22,11 +22,16 @@ namespace Nocturne.Modes
                 LocalMenu.AddItem(new MenuItem("Flee.Youmuu", "Item Youmuu:").SetValue(new StringList(new[] { "Off", "On" }, 1)).SetFontStyle(FontStyle.Regular, PlayerSpells.Q.MenuColor()));
                 LocalMenu.AddItem(new MenuItem("Flee.DrawMouse", "Draw Mouse Position:").SetValue(new StringList(new[] { "Off", "On" }, 1)).SetFontStyle(FontStyle.Regular, PlayerSpells.Q.MenuColor()));
             }
-            ModeConfig.MenuConfig.AddSubMenu(LocalMenu);
+            ParentMenu.AddSubMenu(LocalMenu);
 
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += delegate(EventArgs args)
             {
+                if (!ModeConfig.MenuKeys.Item("Key.Flee").GetValue<KeyBind>().Active)
+                {
+                    return;
+                }
+
                 if (LocalMenu.Item("Flee.DrawMouse").GetValue<StringList>().SelectedIndex == 1)
                 {
                     Render.Circle.DrawCircle(Game.CursorPos, 300f, System.Drawing.Color.Red);
@@ -43,7 +48,7 @@ namespace Nocturne.Modes
 
             if (LocalMenu.Item("Flee.UseQ").GetValue<StringList>().SelectedIndex == 1 && PlayerSpells.Q.IsReady())
             {
-                PlayerSpells.Q.Cast(Game.CursorPos);
+                //PlayerSpells.Q.Cast(Game.CursorPos);
             }
 
             if (LocalMenu.Item("Flee.Youmuu").GetValue<StringList>().SelectedIndex == 1 && Common.CommonItems.Youmuu.IsReady())

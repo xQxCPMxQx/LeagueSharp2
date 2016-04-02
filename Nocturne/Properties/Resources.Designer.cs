@@ -63,6 +63,16 @@ namespace Nocturne.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap killableenemy {
+            get {
+                object obj = ResourceManager.GetObject("killableenemy", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap selectedchampion {
             get {
                 object obj = ResourceManager.GetObject("selectedchampion", resourceCulture);

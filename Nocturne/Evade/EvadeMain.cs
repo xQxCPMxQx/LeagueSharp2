@@ -107,6 +107,8 @@ namespace Nocturne.Evade
             DangerousTargetedSpells.Add(new DangerousSpells("tristana", SpellSlot.R));
             DangerousTargetedSpells.Add(new DangerousSpells("syndra", SpellSlot.R));
             DangerousTargetedSpells.Add(new DangerousSpells("nasus", SpellSlot.W));
+            DangerousTargetedSpells.Add(new DangerousSpells("singed", SpellSlot.W));
+            //            DangerousTargetedSpells.Add(new DangerousSpells("poppy", SpellSlot.E));
         }
 
         public static bool Evading

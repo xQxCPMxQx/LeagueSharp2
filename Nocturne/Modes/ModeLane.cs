@@ -19,7 +19,7 @@ namespace Nocturne.Modes
             LocalMenu = new Menu("Lane", "Lane");
             {
                 LocalMenu.AddItem(new MenuItem("Lane.Enable", ":: Quick Enable/Disable Lane Clear ").SetValue(new KeyBind("L".ToCharArray()[0], KeyBindType.Toggle, true))).Permashow(true, ObjectManager.Player.ChampionName + " : " + "Farm Lane", Colors.ColorPermaShow);
-                LocalMenu.AddItem(new MenuItem("Lane.UnderTurret", ":: Auto Enable Lane Mode Under Ally Turret ").SetValue(true));
+                //LocalMenu.AddItem(new MenuItem("Lane.UnderTurret", ":: Auto Enable Lane Mode Under Ally Turret ").SetValue(true));
 
                 string[] strQ = new string[6];
                 {
@@ -42,13 +42,12 @@ namespace Nocturne.Modes
 
         private static void OnUpdate(EventArgs args)
         {
-            if (ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+            if (ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && LocalMenu.Item("Lane.Enable").GetValue<KeyBind>().Active)
             {
-                return;
+                Execute(); 
             }
-
-            Execute();
         }
+
         static List<Obj_AI_Base> Q_GetCollisionMinions(Obj_AI_Hero source, Vector3 targetposition)
         {
             var input = new PredictionInput

@@ -51,21 +51,14 @@ namespace Nocturne.Modes
 
         private static void OnUpdate(EventArgs args)
         {
-            if (ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+            if (ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && LocalMenu.Item("Jungle.Enable").GetValue<KeyBind>().Active)
             {
-                return;
+                Execute();
             }
-
-            Execute();
         }
 
         private static void Execute()
         {
-            if (!LocalMenu.Item("Jungle.Enable").GetValue<KeyBind>().Active)
-            {
-                return;
-            }
-
             var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, PlayerSpells.Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
 
             if (mobs.Count <= 0)
