@@ -59,7 +59,7 @@ namespace KaiHelper
         private static void Game_OnGameLoad(EventArgs args)
         {
             bool hasUpdate = Helper.HasNewVersion(Assembly.GetExecutingAssembly().GetName().Name);
-            Game.PrintChat("KaiHelper Temp Fixed Version- Loaded!");
+			Game.PrintChat("<font color='#ff3232'>Successfully Loaded: </font><font color='#d4d4d4'><font color='#FFFFFF'>" +  "KaiHelper" + "</font>");
         }
     }
 }

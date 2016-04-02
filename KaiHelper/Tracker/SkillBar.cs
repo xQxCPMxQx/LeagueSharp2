@@ -73,7 +73,7 @@ namespace KaiHelper.Tracker
                             }
                             else
                             {
-                                Game.PrintChat(spellDataInst.Name.ToString());
+                                //Game.PrintChat(spellDataInst.Name.ToString());
                                 summonerSpellTextures.Add(spellDataInst.Name, GetTexture(spellDataInst.Name));
                             }
                         }
