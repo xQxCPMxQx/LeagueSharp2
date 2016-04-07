@@ -28,7 +28,7 @@ namespace Shen.Modes
                 IEnumerable<Obj_AI_Hero> vMax =
                     HeroManager.Allies.Where(
                         ally =>
-                            !ally.IsDead && !ally.IsMe && !ally.InShop() && !ally.HasBuff("Recall") && ally.CountEnemiesInRange(ally.UnderAllyTurret() ? 450 : 350 + 350) > 0)
+                            !ally.IsDead && !ally.IsMe && !ally.InShop() && !ally.HasBuff("Recall") && ally.CountEnemiesInRange(ally.UnderAllyTurret() ? 550 : 450 + 350) > 0)
                         .Where(ally =>
                             LocalMenu.Item(ally.ChampionName + ".UseRWarning").GetValue<StringList>().SelectedIndex != 0)
                         .Where(ally =>
