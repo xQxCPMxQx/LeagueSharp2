@@ -109,7 +109,8 @@ namespace Nocturne.Evade
             DangerousTargetedSpells.Add(new DangerousSpells("warwickR", "warwick", SpellSlot.R));
             DangerousTargetedSpells.Add(new DangerousSpells("zedR", "zed", SpellSlot.R));
             DangerousTargetedSpells.Add(new DangerousSpells("tristanaR", "tristana", SpellSlot.R));
-
+            DangerousTargetedSpells.Add(new DangerousSpells("malzaharR", "malzahar", SpellSlot.R));
+            
             DangerousTargetedSpells.Add(new DangerousSpells("alistarQ", "alistar", SpellSlot.W));
             DangerousTargetedSpells.Add(new DangerousSpells("nasusW", "nasus", SpellSlot.W));
             DangerousTargetedSpells.Add(new DangerousSpells("pantheonW", "pantheon", SpellSlot.W));
