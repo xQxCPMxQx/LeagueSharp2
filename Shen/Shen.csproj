@@ -110,7 +110,6 @@
     </Compile>
     <Compile Include="Champion\SpiritUnit.cs" />
     <Compile Include="Common\DrawHelper.cs" />
-    <Compile Include="ToList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
