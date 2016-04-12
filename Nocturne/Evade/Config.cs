@@ -95,10 +95,10 @@ namespace Nocturne.Evade
                 }
             }
 
-            skillShots.AddItem(new MenuItem("MinionCollision", "Minion collision").SetValue(true).Show(true));
-            skillShots.AddItem(new MenuItem("HeroCollision", "Hero collision").SetValue(true).Show(true));
-            skillShots.AddItem(new MenuItem("YasuoCollision", "Yasuo wall collision").SetValue(true).Show(true));
-            skillShots.AddItem(new MenuItem("EnableCollision", "Enabled").SetValue(true).Show(true));
+            skillShots.AddItem(new MenuItem("MinionCollision", "Minion collision").SetValue(true).Show(false));
+            skillShots.AddItem(new MenuItem("HeroCollision", "Hero collision").SetValue(true).Show(false));
+            skillShots.AddItem(new MenuItem("YasuoCollision", "Yasuo wall collision").SetValue(false).Show(false));
+            skillShots.AddItem(new MenuItem("EnableCollision", "Enabled").SetValue(true).Show(false));
 
             Menu.AddSubMenu(skillShots);
 
@@ -117,8 +117,8 @@ namespace Nocturne.Evade
             var misc = new Menu("Misc", "Misc");
             {
                 misc.AddItem(new MenuItem("BlockSpells", "Block spells while evading").SetValue(new StringList(new[] {"No", "Only dangerous", "Always"}, 1)));
-                misc.AddItem(new MenuItem("DisableFow", "Disable fog of war dodging").SetValue(true)).Show(true);
-                misc.AddItem(new MenuItem("ShowEvadeStatus", "Show Status").SetValue(true));
+                misc.AddItem(new MenuItem("DisableFow", "Disable fog of war dodging").SetValue(true)).Show(false);
+                misc.AddItem(new MenuItem("ShowEvadeStatus", "Show Status").SetValue(false));
                 Menu.AddSubMenu(misc);
             }
 

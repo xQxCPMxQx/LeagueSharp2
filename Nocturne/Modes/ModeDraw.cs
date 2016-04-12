@@ -404,8 +404,11 @@ namespace Nocturne.Modes
             {
                 if (NocturneParanoia.EndTime >= Game.Time)
                 {
-                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 180f, Game.Time * 100 - NocturneParanoia.StartTime * 100, NocturneParanoia.EndTime * 100 - NocturneParanoia.StartTime * 100).ToPolygon();
-                    circle.Draw(Color.Coral, 3);
+                    var circle1 = new CommonGeometry.Circle2(new Vector2(ObjectManager.Player.Position.X + 3, ObjectManager.Player.Position.Y - 3), 220f, Game.Time * 100 - NocturneParanoia.StartTime * 100, NocturneParanoia.EndTime * 100 - NocturneParanoia.StartTime * 100).ToPolygon();
+                    circle1.Draw(Color.Black, 4);
+
+                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 220f, Game.Time * 100 - NocturneParanoia.StartTime * 100, NocturneParanoia.EndTime * 100 - NocturneParanoia.StartTime * 100).ToPolygon();
+                    circle.Draw(Color.DarkOrange, 4);
                     // Drawing.DrawCircle(ObjectManager.Player.Position, 180f, System.Drawing.Color.LightCoral);
                 }
             }
@@ -419,8 +422,11 @@ namespace Nocturne.Modes
             {
                 if (BlueBuff.EndTime >= Game.Time)
                 {
-                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 150f, Game.Time - BlueBuff.StartTime, BlueBuff.EndTime - BlueBuff.StartTime ).ToPolygon();
-                    circle.Draw(Color.Blue, 2);
+                    var circle1 = new CommonGeometry.Circle2(new Vector2(ObjectManager.Player.Position.X + 3, ObjectManager.Player.Position.Y - 3), 190f, Game.Time - BlueBuff.StartTime, BlueBuff.EndTime - BlueBuff.StartTime).ToPolygon();
+                    circle1.Draw(Color.Black, 4);
+
+                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 190f, Game.Time - BlueBuff.StartTime, BlueBuff.EndTime - BlueBuff.StartTime ).ToPolygon();
+                    circle.Draw(Color.DarkBlue, 4);
                  //   Drawing.DrawCircle(ObjectManager.Player.Position, 150f, System.Drawing.Color.DarkBlue);
                 }
             }
@@ -429,8 +435,11 @@ namespace Nocturne.Modes
             {
                 if (RedBuff.EndTime >= Game.Time)
                 {
-                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 130f, Game.Time - RedBuff.StartTime, RedBuff.EndTime - RedBuff.StartTime).ToPolygon();
-                    circle.Draw(Color.Red, 2);
+                    var circle1 = new CommonGeometry.Circle2(new Vector2(ObjectManager.Player.Position.X + 3, ObjectManager.Player.Position.Y - 3), 160f, Game.Time - RedBuff.StartTime, RedBuff.EndTime - RedBuff.StartTime).ToPolygon();
+                    circle1.Draw(Color.Black, 4);
+
+                    var circle = new CommonGeometry.Circle2(ObjectManager.Player.Position.To2D(), 160f, Game.Time - RedBuff.StartTime, RedBuff.EndTime - RedBuff.StartTime).ToPolygon();
+                    circle.Draw(Color.DarkRed, 4);
                     //Drawing.DrawCircle(ObjectManager.Player.Position, 130f, System.Drawing.Color.IndianRed);
                 }
             }

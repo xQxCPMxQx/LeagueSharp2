@@ -80,11 +80,13 @@ namespace Nocturne.Evade
 
         internal class DangerousSpells
         {
+            public string SpellName { get; private set; }
             public string ChampionName { get; private set; }
             public SpellSlot SpellSlot { get; private set; }
 
-            public DangerousSpells(string championName, SpellSlot spellSlot)
+            public DangerousSpells(string spellName, string championName, SpellSlot spellSlot)
             {
+                SpellName = spellName;
                 ChampionName = championName;
                 SpellSlot = spellSlot;
             }
@@ -94,21 +96,25 @@ namespace Nocturne.Evade
 
         private static void LoadDangerousTargetedSpells()
         {
-            DangerousTargetedSpells.Add(new DangerousSpells("darius", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("fiddlesticks", SpellSlot.Q));
-            DangerousTargetedSpells.Add(new DangerousSpells("rammus", SpellSlot.E));
-            DangerousTargetedSpells.Add(new DangerousSpells("garen", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("leesin", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("nautilius", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("skarner", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("syndra", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("warwick", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("zed", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("tristana", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("syndra", SpellSlot.R));
-            DangerousTargetedSpells.Add(new DangerousSpells("nasus", SpellSlot.W));
-            DangerousTargetedSpells.Add(new DangerousSpells("singed", SpellSlot.W));
-            //            DangerousTargetedSpells.Add(new DangerousSpells("poppy", SpellSlot.E));
+            DangerousTargetedSpells.Add(new DangerousSpells("dariusR", "darius", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("viR", "vi", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("veigarR", "veigar", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("fiddlesticksQ", "fiddlesticks", SpellSlot.Q));
+            DangerousTargetedSpells.Add(new DangerousSpells("chogathR", "chogath", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("garenR", "garen", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("leesinR", "leesin", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("nautiliusR", "nautilius", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("skarnerR", "skarner", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("syndraR", "syndra", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("warwickR", "warwick", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("zedR", "zed", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("tristanaR", "tristana", SpellSlot.R));
+
+            DangerousTargetedSpells.Add(new DangerousSpells("alistarQ", "alistar", SpellSlot.W));
+            DangerousTargetedSpells.Add(new DangerousSpells("nasusW", "nasus", SpellSlot.W));
+            DangerousTargetedSpells.Add(new DangerousSpells("pantheonW", "pantheon", SpellSlot.W));
+            DangerousTargetedSpells.Add(new DangerousSpells("rammusE", "rammus", SpellSlot.E));
+            DangerousTargetedSpells.Add(new DangerousSpells("singedW", "singed", SpellSlot.W));
         }
 
         public static bool Evading
@@ -924,323 +930,6 @@ namespace Nocturne.Evade
                         }
                         //Let the user move freely inside the skillshot.
                         NoSolutionFound = true;
-                        return;
-                    }
-
-                    //Walking
-                    if (evadeSpell.Name == "Walking")
-                    {
-                        var points = Evader.GetEvadePoints();
-                        if (points.Count > 0)
-                        {
-                            EvadePoint = to.Closest(points);
-                            var nEvadePoint = EvadePoint.Extend(PlayerPosition, -100);
-                            if (
-                                EvadeMain.IsSafePath(
-                                    ObjectManager.Player.GetPath(nEvadePoint.To3D()).To2DList(),
-                                    Config.EvadingSecondTimeOffset, (int) ObjectManager.Player.MoveSpeed, 100).IsSafe)
-                            {
-                                EvadePoint = nEvadePoint;
-                            }
-
-                            Evading = true;
-                            return;
-                        }
-                    }
-
-                    if (evadeSpell.IsReady())
-                    {
-                        //MovementSpeed Buff
-                        if (evadeSpell.IsMovementSpeedBuff)
-                        {
-                            var points = Evader.GetEvadePoints((int) evadeSpell.MoveSpeedTotalAmount());
-
-                            if (points.Count > 0)
-                            {
-                                EvadePoint = to.Closest(points);
-                                Evading = true;
-
-                                if (evadeSpell.IsSummonerSpell)
-                                {
-                                    ObjectManager.Player.Spellbook.CastSpell(
-                                        evadeSpell.Slot, ObjectManager.Player);
-                                }
-                                else
-                                {
-                                    ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot, ObjectManager.Player);
-                                }
-
-                                return;
-                            }
-                        }
-
-                        //Dashes
-                        if (evadeSpell.IsDash)
-                        {
-                            //Targetted dashes
-                            if (evadeSpell.IsTargetted) //Lesinga W.
-                            {
-                                var targets = Evader.GetEvadeTargets(
-                                    evadeSpell.ValidTargets, evadeSpell.Speed, evadeSpell.Delay, evadeSpell.MaxRange,
-                                    false, false);
-
-                                if (targets.Count > 0)
-                                {
-                                    var closestTarget = Utils.Closest(targets, to);
-                                    EvadePoint = closestTarget.ServerPosition.To2D();
-                                    Evading = true;
-
-                                    if (evadeSpell.IsSummonerSpell)
-                                    {
-                                        ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot, closestTarget);
-                                    }
-                                    else
-                                    {
-                                        ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot, closestTarget);
-                                    }
-
-                                    return;
-                                }
-                                if (Utils.TickCount - LastWardJumpAttempt < 250)
-                                {
-                                    //Let the user move freely inside the skillshot.
-                                    NoSolutionFound = true;
-                                    return;
-                                }
-                            }
-                                //Skillshot type dashes.
-                            else
-                            {
-                                var points = Evader.GetEvadePoints(evadeSpell.Speed, evadeSpell.Delay, false);
-
-                                // Remove the points out of range
-                                points.RemoveAll(
-                                    item => item.Distance(ObjectManager.Player.ServerPosition) > evadeSpell.MaxRange);
-
-                                //If the spell has a fixed range (Vaynes Q), calculate the real dashing location. TODO: take into account walls in the future.
-                                if (evadeSpell.FixedRange)
-                                {
-                                    for (var i = 0; i < points.Count; i++)
-                                    {
-                                        points[i] = PlayerPosition
-                                            .Extend(points[i], evadeSpell.MaxRange);
-                                    }
-
-                                    for (var i = points.Count - 1; i > 0; i--)
-                                    {
-                                        if (!IsSafe(points[i]).IsSafe)
-                                        {
-                                            points.RemoveAt(i);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    for (var i = 0; i < points.Count; i++)
-                                    {
-                                        var k =
-                                            (int)
-                                                (evadeSpell.MaxRange -
-                                                 PlayerPosition.Distance(points[i]));
-                                        k -= Math.Max(RandomN.Next(k) - 100, 0);
-                                        var extended = points[i] +
-                                                       k *
-                                                       (points[i] - PlayerPosition)
-                                                           .Normalized();
-                                        if (IsSafe(extended).IsSafe)
-                                        {
-                                            points[i] = extended;
-                                        }
-                                    }
-                                }
-
-                                if (points.Count > 0)
-                                {
-                                    EvadePoint = to.Closest(points);
-                                    Evading = true;
-
-                                    if (!evadeSpell.Invert)
-                                    {
-                                        if (evadeSpell.RequiresPreMove)
-                                        {
-                                            ObjectManager.Player.SendMovePacket(EvadePoint);
-                                            var theSpell = evadeSpell;
-                                            Utility.DelayAction.Add(
-                                                Game.Ping / 2 + 100,
-                                                delegate
-                                                {
-                                                    ObjectManager.Player.Spellbook.CastSpell(
-                                                        theSpell.Slot, EvadePoint.To3D());
-                                                });
-                                        }
-                                        else
-                                        {
-                                            ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot, EvadePoint.To3D());
-                                        }
-                                    }
-                                    else
-                                    {
-                                        var castPoint = PlayerPosition -
-                                                        (EvadePoint - PlayerPosition);
-                                        ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot, castPoint.To3D());
-                                    }
-
-                                    return;
-                                }
-                            }
-                        }
-
-                        //Blinks
-                        if (evadeSpell.IsBlink)
-                        {
-                            //Targetted blinks
-                            if (evadeSpell.IsTargetted)
-                            {
-                                var targets = Evader.GetEvadeTargets(
-                                    evadeSpell.ValidTargets, int.MaxValue, evadeSpell.Delay, evadeSpell.MaxRange, true,
-                                    false);
-
-                                if (targets.Count > 0)
-                                {
-                                    if (IsAboutToHit(ObjectManager.Player, evadeSpell.Delay))
-                                    {
-                                        var closestTarget = Utils.Closest(targets, to);
-                                        EvadePoint = closestTarget.ServerPosition.To2D();
-                                        Evading = true;
-
-                                        if (evadeSpell.IsSummonerSpell)
-                                        {
-                                            ObjectManager.Player.Spellbook.CastSpell(
-                                                evadeSpell.Slot, closestTarget);
-                                        }
-                                        else
-                                        {
-                                            ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot, closestTarget);
-                                        }
-                                    }
-
-                                    //Let the user move freely inside the skillshot.
-                                    NoSolutionFound = true;
-                                    return;
-                                }
-                                if (Utils.TickCount - LastWardJumpAttempt < 250)
-                                {
-                                    //Let the user move freely inside the skillshot.
-                                    NoSolutionFound = true;
-                                    return;
-                                }
-                            }
-
-                                //Skillshot type blinks.
-                            else
-                            {
-                                var points = Evader.GetEvadePoints(int.MaxValue, evadeSpell.Delay, true);
-
-                                // Remove the points out of range
-                                points.RemoveAll(
-                                    item => item.Distance(ObjectManager.Player.ServerPosition) > evadeSpell.MaxRange);
-
-
-                                //Dont blink just to the edge:
-                                for (var i = 0; i < points.Count; i++)
-                                {
-                                    var k =
-                                        (int)
-                                            (evadeSpell.MaxRange -
-                                             PlayerPosition.Distance(points[i]));
-
-                                    k = k - new Random(Utils.TickCount).Next(k);
-                                    var extended = points[i] +
-                                                   k *
-                                                   (points[i] - PlayerPosition).Normalized();
-                                    if (IsSafe(extended).IsSafe)
-                                    {
-                                        points[i] = extended;
-                                    }
-                                }
-
-
-                                if (points.Count > 0)
-                                {
-                                    if (IsAboutToHit(ObjectManager.Player, evadeSpell.Delay))
-                                    {
-                                        EvadePoint = to.Closest(points);
-                                        Evading = true;
-                                        if (evadeSpell.IsSummonerSpell)
-                                        {
-                                            ObjectManager.Player.Spellbook.CastSpell(
-                                                evadeSpell.Slot, EvadePoint.To3D());
-                                        }
-                                        else
-                                        {
-                                            ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot, EvadePoint.To3D());
-                                        }
-                                    }
-
-                                    //Let the user move freely inside the skillshot.
-                                    NoSolutionFound = true;
-                                    return;
-                                }
-                            }
-                        }
-
-                        //Invulnerabilities, like Fizz's E
-                        if (evadeSpell.IsInvulnerability)
-                        {
-                            if (evadeSpell.IsTargetted)
-                            {
-                                var targets = Evader.GetEvadeTargets(
-                                    evadeSpell.ValidTargets, int.MaxValue, 0, evadeSpell.MaxRange, true, false, true);
-
-                                if (targets.Count > 0)
-                                {
-                                    if (IsAboutToHit(ObjectManager.Player, evadeSpell.Delay))
-                                    {
-                                        var closestTarget = Utils.Closest(targets, to);
-                                        EvadePoint = closestTarget.ServerPosition.To2D();
-                                        Evading = true;
-                                        ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot, closestTarget);
-                                    }
-
-                                    //Let the user move freely inside the skillshot.
-                                    NoSolutionFound = true;
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                if (IsAboutToHit(ObjectManager.Player, evadeSpell.Delay))
-                                {
-                                    if (evadeSpell.SelfCast)
-                                    {
-                                        ObjectManager.Player.Spellbook.CastSpell(evadeSpell.Slot);
-                                    }
-                                    else
-                                    {
-                                        ObjectManager.Player.Spellbook.CastSpell(
-                                            evadeSpell.Slot, ObjectManager.Player.ServerPosition);
-                                    }
-                                }
-                            }
-
-
-                            //Let the user move freely inside the skillshot.
-                            NoSolutionFound = true;
-                            return;
-                        }
-                    }
-
-                    //Zhonyas
-                    if (evadeSpell.Name == "Zhonyas" && (Items.CanUseItem("ZhonyasHourglass")))
-                    {
-                        if (IsAboutToHit(ObjectManager.Player, 100))
-                        {
-                            Items.UseItem("ZhonyasHourglass");
-                        }
-
-                        //Let the user move freely inside the skillshot.
-                        NoSolutionFound = true;
-
                         return;
                     }
 

@@ -266,6 +266,11 @@ namespace Nocturne.Evade
             }
         }
 
+        private static void DodgeMessage(string text)
+        {
+            Game.PrintChat("<font color='#ff3232'>Dodged: </font><font color='#d4d4d4'><font color='#FFFFFF'>" + text + "</font>");
+        }
+
         /// <summary>
         ///     Gets triggered when a unit casts a spell and the unit is visible.
         /// </summary>
@@ -276,35 +281,72 @@ namespace Nocturne.Evade
                 return;
             }
 
-            if (sender.IsEnemy && sender is Obj_AI_Hero && args.Target.IsMe && PlayerSpells.W.IsReady())
-            {
-                foreach (
-                    var c in
-                        EvadeMain.DangerousTargetedSpells.Where(c => ((Obj_AI_Hero)sender).ChampionName.ToLower() == c.ChampionName)
-                            .Where(c => args.Slot == c.SpellSlot))
-                            //.Where(c => args.SData.Name == ((Obj_AI_Hero)sender).GetSpell(c.SpellSlot).Name))
+            if (PlayerSpells.W.IsReady())
+            { 
+                if (sender.IsEnemy && sender is Obj_AI_Hero && args.Target.IsMe)
                 {
-                    PlayerSpells.W.Cast();
-                }
-            }
-
-
-            if ((((Obj_AI_Hero) sender).CharData.BaseSkinName.ToLower() == "vayne" ||
-                 ((Obj_AI_Hero) sender).CharData.BaseSkinName.ToLower() == "poppy") && args.Slot == SpellSlot.E &&
-                args.Target.IsMe)
-            {
-                for (var i = 1; i < 8; i++)
-                {
-                    var myBehind = ObjectManager.Player.Position +
-                                   Vector3.Normalize(((Obj_AI_Hero) sender).ServerPosition -
-                                                     ObjectManager.Player.Position)*(-i*50);
-                    if (myBehind.IsWall())
+                    foreach (
+                        var c in
+                            EvadeMain.DangerousTargetedSpells.Where(c => ((Obj_AI_Hero)sender).ChampionName.ToLower() == c.ChampionName)
+                                .Where(c => args.Slot == c.SpellSlot))
+                                //.Where(c => args.SData.Name == ((Obj_AI_Hero)sender).GetSpell(c.SpellSlot).Name))
                     {
                         PlayerSpells.W.Cast();
                     }
                 }
-            }
+                
+                var enemy = (Obj_AI_Hero) sender;
+                if ((enemy.CharData.BaseSkinName.ToLower() == "vayne" || enemy.CharData.BaseSkinName.ToLower() == "poppy") && args.Slot == SpellSlot.E &&
+                    args.Target.IsMe)
+                {
+                    for (var i = 1; i < 8; i++)
+                    {
+                        var myBehind = ObjectManager.Player.Position +
+                                       Vector3.Normalize(enemy.ServerPosition -
+                                                         ObjectManager.Player.Position)*(-i*50);
+                        if (myBehind.IsWall())
+                        {
+                            PlayerSpells.W.Cast();
+                        }
+                    }
+                }
 
+                if (enemy.CharData.BaseSkinName.ToLower() == "riven" && args.Slot == SpellSlot.W && enemy.Position.Distance(ObjectManager.Player.Position) < Orbwalking.GetRealAutoAttackRange(null) + 150)
+                {
+                    PlayerSpells.W.Cast();
+                    DodgeMessage("Riven's W");
+                }
+
+
+                if (enemy.CharData.BaseSkinName.ToLower() == "diana" && args.Slot == SpellSlot.E && enemy.Position.Distance(ObjectManager.Player.Position) <= 350)
+                {
+                    PlayerSpells.W.Cast();
+                    DodgeMessage("Diana E");
+                }
+
+                if (enemy.CharData.BaseSkinName.ToLower() == "irelia" && args.Slot == SpellSlot.E && enemy.Health < ObjectManager.Player.Health && args.Target.IsMe)
+                {
+                    PlayerSpells.W.Cast();
+                    DodgeMessage("Irelia E");
+                }
+
+                if (enemy.CharData.BaseSkinName.ToLower() == "darius" && args.Slot == SpellSlot.E && enemy.Position.Distance(ObjectManager.Player.Position) <= 550 && enemy.Level <= 5)
+                {
+                    PlayerSpells.W.Cast();
+                    DodgeMessage("Darius E");
+                }
+
+                if (enemy.CharData.BaseSkinName.ToLower() == "blitzcrank" && args.Slot == SpellSlot.R && enemy.Position.Distance(ObjectManager.Player.Position) < Orbwalking.GetRealAutoAttackRange(null) + 300)
+                {
+                    PlayerSpells.W.Cast();
+                    DodgeMessage("Blitzcrank's R");
+                }
+                if (enemy.CharData.BaseSkinName.ToLower() == "lissandra" && args.Slot == SpellSlot.R && enemy.Position.Distance(ObjectManager.Player.Position) < 500)
+                {
+                    PlayerSpells.W.Cast();
+                    DodgeMessage("Lissandra's R");
+                }
+            }
             if (!sender.IsValid)
             {
                 return;

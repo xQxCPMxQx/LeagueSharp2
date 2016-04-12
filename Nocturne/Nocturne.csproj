@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D286BC19-5DE5-4797-A7DB-21E1B3AE1D96}</ProjectGuid>
+    <ProjectGuid>{31B301BD-5D6C-480E-B631-D587C7EDE566}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Nocturne</RootNamespace>
@@ -84,6 +84,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\CommonSkins.cs" />
     <Compile Include="Common\CommonTargetSelector.cs" />
     <Compile Include="Common\CommonAutoBush.cs" />
     <Compile Include="Common\CommonJungleTimer.cs" />

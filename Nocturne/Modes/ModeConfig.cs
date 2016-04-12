@@ -23,18 +23,22 @@ namespace Nocturne.Modes
         // to-do: add ganker mode combo mode + use Q with E Combo
         public static void Initialize()
         {
-            MenuConfig = new Menu("Nocturne", "Nocturne", true);
-
-            MenuConfig.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-            Orbwalker = new Orbwalking.Orbwalker(MenuConfig.SubMenu("Orbwalking"));
-            Orbwalker.SetAttack(true);
+            MenuConfig = new Menu(":: Nocturne is Back", "Nocturne", true).SetFontStyle(FontStyle.Regular, Color.GreenYellow);
 
             MenuTools = new Menu("Tools", "Tools");
+            MenuConfig.AddSubMenu(MenuTools);
+
+            MenuTools.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+            Orbwalker = new Orbwalking.Orbwalker(MenuTools.SubMenu("Orbwalking"));
+            Orbwalker.SetAttack(true);
+
+
             Common.CommonTargetSelector.Initialize(MenuTools);
             Common.CommonAutoLevel.Initialize(MenuTools);
             Common.CommonAutoBush.Initialize(MenuTools);
+            Common.CommonSkins.Initialize(MenuTools);
             Common.CommonHelper.Initialize();
-            MenuConfig.AddSubMenu(MenuTools);
+
             /*
                 MenuCombo = new Menu("Combo", "ExecuteCombo");
                 MenuConfig.AddSubMenu(MenuCombo);

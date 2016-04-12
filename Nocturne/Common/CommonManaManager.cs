@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using Nocturne.Modes;
 using SharpDX;
 using Color = SharpDX.Color;
 
@@ -45,70 +46,99 @@ namespace Nocturne.Common
         {
             LocalMenu = new Menu("Mana Settings", "MinMana").SetFontStyle(FontStyle.Regular, Color.Aquamarine);
             mainMenu.AddSubMenu(LocalMenu);
-            {
-                LocalMenu.AddItem(
-                    new MenuItem("MinMana.Enable", "Quick Enable/Disable Minimum Mana Control!").SetValue(
-                        new KeyBind("M".ToCharArray()[0], KeyBindType.Toggle, true))
-                        .SetFontStyle(FontStyle.Regular, Color.Aqua))
-                    .Permashow(true, ObjectManager.Player.ChampionName + " : " + "Mana Control", Colors.ColorPermaShow);
 
-                var menuLane =
-                    new Menu("Lane Clear Min. Mana Control", "MinMana.Menu.Lane").SetFontStyle(FontStyle.Regular,
-                        Color.Coral);
+            LocalMenu.AddItem(new MenuItem("MinMana.Mode", "Min. Mana Control Mode: ").SetValue(new StringList(new[] { "Simple Mode", "Advanced Mode" }, 0)).SetFontStyle(FontStyle.Bold, Color.Aqua).SetTag(9)).ValueChanged +=
+                delegate(object sender, OnValueChangeEventArgs args)
                 {
-                    menuLane.AddItem(new MenuItem("MinMana.Lane.Alone", "I'm Alone %").SetValue(new Slider(30, 100, 0)))
-                        .SetFontStyle(FontStyle.Regular, Color.LightSkyBlue);
-                    menuLane.AddItem(
-                        new MenuItem("MinMana.Lane.Enemy", "I'm NOT Alone (Enemy Close) %").SetValue(new Slider(60, 100,
-                            0))).SetFontStyle(FontStyle.Regular, Color.IndianRed);
-                    LocalMenu.AddSubMenu(menuLane);
-                }
+                    InitializeRefreshMenuItems();
+                };
 
-                var menuJungle =
-                    new Menu("Jungle Clear Min. Mana Control", "MinMana.Menu.Jungle").SetFontStyle(FontStyle.Regular,
-                        Color.DarkSalmon);
+            LocalMenu.AddItem(new MenuItem("MinMana.Enable", "Quick Enable/Disable Minimum Mana Control!").SetValue(new KeyBind("M".ToCharArray()[0], KeyBindType.Toggle, true)).SetFontStyle(FontStyle.Regular, Color.Aqua).SetTag(9)).Permashow(true, ObjectManager.Player.ChampionName + " : " + "Mana Control", Colors.ColorPermaShow);
+
+            InitializeSimpleMenu();
+            InitializeAdvancedMenu();
+
+            LocalMenu.AddItem(new MenuItem("MinMana.Jungle.DontCheckEnemyBuff", "Don't check min. mana if I'm taking:").SetValue(new StringList(new[] {"Off", "Ally Buff", "Enemy Buff", "Both"}, 3))).SetFontStyle(FontStyle.Regular, Color.Wheat).SetTag(9);
+            LocalMenu.AddItem(new MenuItem("MinMana.Jungle.DontCheckBlueBuff", "Don't check min. mana if I have Blue Buff").SetValue(true)).SetFontStyle(FontStyle.Regular, Color.Wheat).SetTag(9);
+
+            LocalMenu.AddItem(new MenuItem("MinMana.Jungle.Default", "Load Recommended Settings").SetValue(true).SetTag(9))
+                .SetFontStyle(FontStyle.Bold, Color.GreenYellow)
+                .ValueChanged +=
+                (sender, args) =>
                 {
-                    menuJungle.AddItem(
-                        new MenuItem("MinMana.Jungle.AllyBig", "Ally: Big Mob %").SetValue(new Slider(50, 100, 0)))
-                        .SetFontStyle(FontStyle.Regular, Color.LightGreen);
-                    menuJungle.AddItem(
-                        new MenuItem("MinMana.Jungle.AllySmall", "Ally: Small Mob %").SetValue(new Slider(50, 100, 0)))
-                        .SetFontStyle(FontStyle.Regular, Color.LightGreen);
-
-                    menuJungle.AddItem(
-                        new MenuItem("MinMana.Jungle.EnemyBig", "Enemy: Big Mob %").SetValue(new Slider(30, 100, 0)))
-                        .SetFontStyle(FontStyle.Regular, Color.IndianRed);
-                    menuJungle.AddItem(
-                        new MenuItem("MinMana.Jungle.EnemySmall", "Enemy: Small Mob %").SetValue(new Slider(30, 100, 0)))
-                        .SetFontStyle(FontStyle.Regular, Color.IndianRed);
-
-                    menuJungle.AddItem(
-                        new MenuItem("MinMana.Jungle.BigBoys", "Baron/Dragon/RH %").SetValue(new Slider(70, 100, 0)))
-                        .SetFontStyle(FontStyle.Regular, Color.Aqua);
-                    LocalMenu.AddSubMenu(menuJungle);
-                }
-
-                LocalMenu.AddItem(
-                    new MenuItem("MinMana.Jungle.DontCheckEnemyBuff", "Don't check min. mana if I'm taking:").SetValue(
-                        new StringList(new[] {"Off", "Ally Buff", "Enemy Buff", "Both"}, 3)))
-                    .SetFontStyle(FontStyle.Regular, Color.Wheat);
-                LocalMenu.AddItem(
-                    new MenuItem("MinMana.Jungle.DontCheckBlueBuff", "Don't check min. mana if I have Blue Buff")
-                        .SetValue(true)).SetFontStyle(FontStyle.Regular, Color.Wheat);
-
-                LocalMenu.AddItem(new MenuItem("MinMana.Jungle.Default", "Load Recommended Settings").SetValue(true))
-                    .SetFontStyle(FontStyle.Bold, Color.GreenYellow)
-                    .ValueChanged +=
-                    (sender, args) =>
+                    if (args.GetNewValue<bool>() == true)
                     {
-                        if (args.GetNewValue<bool>() == true)
+                        LoadDefaultSettings();
+                    }
+                };
+        }
+
+        static void InitializeRefreshMenuItems()
+        {
+            int argsValue = LocalMenu.Item("MinMana.Mode").GetValue<StringList>().SelectedIndex;
+
+            foreach (var item in LocalMenu.Items)
+            {
+                item.Show(false);
+
+                if (item.Tag == 9)
+                {
+                    item.Show(true);
+                }
+
+                switch (argsValue)
+                {
+                    case 0:
+                        if (item.Tag == 1)
                         {
-                            LoadDefaultSettings();
+                            item.Show(true);
                         }
-                    };
+                        break;
+                    case 1:
+                        if (item.Tag == 2)
+                        {
+                            item.Show(true);
+                        }
+
+                        break;
+                }
             }
         }
 
+        static void InitializeSimpleMenu()
+        {
+            LocalMenu.AddItem(new MenuItem("MinMana.Simple.Harass", "Harass %").SetValue(new Slider(60, 100, 0))).SetFontStyle(FontStyle.Regular, Color.IndianRed).SetTag(1);
+            LocalMenu.AddItem(new MenuItem("MinMana.Simple.Lane", "Lane Clear %").SetValue(new Slider(30, 100, 0))).SetFontStyle(FontStyle.Regular, Color.LightSkyBlue).SetTag(1);
+            LocalMenu.AddItem(new MenuItem("MinMana.Simple.Jungle", "Jungle Clear %").SetValue(new Slider(60, 100, 0))).SetFontStyle(FontStyle.Regular, Color.IndianRed).SetTag(1);
+        }
+
+        static void InitializeAdvancedMenu()
+        {
+            var menuHarass = new Menu("Harass Min. Mana Control", "MinMana.Menu.Harass").SetFontStyle(FontStyle.Regular, Color.DarkSalmon);
+            {
+                menuHarass.AddItem(new MenuItem("MinMana.Advanced.Harass", "Harass %").SetValue(new Slider(30, 100, 0))).SetFontStyle(FontStyle.Regular, Color.LightSkyBlue);
+                LocalMenu.AddSubMenu(menuHarass);
+            }
+
+            var menuLane = new Menu("Lane Clear Min. Mana Control", "MinMana.Menu.Lane").SetFontStyle(FontStyle.Regular, Color.Coral);
+            {
+                menuLane.AddItem(new MenuItem("MinMana.Lane.Alone", "I'm Alone %").SetValue(new Slider(30, 100, 0))).SetFontStyle(FontStyle.Regular, Color.LightSkyBlue).SetTag(2);
+                menuLane.AddItem(new MenuItem("MinMana.Lane.Enemy", "I'm NOT Alone (Enemy Close) %").SetValue(new Slider(60, 100, 0))).SetFontStyle(FontStyle.Regular, Color.IndianRed).SetTag(2);
+                LocalMenu.AddSubMenu(menuLane);
+            }
+
+            var menuJungle = new Menu("Jungle Clear Min. Mana Control", "MinMana.Menu.Jungle").SetFontStyle(FontStyle.Regular, Color.DarkSalmon);
+            {
+                menuJungle.AddItem(new MenuItem("MinMana.Jungle.AllyBig", "Ally: Big Mob %").SetValue(new Slider(50, 100, 0))).SetFontStyle(FontStyle.Regular, Color.LightGreen).SetTag(2);
+                menuJungle.AddItem(new MenuItem("MinMana.Jungle.AllySmall", "Ally: Small Mob %").SetValue(new Slider(50, 100, 0))).SetFontStyle(FontStyle.Regular, Color.LightGreen).SetTag(2);
+
+                menuJungle.AddItem(new MenuItem("MinMana.Jungle.EnemyBig", "Enemy: Big Mob %").SetValue(new Slider(30, 100, 0))).SetFontStyle(FontStyle.Regular, Color.IndianRed).SetTag(2);
+                menuJungle.AddItem(new MenuItem("MinMana.Jungle.EnemySmall", "Enemy: Small Mob %").SetValue(new Slider(30, 100, 0))).SetFontStyle(FontStyle.Regular, Color.IndianRed).SetTag(2);
+
+                menuJungle.AddItem(new MenuItem("MinMana.Jungle.BigBoys", "Baron/Dragon/RH %").SetValue(new Slider(70, 100, 0))).SetFontStyle(FontStyle.Regular, Color.Aqua).SetTag(2);
+                LocalMenu.AddSubMenu(menuJungle);
+            }
+        }
         public static void LoadDefaultSettings()
         {
             LocalMenu.Item("MinMana.Enable")
