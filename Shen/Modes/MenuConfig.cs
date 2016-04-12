@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using Shen.Champion;
+using Color = SharpDX.Color;
 
 namespace Shen.Modes
 {
@@ -15,18 +17,24 @@ namespace Shen.Modes
         public static LeagueSharp.Common.Menu LocalMenu { get; private set; }
         public static void Initialize()
         {
-            LocalMenu = new LeagueSharp.Common.Menu("Shen", "Shen", true);
 
-            LocalMenu.AddSubMenu(new LeagueSharp.Common.Menu("Orbwalking", "Orbwalking"));
-            Orbwalker = new Orbwalking.Orbwalker(LocalMenu.SubMenu("Orbwalking"));
+            LocalMenu = new Menu(":: Shen is Back", "Shen", true).SetFontStyle(FontStyle.Regular, Color.GreenYellow);
+
+            var MenuTools = new Menu("Tools", "Tools");
+            LocalMenu.AddSubMenu(MenuTools);
+
+            MenuTools.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+            Orbwalker = new Orbwalking.Orbwalker(MenuTools.SubMenu("Orbwalking"));
             Orbwalker.SetAttack(true);
-            Shen.Champion.PlayerSpells.Initialize();
-            ModeSelector.Initialize(LocalMenu);
 
-            Common.AutoBushManager.Initialize();
-            Common.AutoLevelManager.Initialize();
+            Shen.Champion.PlayerSpells.Initialize();
+            ModeSelector.Initialize(MenuTools);
+
+            Common.AutoBushManager.Initialize(MenuTools);
+            Common.AutoLevelManager.Initialize(MenuTools);
             Common.SummonerManager.Initialize();
             Common.ItemManager.Initialize();
+            Common.CommonSkins.Initialize(MenuTools);
 
             ModeUlti.Initialize(LocalMenu);
             ModeCombo.Initialize(LocalMenu);
@@ -38,6 +46,14 @@ namespace Shen.Modes
             SpiritUnit.Initialize();
             
             LocalMenu.AddToMainMenu();
+
+            foreach (var i in LocalMenu.Children.Cast<Menu>().SelectMany(GetSubMenu))
+            {
+
+                i.DisplayName = ":: " + i.DisplayName;
+            }
+
+
             Game.OnUpdate += GameOnOnUpdate;
         }
 
@@ -51,6 +67,14 @@ namespace Shen.Modes
                     Shen.Champion.PlayerSpells.R.CastOnUnit(t);
                 }
             }
+        }
+
+        private static IEnumerable<Menu> GetSubMenu(Menu menu)
+        {
+            yield return menu;
+
+            foreach (var childChild in menu.Children.SelectMany(GetSubMenu))
+                yield return childChild;
         }
 
         private static List<Obj_AI_Hero> GetHelplessTeamMate()

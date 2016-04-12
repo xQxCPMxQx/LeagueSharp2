@@ -90,12 +90,13 @@ namespace Shen.Common
 
         private static Menu menu;
 
-        public static void Initialize()
+        public static void Initialize(Menu ParentMenu)
         {
-            menu = Config.AddSubMenu(new Menu("Auto Bush Revealer", "AutoBushRevealer").SetFontStyle(FontStyle.Regular, Color.Aquamarine));
+            menu = ParentMenu.AddSubMenu(new Menu("Auto Bush Revealer", "AutoBushRevealer").SetFontStyle(FontStyle.Regular, Color.Aquamarine));
 
             var useWardsMenu = new Menu("Use Wards: ", "AutoBushUseWards");
             menu.AddSubMenu(useWardsMenu);
+
             foreach (var ward in _wards)
             {
                 useWardsMenu.AddItem(new MenuItem("AutoBush." + ward.Key, ward.Value).SetValue(true));

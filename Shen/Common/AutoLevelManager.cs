@@ -13,7 +13,7 @@ namespace Shen.Common
 
         public static int[] SpellLevels;
 
-        public static void Initialize()
+        public static void Initialize(Menu ParentMenu)
         {
             LocalMenu = new Menu("Auto Level", "Auto Level").SetFontStyle(FontStyle.Regular, Color.Aquamarine);
             LocalMenu.AddItem(
@@ -45,7 +45,7 @@ namespace Shen.Common
                     break;
             }
 
-            Modes.MenuConfig.LocalMenu.AddSubMenu(LocalMenu);
+            ParentMenu.AddSubMenu(LocalMenu);
 
             Game.OnUpdate += Game_OnUpdate;
 

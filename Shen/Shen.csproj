@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="Common\AutoBushManager.cs" />
     <Compile Include="Common\AutoLevelManager.cs" />
+    <Compile Include="Common\CommonSkins.cs" />
     <Compile Include="Common\SummonerManager.cs" />
     <Compile Include="Modes\ModeDrawing.cs" />
     <Compile Include="Common\Geometry.cs" />

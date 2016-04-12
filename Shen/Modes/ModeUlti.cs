@@ -28,11 +28,13 @@ namespace Shen.Modes
                 IEnumerable<Obj_AI_Hero> vMax =
                     HeroManager.Allies.Where(
                         ally =>
-                            !ally.IsDead && !ally.IsMe && !ally.InShop() && !ally.HasBuff("Recall") && ally.CountEnemiesInRange(ally.UnderAllyTurret() ? 550 : 450 + 350) > 0)
+                            !ally.IsDead && !ally.IsMe && !ally.InShop() && !ally.HasBuff("Recall") &&
+                            ally.CountEnemiesInRange(ally.UnderAllyTurret() ? 550 : 350 + 350) > 0)
                         .Where(ally =>
                             LocalMenu.Item(ally.ChampionName + ".UseRWarning").GetValue<StringList>().SelectedIndex != 0)
                         .Where(ally =>
-                            ally.HealthPercent <= LocalMenu.Item(ally.ChampionName + ".UseRWarning").GetValue<StringList>().SelectedIndex*5)
+                            ally.HealthPercent <=
+                            LocalMenu.Item(ally.ChampionName + ".UseRWarning").GetValue<StringList>().SelectedIndex*5)
                         .OrderByDescending(ally =>
                             LocalMenu.Item(ally.ChampionName + ".UseRPriority").GetValue<Slider>().Value);
                 return vMax.FirstOrDefault();
@@ -41,7 +43,7 @@ namespace Shen.Modes
 
         public static void Initialize(LeagueSharp.Common.Menu menuConfig)
         {
-            LocalMenu = new LeagueSharp.Common.Menu("Team Mate Settings", "TeamMates").SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
+            LocalMenu = new LeagueSharp.Common.Menu("R Settings", "TeamMates").SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
 
             //var menuImportant = new LeagueSharp.Common.Menu("Important Ally", "Menu.Important");
             
