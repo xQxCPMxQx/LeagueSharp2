@@ -50,7 +50,7 @@ namespace Shen.Modes
                 {
                     W.Cast();
                 }
-                else if (Q.IsReady())
+                else if (Q.IsReady() && ObjectManager.Player.HasPassive())
                 {
                     Q.Cast();
                 }
