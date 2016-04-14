@@ -281,6 +281,11 @@ namespace Nocturne.Evade
                 return;
             }
 
+            if (!sender.IsValid || sender.Team == ObjectManager.Player.Team)
+            {
+                return;
+            }
+
             if (PlayerSpells.W.IsReady())
             { 
                 if (sender.IsEnemy && sender is Obj_AI_Hero && args.Target.IsMe)
