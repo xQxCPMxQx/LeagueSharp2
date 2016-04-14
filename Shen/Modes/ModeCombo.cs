@@ -39,6 +39,11 @@ namespace Shen.Modes
                 return;
             }
             
+            if (!sender.IsValid || sender.Team == ObjectManager.Player.Team)
+            {
+                return;
+            }
+
             if (!sender.IsMe && sender.IsEnemy && sender is Obj_AI_Hero && args.Target.IsMe)
             {
                 if (ObjectManager.Player.Position.Distance(SpiritUnit.SwordUnit.Position) < 350 && W.IsReady())
