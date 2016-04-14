@@ -39,6 +39,11 @@ namespace Shen.Modes
                 return;
             }
             
+            if (sender.Type != GameObjectType.obj_AI_Hero)
+            {
+                return;
+            }
+            
             if (!sender.IsValid || sender.Team == ObjectManager.Player.Team)
             {
                 return;
