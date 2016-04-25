@@ -110,12 +110,15 @@ namespace Nocturne.Evade
             DangerousTargetedSpells.Add(new DangerousSpells("zedR", "zed", SpellSlot.R));
             DangerousTargetedSpells.Add(new DangerousSpells("tristanaR", "tristana", SpellSlot.R));
             DangerousTargetedSpells.Add(new DangerousSpells("malzaharR", "malzahar", SpellSlot.R));
-            
+            DangerousTargetedSpells.Add(new DangerousSpells("urgotR", "urgot", SpellSlot.R));
+            DangerousTargetedSpells.Add(new DangerousSpells("trundleR", "trundle", SpellSlot.R));
+
             DangerousTargetedSpells.Add(new DangerousSpells("alistarQ", "alistar", SpellSlot.W));
             DangerousTargetedSpells.Add(new DangerousSpells("nasusW", "nasus", SpellSlot.W));
             DangerousTargetedSpells.Add(new DangerousSpells("pantheonW", "pantheon", SpellSlot.W));
             DangerousTargetedSpells.Add(new DangerousSpells("rammusE", "rammus", SpellSlot.E));
             DangerousTargetedSpells.Add(new DangerousSpells("singedW", "singed", SpellSlot.W));
+            DangerousTargetedSpells.Add(new DangerousSpells("kayleQ", "kayle", SpellSlot.Q));
         }
 
         public static bool Evading
