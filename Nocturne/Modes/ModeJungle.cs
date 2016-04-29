@@ -76,8 +76,8 @@ namespace Nocturne.Modes
 
 
             LocalMenu.AddItem(new MenuItem("Jungle.Advanced.UseE.Big1", "E: [Blue/Red]").SetValue(new StringList(new[] { "Off", "On" }, 1))).SetFontStyle(FontStyle.Regular, PlayerSpells.E.MenuColor()).SetTag(2);
-            LocalMenu.AddItem(new MenuItem("Jungle.Advanced.UseE.Big2", "E: [Baron/Dragon]").SetValue(new StringList(new[] { "Off", "On" }, 1))).SetFontStyle(FontStyle.Regular, PlayerSpells.E.MenuColor()).SetTag(2);
-            LocalMenu.AddItem(new MenuItem("Jungle.Advanced.UseE.Big3", "E: [Other Big Mobs]").SetValue(new StringList(new[] { "Off", "On" }, 1))).SetFontStyle(FontStyle.Regular, PlayerSpells.E.MenuColor()).SetTag(2);
+            LocalMenu.AddItem(new MenuItem("Jungle.Advanced.UseE.Big2", "E: [Baron/Dragon]").SetValue(new StringList(new[] { "Off", "On" }, 0))).SetFontStyle(FontStyle.Regular, PlayerSpells.E.MenuColor()).SetTag(2);
+            LocalMenu.AddItem(new MenuItem("Jungle.Advanced.UseE.Big3", "E: [Other Big Mobs]").SetValue(new StringList(new[] { "Off", "On" }, 0))).SetFontStyle(FontStyle.Regular, PlayerSpells.E.MenuColor()).SetTag(2);
             LocalMenu.AddItem(new MenuItem("Jungle.Advanced.UseE.Big4", "E: [Small Mobs]").SetValue(new StringList(new[] { "Off", "On" }, 0))).SetFontStyle(FontStyle.Regular, PlayerSpells.E.MenuColor()).SetTag(2);
         }
 
