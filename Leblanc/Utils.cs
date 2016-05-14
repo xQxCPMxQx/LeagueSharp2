@@ -18,7 +18,7 @@ using Texture = SharpDX.Direct3D9.Texture;
 
 namespace Leblanc
 {
-    static class Common
+    static class CommonL
     {
         public static bool IsOnScreen(Vector3 vector)
         {
@@ -166,7 +166,7 @@ namespace Leblanc
                 sprite.Transform = nMatrix;
                 Matrix mT = Drawing.Direct3DDevice.GetTransform(TransformState.World);
 
-                if (Common.IsOnScreen(new Vector2(size.Width, size.Height)))
+                if (CommonL.IsOnScreen(new Vector2(size.Width, size.Height)))
                     sprite.Draw(texture, color);
                 sprite.Transform = matrix;
             }

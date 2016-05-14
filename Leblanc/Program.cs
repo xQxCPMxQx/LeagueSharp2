@@ -1,9 +1,11 @@
 #region
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using Leblanc.Common;
 using Color = System.Drawing.Color;
 
 #endregion
@@ -79,21 +81,24 @@ namespace Leblanc
                 SpellList.Add(R);
             }
 
-            Config = new Menu(ChampionName, ChampionName, true);
+            Config = new Menu(ChampionName, ChampionName, true).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
             {
                 Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             }
 
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
-            var menuTargetSelector = new Menu("Target Selector", "TargetSelector");
-            {
-                TargetSelector.AddToMenu(menuTargetSelector);
-                Config.AddSubMenu(menuTargetSelector);
-            }
-            new AssassinManager();
+            Common.CommonTargetSelector.Init(Config);
 
-            Config.AddSubMenu(new Menu("Combo", "Combo"));
+            var MenuSettings  = new Menu("Settings", "Settings").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua);
+            {
+                Common.CommonAutoLevel.Init(MenuSettings);
+                Common.CommonAutoBush.Init(MenuSettings);
+                Common.CommonSkins.Init(MenuSettings);
+                Config.AddSubMenu(MenuSettings);
+            }
+
+            Config.AddSubMenu(new Menu("Combo", "Combo")).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
             {
                 Config.SubMenu("Combo")
                     .AddItem(
@@ -242,6 +247,11 @@ namespace Leblanc
 
             Config.AddToMainMenu();
 
+            foreach (var i in Config.Children.Cast<Menu>().SelectMany(GetSubMenu))
+            {
+                i.DisplayName = ":: " + i.DisplayName;
+            }
+
             Game.OnUpdate += Game_OnUpdate;
             {
                 Drawing.OnDraw += Drawing_OnDraw;
@@ -254,6 +264,14 @@ namespace Leblanc
                 String.Format(
                     "<font color='#70DBDB'>xQx</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded! Fixed Auto Return W Problem</font>",
                     ChampionName));
+        }
+
+        private static IEnumerable<Menu> GetSubMenu(Menu menu)
+        {
+            yield return menu;
+
+            foreach (var childChild in menu.Children.SelectMany(GetSubMenu))
+                yield return childChild;
         }
 
         private static int FindCounterStatusForTarget(string enemyBaseSkinName)
@@ -394,7 +412,7 @@ namespace Leblanc
             if (vComboType == ComboType.ComboQR && Q.IsReady())
             {
 
-                t = GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                t = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t == null)
                     return;
 
@@ -404,7 +422,7 @@ namespace Leblanc
 
             if (vComboType == ComboType.ComboWR && W.IsReady())
             {
-                t = GetTarget(W.Range, TargetSelector.DamageType.Magical);
+                t = CommonTargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (t == null)
                     return;
 
@@ -416,7 +434,7 @@ namespace Leblanc
 
             if (vComboType == ComboType.ComboER && E.IsReady())
             {
-                t = GetTarget(E.Range, TargetSelector.DamageType.Magical);
+                t = CommonTargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
                 if (t == null)
                     return;
 
@@ -425,7 +443,7 @@ namespace Leblanc
             }
             _isComboCompleted = true;
 
-            t = GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            t = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             UserSummoners(t);
         }
 
@@ -439,7 +457,7 @@ namespace Leblanc
             var cdW = Game.Time < cdWEx ? cdWEx - Game.Time : 0;
             var cdE = Game.Time < cdEEx ? cdEEx - Game.Time : 0;
 
-            var t = GetTarget(Q.Range * 2, TargetSelector.DamageType.Magical);
+            var t = CommonTargetSelector.GetTarget(Q.Range * 2, TargetSelector.DamageType.Magical);
             var useR = (Config.Item("DontCombo" + t.BaseSkinName) != null &&
                         Config.Item("DontCombo" + t.BaseSkinName).GetValue<bool>() == false);
 
@@ -474,21 +492,21 @@ namespace Leblanc
                 {
                     if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancChaosOrbM") // R-Q
                     {
-                        t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                        t = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                         if (t.IsValidTarget(Q.Range) &&
                             t.Health < GetRQDamage + ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                             R.CastOnUnit(t);
                     }
                     if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSlideM") // R-W
                     {
-                        t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+                        t = CommonTargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                         if (t.IsValidTarget(W.Range) &&
                             t.Health < GetRQDamage + ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                             R.Cast(t, false, true);
                     }
                     if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "LeblancSoulShackleM") // R-E
                     {
-                        t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+                        t = CommonTargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
                         if (t.IsValidTarget(E.Range) &&
                             t.Health < GetRQDamage + ObjectManager.Player.GetSpellDamage(t, SpellSlot.Q))
                             R.CastIfHitchanceEquals(t, GetEHitChance);
@@ -550,9 +568,9 @@ namespace Leblanc
 
         private static void Harass()
         {
-            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var wTarget = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
-            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            var qTarget = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var wTarget = CommonTargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+            var eTarget = CommonTargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("HarassUseQ").GetValue<bool>() &&
                        ObjectManager.Player.ManaPercentage() >= Config.Item("HarassManaQ").GetValue<Slider>().Value;
@@ -580,7 +598,7 @@ namespace Leblanc
 
                 xDmg += ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod) * .65f) +
                         perDmg[R.Level - 1];
-                var t = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
+                var t = CommonTargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget(2000))
                     xDmg +=
                         (float)
@@ -599,7 +617,7 @@ namespace Leblanc
                 xDmg += ((ObjectManager.Player.BaseAbilityDamage + ObjectManager.Player.FlatMagicDamageMod) * .98f) +
                         perDmg[R.Level - 1];
 
-                var t = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
+                var t = CommonTargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget(2000))
                     xDmg += (float) ObjectManager.Player.GetSpellDamage(t, SpellSlot.W);
 
@@ -739,7 +757,7 @@ namespace Leblanc
                 {
                     if (LeBlancStillJumped)
                     {
-                        var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                        var qTarget = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                         if (qTarget == null)
                             return;
                         if (ObjectManager.Player.Health < qTarget.Health || ObjectManager.Player.Level < qTarget.Level && !LeBlancStillJumped)
@@ -837,7 +855,7 @@ namespace Leblanc
         {
             if (Config.SubMenu("Harass").Item("HarassUseTQ").GetValue<KeyBind>().Active)
             {
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                var t = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t != null && Q.IsReady() &&
                     ObjectManager.Player.ManaPercentage() >=
                     Config.SubMenu("Harass").Item("HarassManaQ").GetValue<Slider>().Value)
@@ -846,7 +864,7 @@ namespace Leblanc
 
             if (Config.SubMenu("Harass").Item("HarassUseTW").GetValue<KeyBind>().Active)
             {
-                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+                var t = CommonTargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (t != null && W.IsReady() && !LeBlancStillJumped &&
                     ObjectManager.Player.ManaPercent >= Config.SubMenu("Harass").Item("HarassManaW").GetValue<Slider>().Value)
                     W.Cast(t, true, true);
@@ -854,7 +872,7 @@ namespace Leblanc
 
             if (Config.SubMenu("Harass").Item("HarassUseTE").GetValue<KeyBind>().Active)
             {
-                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+                var t = CommonTargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
                 if (t != null && E.IsReady() &&
                     ObjectManager.Player.ManaPercent >=
                     Config.SubMenu("Harass").Item("HarassManaE").GetValue<Slider>().Value)
@@ -889,7 +907,7 @@ namespace Leblanc
 
             RefreshComboType();
 
-            var t = TargetSelector.GetTarget(W.Range * 2, TargetSelector.DamageType.Physical);
+            var t = CommonTargetSelector.GetTarget(W.Range * 2, TargetSelector.DamageType.Physical);
             {
                 var xComboText = "Combo Kill";
                 if (t.IsValidTarget(W.Range))
@@ -1046,43 +1064,6 @@ namespace Leblanc
 
         #endregion
 
-        #region GetEnemy
-
-        private static Obj_AI_Hero GetTarget(float vDefaultRange = 0,
-            TargetSelector.DamageType vDefaultDamageType = TargetSelector.DamageType.Physical)
-        {
-            if (vDefaultRange < 0.00001)
-                vDefaultRange = Q.Range;
-
-            if (!Config.Item("AssassinActive").GetValue<bool>())
-                return TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType);
-
-            var assassinRange = Config.Item("AssassinSearchRange").GetValue<Slider>().Value;
-
-            var vEnemy =
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(
-                        enemy =>
-                            enemy.Team != ObjectManager.Player.Team && !enemy.IsDead && enemy.IsVisible &&
-                            Config.Item("Assassin" + enemy.ChampionName) != null &&
-                            Config.Item("Assassin" + enemy.ChampionName).GetValue<bool>() &&
-                            ObjectManager.Player.Distance(enemy) < assassinRange);
-
-            if (Config.Item("AssassinSelectOption").GetValue<StringList>().SelectedIndex == 1)
-            {
-                vEnemy = (from vEn in vEnemy select vEn).OrderByDescending(vEn => vEn.MaxHealth);
-            }
-
-            Obj_AI_Hero[] objAiHeroes = vEnemy as Obj_AI_Hero[] ?? vEnemy.ToArray();
-
-            Obj_AI_Hero t = !objAiHeroes.Any()
-                ? TargetSelector.GetTarget(vDefaultRange, vDefaultDamageType)
-                : objAiHeroes[0];
-
-            return t;
-        }
-
-        #endregion
 
         #region GetEHitChance
 
