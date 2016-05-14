@@ -565,7 +565,7 @@ namespace Leblanc
             if (useQ && qTarget != null && Q.IsReady())
                 Q.CastOnUnit(qTarget);
 
-            if (useW && wTarget != null && W.IsReady())
+            if (useW && wTarget != null && W.IsReady() && !LeBlancStillJumped)
                 W.Cast(wTarget, true, true);
 
             if (useE && eTarget != null && E.IsReady())
@@ -743,9 +743,9 @@ namespace Leblanc
                         var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                         if (qTarget == null)
                             return;
-                        if ((ObjectManager.Player.Health < qTarget.Health || ObjectManager.Player.Level < qTarget.Level))
+                        if (ObjectManager.Player.Health < qTarget.Health || ObjectManager.Player.Level < qTarget.Level && !LeBlancStillJumped)
                             W.Cast();
-                        else
+                        else 
                         {
                             if (Q.IsReady())
                                 Q.CastOnUnit(qTarget);
@@ -773,6 +773,11 @@ namespace Leblanc
         {
             if (!Orbwalking.CanMove(40))
                 return;
+
+            if (!LeBlancStillJumped)
+            {
+                return;
+            }
 
             var useQ = Config.Item("LaneClearUseQ").GetValue<bool>();
             var useW = Config.Item("LaneClearUseW").GetValue<bool>();
@@ -822,7 +827,7 @@ namespace Leblanc
             if (useQ && Q.IsReady())
                 Q.CastOnUnit(mob);
 
-            if (useW && W.IsReady() && mobs.Count >= 2)
+            if (useW && W.IsReady() && mobs.Count >= 2 && !LeBlancStillJumped)
                 W.Cast(mob.Position);
 
             if (useE && E.IsReady())
@@ -844,8 +849,7 @@ namespace Leblanc
             {
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (t != null && W.IsReady() && !LeBlancStillJumped &&
-                    ObjectManager.Player.ManaPercentage() >=
-                    Config.SubMenu("Harass").Item("HarassManaW").GetValue<Slider>().Value)
+                    ObjectManager.Player.ManaPercent >= Config.SubMenu("Harass").Item("HarassManaW").GetValue<Slider>().Value)
                     W.Cast(t, true, true);
             }
 
@@ -853,7 +857,7 @@ namespace Leblanc
             {
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
                 if (t != null && E.IsReady() &&
-                    ObjectManager.Player.ManaPercentage() >=
+                    ObjectManager.Player.ManaPercent >=
                     Config.SubMenu("Harass").Item("HarassManaE").GetValue<Slider>().Value)
                     E.CastIfHitchanceEquals(t, GetEHitChance);
             }
