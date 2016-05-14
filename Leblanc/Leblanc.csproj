@@ -54,6 +54,9 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clipper_library">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\clipper_library.dll</HintPath>
+    </Reference>
     <Reference Include="LeagueSharp">
       <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.dll</HintPath>
     </Reference>
@@ -76,6 +79,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\CommonBuffManager.cs" />
+    <Compile Include="Common\CommonGeometry.cs" />
     <Compile Include="Common\CommonTargetSelector.cs" />
     <Compile Include="Common\CommonAutoBush.cs" />
     <Compile Include="Common\CommonAutoLevel.cs" />

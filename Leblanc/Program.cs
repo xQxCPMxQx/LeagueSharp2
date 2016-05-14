@@ -6,6 +6,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using Leblanc.Common;
+using SharpDX;
 using Color = System.Drawing.Color;
 
 #endregion
@@ -87,8 +88,9 @@ namespace Leblanc
             }
 
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-
+            Common.CommonGeometry.Init();
             Common.CommonTargetSelector.Init(Config);
+            var x = new CommonBuffManager();
 
             var MenuSettings  = new Menu("Settings", "Settings").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua);
             {
@@ -116,7 +118,7 @@ namespace Leblanc
                     {
                         Config.SubMenu("Combo")
                             .SubMenu("DontCombo")
-                            .AddItem(new MenuItem("DontCombo" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                            .AddItem(new MenuItem("DontCombo" + enemy.CharData.BaseSkinName, enemy.CharData.BaseSkinName).SetValue(false));
                     }
                 }
                 Config.SubMenu("Combo")
@@ -215,23 +217,28 @@ namespace Leblanc
 
             Config.AddSubMenu(new Menu("Drawings", "Drawings"));
             {
-                Config.SubMenu("Drawings")
-                    .AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(false, Color.Honeydew)));
-                Config.SubMenu("Drawings")
-                    .AddItem(new MenuItem("WRange", "W Range").SetValue(new Circle(true, Color.Honeydew)));
-                Config.SubMenu("Drawings")
-                    .AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false, Color.Honeydew)));
-                Config.SubMenu("Drawings")
-                    .AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, Color.Honeydew)));
+                var subMenuDrawingSpells = new Menu("Spells", "Spells");
+                {
+                    subMenuDrawingSpells.AddItem(new MenuItem("QRange", "Q Range").SetValue(new Circle(false, Color.Honeydew)));
+                    subMenuDrawingSpells.AddItem(new MenuItem("WRange", "W Range").SetValue(new Circle(true, Color.Honeydew)));
+                    subMenuDrawingSpells.AddItem(new MenuItem("ERange", "E Range").SetValue(new Circle(false, Color.Honeydew)));
+                    subMenuDrawingSpells.AddItem(new MenuItem("RRange", "R Range").SetValue(new Circle(false, Color.Honeydew)));
+                    Config.SubMenu("Drawings").AddSubMenu(subMenuDrawingSpells);
+                }
 
-                Config.SubMenu("Drawings")
-                    .AddItem(
-                        new MenuItem("ActiveERange", "Active E Range").SetValue(new Circle(false, Color.GreenYellow)));
-                Config.SubMenu("Drawings")
-                    .AddItem(new MenuItem("WObjPosition", "W Obj. Pos.").SetValue(new Circle(true, Color.GreenYellow)));
+                //var subMenuDrawingBuffs = new Menu("Jungle Buffs", "Buffs");
+                //{
+                //    subMenuDrawingBuffs.AddItem(new MenuItem("Buff.Blue", "Blue: Show Buff Time Circle").SetValue(true)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua);
+                //    subMenuDrawingBuffs.AddItem(new MenuItem("Buff.Red", "Red: Show Buff Time Circle").SetValue(true)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Red);
+                //    subMenuDrawingBuffs.AddItem(new MenuItem("Buff.Baron", "Baron: Show Buff Time Circle").SetValue(true)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Indigo);
+                //    Config.SubMenu("Drawings").AddSubMenu(subMenuDrawingBuffs);
+                //}
+                Config.SubMenu("Drawings").AddItem(new MenuItem("Show.JungleBuffs", "Show Jungle Buff Time Circle:").SetValue(true)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
+                
+                Config.SubMenu("Drawings").AddItem(new MenuItem("ActiveERange", "Active E Range").SetValue(new Circle(false, Color.GreenYellow)));
+                Config.SubMenu("Drawings").AddItem(new MenuItem("WObjPosition", "W Obj. Pos.").SetValue(new Circle(true, Color.GreenYellow)));
                 Config.SubMenu("Drawings").AddItem(new MenuItem("WObjTimeTick", "W Obj. Tick").SetValue(true));
-                Config.SubMenu("Drawings")
-                    .AddItem(new MenuItem("WQRange", "W+Q Range").SetValue(new Circle(false, Color.GreenYellow)));
+                Config.SubMenu("Drawings").AddItem(new MenuItem("WQRange", "W + Q Range").SetValue(new Circle(false, Color.GreenYellow)));
 
                 var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
                 Config.SubMenu("Drawings").AddItem(dmgAfterComboItem);
@@ -257,7 +264,8 @@ namespace Leblanc
                 Drawing.OnDraw += Drawing_OnDraw;
                 GameObject.OnCreate += GameObject_OnCreate;
                 GameObject.OnDelete += GameObject_OnDelete;
-                Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
+                Interrupter2.OnInterruptableTarget += Interrupter_OnPosibleToInterrupt;
+                
             }
 
             Game.PrintChat(
@@ -311,13 +319,12 @@ namespace Leblanc
                         select (buff.Name.Contains("LeblancSoulShackle"))).FirstOrDefault();
             }
         }
-
-        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
+        private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
         {
             if (!Config.Item("InterruptSpells").GetValue<bool>())
                 return;
 
-            var isValidTarget = unit.IsValidTarget(E.Range) && spell.DangerLevel == InterruptableDangerLevel.High;
+            var isValidTarget = unit.IsValidTarget(E.Range) && args.DangerLevel == Interrupter2.DangerLevel.High;
 
             if (E.IsReady() && isValidTarget)
             {
@@ -458,8 +465,8 @@ namespace Leblanc
             var cdE = Game.Time < cdEEx ? cdEEx - Game.Time : 0;
 
             var t = CommonTargetSelector.GetTarget(Q.Range * 2, TargetSelector.DamageType.Magical);
-            var useR = (Config.Item("DontCombo" + t.BaseSkinName) != null &&
-                        Config.Item("DontCombo" + t.BaseSkinName).GetValue<bool>() == false);
+            var useR = (Config.Item("DontCombo" + t.CharData.BaseSkinName) != null &&
+                        Config.Item("DontCombo" + t.CharData.BaseSkinName).GetValue<bool>() == false);
 
             if (!t.IsValidTarget())
                 return;
@@ -573,11 +580,11 @@ namespace Leblanc
             var eTarget = CommonTargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             var useQ = Config.Item("HarassUseQ").GetValue<bool>() &&
-                       ObjectManager.Player.ManaPercentage() >= Config.Item("HarassManaQ").GetValue<Slider>().Value;
+                       ObjectManager.Player.ManaPercent >= Config.Item("HarassManaQ").GetValue<Slider>().Value;
             var useW = Config.Item("HarassUseW").GetValue<bool>() &&
-                       ObjectManager.Player.ManaPercentage() >= Config.Item("HarassManaW").GetValue<Slider>().Value;
+                       ObjectManager.Player.ManaPercent >= Config.Item("HarassManaW").GetValue<Slider>().Value;
             var useE = Config.Item("HarassUseE").GetValue<bool>() &&
-                       ObjectManager.Player.ManaPercentage() >= Config.Item("HarassManaE").GetValue<Slider>().Value;
+                       ObjectManager.Player.ManaPercent >= Config.Item("HarassManaE").GetValue<Slider>().Value;
 
             if (useQ && qTarget != null && Q.IsReady())
                 Q.CastOnUnit(qTarget);
@@ -857,7 +864,7 @@ namespace Leblanc
             {
                 var t = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t != null && Q.IsReady() &&
-                    ObjectManager.Player.ManaPercentage() >=
+                    ObjectManager.Player.ManaPercent >=
                     Config.SubMenu("Harass").Item("HarassManaQ").GetValue<Slider>().Value)
                     Q.CastOnUnit(t);
             }
@@ -948,13 +955,13 @@ namespace Leblanc
 
             if (Config.Item("LaneClearActive").GetValue<KeyBind>().Active)
             {
-                if (ObjectManager.Player.ManaPercentage() >= Config.Item("LaneClearMana").GetValue<Slider>().Value)
+                if (ObjectManager.Player.ManaPercent >= Config.Item("LaneClearMana").GetValue<Slider>().Value)
                     LaneClear();
             }
 
             if (Config.Item("JungleFarmActive").GetValue<KeyBind>().Active)
             {
-                if (ObjectManager.Player.ManaPercentage() >= Config.Item("JungleFarmMana").GetValue<Slider>().Value)
+                if (ObjectManager.Player.ManaPercent >= Config.Item("JungleFarmMana").GetValue<Slider>().Value)
                     JungleFarm();
             }
         }
@@ -963,6 +970,30 @@ namespace Leblanc
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("Show.JungleBuffs").GetValue<bool>())
+            {
+                foreach (var hero in HeroManager.AllHeroes)
+                {
+                    var jungleBuffs =
+                        (from b in hero.Buffs
+                            join b1 in CommonBuffManager.JungleBuffs on b.DisplayName equals b1.BuffName
+                            select new {b, b1}).Distinct();
+
+                    foreach (var buffName in jungleBuffs.ToList())
+                    {
+                        var circle1 =
+                            new CommonGeometry.Circle2(new Vector2(hero.Position.X + 3, hero.Position.Y - 3),
+                                140 + (buffName.b1.Number*20),
+                                Game.Time - buffName.b.StartTime, buffName.b.EndTime - buffName.b.StartTime).ToPolygon();
+                        circle1.Draw(Color.Black, 3);
+
+                        var circle =
+                            new CommonGeometry.Circle2(hero.Position.To2D(), 140 + (buffName.b1.Number*20),
+                                Game.Time - buffName.b.StartTime, buffName.b.EndTime - buffName.b.StartTime).ToPolygon();
+                        circle.Draw(buffName.b1.Color, 3);
+                    }
+                }
+            }
 
             if (Config.SubMenu("Combo").Item("ComboShowInfo").GetValue<bool>())
             {
