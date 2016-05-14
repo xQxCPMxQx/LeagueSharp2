@@ -252,7 +252,7 @@ namespace Leblanc
 
             Game.PrintChat(
                 String.Format(
-                    "<font color='#70DBDB'>xQx</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded!</font>",
+                    "<font color='#70DBDB'>xQx</font> <font color='#FFFFFF'>{0}</font> <font color='#70DBDB'>Loaded! Fixed Auto Return W Problem</font>",
                     ChampionName));
         }
 
@@ -348,7 +348,7 @@ namespace Leblanc
         {
             get
             {
-                return !W.IsReady() || ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "leblancslidereturn";
+                return !W.IsReady() || ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name.ToLower() == "leblancslidereturn";
             }
         }
 
@@ -462,7 +462,7 @@ namespace Leblanc
                     }
                     else
                     {
-                        if (W.IsReady())
+                        if (W.IsReady() && !leBlancClone)
                             ExecuteCombo();
                     }
                 }
@@ -515,13 +515,12 @@ namespace Leblanc
             {
                 if (vComboType == ComboType.ComboWR)
                 {
-                    if (!R.IsReady())
-                        W.Cast(t, true, true);
+                   if (!R.IsReady() && !LeBlancStillJumped) W.Cast(t, true, true);
                 }
-                else
-                {
+
+                else {
                     W.Cast(t, true, true);
-                }
+               }
             }
 
             if (E.IsReady() && t.IsValidTarget(E.Range) && _isComboCompleted)
@@ -537,7 +536,7 @@ namespace Leblanc
                 }
             }
 
-            if (t != null && IgniteSlot != SpellSlot.Unknown &&
+            if (IgniteSlot != SpellSlot.Unknown &&
                 ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
                 if (ObjectManager.Player.Distance(t) < 650 &&
@@ -917,7 +916,6 @@ namespace Leblanc
 
             if (Config.Item("ComboDblStun").GetValue<KeyBind>().Active)
                 DoubleStun();
-
 
             if (Config.Item("RunActive").GetValue<KeyBind>().Active)
                 Run();
