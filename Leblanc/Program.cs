@@ -839,14 +839,13 @@ namespace Leblanc
 
                 if (xUseQ == 2 || xUseQ == 3)
                 {
-
                     foreach (
                         var minion in
                             minionsQ.Where(
                                 m =>
                                     HealthPrediction.GetHealthPrediction(m,
                                         (int) (ObjectManager.Player.AttackCastDelay*1000), Game.Ping/2 - 100) < 0)
-                                .Where(m => m.Health <= Q.GetDamage(m) && Q.CanCast(m)))
+                                .Where(m => m.Health <= Q.GetDamage(m)))
                     {
                         Q.CastOnUnit(minion);
                     }
