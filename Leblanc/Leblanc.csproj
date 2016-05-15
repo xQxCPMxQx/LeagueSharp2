@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champion\PlayerObjects.cs" />
     <Compile Include="Common\CommonBuffManager.cs" />
     <Compile Include="Common\CommonGeometry.cs" />
     <Compile Include="Common\CommonTargetSelector.cs" />

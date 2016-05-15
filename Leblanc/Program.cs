@@ -90,6 +90,7 @@ namespace Leblanc
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Common.CommonGeometry.Init();
             Common.CommonTargetSelector.Init(Config);
+            Champion.PlayerObjects.Init();
             var x = new CommonBuffManager();
 
             var MenuSettings  = new Menu("Settings", "Settings").SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua);
@@ -155,15 +156,12 @@ namespace Leblanc
 
             Config.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             {
-                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(false));
+                //Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(false));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseQ", "Use Q").SetValue(new StringList(new []{"Off", "On: Last Hit", "On: Unkillable Minions", "On: Both"}, 3)));
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseW", "Use W").SetValue(false));
                 Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearUseE", "Use E").SetValue(false));
-                Config.SubMenu("LaneClear")
-                    .AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-                Config.SubMenu("LaneClear")
-                    .AddItem(
-                        new MenuItem("LaneClearActive", "Harass!").SetValue(
-                            new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "Harass!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             }
 
             Config.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
@@ -171,12 +169,8 @@ namespace Leblanc
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseQ", "Use Q").SetValue(true));
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseW", "Use W").SetValue(true));
                 Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmUseE", "Use E").SetValue(true));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-                Config.SubMenu("JungleFarm")
-                    .AddItem(
-                        new MenuItem("JungleFarmActive", "Harass!").SetValue(
-                            new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmMana", "Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("JungleFarm").AddItem(new MenuItem("JungleFarmActive", "Harass!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
             }
 
             var menuRun = new Menu("Run", "Run");
@@ -206,6 +200,13 @@ namespace Leblanc
                     Config.SubMenu("Drawings").AddSubMenu(subMenuDrawingSpells);
                 }
 
+                var subMenuDrawingObjects = new Menu("Objects", "Objects");
+                {
+                    subMenuDrawingObjects.AddItem(new MenuItem("Objects.WPosition", "Show W / R Jump Object Position").SetValue(true));
+                    subMenuDrawingObjects.AddItem(new MenuItem("Objects.EStunStatus", "Show Enemy E Stun Status Time Circle").SetValue(true));
+
+                    Config.SubMenu("Drawings").AddSubMenu(subMenuDrawingObjects);
+                }
                 //var subMenuDrawingBuffs = new Menu("Jungle Buffs", "Buffs");
                 //{
                 //    subMenuDrawingBuffs.AddItem(new MenuItem("Buff.Blue", "Blue: Show Buff Time Circle").SetValue(true)).SetFontStyle(FontStyle.Regular, SharpDX.Color.Aqua);
@@ -216,8 +217,6 @@ namespace Leblanc
                 Config.SubMenu("Drawings").AddItem(new MenuItem("Show.JungleBuffs", "Show Jungle Buff Time Circle:").SetValue(true)).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
                 
                 Config.SubMenu("Drawings").AddItem(new MenuItem("ActiveERange", "Active E Range").SetValue(new Circle(false, Color.GreenYellow)));
-                Config.SubMenu("Drawings").AddItem(new MenuItem("WObjPosition", "W Obj. Pos.").SetValue(new Circle(true, Color.GreenYellow)));
-                Config.SubMenu("Drawings").AddItem(new MenuItem("WObjTimeTick", "W Obj. Tick").SetValue(true));
                 Config.SubMenu("Drawings").AddItem(new MenuItem("WQRange", "W + Q Range").SetValue(new Circle(false, Color.GreenYellow)));
 
                 var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Damage After Combo").SetValue(true);
@@ -323,7 +322,9 @@ namespace Leblanc
         private static void Interrupter_OnPosibleToInterrupt(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs args)
         {
             if (!Config.Item("InterruptSpells").GetValue<bool>())
+            {
                 return;
+            }
 
             var isValidTarget = unit.IsValidTarget(E.Range) && args.DangerLevel == Interrupter2.DangerLevel.High;
 
@@ -593,7 +594,12 @@ namespace Leblanc
 
             if (useW && W.IsReady() && t.IsValidTarget(W.Range))
             {
-                W.Cast(t, true, true);
+                var wP = W.GetPrediction(t);
+                var hithere = wP.CastPosition.Extend(ObjectManager.Player.Position, -50);
+                if (wP.Hitchance >= HitChance.High)
+                {
+                    W.Cast(hithere);
+                }
             }
 
             if (useE && E.IsReady() && t.IsValidTarget(E.Range))
@@ -809,22 +815,41 @@ namespace Leblanc
                 return;
             }
 
-            var useQ = Config.Item("LaneClearUseQ").GetValue<bool>();
             var useW = Config.Item("LaneClearUseW").GetValue<bool>();
-
-            if (useQ && Q.IsReady())
+            
+            var xUseQ = Config.Item("LaneClearUseQ").GetValue<StringList>().SelectedIndex;
+            if (Q.IsReady() && xUseQ != 0)
             {
                 var minionsQ = MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
-                foreach (Obj_AI_Base vMinion in 
-                    from vMinion in minionsQ
-                    let vMinionQDamage = ObjectManager.Player.GetSpellDamage(vMinion, SpellSlot.Q)
-                    where
-                        vMinion.Health <= vMinionQDamage &&
-                        vMinion.Health > ObjectManager.Player.GetAutoAttackDamage(vMinion)
-                    select vMinion)
+                if (xUseQ == 1 || xUseQ == 3)
                 {
-                    Q.CastOnUnit(vMinion);
+                    foreach (Obj_AI_Base vMinion in
+                        from vMinion in minionsQ
+                        let vMinionQDamage = ObjectManager.Player.GetSpellDamage(vMinion, SpellSlot.Q)
+                        where
+                            vMinion.Health <= vMinionQDamage &&
+                            vMinion.Health > ObjectManager.Player.GetAutoAttackDamage(vMinion)
+                        select vMinion)
+                    {
+                        Q.CastOnUnit(vMinion);
+                    }
+
+                }
+
+                if (xUseQ == 2 || xUseQ == 3)
+                {
+
+                    foreach (
+                        var minion in
+                            minionsQ.Where(
+                                m =>
+                                    HealthPrediction.GetHealthPrediction(m,
+                                        (int) (ObjectManager.Player.AttackCastDelay*1000), Game.Ping/2 - 100) < 0)
+                                .Where(m => m.Health <= Q.GetDamage(m) && Q.CanCast(m)))
+                    {
+                        Q.CastOnUnit(minion);
+                    }
                 }
             }
 
@@ -866,6 +891,11 @@ namespace Leblanc
 
         private static void DoToggleHarass()
         {
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                return;
+            }
+
             if (Config.SubMenu("Harass").Item("HarassUseTQ").GetValue<KeyBind>().Active)
             {
                 var t = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
@@ -880,7 +910,12 @@ namespace Leblanc
                 var t = CommonTargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget() && W.IsReady() && ObjectManager.Player.ManaPercent >= Config.SubMenu("Harass").Item("HarassManaW").GetValue<Slider>().Value)
                 {
-                    W.Cast(t, true, true);
+                    var wP = W.GetPrediction(t);
+                    var hithere = wP.CastPosition.Extend(ObjectManager.Player.Position, -50);
+                    if (wP.Hitchance >= HitChance.High)
+                    {
+                        W.Cast(hithere);
+                    }
                 }
             }
 
@@ -1068,13 +1103,16 @@ namespace Leblanc
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active && spell.Level > 0)
-                    Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
+                {
+                    Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color,
+                        spell.IsReady() ? 5 : 1);
+                }
             }
 
             var wqRange = Config.Item("WQRange").GetValue<Circle>();
             if (wqRange.Active && Q.IsReady() && W.IsReady())
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range + Q.Range, wqRange.Color);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range + Q.Range, wqRange.Color, Q.IsReady() && W.IsReady() ? 5 : 1);
             }
 
             var activeERange = Config.Item("ActiveERange").GetValue<Circle>();
