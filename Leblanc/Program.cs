@@ -102,14 +102,11 @@ namespace Leblanc
 
             Config.AddSubMenu(new Menu("Combo", "Combo")).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
             {
-                Config.SubMenu("Combo")
-                    .AddItem(
-                        new MenuItem("ComboSetOption", "Combo").SetValue(
-                            new StringList(new[] { "Auto", "Q-R Combo", "W-R Combo", "E-R Combo", }, 1)));
-                Config.SubMenu("Combo")
-                    .AddItem(
-                        new MenuItem("ComboSetEHitCh", "E Hit").SetValue(
-                            new StringList(new[] { "Low", "Medium", "High", "Very High", "Immobile" }, 2)));
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboMode", "Combo").SetValue(new StringList(new[] { "Auto", "Q-R Combo", "W-R Combo", "E-R Combo", }, 1))).SetFontStyle(FontStyle.Regular, SharpDX.Color.GreenYellow);
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboMode.Key", "   Quick Change Combo Mode With Mouse Scroll Button").SetValue(true)).SetFontStyle(FontStyle.Regular, SharpDX.Color.IndianRed);
+                
+
+                Config.SubMenu("Combo").AddItem(new MenuItem("ComboSetEHitCh", "E Hit").SetValue(new StringList(new[] { "Low", "Medium", "High", "Very High", "Immobile" }, 2)));
                 Config.SubMenu("Combo").AddSubMenu(new Menu("Don't Use Combo on", "DontCombo"));
                 {
                     foreach (
@@ -123,8 +120,7 @@ namespace Leblanc
                 }
                 Config.SubMenu("Combo")
                     .AddItem(
-                        new MenuItem("ComboDblStun", "Double Stun!").SetValue(
-                            new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+                        new MenuItem("ComboDblStun", "Double Stun!").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
                 Config.SubMenu("Combo").AddItem(new MenuItem("ComboShowInfo", "Show Combo Status").SetValue(true));
                 Config.SubMenu("Combo")
                     .AddItem(
@@ -136,34 +132,18 @@ namespace Leblanc
             {
                 Config.SubMenu("Harass").AddSubMenu(new Menu("Q", "HarassQ"));
                 Config.SubMenu("Harass").SubMenu("HarassQ").AddItem(new MenuItem("HarassUseQ", "Use Q").SetValue(true));
-                Config.SubMenu("Harass")
-                    .SubMenu("HarassQ")
-                    .AddItem(new MenuItem("HarassManaQ", "Q Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-                Config.SubMenu("Harass")
-                    .SubMenu("HarassQ")
-                    .AddItem(
-                        new MenuItem("HarassUseTQ", "Use Q (toggle)!").SetValue(
-                            new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
+                Config.SubMenu("Harass").SubMenu("HarassQ").AddItem(new MenuItem("HarassManaQ", "Q Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("Harass").SubMenu("HarassQ").AddItem(new MenuItem("HarassUseTQ", "Use Q (toggle)!").SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle))).Permashow(true, ChampionName + " | Q Toggle Harass:", SharpDX.Color.GreenYellow);
+
                 Config.SubMenu("Harass").AddSubMenu(new Menu("W", "HarassW"));
                 Config.SubMenu("Harass").SubMenu("HarassW").AddItem(new MenuItem("HarassUseW", "Use W").SetValue(true));
-                Config.SubMenu("Harass")
-                    .SubMenu("HarassW")
-                    .AddItem(new MenuItem("HarassManaW", "W Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-                Config.SubMenu("Harass")
-                    .SubMenu("HarassW")
-                    .AddItem(
-                        new MenuItem("HarassUseTW", "Use W (toggle)!").SetValue(
-                            new KeyBind("K".ToCharArray()[0], KeyBindType.Toggle)));
+                Config.SubMenu("Harass").SubMenu("HarassW").AddItem(new MenuItem("HarassManaW", "W Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("Harass").SubMenu("HarassW").AddItem(new MenuItem("HarassUseTW", "Use W (toggle)!").SetValue(new KeyBind("K".ToCharArray()[0], KeyBindType.Toggle))).Permashow(true, ChampionName + " | W Toggle Harass:", SharpDX.Color.GreenYellow);
+
                 Config.SubMenu("Harass").AddSubMenu(new Menu("E", "HarassE"));
                 Config.SubMenu("Harass").SubMenu("HarassE").AddItem(new MenuItem("HarassUseE", "Use E").SetValue(true));
-                Config.SubMenu("Harass")
-                    .SubMenu("HarassE")
-                    .AddItem(new MenuItem("HarassManaE", "E Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
-                Config.SubMenu("Harass")
-                    .SubMenu("HarassE")
-                    .AddItem(
-                        new MenuItem("HarassUseTE", "Use E (toggle)!").SetValue(
-                            new KeyBind("L".ToCharArray()[0], KeyBindType.Toggle)));
+                Config.SubMenu("Harass").SubMenu("HarassE").AddItem(new MenuItem("HarassManaE", "E Min. Mana Percent: ").SetValue(new Slider(50, 100, 0)));
+                Config.SubMenu("Harass").SubMenu("HarassE").AddItem(new MenuItem("HarassUseTE", "Use E (toggle)!").SetValue(new KeyBind("L".ToCharArray()[0], KeyBindType.Toggle))).Permashow(true, ChampionName + " | E Toggle Harass:", SharpDX.Color.GreenYellow);
 
                 Config.SubMenu("Harass")
                     .AddItem(new MenuItem("HarassShowInfo", "Show Harass Toggle Status").SetValue(true));
@@ -264,8 +244,8 @@ namespace Leblanc
                 Drawing.OnDraw += Drawing_OnDraw;
                 GameObject.OnCreate += GameObject_OnCreate;
                 GameObject.OnDelete += GameObject_OnDelete;
+                Game.OnWndProc += Game_OnWndProc;
                 Interrupter2.OnInterruptableTarget += Interrupter_OnPosibleToInterrupt;
-                
             }
 
             Game.PrintChat(
@@ -280,6 +260,27 @@ namespace Leblanc
 
             foreach (var childChild in menu.Children.SelectMany(GetSubMenu))
                 yield return childChild;
+        }
+
+        private static void Game_OnWndProc(WndEventArgs args)
+        {
+            if (args.Msg != 0x20a)
+            {
+                return;
+            }
+
+            if (!Config.Item("ComboMode.Key").GetValue<bool>())
+            {
+                return;
+            }
+
+            var newValue = Config.Item("ComboMode").GetValue<StringList>().SelectedIndex + 1;
+            if (newValue == Config.Item("ComboMode").GetValue<StringList>().SList.Length)
+            {
+                newValue = 0;
+            }
+
+            Config.Item("ComboMode").SetValue(new StringList(new[] { "Auto", "Q-R Combo", "W-R Combo", "E-R Combo" }, newValue));
         }
 
         private static int FindCounterStatusForTarget(string enemyBaseSkinName)
@@ -575,25 +576,30 @@ namespace Leblanc
 
         private static void Harass()
         {
-            var qTarget = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var wTarget = CommonTargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
-            var eTarget = CommonTargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            var t = CommonTargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            if (!t.IsValidTarget())
+            {
+                return;
+            }
 
-            var useQ = Config.Item("HarassUseQ").GetValue<bool>() &&
-                       ObjectManager.Player.ManaPercent >= Config.Item("HarassManaQ").GetValue<Slider>().Value;
-            var useW = Config.Item("HarassUseW").GetValue<bool>() &&
-                       ObjectManager.Player.ManaPercent >= Config.Item("HarassManaW").GetValue<Slider>().Value;
-            var useE = Config.Item("HarassUseE").GetValue<bool>() &&
-                       ObjectManager.Player.ManaPercent >= Config.Item("HarassManaE").GetValue<Slider>().Value;
+            var useQ = Config.Item("HarassUseQ").GetValue<bool>() && ObjectManager.Player.ManaPercent >= Config.Item("HarassManaQ").GetValue<Slider>().Value;
+            var useW = Config.Item("HarassUseW").GetValue<bool>() && ObjectManager.Player.ManaPercent >= Config.Item("HarassManaW").GetValue<Slider>().Value;
+            var useE = Config.Item("HarassUseE").GetValue<bool>() && ObjectManager.Player.ManaPercent >= Config.Item("HarassManaE").GetValue<Slider>().Value;
 
-            if (useQ && qTarget != null && Q.IsReady())
-                Q.CastOnUnit(qTarget);
+            if (useQ && Q.IsReady() && t.IsValidTarget(Q.Range))
+            {
+                Q.CastOnUnit(t);
+            }
 
-            if (useW && wTarget != null && W.IsReady() && !LeBlancStillJumped)
-                W.Cast(wTarget, true, true);
+            if (useW && W.IsReady() && t.IsValidTarget(W.Range))
+            {
+                W.Cast(t, true, true);
+            }
 
-            if (useE && eTarget != null && E.IsReady())
-                E.CastIfHitchanceEquals(eTarget, GetEHitChance);
+            if (useE && E.IsReady() && t.IsValidTarget(E.Range))
+            {
+                E.CastIfHitchanceEquals(t, GetEHitChance);
+            }
         }
 
         private static float GetRQDamage
@@ -863,33 +869,34 @@ namespace Leblanc
             if (Config.SubMenu("Harass").Item("HarassUseTQ").GetValue<KeyBind>().Active)
             {
                 var t = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-                if (t != null && Q.IsReady() &&
-                    ObjectManager.Player.ManaPercent >=
-                    Config.SubMenu("Harass").Item("HarassManaQ").GetValue<Slider>().Value)
+                if (t.IsValidTarget() && Q.IsReady() && ObjectManager.Player.ManaPercent >= Config.SubMenu("Harass").Item("HarassManaQ").GetValue<Slider>().Value)
+                {
                     Q.CastOnUnit(t);
+                }
             }
 
             if (Config.SubMenu("Harass").Item("HarassUseTW").GetValue<KeyBind>().Active)
             {
                 var t = CommonTargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
-                if (t != null && W.IsReady() && !LeBlancStillJumped &&
-                    ObjectManager.Player.ManaPercent >= Config.SubMenu("Harass").Item("HarassManaW").GetValue<Slider>().Value)
+                if (t.IsValidTarget() && W.IsReady() && ObjectManager.Player.ManaPercent >= Config.SubMenu("Harass").Item("HarassManaW").GetValue<Slider>().Value)
+                {
                     W.Cast(t, true, true);
+                }
             }
 
             if (Config.SubMenu("Harass").Item("HarassUseTE").GetValue<KeyBind>().Active)
             {
                 var t = CommonTargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-                if (t != null && E.IsReady() &&
-                    ObjectManager.Player.ManaPercent >=
-                    Config.SubMenu("Harass").Item("HarassManaE").GetValue<Slider>().Value)
+                if (t.IsValidTarget() && E.IsReady() && ObjectManager.Player.ManaPercent >= Config.SubMenu("Harass").Item("HarassManaE").GetValue<Slider>().Value)
+                {
                     E.CastIfHitchanceEquals(t, GetEHitChance);
+                }
             }
         }
 
         private static void RefreshComboType()
         {
-            var xCombo = Config.Item("ComboSetOption").GetValue<StringList>().SelectedIndex;
+            var xCombo = Config.Item("ComboMode").GetValue<StringList>().SelectedIndex;
             switch (xCombo)
             {
                 case 0:
@@ -998,50 +1005,64 @@ namespace Leblanc
             if (Config.SubMenu("Combo").Item("ComboShowInfo").GetValue<bool>())
             {
                 var xComboStr = "Combo Mode: ";
-                var xCombo = Config.Item("ComboSetOption").GetValue<StringList>().SelectedIndex;
+                System.Drawing.Color color = Color.FromArgb(100, 255, 200, 37);
+
+                var xCombo = Config.Item("ComboMode").GetValue<StringList>().SelectedIndex;
                 switch (xCombo)
                 {
+                        
                     case 0:
                         xComboStr += "Auto";
+                        color = Color.FromArgb(100, 255, 200, 37);
                         break;
 
                     case 1: //Q-R
-                        xComboStr += "Q-R";
+                        xComboStr += "Q - R";
+                        color = Color.FromArgb(100, 4, 0, 255);
                         break;
 
                     case 2: //W-R
-                        xComboStr += "W-R";
+                        xComboStr += "W - R";
+                        color = Color.FromArgb(100, 255, 0, 0);
                         break;
 
                     case 3: //E-R
-                        xComboStr += "E-R";
+                        xComboStr += "E - R";
+                        color = Color.FromArgb(100, 0, 255, 8);
                         break;
                 }
-                Drawing.DrawText(Drawing.Width * 0.45f, Drawing.Height * 0.80f, Color.GreenYellow, xComboStr);
+                //Drawing.DrawText(Drawing.Width * 0.45f, Drawing.Height * 0.80f, Color.GreenYellow, xComboStr);
+
+                Common.CommonGeometry.DrawBox(new Vector2((int)ObjectManager.Player.HPBarPosition.X + 145, (int)ObjectManager.Player.HPBarPosition.Y + 5), 125, 18, color, 1, Color.Black);
+                Common.CommonGeometry.DrawText(CommonGeometry.Text, xComboStr, ObjectManager.Player.HPBarPosition.X + 150, ObjectManager.Player.HPBarPosition.Y + 7, SharpDX.Color.Wheat);
             }
 
-            if (Config.SubMenu("Harass").Item("HarassShowInfo").GetValue<bool>())
-            {
-                var xHarassInfo = "";
-                if (Config.SubMenu("Harass").Item("HarassUseTQ").GetValue<KeyBind>().Active)
-                    xHarassInfo += "Q - ";
+            //if (Config.SubMenu("Harass").Item("HarassShowInfo").GetValue<bool>())
+            //{
+            //    var xHarassInfo = "";
+            //    if (Config.SubMenu("Harass").Item("HarassUseTQ").GetValue<KeyBind>().Active)
+            //        xHarassInfo += "Q - ";
 
-                if (Config.SubMenu("Harass").Item("HarassUseTW").GetValue<KeyBind>().Active)
-                    xHarassInfo += "W - ";
+            //    if (Config.SubMenu("Harass").Item("HarassUseTW").GetValue<KeyBind>().Active)
+            //        xHarassInfo += "W - ";
 
-                if (Config.SubMenu("Harass").Item("HarassUseTE").GetValue<KeyBind>().Active)
-                    xHarassInfo += "E - ";
-                if (xHarassInfo.Length < 1)
-                {
-                    xHarassInfo = "Harass Toggle: OFF   ";
-                }
-                else
-                {
-                    xHarassInfo = "Harass Toggle: " + xHarassInfo;
-                }
-                xHarassInfo = xHarassInfo.Substring(0, xHarassInfo.Length - 3);
-                Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.82f, Color.Wheat, xHarassInfo);
-            }
+            //    if (Config.SubMenu("Harass").Item("HarassUseTE").GetValue<KeyBind>().Active)
+            //        xHarassInfo += "E - ";
+            //    if (xHarassInfo.Length < 1)
+            //    {
+            //        xHarassInfo = "Harass Toggle: OFF   ";
+            //    }
+            //    else
+            //    {
+            //        xHarassInfo = "Harass Toggle: " + xHarassInfo;
+            //    }
+            //    xHarassInfo = xHarassInfo.Substring(0, xHarassInfo.Length - 3);
+            //    //Drawing.DrawText(Drawing.Width * 0.44f, Drawing.Height * 0.82f, Color.Wheat, xHarassInfo);
+
+            //    //Common.CommonGeometry.DrawBox(new Vector2((int)ObjectManager.Player.HPBarPosition.X + 145, (int)ObjectManager.Player.HPBarPosition.Y + 15), 125, 18, Color.FromArgb(100, 255, 200, 37), 1, Color.Black);
+            //    //Common.CommonGeometry.DrawText(CommonGeometry.Text, xHarassInfo, ObjectManager.Player.HPBarPosition.X + 150, ObjectManager.Player.HPBarPosition.Y + 17, SharpDX.Color.Wheat);
+
+            //}
 
             foreach (var spell in SpellList)
             {

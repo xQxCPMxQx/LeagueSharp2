@@ -75,7 +75,8 @@ namespace Leblanc.Common
                     FaceName = "Tahoma",
                     Height = 13,
                     OutputPrecision = FontPrecision.Default,
-                    Quality = FontQuality.Draft
+                    Quality = FontQuality.Draft,
+                    Weight = FontWeight.Bold
                 });
             TextPassive = new Font(
                Drawing.Direct3DDevice,
