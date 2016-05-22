@@ -1,21 +1,21 @@
-﻿#region License
+#region License
 
 /*
  Copyright 2014 - 2015 Nikita Bernthaler
- AssemblyInfo.cs is part of SFXUtility.
+ AssemblyInfo.cs is part of SFXWard.
 
- SFXUtility is free software: you can redistribute it and/or modify
+ SFXWard is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
 
- SFXUtility is distributed in the hope that it will be useful,
+ SFXWard is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with SFXUtility. If not, see <http://www.gnu.org/licenses/>.
+ along with SFXWard. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #endregion License
@@ -31,11 +31,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("SFXUtility")]
+[assembly: AssemblyTitle("SFXWard")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("Release")]
 [assembly: AssemblyCompany("Sentryfox")]
-[assembly: AssemblyProduct("SFXUtility")]
+[assembly: AssemblyProduct("SFXWard")]
 [assembly: AssemblyCopyright("Copyright © 2014 - 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -63,4 +63,4 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyVersion("6.10.0.1")]
 [assembly: AssemblyFileVersion("6.10.0.1")]
-[assembly: AssemblyInformationalVersion("0.9.0.12")]
+[assembly: AssemblyInformationalVersion("0.9.0.10")]
