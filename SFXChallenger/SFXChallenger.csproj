@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D3C14DC0-F958-401A-880E-D0C72C371605}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SFXChallenger</RootNamespace>
+    <AssemblyName>SFXChallenger</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PreBuildEvent />
+    <PostBuildEvent />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <OutputPath>bin\Release</OutputPath>
+    <AssemblyInfoFilePath>Properties\AssemblyInfo.cs</AssemblyInfoFilePath>
+    <UpdateAssemblyVersion>True</UpdateAssemblyVersion>
+    <UpdateAssemblyFileVersion>True</UpdateAssemblyFileVersion>
+    <UpdateAssemblyInfoVersion>True</UpdateAssemblyInfoVersion>
+    <AssemblyVersionSettings>None.None.IncrementOnDemandWithReset.Increment</AssemblyVersionSettings>
+    <AssemblyFileVersionSettings>None.None.IncrementOnDemandWithReset.Increment</AssemblyFileVersionSettings>
+    <AssemblyInfoVersionSettings>None.None.IncrementOnDemandWithReset.Increment</AssemblyInfoVersionSettings>
+    <PrimaryVersionType>AssemblyVersionAttribute</PrimaryVersionType>
+    <AssemblyVersion>0.9.5.48</AssemblyVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>5</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LeagueSharp">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp.Common">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Abstracts\Champion.cs" />
+    <Compile Include="Args\BuffManagerArgs.cs" />
+    <Compile Include="Args\GapcloserManagerArgs.cs" />
+    <Compile Include="Args\HeroListManagerArgs.cs" />
+    <Compile Include="Args\ResourceManagerArgs.cs" />
+    <Compile Include="Bootstrap.cs" />
+    <Compile Include="Abstracts\TChampion.cs" />
+    <Compile Include="Champions\Cassiopeia.cs" />
+    <Compile Include="Champions\Ezreal.cs" />
+    <Compile Include="Champions\Graves.cs" />
+    <Compile Include="Champions\Kalista.cs" />
+    <Compile Include="Champions\Kindred.cs" />
+    <Compile Include="Champions\KogMaw.cs" />
+    <Compile Include="Champions\MissFortune.cs" />
+    <Compile Include="Champions\Orianna.cs" />
+    <Compile Include="Champions\Sivir.cs" />
+    <Compile Include="Champions\TwistedFate.cs" />
+    <Compile Include="Champions\Varus.cs" />
+    <Compile Include="Champions\Viktor.cs" />
+    <Compile Include="Champions\Vladimir.cs" />
+    <Compile Include="Enumerations\CastType.cs" />
+    <Compile Include="Enumerations\CombatFlags.cs" />
+    <Compile Include="Enumerations\EffectFlags.cs" />
+    <Compile Include="Enumerations\ItemUsageType.cs" />
+    <Compile Include="Enumerations\ResourceCheckType.cs" />
+    <Compile Include="Enumerations\ResourceType.cs" />
+    <Compile Include="Enumerations\ResourceValueType.cs" />
+    <Compile Include="Enumerations\UltimateModeType.cs" />
+    <Compile Include="Args\InitiatorManagerArgs.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="Helpers\Conflicts.cs" />
+    <Compile Include="Helpers\CPrediction.cs" />
+    <Compile Include="Helpers\DynamicInitializer.cs" />
+    <Compile Include="Helpers\MDrawing.cs" />
+    <Compile Include="Helpers\Report.cs" />
+    <Compile Include="Helpers\Utils.cs" />
+    <Compile Include="Library\Draw.cs" />
+    <Compile Include="Library\Extensions\LeagueSharp\Obj_AI_HeroExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\BitmapExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\CharExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\ColorExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\DictionaryExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\FloatExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\IntegerExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\ListExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\ObjectExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\OtherExtensions.cs" />
+    <Compile Include="Library\Extensions\NET\StringExtensions.cs" />
+    <Compile Include="Library\Extensions\SharpDX\FontExtension.cs" />
+    <Compile Include="Library\Extensions\SharpDX\SpriteExtension.cs" />
+    <Compile Include="Library\Extensions\SharpDX\VectorExtensions.cs" />
+    <Compile Include="Library\GameObjects.cs" />
+    <Compile Include="Library\Logger\ConsoleLogger.cs" />
+    <Compile Include="Library\Logger\FileLogger.cs" />
+    <Compile Include="Library\Logger\ILogger.cs" />
+    <Compile Include="Library\Logger\SimpleFileLogger.cs" />
+    <Compile Include="Library\MinionManager.cs" />
+    <Compile Include="Library\ProducerConsumer.cs" />
+    <Compile Include="Library\Reset.cs" />
+    <Compile Include="Library\Update.cs" />
+    <Compile Include="Library\Utils.cs" />
+    <Compile Include="Managers\BestTargetOnlyManager.cs" />
+    <Compile Include="Managers\BlockOrdersManager.cs" />
+    <Compile Include="Managers\BuffManager.cs" />
+    <Compile Include="Managers\DelayManager.cs" />
+    <Compile Include="Managers\DrawingManager.cs" />
+    <Compile Include="Managers\GapcloserManager.cs" />
+    <Compile Include="Managers\HeroListManager.cs" />
+    <Compile Include="Managers\HitchanceManager.cs" />
+    <Compile Include="Managers\IncomingDamageManager.cs" />
+    <Compile Include="Managers\IndicatorManager.cs" />
+    <Compile Include="Managers\InitiatorManager.cs" />
+    <Compile Include="Managers\KillstealManager.cs" />
+    <Compile Include="Managers\TearStackManager.cs" />
+    <Compile Include="Managers\OverkillManager.cs" />
+    <Compile Include="Managers\ResourceManager.cs" />
+    <Compile Include="Managers\SpellBlockManager.cs" />
+    <Compile Include="Managers\UltimateManager.cs" />
+    <Compile Include="Menus\DebugMenu.cs" />
+    <Compile Include="Menus\InfoMenu.cs" />
+    <Compile Include="Helpers\Casting.cs" />
+    <Compile Include="Interfaces\IChampion.cs" />
+    <Compile Include="Core.cs" />
+    <Compile Include="Enumerations\ItemFlags.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SFXTargetSelector\Aggro.cs" />
+    <Compile Include="SFXTargetSelector\Compatibility.cs" />
+    <Compile Include="SFXTargetSelector\Drawings.cs" />
+    <Compile Include="SFXTargetSelector\Enumerations\Mode.cs" />
+    <Compile Include="SFXTargetSelector\Enumerations\Priority.cs" />
+    <Compile Include="SFXTargetSelector\EventArgs\ModesOnChange.cs" />
+    <Compile Include="SFXTargetSelector\Extensions.cs" />
+    <Compile Include="SFXTargetSelector\Focus.cs" />
+    <Compile Include="SFXTargetSelector\Helpers\SimpleCache.cs" />
+    <Compile Include="SFXTargetSelector\Helpers\Utils.cs" />
+    <Compile Include="SFXTargetSelector\Humanizer.cs" />
+    <Compile Include="SFXTargetSelector\Modes.cs" />
+    <Compile Include="SFXTargetSelector\Orbwalking.cs" />
+    <Compile Include="SFXTargetSelector\Others\Invulnerable.cs" />
+    <Compile Include="SFXTargetSelector\Priorities.cs" />
+    <Compile Include="SFXTargetSelector\Selected.cs" />
+    <Compile Include="SFXTargetSelector\Targets.cs" />
+    <Compile Include="SFXTargetSelector\TargetSelector.cs" />
+    <Compile Include="SFXTargetSelector\Weights.cs" />
+    <Compile Include="Wrappers\Spell.cs" />
+    <Compile Include="Managers\ItemManager.cs" />
+    <Compile Include="Managers\SummonerManager.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\default.licenseheader">
+      <Link>default.licenseheader</Link>
+    </None>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
