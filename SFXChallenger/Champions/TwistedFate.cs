@@ -1220,7 +1220,7 @@ namespace SFXChallenger.Champions
             private static CardColor GetCurrentCard()
             {
                 var spell = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W);
-                switch (spell.Name)
+                switch (spell.Name.ToLower())
                 {
                     case "bluecardlock":
                         return CardColor.Blue;
