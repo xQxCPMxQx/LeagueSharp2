@@ -48,7 +48,7 @@ using Utils = SFXChallenger.Helpers.Utils;
 
 namespace SFXChallenger.Champions
 {
-    internal class MissFortuneTesting : Champion
+    internal class MissFortune : Champion
     {
         private float _lastRCast;
         private Vector3 _lastRPosition = Vector3.Zero;
