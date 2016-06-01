@@ -1566,6 +1566,17 @@ namespace LeeSin
             {
                 return;
             }
+            
+            var dmg = 0d;
+            dmg += E.IsReady() && EStage == ECastStage.IsReady ? E.GetDamage(t) : 0;
+
+            if (t.HealthPercent < ObjectManager.Player.HealthPercent && t.Health <= ObjectManager.Player.TotalAttackDamage*4 + dmg)
+            {
+                WardJump(t.Position);
+                {
+                    return;
+                }
+            }
 
             if (!CollisionObjects(ObjectManager.Player.Position, t.Position, Q.Width, Q.Range) && QStage == QCastStage.IsReady && t.IsValidTarget(Q.Range - 20))
             {
