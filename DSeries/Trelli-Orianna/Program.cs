@@ -48,7 +48,6 @@ namespace Orianna
         {
             if (ObjectManager.Player.BaseSkinName != ChampionName)
                 return;
-            OriannaUpdater.InitializeOrianna();
             var initiatorList = new Dictionary<string, List<string>>();
             var interruptList = new Dictionary<string, List<string>>();
             var switchList = new Dictionary<string, string>();
@@ -1031,7 +1030,7 @@ namespace Orianna
             if (useE && E.IsReady())
             {
                 var collisionList = GetMinionsHitByE();
-                vaR Hit ChanceCount = collisionList.Count;
+                var hitCount = collisionList.Count;
                 var healthPer = ObjectManager.Player.Health / ObjectManager.Player.MaxHealth;
                 var manaPer = ObjectManager.Player.Mana / ObjectManager.Player.MaxMana;
                 if (hitCount >= 1 || (healthPer < 0.40 && manaPer >= 0.20))
