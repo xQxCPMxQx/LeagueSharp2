@@ -62,17 +62,27 @@ namespace Leblanc.Champion
 
         static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            var hero = args.Target as Obj_AI_Hero;
-            if (hero != null)
+            if (!Modes.ModeSettings.MenuSettingQ.Item("Settings.SpellCast.Active").GetValue<bool>())
             {
-                var t = hero;
-                if (!t.IsValidTarget(E.Range))
+                args.Process = true;
+            }
+            else
+            {
+                var hero = args.Target as Obj_AI_Hero;
+                if (hero != null)
                 {
-                    return;
-                }
-                // args.Process = !t.HaveImmortalBuff();
+                    var t = hero;
+                    if (!t.IsValidTarget(E.Range))
+                    {
+                        return;
+                    }
+                    // args.Process = !t.HaveImmortalBuff();
 
-                args.Process = Environment.TickCount - LastSeen(t) >= (Modes.ModeSettings.MenuSettingQ.Item("Settings.SpellCast.VisibleDelay").GetValue<StringList>().SelectedIndex + 1)*250;
+                    args.Process = Environment.TickCount - LastSeen(t) >=
+                                   (Modes.ModeSettings.MenuSettingQ.Item("Settings.SpellCast.VisibleDelay")
+                                       .GetValue<StringList>()
+                                       .SelectedIndex + 1)*250;
+                }
             }
         }
 

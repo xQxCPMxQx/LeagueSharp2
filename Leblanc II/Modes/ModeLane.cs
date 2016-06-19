@@ -153,7 +153,7 @@ namespace Leblanc.Modes
                             minionsQ.Where(
                                 m =>
                                     HealthPrediction.GetHealthPrediction(m,
-                                        (int)(ObjectManager.Player.AttackCastDelay * 1000), Game.Ping / 2 + (int) W.Delay + 30) < 0)
+                                        (int)(ObjectManager.Player.AttackCastDelay * 1000), Game.Ping / 2) < 0)
                                 .Where(m => m.Health <= Q.GetDamage(m)))
                     {
                         Q.CastOnUnit(minion);

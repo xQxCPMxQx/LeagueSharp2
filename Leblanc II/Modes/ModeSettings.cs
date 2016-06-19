@@ -30,12 +30,13 @@ namespace Leblanc.Modes
 
             MenuSettingQ = new Menu("Humanizer Spell Cast", "SettingsSpellCast").SetFontStyle(FontStyle.Regular, Champion.PlayerSpells.Q.MenuColor());
             {
+                MenuSettingQ.AddItem(new MenuItem("Settings.SpellCast.Active", "Active: ").SetValue(false)).SetTooltip("Exp: Rengar / Shaco / Wukong / Kha'Zix / Vayne / Enemy Ganker from the bush").SetFontStyle(FontStyle.Regular, Champion.PlayerSpells.Q.MenuColor());
                 string[] strQ = new string[1000 / 250];
                 for (float i = 250; i <= 1000; i += 250)
                 {
                     strQ[(int) (i / 250 - 1)] = (i / 1000) + " sec. ";
                 }
-                MenuSettingQ.AddItem(new MenuItem("Settings.SpellCast.VisibleDelay", "Cast Delay: Instatly Visible Enemy").SetValue(new StringList(strQ, 2))).SetTooltip("Exp: Rengar / Shaco / Wukong / Kha'Zix / Vayne / Enemy Ganker from the bush").SetFontStyle(FontStyle.Regular, Champion.PlayerSpells.Q.MenuColor());
+                MenuSettingQ.AddItem(new MenuItem("Settings.SpellCast.VisibleDelay", "Cast Delay: Instatly Visible Enemy").SetValue(new StringList(strQ, 2))).SetFontStyle(FontStyle.Regular, Champion.PlayerSpells.Q.MenuColor());
                 //MenuSettingQ.AddItem(new MenuItem("Settings.SpellCast.Clone", "Clone Cast: Wukong/Leblanc/Shaco Clone").SetValue(new StringList(new []{"Off", "Cast Q", "Cast W", "Cast E"}, 0))).SetTooltip("Exp: Shaco / Leblanc / Wukong").SetFontStyle(FontStyle.Regular, Champion.PlayerSpells.Q.MenuColor());
 
                 MenuSettingQ.AddItem(new MenuItem("Settings.SpellCast.Default", "Load Recommended Settings").SetValue(true)).SetFontStyle(FontStyle.Bold, Color.Wheat)
@@ -72,6 +73,7 @@ namespace Leblanc.Modes
                 strQ[(int)(i / 250 - 1)] = (i / 100) + " sec. ";
             }
             MenuSettingQ.Item("Settings.SpellCast.VisibleDelay").SetValue(new StringList(strQ, 2));
+            MenuSettingQ.Item("Settings.SpellCast.Active").SetValue(true);
             //MenuSettingQ.Item("Settings.SpellCast.Clone").SetValue(new StringList(new[] {"Off", "Cast Q", "Cast W", "Cast E"}, 3));
         }
     }

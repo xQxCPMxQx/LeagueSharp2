@@ -276,10 +276,10 @@ namespace Leblanc.Modes
                 return;
             }
 
-            if (Target.IsValidTarget(Q.Range*2))
-            {
-                var wComboHits = GetWHits(Target, HeroManager.Enemies.Where(e => e.IsValidTarget(W.Range + W.Width)).Cast<Obj_AI_Base>().ToList());
-            }
+            //if (Target.IsValidTarget(Q.Range*2))
+            //{
+            //    var wComboHits = GetWHits(Target, HeroManager.Enemies.Where(e => e.IsValidTarget(W.Range + W.Width)).Cast<Obj_AI_Base>().ToList());
+            //}
             if (ObjectManager.Player.IsDead)
             {
                 return;
@@ -442,6 +442,7 @@ namespace Leblanc.Modes
                     }
                 }
                 ExecuteSpells();
+                ExecuteCompleteCombo();
             }
         }
 
@@ -583,7 +584,22 @@ namespace Leblanc.Modes
             }
 
             Champion.PlayerSpells.CastQ(Target);
-            Champion.PlayerSpells.CastQ2(Target);
+            Champion.PlayerSpells.Q2.CastOnUnit(Target);
+
+            //Champion.PlayerSpells.CastQ2(Target);
+        }
+
+        private static void ExecuteCompleteCombo()
+        {
+            if (ComboMode == ComboMode.Mode2xQ && !Q.IsReady() && R.IsReady())
+            {
+                Champion.PlayerSpells.Q2.CastOnUnit(Target);
+            }
+
+            if (ComboMode == ComboMode.Mode2xW && !W.IsReady() && R.IsReady())
+            {
+                Champion.PlayerSpells.Q2.Cast(Target);
+            }
         }
 
         private static void ExecuteMode2xW()
@@ -599,7 +615,8 @@ namespace Leblanc.Modes
             }
 
             Champion.PlayerSpells.CastW(Target);
-            Champion.PlayerSpells.CastW2(Target);
+            Champion.PlayerSpells.W2.Cast(Target);
+            //Champion.PlayerSpells.CastW2(Target);
         }
 
         private static void ExecuteModeAuto()
