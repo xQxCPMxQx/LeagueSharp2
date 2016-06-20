@@ -44,12 +44,11 @@ namespace SFXUtility.Classes
             try
             {
                 uniqueId = uniqueId.ToUpper();
-                var cachePath = GetCachePath(uniqueId, name);
-                if (File.Exists(cachePath))
-                {
-                    
-                    return new Bitmap(cachePath);
-                }
+                //var cachePath = GetCachePath(uniqueId, name);
+                //if (File.Exists(cachePath))
+                //{
+                //    return new Bitmap(cachePath);
+                //}
                 var bitmap = Resources.ResourceManager.GetObject(name) as Bitmap;
                 if (bitmap != null)
                 {
