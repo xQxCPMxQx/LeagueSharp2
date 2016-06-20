@@ -62,7 +62,7 @@ namespace SFXUtility.Classes
                             bitmap = CreateSidebarImage(bitmap);
                             break;
                     }
-                    bitmap?.Save(cachePath);
+                   // bitmap?.Save(cachePath);
                 }
                 return bitmap;
             }
