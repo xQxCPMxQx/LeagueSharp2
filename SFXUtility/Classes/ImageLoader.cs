@@ -39,16 +39,9 @@ namespace SFXUtility.Classes
     {
         public static Bitmap Load(string uniqueId, string name)
         {
-            var cachePath1 = GetCachePath(uniqueId, name);
-
             try
             {
                 uniqueId = uniqueId.ToUpper();
-                //var cachePath = GetCachePath(uniqueId, name);
-                //if (File.Exists(cachePath))
-                //{
-                //    return new Bitmap(cachePath);
-                //}
                 var bitmap = Resources.ResourceManager.GetObject(name) as Bitmap;
                 if (bitmap != null)
                 {
@@ -61,7 +54,6 @@ namespace SFXUtility.Classes
                             bitmap = CreateSidebarImage(bitmap);
                             break;
                     }
-                   // bitmap?.Save(cachePath);
                 }
                 return bitmap;
             }
@@ -79,10 +71,9 @@ namespace SFXUtility.Classes
                 if (!Directory.Exists(Global.CacheDir))
                 {
                     Directory.CreateDirectory(Global.CacheDir);
-                    
                 }
-                string path = Path.Combine(Global.CacheDir, string.Format("{0}", Game.Version.Substring(0, 19)));
 
+                var path = Path.Combine(Global.CacheDir, string.Format("{0}", "6.12"));
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
@@ -92,7 +83,6 @@ namespace SFXUtility.Classes
                 {
                     Directory.CreateDirectory(path);
                 }
-                
                 return Path.Combine(path, string.Format("{0}.png", name));
             }
             catch (Exception ex)

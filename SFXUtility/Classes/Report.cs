@@ -207,7 +207,7 @@ namespace SFXUtility.Classes
             Builder.AppendLine("Game Information");
             Builder.AppendLine("--------------------------------------");
 
-            Builder.AppendLine(string.Format("[Version] : {0}", Game.Version));
+            Builder.AppendLine(string.Format("[Version] : {0}", "6.12"));
             Builder.AppendLine(string.Format("[Region]  : {0}", Game.Region));
             Builder.AppendLine(string.Format("[MapId]   : {0}", Game.MapId));
             Builder.AppendLine(string.Format("[Type]    : {0}", Game.Type));

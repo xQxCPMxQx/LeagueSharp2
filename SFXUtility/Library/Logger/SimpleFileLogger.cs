@@ -147,7 +147,7 @@ namespace SFXUtility.Library.Logger
                     ex.Data.Add(
                         "Champions", string.Join(", ", GameObjects.Heroes.Select(e => e.ChampionName).ToArray()));
                 }
-                ex.Data.Add("Version", Game.Version);
+                ex.Data.Add("Version", "6.12");
                 ex.Data.Add("Region", Game.Region);
                 ex.Data.Add("MapId", Game.MapId);
                 ex.Data.Add("Type", Game.Type);

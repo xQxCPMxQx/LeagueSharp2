@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2D7486BB-8A00-4CDB-AE64-8BF17463B518}</ProjectGuid>
+    <ProjectGuid>{0E29B01E-CB84-4FA4-A54C-F6070DFE8E61}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SFXUtility</RootNamespace>
@@ -77,16 +77,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -307,7 +307,6 @@
     <Content Include="Resources\Champions\Swain.png" />
     <Content Include="Resources\Champions\Syndra.png" />
     <Content Include="Resources\Champions\TahmKench.png" />
-    <Content Include="Resources\Champions\Taliyah.png" />
     <Content Include="Resources\Champions\Talon.png" />
     <Content Include="Resources\Champions\Taric.png" />
     <Content Include="Resources\Champions\Teemo.png" />

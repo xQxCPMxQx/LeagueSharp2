@@ -88,7 +88,10 @@ namespace SFXUtility.Features.Trackers
             OnLoad();
         }
 
-        public override string Name => "Sidebar";
+        public override string Name
+        {
+            get { return "Sidebar"; }
+        }
 
         protected override void OnEnable()
         {
@@ -130,7 +133,7 @@ namespace SFXUtility.Features.Trackers
                 var offsetTop = Menu.Item(Menu.Name + "DrawingOffsetTop").GetValue<Slider>().Value + hudHeight / 2f;
                 var offsetRight = Drawing.Width - Menu.Item(Menu.Name + "DrawingOffsetRight").GetValue<Slider>().Value -
                                   (hudWidth + (float) Math.Ceiling(4 * _scale)) / 2f;
-                
+
                 foreach (var enemy in _enemyObjects)
                 {
                     if (enemy.Unit.IsDead && Game.Time > enemy.DeathEndTime)
@@ -190,7 +193,7 @@ namespace SFXUtility.Features.Trackers
                             }
                         }
                     }
-                    
+
                     _sprite.Begin(SpriteFlags.AlphaBlend);
 
                     _sprite.DrawCentered(
@@ -217,7 +220,7 @@ namespace SFXUtility.Features.Trackers
                             new Vector2(offsetRight - hudWidth * 0.338f, offsetTop - hudHeight * 0.365f + offset),
                             Color.White);
                     }
-                    
+
                     _line17.Begin();
                     _line17.Draw(
                         new[]
@@ -387,7 +390,7 @@ namespace SFXUtility.Features.Trackers
         {
             try
             {
-                if (!HeroManager.Enemies.Any())
+                if (!GameObjects.EnemyHeroes.Any())
                 {
                     OnUnload(null, new UnloadEventArgs(true));
                     return;
@@ -400,7 +403,7 @@ namespace SFXUtility.Features.Trackers
                 _teleportStartTexture = Resources.SB_RecallStart.Scale(_scale).ToTexture();
                 _ultimateTexture = Resources.SB_Ultimate.Scale(_scale).ToTexture();
 
-                foreach (var enemy in HeroManager.Enemies)
+                foreach (var enemy in GameObjects.EnemyHeroes)
                 {
                     var lEnemy = enemy;
                     _spellDatas.Add(enemy.NetworkId, _summonerSpellSlots.Select(slot => lEnemy.GetSpell(slot)).ToList());
@@ -417,7 +420,7 @@ namespace SFXUtility.Features.Trackers
 
                 foreach (var summonerSlot in _summonerSpellSlots)
                 {
-                    foreach (var enemy in HeroManager.Enemies)
+                    foreach (var enemy in GameObjects.EnemyHeroes)
                     {
                         var spell = enemy.Spellbook.GetSpell(summonerSlot);
                         if (!_summonerTextures.ContainsKey(Summoners.FixName(spell.Name)))
@@ -425,7 +428,7 @@ namespace SFXUtility.Features.Trackers
                             _summonerTextures[Summoners.FixName(spell.Name)] =
                                 ((Bitmap)
                                     Resources.ResourceManager.GetObject(
-                                        $"SB_{Summoners.FixName(spell.Name)}") ??
+                                        string.Format("SB_{0}", Summoners.FixName(spell.Name))) ??
                                  Resources.SB_summonerbarrier).Scale(_scale).ToTexture();
                         }
                     }

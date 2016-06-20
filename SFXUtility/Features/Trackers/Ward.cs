@@ -99,7 +99,6 @@ namespace SFXUtility.Features.Trackers
             base.OnEnable();
         }
 
-
         protected override void OnDisable()
         {
             Game.OnUpdate -= OnGameUpdate;
