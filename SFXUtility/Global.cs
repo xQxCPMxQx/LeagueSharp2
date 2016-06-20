@@ -39,16 +39,20 @@ namespace SFXUtility
         public static string DefaultFont = "Calibri";
         public static string Name = "SFXUtility";
         public static string UpdatePath = "Lizzaran/LeagueSharp-Dev/master/SFXUtility";
-        public static string BaseDir = AppDomain.CurrentDomain.BaseDirectory;
+        public static string BaseDir = ProgramFilesx86(); //+ "\\Lizzaran\"; //AppDomain.CurrentDomain.BaseDirectory;
         public static string LogDir = Path.Combine(BaseDir, Name + " - Logs");
         public static string CacheDir = Path.Combine(BaseDir, Name + " - Cache");
         public static SFXUtility SFX = null;
         public static List<IChild> Features = new List<IChild>();
 
+        static string ProgramFilesx86()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\SFXUtility";
+        }
         static Global()
         {
+            
             Logger = new SimpleFileLogger(LogDir) { LogLevel = LogLevel.High };
-
             try
             {
                 Directory.GetFiles(LogDir)
