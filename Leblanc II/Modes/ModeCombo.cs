@@ -596,9 +596,9 @@ namespace Leblanc.Modes
                 Champion.PlayerSpells.Q2.CastOnUnit(Target);
             }
 
-            if (ComboMode == ComboMode.Mode2xW && !W.IsReady() && R.IsReady())
+            if (ComboMode == ComboMode.Mode2xW && !W.IsReady() && W2.IsReady() && !W2.StillJumped())
             {
-                Champion.PlayerSpells.Q2.Cast(Target);
+                Champion.PlayerSpells.W2.Cast(Target);
             }
         }
 
