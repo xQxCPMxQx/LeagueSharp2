@@ -48,7 +48,7 @@ using Utils = SFXChallenger.Helpers.Utils;
 
 namespace SFXChallenger.Champions
 {
-    internal class EzrealTesting : Champion
+    internal class Ezreal: Champion
     {
         private int _lastFarmQKill;
 
