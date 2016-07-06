@@ -58,7 +58,7 @@
 //        public static SpellSlot IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
 
 //        //public static Obj_AI_Hero Target => GetTarget ?? TargetSelector.GetTarget(Q.Range * 2, TargetSelector.DamageType.Magical);
-//        //public static Obj_AI_Hero Target => HeroManager.Enemies.Where(e => !e.IsDead && e.IsVisible && e.IsValidTarget(E.Range) && !e.HaveImmortalBuff()).OrderBy(e => e.Health - GetComboDamage(e)).FirstOrDefault();
+//        //public static Obj_AI_Hero Target => HeroManager.Enemies.Where(e => !e.IsDead && e.IsVisible && e.IsValidTarget(E.Range) && !e.HasImmortalBuff()).OrderBy(e => e.Health - GetComboDamage(e)).FirstOrDefault();
 //        public static Obj_AI_Hero Target => HeroManager.Enemies.Where(e => !e.IsDead && e.IsVisible && e.IsValidTarget(E.Range)).OrderBy(e => e.Health - GetComboDamage(e)).FirstOrDefault();
 
 
@@ -477,7 +477,7 @@
 //                if (IgniteSlot != SpellSlot.Unknown &&
 //                    ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
 //                {
-//                    if (!Target.HaveImmortalBuff() && ObjectManager.Player.Distance(Target) < 650 &&
+//                    if (!Target.HasImmortalBuff() && ObjectManager.Player.Distance(Target) < 650 &&
 //                        ObjectManager.Player.GetSummonerSpellDamage(Target, Damage.SummonerSpell.Ignite) >=
 //                        Target.Health)
 //                    {

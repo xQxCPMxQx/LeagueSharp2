@@ -50,6 +50,7 @@ namespace Leblanc.Common
         #endregion
 
         public static Font Text;
+        public static Font TextBig;
         public static Font TextPassive;
 
         public static bool IsWallBetween(Vector3 start, Vector3 end, int step = 3)
@@ -71,18 +72,21 @@ namespace Leblanc.Common
         private static void CurrentDomainOnDomainUnload(object sender, EventArgs eventArgs)
         {
             Text.Dispose();
+            TextBig.Dispose();
             TextPassive.Dispose();
         }
 
         private static void DrawingOnOnPostReset(EventArgs args)
         {
             Text.OnResetDevice();
+            TextBig.OnResetDevice();
             TextPassive.OnResetDevice();
         }
 
         private static void DrawingOnOnPreReset(EventArgs args)
         {
             Text.OnLostDevice();
+            TextBig.OnLostDevice();
             TextPassive.OnLostDevice();
         }
 
@@ -98,7 +102,18 @@ namespace Leblanc.Common
                     Height = 13,
                     OutputPrecision = FontPrecision.Default,
                     Quality = FontQuality.Draft,
-                    Weight = FontWeight.Bold
+                    //Weight = FontWeight.Bold
+                });
+
+            TextBig = new Font(
+    Drawing.Direct3DDevice,
+    new FontDescription
+    {
+        FaceName = "Segoe UI",
+        Height = 50,
+        OutputPrecision = FontPrecision.Default,
+        Quality = FontQuality.Draft,
+                    //Weight = FontWeight.Bold
                 });
             TextPassive = new Font(
                Drawing.Direct3DDevice,

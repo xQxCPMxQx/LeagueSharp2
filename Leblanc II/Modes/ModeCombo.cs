@@ -56,7 +56,7 @@ namespace Leblanc.Modes
         public static SpellSlot IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
 
         //public static Obj_AI_Hero Target => GetTarget ?? TargetSelector.GetTarget(Q.Range * 2, TargetSelector.DamageType.Magical);
-        //public static Obj_AI_Hero Target => HeroManager.Enemies.Where(e => !e.IsDead && e.IsVisible && e.IsValidTarget(E.Range) && !e.HaveImmortalBuff()).OrderBy(e => e.Health - GetComboDamage(e)).FirstOrDefault();
+        //public static Obj_AI_Hero Target => HeroManager.Enemies.Where(e => !e.IsDead && e.IsVisible && e.IsValidTarget(E.Range) && !e.HasImmortalBuff()).OrderBy(e => e.Health - GetComboDamage(e)).FirstOrDefault();
         public static Obj_AI_Hero Target => CommonTargetSelector.GetTarget(Q.Range);
         //public static Obj_AI_Hero Target => HeroManager.Enemies.Where(e => !e.IsDead && e.IsVisible && e.IsValidTarget(E.Range)).OrderBy(e => e.Health - GetComboDamage(e)).FirstOrDefault();
 
@@ -304,14 +304,13 @@ namespace Leblanc.Modes
 
             string[] vComboString = new[]
             {
-                "Q:R", "W:R"
+                "Q > R", "W > R"
             };
 
             System.Drawing.Color[] vComboColor = new[]
             {
                 System.Drawing.Color.FromArgb(255, 4, 0, 255),
-                System.Drawing.Color.Red,
-                System.Drawing.Color.FromArgb(255, 46, 47, 46),
+                System.Drawing.Color.FromArgb(198, 255, 0, 0),
             };
 
             var nComboMode = MenuLocal.Item("Combo.Mode").GetValue<StringList>().SelectedIndex;
@@ -337,7 +336,7 @@ namespace Leblanc.Modes
             //}
             //Drawing.DrawText(Drawing.Width * 0.45f, Drawing.Height * 0.80f, Color.GreenYellow, xComboStr);
 
-            Common.CommonGeometry.DrawBox(new Vector2(Drawing.Width * 0.45f, Drawing.Height * 0.80f), 125, 18, xComboColor, 1, System.Drawing.Color.Black);
+            Common.CommonGeometry.DrawBox(new Vector2(Drawing.Width * 0.45f, Drawing.Height * 0.80f), 115, 18, xComboColor, 1, System.Drawing.Color.Black);
             Common.CommonGeometry.DrawText(CommonGeometry.Text, xComboString, Drawing.Width * 0.455f, Drawing.Height * 0.803f, SharpDX.Color.Wheat);
 
             //Common.CommonGeometry.DrawBox( new Vector2((int) ObjectManager.Player.HPBarPosition.X + 145, (int) ObjectManager.Player.HPBarPosition.Y + 5), 115, 18, xComboColor, 1, System.Drawing.Color.Black);
@@ -421,7 +420,7 @@ namespace Leblanc.Modes
                     if (IgniteSlot != SpellSlot.Unknown &&
                         ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                     {
-                        if (Target.IsValidTarget(650) && !Target.HaveImmortalBuff() &&
+                        if (Target.IsValidTarget(650) && !Target.HasImmortalBuff() &&
                             ObjectManager.Player.GetSummonerSpellDamage(Target, Damage.SummonerSpell.Ignite) + 150 >=
                             Target.Health && (!Q.IsReady() || W.StillJumped()))
                         {
@@ -590,9 +589,7 @@ namespace Leblanc.Modes
             }
 
             Champion.PlayerSpells.CastQ(Target);
-            Champion.PlayerSpells.Q2.CastOnUnit(Target);
-
-            //Champion.PlayerSpells.CastQ2(Target);
+            Champion.PlayerSpells.CastQ2(Target);
         }
 
         private static void ExecuteCompleteCombo()

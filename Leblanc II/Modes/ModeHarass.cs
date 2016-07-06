@@ -18,7 +18,7 @@ namespace Leblanc.Modes
         private static Spell W => Champion.PlayerSpells.W;
         private static Spell E => Champion.PlayerSpells.E;
 
-        private static bool AutoReturnW => MenuLocal.Item("Harass.UseW.Return").GetValue<StringList>().SelectedIndex == 1;
+        private static bool AutoReturnW => MenuLocal.Item("Harass.UseW.Return").GetValue<bool>();
 
         private static int ToggleActive => MenuToggle.Item("Toggle.Active").GetValue<StringList>().SelectedIndex;
 
@@ -32,7 +32,7 @@ namespace Leblanc.Modes
             {
                 MenuLocal.AddItem(new MenuItem("Harass.UseQ", "Q:").SetValue(true).SetFontStyle(FontStyle.Regular, Q.MenuColor()));
                 MenuLocal.AddItem(new MenuItem("Harass.UseW", "W:").SetValue(new StringList(new []{"Off", "On", "On: After Q"}, 2)).SetFontStyle(FontStyle.Regular, W.MenuColor()));
-                MenuLocal.AddItem(new MenuItem("Harass.UseW.Return", "W: Auto Return:").SetValue(new StringList(new[] { "Off", "On" }, 1)).SetFontStyle(FontStyle.Regular, W.MenuColor()));
+                MenuLocal.AddItem(new MenuItem("Harass.UseW.Return", "W: Auto Return:").SetValue(true).SetFontStyle(FontStyle.Regular, W.MenuColor()));
                 MenuLocal.AddItem(new MenuItem("Harass.UseE", "E:").SetValue(false).SetFontStyle(FontStyle.Regular, E.MenuColor()));
                 Modes.ModeConfig.MenuConfig.AddSubMenu(MenuLocal);
             }
@@ -63,41 +63,6 @@ namespace Leblanc.Modes
             }
         }
 
-        private static void CastW()
-        {
-            if (!W.CanCast(Target))
-            {
-                return;
-            }
-
-            PlayerSpells.CastW(Target, AutoReturnW);
-            return;
-
-            var nAutoReturnBack = MenuLocal.Item("Harass.UseW.Return").GetValue<StringList>().SelectedIndex;
-            {
-                switch (nAutoReturnBack)
-                {
-                    case 0:
-                    {
-                        PlayerSpells.CastW(Target, true);
-                        break;
-                    }
-                    case 1:
-                    {
-                        PlayerSpells.CastW(Target, true);
-                        break;
-                    }
-                    case 2:
-                    {
-                        PlayerSpells.CastW(Target, !Target.HasSoulShackle());
-                        
-                        break;
-                    }
-                }
-
-                //   PlayerSpells.CastW(Target, true);
-            }
-        }
         private static void ExecuteHarass()
         {
             if (MenuLocal.Item("Harass.UseQ").GetValue<bool>() && Q.CanCast(Target))
@@ -106,17 +71,29 @@ namespace Leblanc.Modes
             }
 
             var harassUseW = MenuLocal.Item("Harass.UseW").GetValue<StringList>().SelectedIndex;
-            
+
             if (harassUseW != 0 && W.CanCast(Target))
             {
-                if (harassUseW == 1)
+                switch (harassUseW)
                 {
-                    CastW();
+                    case 1:
+                    {
+                        PlayerSpells.CastW(Target);
+                        break;
+                    }
+                    case 2:
+                    {
+                        if (Target.HasMarkedWithQ())
+                            PlayerSpells.CastW(Target);
+                        break;
+                    }
                 }
-                else if (harassUseW == 2 && Target.HasMarkedWithQ())
-                {
-                    CastW();
-                }
+
+            }
+
+            if (W.StillJumped() && AutoReturnW)
+            {
+                W.Cast();
             }
 
             if (MenuLocal.Item("Harass.UseE").GetValue<bool>() && E.CanCast(Target))
@@ -131,13 +108,13 @@ namespace Leblanc.Modes
             {
                 return;
             }
-
+            
             if (ToggleActive == 1 && Modes.ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LastHit)
             {
                 return;
             }
 
-            if (!(ToggleActive == 2 && (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)))
+            if (ToggleActive == 2 && !(Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit))
             {
                 return;
             }
@@ -154,13 +131,12 @@ namespace Leblanc.Modes
 
             if (MenuToggle.Item("Toggle.UseW").GetValue<bool>() && W.CanCast(Target))
             {
-                if (Target.HasSoulShackle() && MenuLocal.Item("Harass.UseW.Return").GetValue<StringList>().SelectedIndex == 2)
-                {
-                    PlayerSpells.CastW(Target, false);
-                    return;
-                }
+                PlayerSpells.CastW(Target);
+            }
 
-                PlayerSpells.CastW(Target, AutoReturnW);
+            if (W.StillJumped() && AutoReturnW)
+            {
+                W.Cast();
             }
 
             if (MenuToggle.Item("Toggle.UseE").GetValue<bool>() && E.CanCast(Target))

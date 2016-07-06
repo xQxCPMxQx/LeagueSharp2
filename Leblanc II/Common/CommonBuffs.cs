@@ -39,7 +39,7 @@ namespace Leblanc.Common
             });
         }
 
-        public static bool HaveImmortalBuff(this Obj_AI_Base obj)
+        public static bool HasImmortalBuff(this Obj_AI_Base obj)
         {
             return (from b in obj.Buffs join b1 in BuffDb on b.DisplayName equals b1.BuffName select new {b, b1}).Distinct().Any();
         }

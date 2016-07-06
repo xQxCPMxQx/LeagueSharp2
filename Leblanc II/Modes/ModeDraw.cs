@@ -564,6 +564,10 @@ namespace Leblanc.Modes
         {
             aFont.DrawText(null, aText, aPosX + 2, aPosY + 2, aColor != SharpDX.Color.Black ? SharpDX.Color.Black : SharpDX.Color.White);
             aFont.DrawText(null, aText, aPosX, aPosY, aColor);
+
+
+
+
         }
     }
 }
