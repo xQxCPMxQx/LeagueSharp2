@@ -420,7 +420,7 @@ namespace Leblanc.Modes
                     if (IgniteSlot != SpellSlot.Unknown &&
                         ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                     {
-                        if (Target.IsValidTarget(650) && !Target.HasImmortalBuff() &&
+                        if (Target.IsValidTarget(650) && 
                             ObjectManager.Player.GetSummonerSpellDamage(Target, Damage.SummonerSpell.Ignite) + 150 >=
                             Target.Health && (!Q.IsReady() || W.StillJumped()))
                         {
