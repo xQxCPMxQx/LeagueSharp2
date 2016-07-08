@@ -69,7 +69,7 @@ namespace Leblanc.Champion
             //        }
             //        // args.Process = !t.HasImmortalBuff();
 
-            args.Process = !Modes.ModeCombo.Target.HasImmortalBuff();
+            //args.Process = !Modes.ModeCombo.Target.HasImmortalBuff();
 
             //if (!Modes.ModeSettings.MenuSettingQ.Item("Settings.SpellCast.Active").GetValue<bool>())
             //{
