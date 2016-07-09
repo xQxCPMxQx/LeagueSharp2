@@ -2276,7 +2276,7 @@ namespace LeeSin
                 insecRange += canUseFlash ? FlashRange : 0f;
             }
 
-            Game.PrintChat(insecRange.ToString(CultureInfo.InvariantCulture));
+            
 
             Render.Circle.DrawCircle(ObjectManager.Player.Position, WardRange, Color.Crimson);
             Render.Circle.DrawCircle(ObjectManager.Player.Position, FlashRange, Color.GreenYellow);
