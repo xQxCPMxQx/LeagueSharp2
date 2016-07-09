@@ -38,7 +38,7 @@ namespace LeeSin
             Game.OnUpdate += args =>
             {
                 if (wardJumpObjectforFlee != null &&
-                    (wardJumpObjectforFlee.Distance(ObjectManager.Player.Position) > W.Range*4 ||
+                    (wardJumpObjectforFlee.Distance(ObjectManager.Player.Position) > W.Range * 4 ||
                      wardJumpObjectforFlee.IsDead))
                 {
                     wardJumpObjectforFlee = null;
@@ -62,7 +62,7 @@ namespace LeeSin
                 }
             };
             Game.OnWndProc += OnWndProc_Flee;
-            Drawing.OnDraw += Drawing_OnDraw;
+            //Drawing.OnDraw += Drawing_OnDraw;
         }
 
 

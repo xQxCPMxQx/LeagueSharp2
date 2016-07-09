@@ -18,7 +18,7 @@ namespace Leblanc.Modes
         private static Spell W => Champion.PlayerSpells.W;
         private static Spell E => Champion.PlayerSpells.E;
 
-        private static bool AutoReturnW => MenuLocal.Item("Harass.UseW.Return").GetValue<bool>();
+        //private static bool AutoReturnW => MenuLocal.Item("Harass.UseW.Return").GetValue<bool>();
 
         private static int ToggleActive => MenuToggle.Item("Toggle.Active").GetValue<StringList>().SelectedIndex;
 
@@ -32,7 +32,7 @@ namespace Leblanc.Modes
             {
                 MenuLocal.AddItem(new MenuItem("Harass.UseQ", "Q:").SetValue(true).SetFontStyle(FontStyle.Regular, Q.MenuColor()));
                 MenuLocal.AddItem(new MenuItem("Harass.UseW", "W:").SetValue(new StringList(new []{"Off", "On", "On: After Q"}, 2)).SetFontStyle(FontStyle.Regular, W.MenuColor()));
-                MenuLocal.AddItem(new MenuItem("Harass.UseW.Return", "W: Auto Return:").SetValue(true).SetFontStyle(FontStyle.Regular, W.MenuColor()));
+                //MenuLocal.AddItem(new MenuItem("Harass.UseW.Return", "W: Auto Return:").SetValue(true).SetFontStyle(FontStyle.Regular, W.MenuColor()));
                 MenuLocal.AddItem(new MenuItem("Harass.UseE", "E:").SetValue(false).SetFontStyle(FontStyle.Regular, E.MenuColor()));
                 Modes.ModeConfig.MenuConfig.AddSubMenu(MenuLocal);
             }
@@ -91,11 +91,6 @@ namespace Leblanc.Modes
 
             }
 
-            if (W.StillJumped() && AutoReturnW)
-            {
-                W.Cast();
-            }
-
             if (MenuLocal.Item("Harass.UseE").GetValue<bool>() && E.CanCast(Target))
             {
                 PlayerSpells.CastE(Target);
@@ -132,11 +127,6 @@ namespace Leblanc.Modes
             if (MenuToggle.Item("Toggle.UseW").GetValue<bool>() && W.CanCast(Target))
             {
                 PlayerSpells.CastW(Target);
-            }
-
-            if (W.StillJumped() && AutoReturnW)
-            {
-                W.Cast();
             }
 
             if (MenuToggle.Item("Toggle.UseE").GetValue<bool>() && E.CanCast(Target))

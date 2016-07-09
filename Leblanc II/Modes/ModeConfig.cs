@@ -45,8 +45,9 @@ namespace Leblanc.Modes
 
             MenuKeys = new Menu("Keys", "Keys").SetFontStyle(FontStyle.Bold, Color.Coral);
             {
-                MenuKeys.AddItem(new MenuItem("Key.Combo", "Combo!").SetValue(new KeyBind(MenuConfig.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press))).SetFontStyle(FontStyle.Regular, Color.GreenYellow);
-                MenuKeys.AddItem(new MenuItem("Key.ChangeCombo", "Change Combo!").SetValue(new KeyBind('J', KeyBindType.Press))).SetFontStyle(FontStyle.Regular, Color.GreenYellow);
+                //MenuKeys.AddItem(new MenuItem("Key.Combo", "Combo!").SetValue(new KeyBind(MenuConfig.Item("Orbwalk").GetValue<KeyBind>().Key, KeyBindType.Press))).SetFontStyle(FontStyle.Regular, Color.GreenYellow);
+                MenuKeys.AddItem(new MenuItem("Key.ComboAA", "Combo [Without AA]").SetValue(new KeyBind('Z', KeyBindType.Press))).SetFontStyle(FontStyle.Regular, Color.Aqua);
+                MenuKeys.AddItem(new MenuItem("Key.ChangeCombo", "Change Combo!").SetValue(new KeyBind('J', KeyBindType.Press))).SetFontStyle(FontStyle.Regular, Color.IndianRed);
                 MenuKeys.AddItem(new MenuItem("Key.Harass1", "Harass Toggle!").SetValue(new KeyBind('T', KeyBindType.Toggle)).SetFontStyle(FontStyle.Regular, Color.GreenYellow)).Permashow(true, ObjectManager.Player.ChampionName + " | Harass Toggle", Color.AliceBlue);
                 
                 //.ValueChanged += (sender, args) =>
@@ -63,13 +64,14 @@ namespace Leblanc.Modes
                 //        };
 
                 MenuKeys.AddItem(new MenuItem("Key.DoubleChain", "Double Chain!").SetValue(new KeyBind('G', KeyBindType.Press)).SetFontStyle(FontStyle.Regular, Color.IndianRed));
-                MenuKeys.AddItem(new MenuItem("Key.Farm", "Farm").SetValue(new KeyBind(MenuConfig.Item("LaneClear").GetValue<KeyBind>().Key, KeyBindType.Press))).SetFontStyle(FontStyle.Regular, Color.DarkKhaki);
+                //MenuKeys.AddItem(new MenuItem("Key.Farm", "Farm").SetValue(new KeyBind(MenuConfig.Item("LaneClear").GetValue<KeyBind>().Key, KeyBindType.Press))).SetFontStyle(FontStyle.Regular, Color.DarkKhaki);
                 MenuKeys.AddItem(new MenuItem("Key.Flee", "Flee").SetValue(new KeyBind('A', KeyBindType.Press)).SetFontStyle(FontStyle.Regular, Color.GreenYellow));
                 
                 MenuConfig.AddSubMenu(MenuKeys);
             }
 
             Modes.ModeCombo.Init();
+            Modes.ModeJump.Init(MenuConfig);
             Modes.ModeChain.Init();
             Modes.ModeHarass.Init();
 

@@ -59,21 +59,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>C:\Program Files (x86)\PlaySharp\System\clipper_library.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\References\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Program Files (x86)\PlaySharp\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\References\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Program Files (x86)\PlaySharp\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\References\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="SharpDX">
-      <HintPath>C:\Program Files (x86)\PlaySharp\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\References\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\PlaySharp\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\PlaySharp\References\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -99,6 +99,7 @@
     <Compile Include="Modes\ModeCombo2.cs" />
     <Compile Include="Modes\ModeFlee.cs" />
     <Compile Include="Modes\ModeHarass.cs" />
+    <Compile Include="Modes\ModeJump.cs" />
     <Compile Include="Modes\ModeJungle.cs" />
     <Compile Include="Modes\ModeLane.cs" />
     <Compile Include="Modes\ModeCombo.cs" />

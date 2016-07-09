@@ -127,6 +127,10 @@ namespace Leblanc.Modes
             Game.OnWndProc += Game_OnWndProc;
             Drawing.OnDraw += DrawingOnOnDraw;
             Drawing.OnDraw += DrawingHutMode;
+            Orbwalking.BeforeAttack += args =>
+            {
+                args.Process = !Modes.ModeConfig.MenuKeys.Item("Key.ComboAA").GetValue<KeyBind>().Active;
+            };
         }
 
         private static int GetWHits(Obj_AI_Base target, List<Obj_AI_Base> targets = null)
@@ -395,62 +399,69 @@ namespace Leblanc.Modes
 
         private static void GameOnOnUpdate(EventArgs args)
         {
-            if (!Target.IsValidTarget())
+            if (Modes.ModeConfig.MenuKeys.Item("Key.ComboAA").GetValue<KeyBind>().Active)
+            {
+                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                ExecuteComboMode();
+            }
+
+            if (!Target.IsValidTarget() || Modes.ModeConfig.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
             {
                 return;
             }
 
-            if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            ExecuteComboMode();
+        }
+
+
+        static void ExecuteComboMode()
+        {
+            if (Target.IsValidTarget(Q.Range) && CommonHelper.SpellRStatus == CommonHelper.SpellRName.R2xQ && Target.Health < ComboDamage2xQ(Target))
             {
-                //Game.PrintChat(Q.Cooldown.ToString());
-                if (Target.IsValidTarget(Q.Range) && CommonHelper.SpellRStatus == CommonHelper.SpellRName.R2xQ && Target.Health < ComboDamage2xQ(Target))
-                {
-                    Q2.CastOnUnit(Target);
-                }
+                Q2.CastOnUnit(Target);
+            }
 
-                if (Target.IsValidTarget(W.Range) && CommonHelper.SpellRStatus == CommonHelper.SpellRName.R2xW && Target.Health < ComboDamage2xW(Target))
-                {
-                    W2.Cast(Target);
-                }
+            if (Target.IsValidTarget(W.Range) && CommonHelper.SpellRStatus == CommonHelper.SpellRName.R2xW && Target.Health < ComboDamage2xW(Target))
+            {
+                W2.Cast(Target);
+            }
 
-                //ExecuteFarCombo();
+            //ExecuteFarCombo();
 
-                if (MenuLocal.Item("Combo.Ignite").GetValue<StringList>().SelectedIndex == 1)
+            if (MenuLocal.Item("Combo.Ignite").GetValue<StringList>().SelectedIndex == 1)
+            {
+                if (IgniteSlot != SpellSlot.Unknown &&
+                    ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
-                    if (IgniteSlot != SpellSlot.Unknown &&
-                        ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                    if (Target.IsValidTarget(650) &&
+                        ObjectManager.Player.GetSummonerSpellDamage(Target, Damage.SummonerSpell.Ignite) + 150 >=
+                        Target.Health && (!Q.IsReady() || W.StillJumped()))
                     {
-                        if (Target.IsValidTarget(650) && !Target.HasImmortalBuff() &&
-                            ObjectManager.Player.GetSummonerSpellDamage(Target, Damage.SummonerSpell.Ignite) + 150 >=
-                            Target.Health && (!Q.IsReady() || W.StillJumped()))
-                        {
-                            ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, Target);
-                        }
+                        ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, Target);
                     }
                 }
+            }
 
-                switch (ComboMode)
-                {
-                    case ComboMode.Mode2xQ:
+            switch (ComboMode)
+            {
+                case ComboMode.Mode2xQ:
                     {
                         ActiveComboMode = ActiveComboMode.Mode2xQ;
                         ExecuteMode2xQ();
                         break;
                     }
 
-                    case ComboMode.Mode2xW:
+                case ComboMode.Mode2xW:
                     {
                         ActiveComboMode = ActiveComboMode.Mode2xW;
                         ExecuteMode2xW();
                         break;
                     }
-                }
-                
-                ExecuteSpells();
-                ExecuteCompleteCombo();
             }
-        }
 
+            ExecuteSpells();
+            ExecuteCompleteCombo();
+        }
         static void ExecuteFarCombo()
         {
             var castWxWxQ = false;

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -26,6 +27,14 @@ namespace LeeSin
 {
     class Program
     {
+
+
+        /// <summary>
+        /// New
+        /// </summary>
+        public static int LastPutWardTime;
+
+        private static Obj_AI_Hero Player => ObjectManager.Player;
         private const string ChampionName = "LeeSin";
         private static Geometry.Polygon toPolygon;
 
@@ -46,14 +55,14 @@ namespace LeeSin
         public static Menu MenuMisc { get; private set; }
         public static Menu MenuDrawing { get; private set; }
 
-        private static float wardRange = 625;
+        private static float WardRange = 625;
         
         private static Obj_AI_Base insobj;
         private static SpellSlot igniteSlot;
         private static SpellSlot flashSlot;
         public static SpellSlot SmiteDamageSlot;
         private static SpellSlot SmiteHpSlot;
-        public static Vector3 WardCastPosition;
+        
         private static Vector3 insdirec;
         private static Vector3 InsecJumpPosition;
         private static Geometry.Polygon aInsecJumpPosition;
@@ -64,7 +73,6 @@ namespace LeeSin
         private static Vector3 wallcheck;
         private static Vector3 firstpos;
         private static float FlashRange = 425;
-        private static float WardRange = 525;
 
         static List<Obj_AI_Base> insecDirection = new List<Obj_AI_Base>();
         static int enemyInsecMethod = 0;
@@ -260,17 +268,17 @@ namespace LeeSin
             Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
             ////Drawing.OnDraw += Drawing_OnDraw_xQx;
-            /// lol to much ondraw Kappa
 
-            //Drawing.OnDraw += Drawing_OnDraw_ShowEnemyMinionsUnderAllyTurret;
-            Drawing.OnDraw += Drawing_OnDraw_Insec;
-            Drawing.OnDraw += Drawing_OnDraw_Insec2;
-            //Drawing.OnDraw += Drawing_OnDraw_Insec3;
 
-            Drawing.OnDraw += Drawing_RKickWaveForKillableEnemy;
-            Drawing.OnDraw += Drawing_RKickWaveForHitToEnemy;
-            Drawing.OnDraw += Drawing_OnDraw_JumpToEnemy;
-            Drawing.OnDraw += Drawing_OnDraw;
+
+            //Drawing.OnDraw += Drawing_OnDraw_Insec;
+            //Drawing.OnDraw += Drawing_OnDraw_Insec2;
+            //Drawing.OnDraw += Drawing_RKickWaveForKillableEnemy;
+            //Drawing.OnDraw += Drawing_RKickWaveForHitToEnemy;
+            //Drawing.OnDraw += Drawing_OnDraw_JumpToEnemy;
+            //Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnDraw += Drawing_OnDrawNew;
+
             ////Drawing.OnDraw += Drawing_OnDraw_GetBestPositionForWQCombo;
 
             ////Drawing.OnDraw += Drawing_OnDraw_Enemy2;
@@ -638,7 +646,6 @@ namespace LeeSin
 
         private static void OnWndProc(WndEventArgs args)
         {
-            return;
             if (args.Msg == 515 || args.Msg == 513)
             {
                 if (args.Msg == 515)
@@ -646,7 +653,6 @@ namespace LeeSin
                     insdirec = Game.CursorPos;
                     
                 }
-
                 var boohoo = ObjectManager.Get<Obj_AI_Base>()
                          .OrderBy(obj => obj.Distance(ObjectManager.Player.ServerPosition))
                          .FirstOrDefault(
@@ -657,6 +663,7 @@ namespace LeeSin
                 if (args.Msg == 513 && boohoo != null)
                 {
                     insobj = boohoo;
+
                     
                 }
             }
@@ -946,52 +953,48 @@ namespace LeeSin
 
         public static void WardJump(Vector3 jumpPosition, bool useAllyObjects = true, bool useWard = true, bool useFlash = false)
         {
-            if (WStage!= WCastStage.IsReady)
-            {
-                return;
-            }
+            //if (WStage!= WCastStage.IsReady)
+            //{
+            //    return;
+            //}
+
+            //if (!useWard || Items.GetWardSlot() == null || Items.GetWardSlot().Stacks == 0)
+            //{
+            //    return;
+            //}
 
             //WardCastPosition = NavMesh.GetCollisionFlags(jumpPosition).HasFlag(CollisionFlags.Wall) ? ObjectManager.Player.GetPath(jumpPosition).Last(): jumpPosition;
-            WardCastPosition = jumpPosition;
 
-            if (useAllyObjects)
+            if (WStage == WCastStage.IsReady)
             {
-                var jumpObject =
-                    ObjectManager.Get<Obj_AI_Base>()
-                        .OrderBy(obj => obj.Distance(ObjectManager.Player.ServerPosition))
-                        .FirstOrDefault(
-                            obj =>
-                                obj.IsAlly && !obj.IsMe && !(obj is Obj_AI_Turret) &&
-                                obj.Position.Distance(ObjectManager.Player.Position) < W.Range &&
-                                obj.Position.Distance(WardCastPosition) <= MenuFlee.Item("Flee.Range").GetValue<Slider>().Value);
-
-                if (jumpObject != null)
+                if (useAllyObjects)
                 {
-                    W.CastOnUnit(jumpObject);
+                    var jumpObject =
+                        ObjectManager.Get<Obj_AI_Base>()
+                            .OrderBy(obj => obj.Distance(ObjectManager.Player.ServerPosition))
+                            .FirstOrDefault(
+                                obj =>
+                                    obj.IsAlly && !obj.IsMe && !(obj is Obj_AI_Turret) &&
+                                    obj.Position.Distance(ObjectManager.Player.Position) < W.Range &&
+                                    obj.Position.Distance(jumpPosition) <=
+                                    MenuFlee.Item("Flee.Range").GetValue<Slider>().Value);
+
+                    if (jumpObject != null)
+                    {
+                        W.CastOnUnit(jumpObject);
+                        return;
+                    }
+                }
+
+
+                if (useWard && Items.GetWardSlot() != null && Items.GetWardSlot().Stacks != 0)
+                {
+                    PutWard(jumpPosition);
                     return;
                 }
             }
 
-            /*
-            foreach (
-                var objects in
-                    ObjectManager.Get<Obj_AI_Base>()
-                        .Where(
-                            o =>
-                                o.Distance(ObjectManager.Player.Position) < W.Range && o.Name.ToLower().Contains("ward") &&
-                                o is Obj_AI_Minion)
-                        .Where(objects => objects.IsAlly))
-                        {
-                            Game.PrintChat(objects.Name + " : " + objects.Type.ToString());
-                        }
-            */
-            if (useWard && Items.GetWardSlot() != null && Items.GetWardSlot().Stacks != 0)
-            {
-                PutWard(WardCastPosition);
-                return;
-            }
-
-            if (useFlash && ObjectManager.Player.Spellbook.CanUseSpell(flashSlot) == SpellState.Ready)
+            if (useFlash && ObjectManager.Player.Spellbook.CanUseSpell(flashSlot) == SpellState.Ready && ObjectManager.Player.Distance(jumpPosition) < FlashRange)
             {
                 ObjectManager.Player.Spellbook.CastSpell(flashSlot, jumpPosition);
                 return;
@@ -1005,10 +1008,16 @@ namespace LeeSin
                 return;
             }
 
+            if (Environment.TickCount < LastPutWardTime + 3000)
+            {
+                return;
+            }
+
             var ward = Items.GetWardSlot();
             if (ward.IsValidSlot() && ward.Stacks > 0)
             {
                 ObjectManager.Player.Spellbook.CastSpell(ward.SpellSlot, position);
+                LastPutWardTime = Environment.TickCount;
             }
         }
 
@@ -1140,7 +1149,7 @@ namespace LeeSin
             var haveFlash = ObjectManager.Player.Spellbook.CanUseSpell(flashSlot) == SpellState.Ready;
 
             var vEnemySearchRangeForInsec = 0f;
-            vEnemySearchRangeForInsec += haveWard ? wardRange : 0;
+            vEnemySearchRangeForInsec += haveWard ? WardRange : 0;
             
             vEnemySearchRangeForInsec += haveFlash ? FlashRange : 0;
             vEnemySearchRangeForInsec += QStage == QCastStage.IsReady ? Q.Range : 0;
@@ -1159,7 +1168,7 @@ namespace LeeSin
                 return;
             }
 
-            if (WStage == WCastStage.IsReady && ObjectManager.Player.Position.Distance(InsecJumpPosition) < wardRange && ObjectManager.Player.Distance(InsecJumpPosition) > 120)
+            if (WStage == WCastStage.IsReady && ObjectManager.Player.Position.Distance(InsecJumpPosition) < WardRange && ObjectManager.Player.Distance(InsecJumpPosition) > 120)
             {
                 WardJump(InsecJumpPosition);
                 return;
@@ -1177,7 +1186,7 @@ namespace LeeSin
                         .Where(
                             o =>
                                 o.IsEnemy && !o.IsDead && o.Health > Q.GetDamage(o) + 20 &&
-                                o.Distance(InsecJumpPosition) < wardRange - 40 && o.IsValidTarget(Q.Range)))
+                                o.Distance(InsecJumpPosition) < WardRange - 40 && o.IsValidTarget(Q.Range)))
             {
                 Q.Cast(minions);
                 if (minions.HasBlindMonkBuff())
@@ -1186,7 +1195,7 @@ namespace LeeSin
                 }
             }
 
-            if (ObjectManager.Get<Obj_AI_Base>().Where(o => o.HasBlindMonkBuff() && o.Distance(InsecJumpPosition) < wardRange).Any(obj => QStage == QCastStage.IsCasted))
+            if (ObjectManager.Get<Obj_AI_Base>().Where(o => o.HasBlindMonkBuff() && o.Distance(InsecJumpPosition) < WardRange).Any(obj => QStage == QCastStage.IsCasted))
             {
                 Q.Cast();
                 return;
@@ -1625,7 +1634,7 @@ namespace LeeSin
                                 obj.Position.Distance(ObjectManager.Player.Position) < W.Range &&
                                 obj.Position.Distance(Game.CursorPos) <= MenuFlee.Item("Flee.Range").GetValue<Slider>().Value);
 
-                return jumpObject != null ? W.Range : wardRange;
+                return jumpObject != null ? W.Range : WardRange;
             }
         }
 
@@ -2249,6 +2258,89 @@ namespace LeeSin
                     Drawing.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.White);
                 }
             }
+        }
+
+        private static void Drawing_OnDrawNew(EventArgs args)
+        {
+
+            bool canUseQ = Q.IsReady() && QStage == QCastStage.IsReady;
+            bool canUseW = W.IsReady() && WStage == WCastStage.IsReady;
+            bool canUseWard = Items.GetWardSlot() != null && Items.GetWardSlot().Stacks != 0;
+            bool canUseFlash = flashSlot.IsReady();
+
+            var insecRange = 0f;
+            {
+                insecRange += canUseQ ? Q.Range : 0f;
+                insecRange += canUseW ? W.Range : 0f;
+                insecRange += canUseWard ? WardRange : 0f;
+                insecRange += canUseFlash ? FlashRange : 0f;
+            }
+
+            Game.PrintChat(insecRange.ToString(CultureInfo.InvariantCulture));
+
+            Render.Circle.DrawCircle(ObjectManager.Player.Position, WardRange, Color.Crimson);
+            Render.Circle.DrawCircle(ObjectManager.Player.Position, FlashRange, Color.GreenYellow);
+            Render.Circle.DrawCircle(ObjectManager.Player.Position, WardRange + FlashRange, Color.Black);
+
+            var t = TargetSelector.GetTarget(Q.Range + W.Range + FlashRange + WardRange, TargetSelector.DamageType.Physical);
+            if (!t.IsValidTarget()) return;
+
+            InsecJumpPosition = t.ServerPosition.Extend(insdirec, -200);
+
+            Render.Circle.DrawCircle(InsecJumpPosition, 25, Color.Crimson);
+            
+            if (InsecJumpPosition.Distance(Player.Position) > FlashRange && InsecJumpPosition.Distance(Player.Position) < WardRange + FlashRange)
+            {
+                WardJump(t.Position);
+                return;
+            }
+
+            if (ObjectManager.Player.Distance(InsecJumpPosition) <= WardRange)
+            {
+                WardJump(InsecJumpPosition, true, true, true);
+                return;
+            }
+
+            if (R.CanCast(t) && LeeGeo.Distance(Player, InsecJumpPosition) < 200 && LeeGeo.Distance(Player.Position, insdirec) > LeeGeo.Distance(t.Position, insdirec))
+            {
+                R.CastOnUnit(t);
+            }
+
+
+
+        }
+    }
+
+    static class LeeGeo
+    {
+        public static float Distance(object from, object to)
+        {
+            if (from is Obj_AI_Base && to is Obj_AI_Base)
+            {
+                return ((Obj_AI_Base) from).Distance(((Obj_AI_Base) to).Position);
+            }
+
+            if (from is Vector3 && to is Obj_AI_Base)
+            {
+                return ((Vector3)from).Distance(((Obj_AI_Base)to).Position);
+            }
+
+            if (from is Obj_AI_Base && to is Vector3)
+            {
+                return ((Obj_AI_Base)from).Distance((Vector3)to);
+            }
+            
+            if (from is Vector3 && to is Vector3)
+            {
+                return ((Vector3)from).Distance((Vector3)to);
+            }
+
+            return 0f;
+        }
+
+        public static float DistanceToPlayer(this Vector3 to)
+        {
+            return ObjectManager.Player.Distance(to);
         }
     }
 }
