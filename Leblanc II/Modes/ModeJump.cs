@@ -95,13 +95,11 @@ namespace Leblanc.Modes
             {
                 if (W.StillJumped())
                 {
-                    Game.PrintChat("W 1");
                     W.Cast();
                 }
 
                 if (W2.StillJumped())
                 {
-                    Game.PrintChat("W 2");
                     W2.Cast();
                 }
             }
