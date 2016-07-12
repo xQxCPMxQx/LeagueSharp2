@@ -59,6 +59,10 @@ namespace Leblanc.Modes
 
             MenuFlame = new Menu("Flame", "Flame");
             MenuFlame.AddItem(new MenuItem("Flame.Laugh", "After Kill:").SetValue(new StringList(new[] {"Off", "Joke", "Taunt", "Laugh", "Mastery Badge", "Random" }, 5)));
+
+            Modes.ModeJump.Init(MenuLocal);
+            
+            
         }
 
         static void LoadDefaultSettingsQ()

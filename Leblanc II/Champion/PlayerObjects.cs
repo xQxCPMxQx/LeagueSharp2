@@ -140,7 +140,7 @@ namespace Leblanc.Champion
                 { 
                     if (LeblancSoulShackle.EndTime >= Game.Time && eObjects.NetworkId == LeblancSoulShackle.Object.NetworkId)
                     {
-                        var circle = new Geometry.Circle2(LeblancSoulShackle.Object.Position.To2D(), LeblancSoulShackle.Object.BoundingRadius - 20, Game.Time * 300 - LeblancSoulShackle.StartTime * 300, LeblancSoulShackle.EndTime * 300 - LeblancSoulShackle.StartTime * 300).ToPolygon();
+                        var circle = new Geometry.Circle2(LeblancSoulShackle.Object.Position.To2D(), (LeblancSoulShackle.Object.BoundingRadius * 2) - 20, Game.Time * 300 - LeblancSoulShackle.StartTime * 300, LeblancSoulShackle.EndTime * 300 - LeblancSoulShackle.StartTime * 300).ToPolygon();
                         circle.Draw(Color.GreenYellow, 5);
                     }
                 }
@@ -149,7 +149,7 @@ namespace Leblanc.Champion
                 {
                     if (LeblancSoulShackleM.EndTime >= Game.Time && eObjects.NetworkId == LeblancSoulShackleM.Object.NetworkId)
                     {
-                        var circle = new Geometry.Circle2(LeblancSoulShackleM.Object.Position.To2D(), LeblancSoulShackleM.Object.BoundingRadius, Game.Time * 300 - LeblancSoulShackleM.StartTime * 300, LeblancSoulShackleM.EndTime * 300 - LeblancSoulShackleM.StartTime * 300).ToPolygon();
+                        var circle = new Geometry.Circle2(LeblancSoulShackleM.Object.Position.To2D(), LeblancSoulShackleM.Object.BoundingRadius * 2, Game.Time * 300 - LeblancSoulShackleM.StartTime * 300, LeblancSoulShackleM.EndTime * 300 - LeblancSoulShackleM.StartTime * 300).ToPolygon();
                         circle.Draw(Color.DarkRed, 5);
                     }
                 }

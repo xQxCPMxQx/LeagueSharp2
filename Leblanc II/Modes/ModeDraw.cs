@@ -256,6 +256,7 @@ namespace Leblanc.Modes
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Width, Color.GreenYellow);
             if (!MenuLocal.Item("Draw.Enable").GetValue<bool>())
             {
                 return;

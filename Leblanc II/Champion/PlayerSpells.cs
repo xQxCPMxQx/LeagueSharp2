@@ -24,7 +24,7 @@ namespace Leblanc.Champion
             Q.SetTargetted(0.5f, 1500f);
 
             W = new Spell(SpellSlot.W, 600 + 80);
-            W.SetSkillshot(0.6f, 140f, 1450f, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.6f, 220f, 1450f, false, SkillshotType.SkillshotCircle);
 
             E = new Spell(SpellSlot.E, 820);
             E.SetSkillshot(0.3f, 55f, 1650f, true, SkillshotType.SkillshotLine);
@@ -35,7 +35,7 @@ namespace Leblanc.Champion
             Q2.SetTargetted(0.5f, 1500f);
 
             W2 = new Spell(SpellSlot.R, 600 + 80);
-            W2.SetSkillshot(0.6f, 180f, 1450f, false, SkillshotType.SkillshotCircle);
+            W2.SetSkillshot(0.6f, 220f, 1450f, false, SkillshotType.SkillshotCircle);
 
             E2 = new Spell(SpellSlot.R, 820);
             E2.SetSkillshot(0.3f, 55f, 1650f, true, SkillshotType.SkillshotLine);

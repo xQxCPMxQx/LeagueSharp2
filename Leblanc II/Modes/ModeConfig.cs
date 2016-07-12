@@ -71,7 +71,6 @@ namespace Leblanc.Modes
             }
 
             Modes.ModeCombo.Init();
-            Modes.ModeJump.Init(MenuConfig);
             Modes.ModeChain.Init();
             Modes.ModeHarass.Init();
 

@@ -17,7 +17,7 @@ namespace Leblanc.Modes
         public static void Init(Menu ParentMenu)
         {
 
-            MenuLocal = new LeagueSharp.Common.Menu("W Atuo Return Back:", "Menu.W").SetFontStyle(FontStyle.Regular, Color.AliceBlue);
+            MenuLocal = new LeagueSharp.Common.Menu("W Auto Return Back", "MenuReturnW").SetFontStyle(FontStyle.Regular, Color.AliceBlue);
             {
                 MenuLocal.AddItem(new MenuItem("W.Return.Lasthist", "Last hit:").SetValue(true));
                 MenuLocal.AddItem(new MenuItem("W.Return.Freeze", "Freeze:").SetValue(true));
@@ -95,11 +95,13 @@ namespace Leblanc.Modes
             {
                 if (W.StillJumped())
                 {
+                    Game.PrintChat("W 1");
                     W.Cast();
                 }
 
                 if (W2.StillJumped())
                 {
+                    Game.PrintChat("W 2");
                     W2.Cast();
                 }
             }
