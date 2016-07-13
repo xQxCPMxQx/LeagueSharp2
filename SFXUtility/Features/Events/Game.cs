@@ -75,7 +75,8 @@ namespace SFXUtility.Features.Events
                     new MenuItem(startMenu.Name + "Greeting", "Greeting").SetValue(
                         new StringList(new[] { "gl & hf", "good luck & have fun" })));
                 startMenu.AddItem(new MenuItem(startMenu.Name + "SayGreeting", "Say Greeting").SetValue(false));
-
+                startMenu.AddItem(new MenuItem(startMenu.Name + "MuteAll", "Mute All").SetValue(false));
+                
                 var endMenu = new Menu("OnEnd", Name + "OnEnd");
                 endMenu.AddItem(
                     new MenuItem(endMenu.Name + "Ending", "Goodbye").SetValue(
@@ -101,6 +102,24 @@ namespace SFXUtility.Features.Events
 
         private void OnGameUpdate(EventArgs args)
         {
+             if (!_onStartDone)
+            {
+                if (LeagueSharp.Game.Time > Menu.Item(Name + "OnStartDelay").GetValue<Slider>().Value)
+                {
+                    if (Menu.Item(Name + "OnStartSayGreeting").GetValue<bool>() && ObjectManager.Player.Level == 1)
+                    {
+                        LeagueSharp.Game.Say("/all " + Menu.Item(Name + "OnStartGreeting").GetValue<StringList>().SelectedValue);
+                    }
+
+                    if (Menu.Item(Name + "OnStartMuteAll").GetValue<bool>() && ObjectManager.Player.Level == 1)
+                    {
+                        LeagueSharp.Game.Say("/mute all");
+                        LeagueSharp.Game.PrintChat("Mute All - OK!");
+                    }
+                    _onStartDone = true;
+                }
+            }
+            return;
             try
             {
                 if (_onStartTriggerd && !_onStartDone)
