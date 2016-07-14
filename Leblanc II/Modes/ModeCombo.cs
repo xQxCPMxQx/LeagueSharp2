@@ -443,7 +443,7 @@ namespace Leblanc.Modes
 
             if (Target.IsValidTarget(W.Range) && CommonHelper.SpellRStatus == CommonHelper.SpellRName.R2xW && Target.Health < ComboDamage2xW(Target))
             {
-                W2.Cast(Target);
+                PlayerSpells.CastW2(Target.Position);
             }
 
             //ExecuteFarCombo();
@@ -638,7 +638,7 @@ namespace Leblanc.Modes
 
             if (ComboMode == ComboMode.Mode2xW && !W.IsReady() && R.IsReady() && !W2.StillJumped())
             {
-                Champion.PlayerSpells.W2.Cast(Target);
+                PlayerSpells.CastW2(Target.Position);
             }
         }
 
