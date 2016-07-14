@@ -414,14 +414,20 @@ namespace Zed
         private static void TheLine()
         {
             var target = CommonTargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-
-            if (target == null)
+            
+            if (!target.IsValidTarget())
             {
                 _player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             }
+
             else
             {
                 _player.IssueOrder(GameObjectOrder.AttackUnit, target);
+            }
+
+            if (!target.IsValidTarget())
+            {
+                return;
             }
 
             if ( !R.IsReady() || target.Distance(_player.Position) >= 640)
