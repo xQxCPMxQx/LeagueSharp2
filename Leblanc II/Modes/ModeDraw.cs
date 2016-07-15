@@ -256,12 +256,47 @@ namespace Leblanc.Modes
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Width, Color.GreenYellow);
+         
             if (!MenuLocal.Item("Draw.Enable").GetValue<bool>())
             {
                 return;
             }
+            if (MenuLocal.Item(GetPcModeStringValue + "DrawBuffs").GetValue<bool>())
+            {
+                var passiveBuffs =
+                    (from b in ObjectManager.Player.Buffs
+                        join b1 in CommonBuffManager.BuffDatabase on b.Name equals b1.BuffName
+                        select new {b, b1}).Distinct();
 
+                var i = 0;
+                foreach (var buffName in passiveBuffs)
+                {
+                    if (buffName.b.EndTime >= Game.Time)
+                    {
+                        CommonGeometry.DrawBox(
+                            new Vector2(ObjectManager.Player.HPBarPosition.X + 10,
+                                (i*8) + ObjectManager.Player.HPBarPosition.Y + 32), 130, 6,
+                            Color.FromArgb(100, 255, 200, 37), 1, Color.Black);
+
+                        var buffTime = buffName.b.EndTime - buffName.b.StartTime;
+                        CommonGeometry.DrawBox(
+                            new Vector2(ObjectManager.Player.HPBarPosition.X + 11,
+                                (i*8) + ObjectManager.Player.HPBarPosition.Y + 33),
+                            (130/buffTime)*(buffName.b.EndTime - Game.Time), 4, buffName.b1.Color, 1, buffName.b1.Color);
+
+                        TimeSpan timeSpan = TimeSpan.FromSeconds(buffName.b.EndTime - Game.Time);
+                        var timer = $"{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+                        CommonGeometry.DrawText(CommonGeometry.TextPassive, timer,
+                            ObjectManager.Player.HPBarPosition.X + 142,
+                            (i*8) + ObjectManager.Player.HPBarPosition.Y + 29,
+                            SharpDX.Color.Wheat);
+                        CommonGeometry.TextPassive.DrawTextLeft(buffName.b1.Caption,
+                            (int) ObjectManager.Player.HPBarPosition.X + 8,
+                            (int) ((i*8) + ObjectManager.Player.HPBarPosition.Y + 35), SharpDX.Color.Wheat);
+                    }
+                    i += 1;
+                }
+            }
 
             DrawSpells();
             DrawMinionLastHit();

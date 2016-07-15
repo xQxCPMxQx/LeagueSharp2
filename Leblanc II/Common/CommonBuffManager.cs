@@ -14,9 +14,37 @@ namespace Leblanc.Common
 
     public class CommonBuffManager
     {
+        public static List<BuffDatabase> BuffDatabase = new List<BuffDatabase>();
         public static List<JungleBuffs> JungleBuffs = new List<JungleBuffs>();
         public static List<PassiveBuffs> PassiveBuffs = new List<PassiveBuffs>();
 
+        void InitBuffDatabase()
+        {
+            BuffDatabase.Add(
+                new BuffDatabase
+                {
+                    Caption = "Leblanc Q:",
+                    BuffName = "LeblancChaosOrb",
+                    Color = Color.Aquamarine,
+                });
+
+            BuffDatabase.Add(
+                new BuffDatabase
+                {
+                    Caption = "W Time:",
+                    BuffName = "LeblancSlide",
+                    Color = Color.Yellow
+                });
+
+            BuffDatabase.Add(
+                new BuffDatabase
+                {
+                    Caption = "R Time:",
+                    BuffName = "LeblancSlideM",
+                    Color = Color.Red
+                });
+
+        }
         void InitJungleBuffs()
         {
             #region Blue
@@ -138,12 +166,14 @@ namespace Leblanc.Common
                     Color = Color.FromArgb(85, 4, 144)
                 });
             #endregion Anivia            
+
         }
 
         public CommonBuffManager()
         {
             InitPassiveBuffs();
             InitJungleBuffs();
+            InitBuffDatabase();
 
             Drawing.OnDraw += DrawingOnOnDraw;
 
@@ -190,6 +220,23 @@ namespace Leblanc.Common
         }
     }
 
+    public class BuffDatabase
+    {
+        public string Caption;
+        public string BuffName;
+        public SpellSlot Slot;
+        public Color Color;
+
+        public BuffDatabase() { }
+
+        public BuffDatabase(string caption, string buffName, SpellSlot slot, Color color = default(Color))
+        {
+            Caption = caption;
+            BuffName = buffName;
+            Slot = slot;
+            Color = default(Color) != new Color() ? Color.White : color;
+        }
+    }
     public class JungleBuffs
     {
         public int Number;

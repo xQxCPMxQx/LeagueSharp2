@@ -89,6 +89,7 @@
     <Compile Include="Champion\PlayerObjects.cs" />
     <Compile Include="Common\CommonBuffManager.cs" />
     <Compile Include="Common\CommonBuffs.cs" />
+    <Compile Include="Common\CommonFontExtension.cs" />
     <Compile Include="Common\CommonMath.cs" />
     <Compile Include="Common\CommonSkins.cs" />
     <Compile Include="Common\CommonTargetSelector.cs" />

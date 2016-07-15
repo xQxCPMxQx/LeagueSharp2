@@ -57,6 +57,7 @@ namespace Leblanc.Modes
             {
                 Champion.PlayerSpells.CastW(Game.CursorPos);
             }
+
             if (MenuLocal.Item("Flee.UseR").GetValue<bool>())
             {
                 Champion.PlayerSpells.CastW2(Game.CursorPos);

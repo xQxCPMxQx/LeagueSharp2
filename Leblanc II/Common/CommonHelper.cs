@@ -120,14 +120,21 @@ namespace Leblanc.Common
         {
             if (spell == Champion.PlayerSpells.W)
             {
+                return ObjectManager.Player.HasBuff("LeblancSlide");
                 return ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W)
                     .Name.Equals("Leblancslidereturn", StringComparison.InvariantCultureIgnoreCase);
             }
 
-            return spell == Champion.PlayerSpells.W2 &&
-                   ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R)
-                       .Name.ToLower()
-                       .Equals("Leblancslidereturnm", StringComparison.InvariantCultureIgnoreCase);
+            if (spell == Champion.PlayerSpells.W2)
+            {
+                return ObjectManager.Player.HasBuff("LeblancSlideM");
+            }
+
+            return false;
+            //    return spell == Champion.PlayerSpells.W2 &&
+            //           ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R)
+            //               .Name.ToLower()
+            //               .Equals("Leblancslidereturnm", StringComparison.InvariantCultureIgnoreCase);
         }
         public static void DrawText(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {

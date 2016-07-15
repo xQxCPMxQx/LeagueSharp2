@@ -41,6 +41,7 @@ namespace Leblanc.Modes
                 Common.CommonSkins.Init(MenuTools);
             }
 
+            var x = new CommonBuffManager();
             Common.CommonHelper.Init();
 
             MenuKeys = new Menu("Keys", "Keys").SetFontStyle(FontStyle.Bold, Color.Coral);

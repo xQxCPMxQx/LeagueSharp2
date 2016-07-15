@@ -60,7 +60,7 @@ namespace Leblanc.Modes
 
         //public static Obj_AI_Hero Target => GetTarget ?? TargetSelector.GetTarget(Q.Range * 2, TargetSelector.DamageType.Magical);
         //public static Obj_AI_Hero Target => HeroManager.Enemies.Where(e => !e.IsDead && e.IsVisible && e.IsValidTarget(E.Range) && !e.HasImmortalBuff()).OrderBy(e => e.Health - GetComboDamage(e)).FirstOrDefault();
-        public static Obj_AI_Hero Target => CommonTargetSelector.GetTarget(Q.Range);
+        public static Obj_AI_Hero Target => CommonTargetSelector.GetTarget(E.Range);
         //public static Obj_AI_Hero Target => HeroManager.Enemies.Where(e => !e.IsDead && e.IsVisible && e.IsValidTarget(E.Range)).OrderBy(e => e.Health - GetComboDamage(e)).FirstOrDefault();
 
 
@@ -443,7 +443,7 @@ namespace Leblanc.Modes
 
             if (Target.IsValidTarget(W.Range) && CommonHelper.SpellRStatus == CommonHelper.SpellRName.R2xW && Target.Health < ComboDamage2xW(Target))
             {
-                W2.Cast(Target);
+                PlayerSpells.CastW2(Target.Position);
             }
 
             //ExecuteFarCombo();
@@ -533,6 +533,11 @@ namespace Leblanc.Modes
         }
         static void ExecuteSpells()
         {
+            if (!Target.IsValidTarget())
+            {
+                return;
+            }
+
             if (!R.IsReady())
             {
                 if (ActiveComboMode == ActiveComboMode.Mode2xQ)
@@ -636,9 +641,9 @@ namespace Leblanc.Modes
                 Champion.PlayerSpells.Q2.CastOnUnit(Target);
             }
 
-            if (ComboMode == ComboMode.Mode2xW && !W.IsReady() && R.IsReady() && !W2.StillJumped())
+            if (ComboMode == ComboMode.Mode2xW && !W.IsReady() && R.IsReady())
             {
-                Champion.PlayerSpells.W2.Cast(Target);
+                PlayerSpells.CastW2(Target.Position);
             }
         }
 

@@ -120,7 +120,7 @@ namespace Leblanc.Common
                new FontDescription
                {
                    FaceName = "Calibri",
-                   Height = 11,
+                   Height = 13,
                    OutputPrecision = FontPrecision.Default,
                    Quality = FontQuality.Draft
                });
