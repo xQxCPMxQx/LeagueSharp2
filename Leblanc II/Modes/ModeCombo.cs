@@ -455,7 +455,7 @@ namespace Leblanc.Modes
                 {
                     if (Target.IsValidTarget(650) &&
                         ObjectManager.Player.GetSummonerSpellDamage(Target, Damage.SummonerSpell.Ignite) + 150 >=
-                        Target.Health && (!Q.IsReady() || W.StillJumped()))
+                        Target.Health && (!Q.IsReady() || Champion.PlayerSpells.WStillJumped))
                     {
                         ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, Target);
                     }
@@ -488,49 +488,7 @@ namespace Leblanc.Modes
             ExecuteSpells();
             ExecuteCompleteCombo();
         }
-        static void ExecuteFarCombo()
-        {
-            var castWxWxQ = false;
-            var castWxW = false;
-            var castWxQ = false;
 
-            var rangeWxWxQ = W.Range * 2 + Q.Range - 50;
-            var rangeWxQ = W.Range + Q.Range;
-            var range2xW = W.Range * 2 - 50;
-
-            int[] qPerLevel = new[] {55, 80, 105, 130, 155};
-
-            var qDamage = ObjectManager.Player.TotalMagicalDamage/100*40 + qPerLevel[Q.Level - 1];
-            //Game.PrintChat(qDamage.ToString());
-
-            Obj_AI_Hero t = null;
- 
-            foreach (var e in HeroManager.Enemies.Where(e => e.IsValidTarget(rangeWxQ) && !e.IsValidTarget(Q.Range) && e.Health <= Q.GetDamage(e) * 2 + ComboDamage2xQ(e) + E.GetDamage(e) * 2))
-            {
-                if (Q.IsReady() && W.IsReady() && R.IsReady())
-                {
-                    W.Cast(e);
-                }
-                //if (e.IsValidTarget(range2xW) && W.IsReady() && R.IsReady() && e.Health <= GetComboDamage(e, true, false, false, false, R.IsReady(), true))
-                //{
-                //    castWxW = true;
-                //    t = e;
-                //}
-                //else if (e.IsValidTarget(rangeWxQ) && Q.IsReady() && W.IsReady() && e.Health <= GetComboDamage(e, true, false, false, R.IsReady(), false, true))
-                //{
-                //    castWxQ = true;
-                //    t = e;
-                //}
-                //else if (e.IsValidTarget(rangeWxWxQ) && Q.IsReady() && W.IsReady() && R.IsReady() && e.Health <= GetComboDamage(e, true, false, false, false, false, true))
-                //{
-                //    castWxWxQ = true;
-                //    t = e;
-                //}
-
-            }
-
-
-        }
         static void ExecuteSpells()
         {
             if (!Target.IsValidTarget())
@@ -585,7 +543,7 @@ namespace Leblanc.Modes
                     }
                 }
 
-                if (ActiveComboMode == ActiveComboMode.Mode2xW && CommonHelper.SpellRStatus != CommonHelper.SpellRName.R2xW  && (W.StillJumped() || W.Cooldown > 1))
+                if (ActiveComboMode == ActiveComboMode.Mode2xW && CommonHelper.SpellRStatus != CommonHelper.SpellRName.R2xW  && (Champion.PlayerSpells.WStillJumped || W.Cooldown > 1))
                 {
                     Champion.PlayerSpells.CastQ(Target);
 

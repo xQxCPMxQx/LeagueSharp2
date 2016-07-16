@@ -204,8 +204,8 @@ namespace Leblanc.Champion
         }
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            if (
-                sender.Name.Equals("Leblanc_base_w_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase) ||
+
+            if (sender.Name.Equals("Leblanc_base_w_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase) ||
                 sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
             {
                // Console.WriteLine(sender.Name);
@@ -219,6 +219,16 @@ namespace Leblanc.Champion
                         EndTime = Game.Time + 4,
                         Type = sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase) ? 1 : 0
                     });
+            }
+
+            if (sender.Name.Equals("Leblanc_base_w_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
+            {
+                Champion.PlayerSpells.WStillJumped = true;
+            }
+
+            if (sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
+            {
+                Champion.PlayerSpells.W2StillJumped = true;
             }
         }
 
@@ -242,6 +252,15 @@ namespace Leblanc.Champion
                         return;
                     }
                 }
+            }
+            if (sender.Name.Equals("Leblanc_base_w_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
+            {
+                Champion.PlayerSpells.WStillJumped = false;
+            }
+
+            if (sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
+            {
+                Champion.PlayerSpells.W2StillJumped = false;
             }
         }
     }

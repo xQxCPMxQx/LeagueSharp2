@@ -200,7 +200,7 @@ namespace Leblanc.Modes
             }
 
 
-            if (W.IsReady()
+            if (W.IsReady() && Champion.PlayerSpells.WStillJumped
                 && MenuLocal.Item("Jungle.Simple.W").GetValue<StringList>().SelectedIndex != 0
                 && mob.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
             {
@@ -217,7 +217,7 @@ namespace Leblanc.Modes
                     CommonManaManager.GetMobType(mobs[0], CommonManaManager.FromMobClass.ByType) ==
                     CommonManaManager.MobTypes.Big)
                 {
-                    W.Cast(mobs[0].Position);
+                    PlayerSpells.CastW(mobs[0].Position);
                 }
             }
 

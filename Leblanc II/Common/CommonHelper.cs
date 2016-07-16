@@ -16,7 +16,6 @@ namespace Leblanc.Common
 
         public static void Init()
         {
-            
             Text = new Font(Drawing.Direct3DDevice,
                 new FontDescription
                 {
@@ -120,14 +119,17 @@ namespace Leblanc.Common
         {
             if (spell == Champion.PlayerSpells.W)
             {
-                return ObjectManager.Player.HasBuff("LeblancSlide");
-                return ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W)
-                    .Name.Equals("Leblancslidereturn", StringComparison.InvariantCultureIgnoreCase);
+                return ObjectManager.Player.HasBuff("LeblancSlide") ||
+                       ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W)
+                           .Name.Equals("Leblancslidereturn", StringComparison.InvariantCultureIgnoreCase);
             }
 
             if (spell == Champion.PlayerSpells.W2)
             {
-                return ObjectManager.Player.HasBuff("LeblancSlideM");
+                return ObjectManager.Player.HasBuff("LeblancSlideM") ||
+                       ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R)
+                           .Name.ToLower()
+                           .Equals("Leblancslidereturnm", StringComparison.InvariantCultureIgnoreCase);
             }
 
             return false;
