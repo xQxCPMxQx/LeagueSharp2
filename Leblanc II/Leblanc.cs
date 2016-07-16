@@ -27,7 +27,7 @@ namespace Leblanc
             Modes.ModeConfig.Init();
             Common.CommonItems.Init();
 
-            Game.PrintChat("<font color='#ff3232'>Successfully Loaded: </font><font color='#d4d4d4'><font color='#FFFFFF'>" + Assembly.GetExecutingAssembly().ToString().Substring(0, 28) + "</font>");
+            Game.PrintChat("<font color='#ff3232'>Successfully Loaded: </font><font color='#d4d4d4'><font color='#FFFFFF'> Leblanc II " + Assembly.GetExecutingAssembly().GetName().Version + "</font>");
 
             Console.Clear();
         }
