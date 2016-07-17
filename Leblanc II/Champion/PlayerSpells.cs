@@ -18,7 +18,7 @@ namespace Leblanc.Champion
 
         public static Spell Q2, W2, E2;
 
-        public static bool WStillJumped, W2StillJumped;
+        //public static bool WStillJumped, W2StillJumped;
 
         public static void Init()
         {
@@ -111,7 +111,7 @@ namespace Leblanc.Champion
         }
         public static void CastW(Vector3 t)
         {
-            if (W.IsReady() && !WStillJumped)
+            if (W.IsReady() && !W.StillJumped())
             {
                 W.Cast(t, true);
             }
@@ -119,7 +119,7 @@ namespace Leblanc.Champion
 
         public static void CastW2(Vector3 t)
         {
-            if (W2.IsReady() && !W2StillJumped)
+            if (W2.IsReady() && !W2.StillJumped())
             {
                 W2.Cast(t, true);
             }
@@ -127,7 +127,7 @@ namespace Leblanc.Champion
 
         public static void CastW(Obj_AI_Base t, bool returnBack = false)
         {
-            if (W.CanCast(t) && !WStillJumped)
+            if (W.CanCast(t) && !W.StillJumped())
             {
                 W.Cast(t.Position, true);
             }

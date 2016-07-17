@@ -200,7 +200,7 @@ namespace Leblanc.Modes
             }
 
 
-            if (W.IsReady() && Champion.PlayerSpells.WStillJumped
+            if (W.IsReady() && W.StillJumped()
                 && MenuLocal.Item("Jungle.Simple.W").GetValue<StringList>().SelectedIndex != 0
                 && mob.IsValidTarget(Orbwalking.GetRealAutoAttackRange(null) + 65))
             {

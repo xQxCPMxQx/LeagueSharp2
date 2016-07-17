@@ -36,12 +36,12 @@ namespace Leblanc.Modes
             if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit &&
                 MenuLocal.Item("W.Return.Lasthist").GetValue<bool>())
             {
-                if (Champion.PlayerSpells.WStillJumped)
+                if (W.StillJumped())
                 {
                     W.Cast();
                 }
 
-                if (Champion.PlayerSpells.W2StillJumped)
+                if (W2.StillJumped())
                 {
                     W2.Cast();
                 }
@@ -50,12 +50,12 @@ namespace Leblanc.Modes
             if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Freeze &&
                 MenuLocal.Item("W.Return.Freeze").GetValue<bool>())
             {
-                if (Champion.PlayerSpells.WStillJumped)
+                if (W.StillJumped())
                 {
                     W.Cast();
                 }
 
-                if (Champion.PlayerSpells.W2StillJumped)
+                if (W2.StillJumped())
                 {
                     W2.Cast();
                 }
@@ -64,12 +64,12 @@ namespace Leblanc.Modes
             if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear &&
                 MenuLocal.Item("W.Return.Laneclear").GetValue<bool>())
             {
-                if (Champion.PlayerSpells.WStillJumped)
+                if (W.StillJumped())
                 {
                     W.Cast();
                 }
 
-                if (Champion.PlayerSpells.W2StillJumped)
+                if (W2.StillJumped())
                 {
                     W2.Cast();
                 }
@@ -79,12 +79,12 @@ namespace Leblanc.Modes
             if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed &&
                 MenuLocal.Item("W.Return.Harass").GetValue<bool>())
             {
-                if (Champion.PlayerSpells.WStillJumped)
+                if (W.StillJumped())
                 {
                     W.Cast();
                 }
 
-                if (Champion.PlayerSpells.W2StillJumped)
+                if (W2.StillJumped())
                 {
                     W2.Cast();
                 }
@@ -93,13 +93,13 @@ namespace Leblanc.Modes
             if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo &&
                 MenuLocal.Item("W.Return.Combo").GetValue<bool>())
             {
-                if (Champion.PlayerSpells.WStillJumped)
+                if (W.StillJumped())
                 {
                     Game.PrintChat("W 1");
                     W.Cast();
                 }
 
-                if (Champion.PlayerSpells.W2StillJumped)
+                if (W2.StillJumped())
                 {
                     Game.PrintChat("W 2");
                     W2.Cast();

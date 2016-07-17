@@ -419,6 +419,11 @@ namespace Leblanc.Modes
 
         private static void GameOnOnUpdate(EventArgs args)
         {
+            if (!Target.IsValidTarget(2000))
+            {
+                return;
+            }
+
             if (Modes.ModeConfig.MenuKeys.Item("Key.ComboAA").GetValue<KeyBind>().Active)
             {
                 ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
@@ -455,7 +460,7 @@ namespace Leblanc.Modes
                 {
                     if (Target.IsValidTarget(650) &&
                         ObjectManager.Player.GetSummonerSpellDamage(Target, Damage.SummonerSpell.Ignite) + 150 >=
-                        Target.Health && (!Q.IsReady() || Champion.PlayerSpells.WStillJumped))
+                        Target.Health && (!Q.IsReady() || W.StillJumped()))
                     {
                         ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, Target);
                     }
@@ -543,7 +548,7 @@ namespace Leblanc.Modes
                     }
                 }
 
-                if (ActiveComboMode == ActiveComboMode.Mode2xW && CommonHelper.SpellRStatus != CommonHelper.SpellRName.R2xW  && (Champion.PlayerSpells.WStillJumped || W.Cooldown > 1))
+                if (ActiveComboMode == ActiveComboMode.Mode2xW && CommonHelper.SpellRStatus != CommonHelper.SpellRName.R2xW  && (W.StillJumped() || W.Cooldown > 1))
                 {
                     Champion.PlayerSpells.CastQ(Target);
 

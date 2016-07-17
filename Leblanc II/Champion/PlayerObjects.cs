@@ -204,32 +204,40 @@ namespace Leblanc.Champion
         }
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
+            if (
+                    sender.Name.Equals("Leblanc_base_w_return_indicator.troy",
+                        StringComparison.InvariantCultureIgnoreCase) ||
+                    sender.Name.Equals("Leblanc_base_rw_return_indicator.troy",
+                        StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // Console.WriteLine(sender.Name);
+                    ExistingSlide.Add(
+                        new Slide
+                        {
+                            Object = sender,
+                            NetworkId = sender.NetworkId,
+                            Position = sender.Position,
+                            StartTime = Game.Time,
+                            EndTime = Game.Time + 4,
+                            Type =
+                                sender.Name.Equals("Leblanc_base_rw_return_indicator.troy",
+                                    StringComparison.InvariantCultureIgnoreCase)
+                                    ? 1
+                                    : 0
+                        });
+                }
 
-            if (sender.Name.Equals("Leblanc_base_w_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase) ||
-                sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
-            {
-               // Console.WriteLine(sender.Name);
-                ExistingSlide.Add(
-                    new Slide
-                    {
-                        Object = sender,
-                        NetworkId = sender.NetworkId,
-                        Position = sender.Position,
-                        StartTime = Game.Time,
-                        EndTime = Game.Time + 4,
-                        Type = sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase) ? 1 : 0
-                    });
-            }
+                //if (sender.Name.Equals("Leblanc_base_w_return_indicator.troy",
+                //    StringComparison.InvariantCultureIgnoreCase))
+                //{
+                //    Champion.PlayerSpells.WWStillJumped = true;
+                //}
 
-            if (sender.Name.Equals("Leblanc_base_w_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
-            {
-                Champion.PlayerSpells.WStillJumped = true;
-            }
-
-            if (sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
-            {
-                Champion.PlayerSpells.W2StillJumped = true;
-            }
+                //if (sender.Name.Equals("Leblanc_base_rw_return_indicator.troy",
+                //    StringComparison.InvariantCultureIgnoreCase))
+                //{
+                //    Champion.PlayerSpells.W2StillJumped = true;
+                //}
         }
 
         private static void GameObject_OnDelete(GameObject sender, EventArgs args)
@@ -240,8 +248,10 @@ namespace Leblanc.Champion
             }
 
             if (
-                sender.Name.Equals("Leblanc_base_w_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase) ||
-                sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
+                sender.Name.Equals("Leblanc_base_w_return_indicator.troy",
+                    StringComparison.InvariantCultureIgnoreCase) ||
+                sender.Name.Equals("Leblanc_base_rw_return_indicator.troy",
+                    StringComparison.InvariantCultureIgnoreCase))
             {
 
                 for (var i = 0; i < ExistingSlide.Count; i++)
@@ -253,15 +263,17 @@ namespace Leblanc.Champion
                     }
                 }
             }
-            if (sender.Name.Equals("Leblanc_base_w_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
-            {
-                Champion.PlayerSpells.WStillJumped = false;
-            }
+                //if (sender.Name.Equals("Leblanc_base_w_return_indicator.troy",
+                //    StringComparison.InvariantCultureIgnoreCase))
+                //{
+                //    Champion.PlayerSpells.WStillJumped = false;
+                //}
 
-            if (sender.Name.Equals("Leblanc_base_rw_return_indicator.troy", StringComparison.InvariantCultureIgnoreCase))
-            {
-                Champion.PlayerSpells.W2StillJumped = false;
-            }
+                //if (sender.Name.Equals("Leblanc_base_rw_return_indicator.troy",
+                //    StringComparison.InvariantCultureIgnoreCase))
+                //{
+                //    Champion.PlayerSpells.W2StillJumped = false;
+                //}
         }
     }
 }

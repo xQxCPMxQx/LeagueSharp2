@@ -1,14 +1,8 @@
 ﻿#region
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+using System.Reflection;
 using LeagueSharp;
 using LeagueSharp.Common;
-using Leblanc.Common;
-using SharpDX;
-using Color = System.Drawing.Color;
-using Geometry = Leblanc.Common.CommonGeometry;
 
 #endregion
 
@@ -32,8 +26,10 @@ namespace Leblanc
             Champion.PlayerSpells.Init();
             Modes.ModeConfig.Init();
             Common.CommonItems.Init();
-
-            Game.PrintChat("<font color='#ff3232'>Successfully Loaded: </font><font color='#d4d4d4'><font color='#FFFFFF'>" + ChampionName + "</font> II Beta");
+            var fVersion = "<font color='#FFFFFF'>Version=" + Assembly.GetExecutingAssembly().GetName().Version + "</font>";
+            Game.PrintChat(
+                "<font color='#ff3232'>Successfully Loaded: </font><font color='#d4d4d4'><font color='#FFFFFF'>Leblanc II </font>" +
+                fVersion);
 
             Console.Clear();
         }
