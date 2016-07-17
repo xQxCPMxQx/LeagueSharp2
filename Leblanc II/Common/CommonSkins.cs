@@ -24,7 +24,7 @@ namespace Leblanc.Common
                         }
                     };
 
-                string[] strSkins = new[] { "Classic", "Wicked Leblanc", "Mistletoe Leblanc", "Raverborn Leblanc", "Elderwood Leblanc" };
+                string[] strSkins = new[] { "Classic Leblanc", "Prestigious Leblanc", "Wicked Leblanc", "Mistletoe Leblanc", "Raverborn Leblanc", "Elderwood Leblanc" };
 
                 MenuLocal.AddItem(new MenuItem("Settings.SkinID", "Skin Name:").SetValue(new StringList(strSkins, 0)));
             }
