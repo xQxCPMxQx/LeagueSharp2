@@ -119,14 +119,14 @@ namespace Leblanc.Common
         {
             if (spell == Champion.PlayerSpells.W)
             {
-                return ObjectManager.Player.HasBuff("LeblancSlide") ||
+                return 
                        ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W)
                            .Name.Equals("Leblancslidereturn", StringComparison.InvariantCultureIgnoreCase);
             }
 
             if (spell == Champion.PlayerSpells.W2)
             {
-                return ObjectManager.Player.HasBuff("LeblancSlideM") ||
+                return 
                        ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R)
                            .Name.ToLower()
                            .Equals("Leblancslidereturnm", StringComparison.InvariantCultureIgnoreCase);
