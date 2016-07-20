@@ -128,8 +128,7 @@ namespace Leblanc.Common
             {
                 return 
                        ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R)
-                           .Name.ToLower()
-                           .Equals("Leblancslidereturnm", StringComparison.InvariantCultureIgnoreCase);
+                           .Name.Equals("Leblancslidereturnm", StringComparison.InvariantCultureIgnoreCase);
             }
 
             return false;
