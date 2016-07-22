@@ -19,7 +19,7 @@ namespace Leblanc.Modes
             MenuLocal = new Menu("Flee", "Flee");
             {
                 MenuLocal.AddItem(new MenuItem("Flee.UseW", "W:").SetValue(true).SetFontStyle(FontStyle.Regular, Champion.PlayerSpells.Q.MenuColor()));
-                MenuLocal.AddItem(new MenuItem("Flee.UseR", "R:").SetValue(true).SetFontStyle(FontStyle.Regular, Champion.PlayerSpells.R.MenuColor()));
+                MenuLocal.AddItem(new MenuItem("Flee.UseR", "R:").SetValue(true).SetFontStyle(FontStyle.Regular, Champion.PlayerSpells.W.MenuColor()));
                 MenuLocal.AddItem(new MenuItem("Flee.DrawMouse", "Show Mouse Cursor Position:").SetValue(true));
             }
             ParentMenu.AddSubMenu(MenuLocal);

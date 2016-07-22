@@ -256,11 +256,11 @@ namespace Leblanc.Modes
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-         
             if (!MenuLocal.Item("Draw.Enable").GetValue<bool>())
             {
                 return;
             }
+
             if (MenuLocal.Item(GetPcModeStringValue + "DrawBuffs").GetValue<bool>())
             {
                 var passiveBuffs =

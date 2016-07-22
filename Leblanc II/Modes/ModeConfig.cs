@@ -89,7 +89,6 @@ namespace Leblanc.Modes
             Modes.ModeFlee.Init(MenuConfig);
 
             new ModeDraw().Init();
-            Modes.ModePerma.Init();
             Champion.PlayerObjects.Init();
             MenuConfig.AddToMainMenu();
             

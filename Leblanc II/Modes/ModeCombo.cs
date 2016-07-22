@@ -419,6 +419,14 @@ namespace Leblanc.Modes
 
         private static void GameOnOnUpdate(EventArgs args)
         {
+            //if (W.IsReady() && Target.IsValidTarget())
+            //{
+            //    var pre = W.GetPrediction(Target, true);
+            //    if (pre.Hitchance >= HitChance.High)
+            //        W.Cast(pre.CastPosition, true);
+            //}
+            //return;
+
             if (!Target.IsValidTarget(2000))
             {
                 return;
@@ -588,7 +596,7 @@ namespace Leblanc.Modes
                 return;
             }
 
-            if (!Q.IsReady() && !R.IsReady())
+            if (!Q.IsReady() && !Q2.IsReady())
             {
                 return;
             }
@@ -599,12 +607,12 @@ namespace Leblanc.Modes
 
         private static void ExecuteCompleteCombo()
         {
-            if (ComboMode == ComboMode.Mode2xQ && !Q.IsReady() && R.IsReady())
+            if (ComboMode == ComboMode.Mode2xQ && !Q.IsReady() && Q2.IsReady() && !W2.StillJumped())
             {
                 Champion.PlayerSpells.Q2.CastOnUnit(Target);
             }
 
-            if (ComboMode == ComboMode.Mode2xW && !W.IsReady() && R.IsReady())
+            if (ComboMode == ComboMode.Mode2xW && !W.IsReady() && W2.IsReady() && W2.StillJumped())
             {
                 PlayerSpells.CastW2(Target.Position);
             }
@@ -617,7 +625,7 @@ namespace Leblanc.Modes
                 return;
             }
 
-            if (!W.IsReady() && !R.IsReady())
+            if (!W.IsReady() && !W2.IsReady() && !W2.StillJumped())
             {
                 return;
             }

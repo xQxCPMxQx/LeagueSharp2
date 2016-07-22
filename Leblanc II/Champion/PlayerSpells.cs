@@ -131,11 +131,6 @@ namespace Leblanc.Champion
             {
                 W.Cast(t.Position, true);
             }
-
-            //if (returnBack && WStillJumped)
-            //{
-            //    W.Cast();
-            //}
         }
 
         public static void CastE(Obj_AI_Base t)

@@ -27,12 +27,30 @@ namespace Leblanc.Modes
 
                 ParentMenu.AddSubMenu(MenuLocal);
 
+               //Spellbook.OnCastSpell += Spellbook_OnCastSpell;
                 Game.OnUpdate += GameOnOnUpdate;
             }
         }
 
+        static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && !MenuLocal.Item("W.Return.Combo").GetValue<bool>())
+            {
+                if (args.Slot == SpellSlot.W && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name.Equals("Leblancslidereturn", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    args.Process = false;
+                }
+
+                if (args.Slot == SpellSlot.R && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name.ToLower().Equals("Leblancslidereturnm", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    args.Process = false;
+                }
+            }
+
+        }
         private static void GameOnOnUpdate(EventArgs args)
         {
+            //return;
             if (Modes.ModeConfig.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit &&
                 MenuLocal.Item("W.Return.Lasthist").GetValue<bool>())
             {

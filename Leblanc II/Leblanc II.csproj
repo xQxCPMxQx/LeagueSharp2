@@ -105,7 +105,6 @@
     <Compile Include="Modes\ModeLane.cs" />
     <Compile Include="Modes\ModeCombo.cs" />
     <Compile Include="Modes\ModeSettings.cs" />
-    <Compile Include="Modes\ModePerma.cs" />
     <Compile Include="Leblanc.cs" />
     <Compile Include="Modes\ModeDraw.cs" />
     <Compile Include="Common\CommonItems.cs" />
