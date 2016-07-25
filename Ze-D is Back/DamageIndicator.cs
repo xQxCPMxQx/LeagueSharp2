@@ -60,7 +60,7 @@ namespace Zed
 
                 Drawing.DrawLine(xPosDamage, yPos, xPosDamage, yPos + Height / 2, 2, Color);
 
-                if (Program.Config.Item("DrawHP").GetValue<bool>())
+                if (Program._config.Item("DrawHP").GetValue<bool>())
                 {
                     var differenceInHP = xPosCurrentHp - xPosDamage;
                     var pos1 = barPos.X + 9 + (107 * percentHealthAfterDamage);
