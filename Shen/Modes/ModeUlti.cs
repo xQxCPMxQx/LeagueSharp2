@@ -97,7 +97,7 @@ namespace Shen.Modes
                 strAutoUltimate[i] = "If my hp >= % " + (i * 5);
             }
             LocalMenu.AddItem(new MenuItem("SpellR.AutoUltimate", "Auto Ulti Condition:").SetValue(new StringList(strAutoUltimate , 8)).SetFontStyle(FontStyle.Regular, SharpDX.Color.IndianRed));
-            LocalMenu.AddItem(new MenuItem("SpellR.ConfirmKey", "Ulti Confirm Key!").SetValue(new KeyBind("U".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Bold, SharpDX.Color.GreenYellow));
+            LocalMenu.AddItem(new MenuItem("SpellR.ConfirmKey", "Ulti Confirm Key!").SetValue(new KeyBind("R".ToCharArray()[0], KeyBindType.Press)).SetFontStyle(FontStyle.Bold, SharpDX.Color.GreenYellow));
 
             menuConfig.AddSubMenu(LocalMenu);
             
