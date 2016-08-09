@@ -89,7 +89,7 @@ namespace SFXChallenger.Champions
             W = new Spell(SpellSlot.W, 700f, DamageType.Magical);
             W.SetSkillshot(1f, 300f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
-            E = new Spell(SpellSlot.E, 525f, DamageType.Magical);
+            E = new Spell(SpellSlot.E, 1025, DamageType.Magical);
             E.SetSkillshot(0f, 90f, 800f, false, SkillshotType.SkillshotLine);
 
             R = new Spell(SpellSlot.R, 700f, DamageType.Magical);
@@ -254,7 +254,7 @@ namespace SFXChallenger.Champions
             BestTargetOnlyManager.AddToMenu(wGapcloserMenu, "w-gapcloser");
 
             miscMenu.AddItem(
-                new MenuItem(miscMenu.Name + ".e-logic", "E Logic").SetValue(new StringList(new[] { "Old", "New" }, 1)))
+                new MenuItem(miscMenu.Name + ".e-logic", "E Logic").SetValue(new StringList(new[] { "Old", "New", "Beta xQx" }, 1)))
                 .ValueChanged +=
                 delegate(object sender, OnValueChangeEventArgs args)
                 {
@@ -299,6 +299,7 @@ namespace SFXChallenger.Champions
                     return 0f;
                 });
             IndicatorManager.Finale();
+
         }
 
         protected override void OnPreUpdate() {}
@@ -600,18 +601,22 @@ namespace SFXChallenger.Champions
             var qCasted = false;
             if (e)
             {
+                
                 var target = TargetSelector.GetTarget((E.Range + ELength + E.Width) * 1.1f, E.DamageType);
                 if (target != null)
                 {
-                    var eLogicNew =
-                        Menu.Item(Menu.Name + ".miscellaneous.e-logic").GetValue<StringList>().SelectedIndex == 1;
-                    if (eLogicNew)
+                    var eLogicNew = Menu.Item(Menu.Name + ".miscellaneous.e-logic").GetValue<StringList>();
+                    if (eLogicNew.SelectedIndex == 1)
                     {
                         ELogicNew(target, E.GetHitChance("combo"));
                     }
-                    else
+                    else if (eLogicNew.SelectedIndex == 0)
                     {
                         ELogic(target, GameObjects.EnemyHeroes.ToList(), E.GetHitChance("combo"));
+                    }
+                    else
+                    {
+                        ELogicBeta();
                     }
                 }
             }
@@ -929,6 +934,37 @@ namespace SFXChallenger.Champions
             }
         }
 
+        private void ELogicBeta()
+        {
+            var t = TargetSelector.GetTarget(E.Range, DamageType.Magical);
+            if (!t.IsValidTarget()) { return; }
+
+            var endPos = Vector3.Zero;
+            var startPos = Vector3.Zero;
+
+            if (t.IsValidTarget(525))
+            {
+                startPos = t.Position;
+                endPos = t.Path[0];
+            }
+            else
+            {
+                if (t.Path.Count() > 0)
+                {
+                    endPos = t.Position + (t.Position - t.Path[0]).Normalized() * (t.IsFacing(Player) ? -120 : -60);
+                }
+                else
+                {
+                    endPos = t.Position + (t.Position - Player.Position).Normalized()*(t.IsFacing(Player) ? 60 : 120);
+                }
+                startPos = Player.Position.Extend(endPos, 505);
+            }
+            if (E.IsReady() && Player.Distance(endPos) <= E.Range)
+            {
+                E.Cast(startPos, endPos);
+            }
+        }
+
         private bool ELogic(Obj_AI_Hero target, List<Obj_AI_Hero> targets, HitChance hitChance, int minHits = 1)
         {
             return ELogic(
@@ -984,22 +1020,12 @@ namespace SFXChallenger.Champions
                                 {
                                     containsTarget = t.NetworkId == mainTarget.NetworkId;
                                 }
-                                var rect = new Geometry.Polygon.Rectangle(
-                                    cCastPos.To2D(), cCastPos.Extend(pred.CastPosition, ELength).To2D(), E.Width);
-                                foreach (var c in
-                                    targets.Where(
-                                        c => c.NetworkId != cTarget.NetworkId && c.NetworkId != lTarget.NetworkId))
+                                var rect = new Geometry.Polygon.Rectangle(cCastPos.To2D(), cCastPos.Extend(pred.CastPosition, ELength).To2D(), E.Width);
+                                foreach (var c in targets.Where(c => c.NetworkId != cTarget.NetworkId && c.NetworkId != lTarget.NetworkId))
                                 {
                                     input.Unit = c;
-                                    var cPredPos = c.Type == GameObjectType.obj_AI_Minion
-                                        ? c.Position
-                                        : Prediction.GetPrediction(input).UnitPosition;
-                                    if (
-                                        new Geometry.Polygon.Circle(
-                                            cPredPos,
-                                            c.Type == GameObjectType.obj_AI_Minion && c.IsMoving
-                                                ? c.BoundingRadius / 2f
-                                                : c.BoundingRadius * 0.9f).Points.Any(p => rect.IsInside(p)))
+                                    var cPredPos = c.Type == GameObjectType.obj_AI_Minion ? c.Position : Prediction.GetPrediction(input).UnitPosition;
+                                    if (new Geometry.Polygon.Circle(cPredPos, c.Type == GameObjectType.obj_AI_Minion && c.IsMoving ? c.BoundingRadius / 2f : c.BoundingRadius * 0.9f).Points.Any(p => rect.IsInside(p)))
                                     {
                                         count++;
                                         if (!containsTarget && c.NetworkId == mainTarget.NetworkId)
