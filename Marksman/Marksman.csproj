@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4E9F7272-33F7-465C-8BD9-87F801222C9E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Marksman</RootNamespace>
+    <AssemblyName>Marksman</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+    <PreBuildEvent />
+    <OutputPath>bin\Release</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>
+    </ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="clipper_library">
+      <HintPath>C:\Program Files (x86)\2bScOWoCt\References\clipper_library.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp">
+      <HintPath>C:\Program Files (x86)\2bScOWoCt\References\LeagueSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp.Common">
+      <HintPath>C:\Program Files (x86)\2bScOWoCt\References\LeagueSharp.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Program Files (x86)\2bScOWoCt\References\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>C:\Program Files (x86)\2bScOWoCt\References\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Evade\Collision.cs" />
+    <Compile Include="Evade\Config.cs" />
+    <Compile Include="Evade\Evader.cs" />
+    <Compile Include="Evade\EvadeSpellData.cs" />
+    <Compile Include="Evade\EvadeSpellDatabase.cs" />
+    <Compile Include="Evade\Geometry.cs" />
+    <Compile Include="Evade\Evade.cs" />
+    <Compile Include="Evade\Skillshot.cs" />
+    <Compile Include="Evade\SkillshotDetector.cs" />
+    <Compile Include="Evade\SpellData.cs" />
+    <Compile Include="Evade\SpellDatabase.cs" />
+    <Compile Include="Evade\Utils.cs" />
+    <Compile Include="Utils\Activator.cs" />
+    <Compile Include="Utils\AutoBushRevealer.cs" />
+    <Compile Include="Utils\AutoPink.cs" />
+    <Compile Include="Utils\EarlyEvade.cs" />
+    <Compile Include="Champions\Ashe.cs" />
+    <Compile Include="Champions\Caitlyn.cs" />
+    <Compile Include="Champions\Champion.cs" />
+    <Compile Include="Champions\Corki.cs" />
+    <Compile Include="Utils\ExecutedTime.cs" />
+    <Compile Include="Utils\IncomingDangerous.cs" />
+    <Compile Include="Utils\Sprite.cs" />
+    <Compile Include="Champions\Draven.cs" />
+    <Compile Include="Champions\Ezreal.cs" />
+    <Compile Include="Champions\Gnar.cs" />
+    <Compile Include="Champions\Graves.cs" />
+    <Compile Include="Champions\Jinx.cs" />
+    <Compile Include="Champions\Kalista.cs" />
+    <Compile Include="Champions\Kindred.cs" />
+    <Compile Include="Champions\Kogmaw.cs" />
+    <Compile Include="Utils\PotionManager.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Champions\Lucian.cs" />
+    <Compile Include="Champions\MissFortune.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\SpellList.cs" />
+    <Compile Include="Champions\Quinn.cs" />
+    <Compile Include="Champions\Sivir.cs" />
+    <Compile Include="Champions\Teemo.cs" />
+    <Compile Include="Champions\Tristana.cs" />
+    <Compile Include="Champions\Twitch.cs" />
+    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Utils\AutoLevel.cs" />
+    <Compile Include="Champions\Urgot.cs" />
+    <Compile Include="Champions\Varus.cs" />
+    <Compile Include="Champions\Vayne.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.1 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\selectedchampion.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\selectedminion.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
