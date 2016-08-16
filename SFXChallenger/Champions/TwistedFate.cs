@@ -59,16 +59,8 @@ namespace SFXChallenger.Champions
         private MenuItem _rMinimap;
         private Obj_AI_Hero _wTarget;
         private float _wTargetEndTime;
-
-        protected override ItemFlags ItemFlags
-        {
-            get { return ItemFlags.Offensive | ItemFlags.Defensive | ItemFlags.Flee; }
-        }
-
-        protected override ItemUsageType ItemUsage
-        {
-            get { return ItemUsageType.Custom; }
-        }
+        protected override ItemFlags ItemFlags => ItemFlags.Offensive | ItemFlags.Defensive | ItemFlags.Flee;
+        protected override ItemUsageType ItemUsage => ItemUsageType.Custom;
 
         protected override void OnLoad()
         {
@@ -96,24 +88,15 @@ namespace SFXChallenger.Champions
         protected override void AddToMenu()
         {
             var comboMenu = Menu.AddSubMenu(new Menu("Combo", Menu.Name + ".combo"));
-            HitchanceManager.AddToMenu(
-                comboMenu.AddSubMenu(new Menu("Hitchance", comboMenu.Name + ".hitchance")), "combo",
-                new Dictionary<string, HitChance> { { "Q", HitChance.High } });
-            comboMenu.AddItem(
-                new MenuItem(comboMenu.Name + ".gold-percent", "Pick Gold Health <= %").SetValue(new Slider(20, 5, 75)));
-            comboMenu.AddItem(
-                new MenuItem(comboMenu.Name + ".red-min", "Pick Red Targets >=").SetValue(new Slider(3, 1, 5)));
+            HitchanceManager.AddToMenu(comboMenu.AddSubMenu(new Menu("Hitchance", comboMenu.Name + ".hitchance")), "combo",new Dictionary<string, HitChance> { { "Q", HitChance.High } });
+            comboMenu.AddItem(new MenuItem(comboMenu.Name + ".gold-percent", "Pick Gold Health <= %").SetValue(new Slider(20, 5, 75)));
+            comboMenu.AddItem(new MenuItem(comboMenu.Name + ".red-min", "Pick Red Targets >=").SetValue(new Slider(3, 1, 5)));
             comboMenu.AddItem(new MenuItem(comboMenu.Name + ".q", "Use Q").SetValue(true));
             comboMenu.AddItem(new MenuItem(comboMenu.Name + ".w", "Use W").SetValue(true));
 
             var harassMenu = Menu.AddSubMenu(new Menu("Harass", Menu.Name + ".harass"));
-            HitchanceManager.AddToMenu(
-                harassMenu.AddSubMenu(new Menu("Hitchance", harassMenu.Name + ".hitchance")), "harass",
-                new Dictionary<string, HitChance> { { "Q", HitChance.High } });
-            ResourceManager.AddToMenu(
-                harassMenu,
-                new ResourceManagerArgs(
-                    "harass", ResourceType.Mana, ResourceValueType.Percent, ResourceCheckType.Minimum)
+            HitchanceManager.AddToMenu(harassMenu.AddSubMenu(new Menu("Hitchance", harassMenu.Name + ".hitchance")), "harass",new Dictionary<string, HitChance> { { "Q", HitChance.High } });
+            ResourceManager.AddToMenu(harassMenu,new ResourceManagerArgs("harass", ResourceType.Mana, ResourceValueType.Percent, ResourceCheckType.Minimum)
                 {
                     DefaultValue = 30
                 });
@@ -994,8 +977,7 @@ namespace SFXChallenger.Champions
 
                     if (!cards.Any())
                     {
-                        if (ObjectManager.Player.HealthPercent <=
-                            Menu.Item(Menu.Name + ".combo.gold-percent").GetValue<Slider>().Value)
+                        if (ObjectManager.Player.HealthPercent <= Menu.Item(Menu.Name + ".combo.gold-percent").GetValue<Slider>().Value)
                         {
                             cards.Add(CardColor.Gold);
                         }
@@ -1005,8 +987,7 @@ namespace SFXChallenger.Champions
                         }
                         else
                         {
-                            var redHits = GetWHits(
-                                target, GameObjects.EnemyHeroes.Cast<Obj_AI_Base>().ToList(), CardColor.Red);
+                            var redHits = GetWHits(target, GameObjects.EnemyHeroes.Cast<Obj_AI_Base>().ToList(), CardColor.Red);
                             if (redHits >= Menu.Item(Menu.Name + ".combo.red-min").GetValue<Slider>().Value)
                             {
                                 cards.Add(CardColor.Red);
@@ -1105,9 +1086,9 @@ namespace SFXChallenger.Champions
 
             public static bool Has(CardColor color)
             {
-                return color == CardColor.Gold && ObjectManager.Player.HasBuff("goldcardpreattack") ||
-                       color == CardColor.Red && ObjectManager.Player.HasBuff("redcardpreattack") ||
-                       color == CardColor.Blue && ObjectManager.Player.HasBuff("bluecardpreattack");
+                return color == CardColor.Gold && ObjectManager.Player.HasBuff("GoldCardPreAttack") ||
+                       color == CardColor.Red && ObjectManager.Player.HasBuff("RedCardPreAttack") ||
+                       color == CardColor.Blue && ObjectManager.Player.HasBuff("BlueCardPreAttack");
             }
 
             public static bool Has()
