@@ -686,15 +686,18 @@ namespace SFXChallenger.Champions
                 var target = TargetSelector.GetTarget((E.Range + ELength + E.Width) * 1.1f, E.DamageType);
                 if (target != null)
                 {
-                    var eLogicNew =
-                        Menu.Item(Menu.Name + ".miscellaneous.e-logic").GetValue<StringList>().SelectedIndex == 1;
-                    if (eLogicNew)
+                    var eLogicNew = Menu.Item(Menu.Name + ".miscellaneous.e-logic").GetValue<StringList>();
+                    if (eLogicNew.SelectedIndex == 1)
                     {
                         ELogicNew(target, E.GetHitChance("harass"));
                     }
-                    else
+                    else if (eLogicNew.SelectedIndex == 0)
                     {
                         ELogic(target, GameObjects.EnemyHeroes.ToList(), E.GetHitChance("harass"));
+                    }
+                    else
+                    {
+                        ELogicBeta();
                     }
                 }
             }
