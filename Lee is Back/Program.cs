@@ -986,19 +986,19 @@ namespace LeeSin
                     }
                 }
 
-
                 if (useWard && Items.GetWardSlot() != null && Items.GetWardSlot().Stacks != 0)
                 {
                     PutWard(jumpPosition);
                     return;
                 }
             }
-
+            /*
             if (useFlash && ObjectManager.Player.Spellbook.CanUseSpell(flashSlot) == SpellState.Ready && ObjectManager.Player.Distance(jumpPosition) < FlashRange)
             {
                 ObjectManager.Player.Spellbook.CastSpell(flashSlot, jumpPosition);
                 return;
             }
+            */            
         }
 
         public static void PutWard(Vector3 position)
