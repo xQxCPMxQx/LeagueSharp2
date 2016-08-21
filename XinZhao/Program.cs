@@ -47,7 +47,7 @@ namespace XinZhao
 
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 600);
+            E = new Spell(SpellSlot.E, 700);
             R = new Spell(SpellSlot.R, 480);
 
             Items = new Items();
