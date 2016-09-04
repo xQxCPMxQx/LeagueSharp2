@@ -477,7 +477,7 @@ namespace Olafisback
         {
             
             //if (obj.Name == "olaf_axe_totem_team_id_green.troy")
-            if (obj.Name.Contains("axe_totem_team_id_green.troy"))
+            if (obj.Name.ToLower().Contains("olaf_base_q_axe") && obj.Name.ToLower().Contains("ally"))
             {
                 olafAxe.Object = obj;
                 olafAxe.ExpireTime = Game.Time + 8;
@@ -491,7 +491,7 @@ namespace Olafisback
         private static void GameObject_OnDelete(GameObject obj, EventArgs args)
         {
             //if (obj.Name == "olaf_axe_totem_team_id_green.troy")
-            if (obj.Name.Contains("axe_totem_team_id_green.troy"))
+            if (obj.Name.ToLower().Contains("olaf_base_q_axe") && obj.Name.ToLower().Contains("ally"))
             {
                 olafAxe.Object = null;
                 //_axeObj = null;
