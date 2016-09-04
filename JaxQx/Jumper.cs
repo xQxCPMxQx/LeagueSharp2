@@ -19,7 +19,7 @@ namespace JaxQx
 
         public static int getJumpWardId()
         {
-            int[] wardIds = { 3340, 3350, 3205, 3207, 2049, 2045, 2044, 3361, 3154, 3362, 3160, 2043 };
+            int[] wardIds = { 2045, 2049, 2050, 2301, 2302, 2303, 3340, 3361, 3362, 3711, 1408, 1409, 1410, 1411, 2043 };
             foreach (int id in wardIds)
             {
                 if (LeagueSharp.Common.Items.HasItem(id) && LeagueSharp.Common.Items.CanUseItem(id))
