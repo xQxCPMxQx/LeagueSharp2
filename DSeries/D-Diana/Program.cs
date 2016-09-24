@@ -16,7 +16,7 @@ namespace D_Diana
 
         private static Spell _q, _w, _e, _r;
 
-        private static Obj_SpellMissile _qpos;
+        private static Obj_AI_BaseProcessSpellCast _qpos;
 
         private static bool _qcreated = false;
 
@@ -264,8 +264,8 @@ namespace D_Diana
             new AssassinManager();
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            GameObject.OnCreate += OnCreate;
-            GameObject.OnDelete += OnDelete;
+            //GameObject.OnCreate += OnCreate;
+            //GameObject.OnDelete += OnDelete;
             Game.PrintChat("<font color='#881df2'>Diana By Diabaths With Misaya Combo by xSalice </font>Loaded!");
             Game.PrintChat(
                 "<font color='#FF0000'>If You like my work and want to support me,  plz donate via paypal in </font> <font color='#FF9900'>ssssssssssmith@hotmail.com</font> (10) S");
@@ -444,7 +444,7 @@ namespace D_Diana
                 }
                 if (_player.Distance(t) <= _r.Range && Config.Item("UseRCombo").GetValue<bool>() && _r.IsReady() &&
                     ((_qcreated == true)
-                     || t.HasBuff("dianamoonlight", true)))
+                     || t.HasBuff("dianamoonlight")))
                 {
                     _r.Cast(t, Packets());
                 }
@@ -872,61 +872,61 @@ namespace D_Diana
             return Config.Item("usePackets").GetValue<bool>();
         }
 
-        private static void OnCreate(GameObject sender, EventArgs args)
-        {
-            var spell = (Obj_SpellMissile) sender;
-            var unit = spell.SpellCaster.Name;
-            var caster = spell.SpellCaster;
-            var name = spell.SData.Name;
+        //private static void OnCreate(GameObject sender, EventArgs args)
+        //{
+        //    var spell = (Spell)sender;
+        //    var unit = spell.SpellCaster.Name;
+        //    var caster = spell.SpellCaster;
+        //    var name = spell.SData.Name;
 
-            if (unit == ObjectManager.Player.Name && (name == "dianaarcthrow"))
-            {
-                // Game.PrintChat("Spell: " + name);
-                _qpos = spell;
-                _qcreated = true;
-                return;
-            }
-            // credits 100% to brian0305
-            if (sender is Obj_SpellMissile && sender.IsValid && Config.Item("AutoShield").GetValue<bool>() &&
-                _w.IsReady())
-            {
-                if (caster.IsEnemy)
-                {
-                    var shieldBuff = new Int32[] {40, 55, 70, 85, 100}[_w.Level - 1] +
-                                     1.3*_player.FlatMagicDamageMod;
-                    if (spell.SData.Name.Contains("BasicAttack"))
-                    {
-                        if (spell.Target.IsMe && _player.Health <= caster.GetAutoAttackDamage(_player, true) &&
-                            _player.Health + shieldBuff > caster.GetAutoAttackDamage(_player, true)) _w.Cast();
-                    }
-                    else if (spell.Target.IsMe || spell.EndPosition.Distance(_player.Position) <= 130)
-                    {
-                        if (spell.SData.Name == "summonerdot")
-                        {
-                            if (_player.Health <=
-                                (caster as Obj_AI_Hero).GetSummonerSpellDamage(_player, Damage.SummonerSpell.Ignite) &&
-                                _player.Health + shieldBuff >
-                                (caster as Obj_AI_Hero).GetSummonerSpellDamage(_player, Damage.SummonerSpell.Ignite))
-                                _w.Cast();
-                        }
-                        else if (_player.Health <=
-                                 (caster as Obj_AI_Hero).GetSpellDamage(_player,
-                                     (caster as Obj_AI_Hero).GetSpellSlot(spell.SData.Name), 1) &&
-                                 _player.Health + shieldBuff >
-                                 (caster as Obj_AI_Hero).GetSpellDamage(_player,
-                                     (caster as Obj_AI_Hero).GetSpellSlot(spell.SData.Name), 1)) _w.Cast();
-                    }
-        }
-            }
-        }
+        //    if (unit == ObjectManager.Player.Name && (name == "dianaarcthrow"))
+        //    {
+        //        // Game.PrintChat("Spell: " + name);
+        //        _qpos = spell;
+        //        _qcreated = true;
+        //        return;
+        //    }
+        //    // credits 100% to brian0305
+        //    if (sender is Obj_SpellMissile && sender.IsValid && Config.Item("AutoShield").GetValue<bool>() &&
+        //        _w.IsReady())
+        //    {
+        //        if (caster.IsEnemy)
+        //        {
+        //            var shieldBuff = new Int32[] { 40, 55, 70, 85, 100 }[_w.Level - 1] +
+        //                             1.3 * _player.FlatMagicDamageMod;
+        //            if (spell.SData.Name.Contains("BasicAttack"))
+        //            {
+        //                if (spell.Target.IsMe && _player.Health <= caster.GetAutoAttackDamage(_player, true) &&
+        //                    _player.Health + shieldBuff > caster.GetAutoAttackDamage(_player, true)) _w.Cast();
+        //            }
+        //            else if (spell.Target.IsMe || spell.EndPosition.Distance(_player.Position) <= 130)
+        //            {
+        //                if (spell.SData.Name == "summonerdot")
+        //                {
+        //                    if (_player.Health <=
+        //                        (caster as Obj_AI_Hero).GetSummonerSpellDamage(_player, Damage.SummonerSpell.Ignite) &&
+        //                        _player.Health + shieldBuff >
+        //                        (caster as Obj_AI_Hero).GetSummonerSpellDamage(_player, Damage.SummonerSpell.Ignite))
+        //                        _w.Cast();
+        //                }
+        //                else if (_player.Health <=
+        //                         (caster as Obj_AI_Hero).GetSpellDamage(_player,
+        //                             (caster as Obj_AI_Hero).GetSpellSlot(spell.SData.Name), 1) &&
+        //                         _player.Health + shieldBuff >
+        //                         (caster as Obj_AI_Hero).GetSpellDamage(_player,
+        //                             (caster as Obj_AI_Hero).GetSpellSlot(spell.SData.Name), 1)) _w.Cast();
+        //            }
+        //        }
+        //    }
+        //}
 
         private static void OnDelete(GameObject sender, EventArgs args)
         {
-            var spell = (Obj_SpellMissile)sender;
-            var unit = spell.SpellCaster.Name;
-            var name = spell.SData.Name;
+            //var spell = (Obj_SpellMissile)sender;
+            var unit = sender as Obj_AI_Hero;
+            var name = sender.Name;
 
-            if (unit == ObjectManager.Player.Name && (name == "dianaarcthrow"))
+            if (unit == ObjectManager.Player && (name == "dianaarcthrow"))
             {
                 _qpos = null;
                 _qcreated = false;
@@ -961,8 +961,8 @@ namespace D_Diana
                     Drawing.DrawText(Drawing.Width * 0.90f, Drawing.Height * 0.68f, System.Drawing.Color.DarkRed,
                         "Smite Is Off");
             }
-            if (_qpos != null)
-                Render.Circle.DrawCircle(_qpos.Position, _qpos.BoundingRadius, System.Drawing.Color.Red, 1);
+            //if (_qpos != null)
+            //    Render.Circle.DrawCircle(_qpos.Position, _qpos.BoundingRadius, System.Drawing.Color.Red, 1);
             
             if (Config.Item("ShowPassive").GetValue<bool>())
             {
