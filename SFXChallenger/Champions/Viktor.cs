@@ -87,10 +87,10 @@ namespace SFXChallenger.Champions
             Q.SetTargetted(0.15f, 2050f);
 
             W = new Spell(SpellSlot.W, 700f, DamageType.Magical);
-            W.SetSkillshot(1f, 300f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(1f, 150f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
-            E = new Spell(SpellSlot.E, 1025, DamageType.Magical);
-            E.SetSkillshot(0f, 90f, 800f, false, SkillshotType.SkillshotLine);
+            E = new Spell(SpellSlot.E, 520, DamageType.Magical);
+            E.SetSkillshot(0f, 70f, 1200f, false, SkillshotType.SkillshotLine);
 
             R = new Spell(SpellSlot.R, 700f, DamageType.Magical);
             R.SetSkillshot(0.2f, 300f, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -256,7 +256,7 @@ namespace SFXChallenger.Champions
             miscMenu.AddItem(
                 new MenuItem(miscMenu.Name + ".e-logic", "E Logic").SetValue(new StringList(new[] { "Old", "New", "Beta xQx" }, 1)))
                 .ValueChanged +=
-                delegate(object sender, OnValueChangeEventArgs args)
+                delegate (object sender, OnValueChangeEventArgs args)
                 {
                     Menu.Item(Menu.Name + ".miscellaneous.e-new-distance").ShowItem =
                         args.GetNewValue<StringList>().SelectedIndex == 1;
@@ -269,7 +269,7 @@ namespace SFXChallenger.Champions
 
             IndicatorManager.AddToMenu(DrawingManager.Menu, true);
             IndicatorManager.Add(
-                "Q", delegate(Obj_AI_Hero hero)
+                "Q", delegate (Obj_AI_Hero hero)
                 {
                     var damage = 0f;
                     if (Q.IsReady())
@@ -290,7 +290,7 @@ namespace SFXChallenger.Champions
                 });
             IndicatorManager.Add(E);
             IndicatorManager.Add(
-                "R Burst", delegate(Obj_AI_Hero hero)
+                "R Burst", delegate (Obj_AI_Hero hero)
                 {
                     if (R.IsReady() && (_rObject == null || !_rObject.IsValid))
                     {
@@ -302,7 +302,7 @@ namespace SFXChallenger.Champions
 
         }
 
-        protected override void OnPreUpdate() {}
+        protected override void OnPreUpdate() { }
 
         protected override void OnPostUpdate()
         {
@@ -352,7 +352,7 @@ namespace SFXChallenger.Champions
                         foreach (var minion in minions)
                         {
                             var health = HealthPrediction.GetHealthPrediction(
-                                minion, (int) (Q.ArrivalTime(minion) * 1000));
+                                minion, (int)(Q.ArrivalTime(minion) * 1000));
                             if (health > 0 && Math.Abs(health - minion.Health) > 10 &&
                                 Q.GetDamage(minion) * 0.85f > health)
                             {
@@ -473,7 +473,7 @@ namespace SFXChallenger.Champions
                     var minion = args.Target as Obj_AI_Minion;
                     if (minion != null &&
                         HealthPrediction.LaneClearHealthPrediction(
-                            minion, (int) (Player.AttackDelay * 1000), Game.Ping / 2) <
+                            minion, (int)(Player.AttackDelay * 1000), Game.Ping / 2) <
                         Player.GetAutoAttackDamage(minion))
                     {
                         _lastBeforeFarmTarget = minion;
@@ -601,7 +601,7 @@ namespace SFXChallenger.Champions
             var qCasted = false;
             if (e)
             {
-                
+
                 var target = TargetSelector.GetTarget((E.Range + ELength + E.Width) * 1.1f, E.DamageType);
                 if (target != null)
                 {
@@ -958,7 +958,7 @@ namespace SFXChallenger.Champions
                 }
                 else
                 {
-                    endPos = t.Position + (t.Position - Player.Position).Normalized()*(t.IsFacing(Player) ? 60 : 120);
+                    endPos = t.Position + (t.Position - Player.Position).Normalized() * (t.IsFacing(Player) ? 60 : 120);
                 }
                 startPos = Player.Position.Extend(endPos, 505);
             }
