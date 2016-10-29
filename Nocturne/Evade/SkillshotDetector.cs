@@ -302,6 +302,14 @@ namespace Nocturne.Evade
                 }
                 
                 var enemy = (Obj_AI_Hero) sender;
+                
+                if (enemy.CharData.BaseSkinName.ToLower() == "jayce" && enemy.HasBuff("JayceStanceHammer") && args.Slot == SpellSlot.E && args.Target.IsMe)
+                {
+                    PlayerSpells.W.CastOnUnit(ObjectManager.Player);
+                    DodgeMessage("Jayce's E");
+                }
+
+
                 if ((enemy.CharData.BaseSkinName.ToLower() == "vayne" || enemy.CharData.BaseSkinName.ToLower() == "poppy") && args.Slot == SpellSlot.E &&
                     args.Target.IsMe)
                 {
