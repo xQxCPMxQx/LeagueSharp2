@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -601,8 +601,9 @@ namespace Leblanc.Modes
                 return;
             }
 
-            Champion.PlayerSpells.CastQ(Target);
             Champion.PlayerSpells.CastQ2(Target);
+            Champion.PlayerSpells.CastQ(Target);
+            
         }
 
         private static void ExecuteCompleteCombo()
@@ -630,8 +631,9 @@ namespace Leblanc.Modes
                 return;
             }
 
-            Champion.PlayerSpells.CastW(Target);
             Champion.PlayerSpells.CastW2(Target.Position);
+            Champion.PlayerSpells.CastW(Target);
+            
             //Champion.PlayerSpells.CastW2(Target);
         }
 
