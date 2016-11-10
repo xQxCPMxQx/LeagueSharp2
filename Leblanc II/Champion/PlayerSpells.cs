@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -106,6 +106,8 @@ namespace Leblanc.Champion
         {
             if (CommonHelper.SpellRStatus == CommonHelper.SpellRName.R2xQ)
             {
+                Champion.PlayerSpells.R.CastOnUnit(ObjectManager.Player);
+                return;
                 Q2.CastOnUnit(t, true);
             }
         }
@@ -119,6 +121,8 @@ namespace Leblanc.Champion
 
         public static void CastW2(Vector3 t)
         {
+            Champion.PlayerSpells.R.CastOnUnit(ObjectManager.Player);
+            return;
             if (W2.IsReady() && !W2.StillJumped())
             {
                 W2.Cast(t, true);
@@ -148,6 +152,8 @@ namespace Leblanc.Champion
 
         public static void CastE2(Obj_AI_Base t)
         {
+            Champion.PlayerSpells.R.CastOnUnit(ObjectManager.Player);
+            return;
             if (CommonHelper.SpellRStatus == CommonHelper.SpellRName.R2xE && E.IsReady() && t.IsValidTarget(Modes.ModeSettings.MaxERange))
             {
                 HitChance[] hitChances = new[] { HitChance.VeryHigh, HitChance.High, HitChance.Medium, HitChance.Low};
