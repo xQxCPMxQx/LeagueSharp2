@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -117,18 +117,19 @@ namespace Leblanc.Common
 
         public static bool StillJumped(this Spell spell)
         {
+            
             if (spell == Champion.PlayerSpells.W)
             {
                 return 
                        ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W)
-                           .Name.Equals("Leblancslidereturn", StringComparison.InvariantCultureIgnoreCase);
+                           .Name.Equals("LeblancWReturn", StringComparison.InvariantCultureIgnoreCase);
             }
 
             if (spell == Champion.PlayerSpells.W2)
             {
                 return 
                        ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R)
-                           .Name.Equals("Leblancslidereturnm", StringComparison.InvariantCultureIgnoreCase);
+                           .Name.Equals("LeblancRWReturn", StringComparison.InvariantCultureIgnoreCase);
             }
 
             return false;
