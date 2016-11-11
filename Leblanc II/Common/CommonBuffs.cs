@@ -46,7 +46,9 @@ namespace Leblanc.Common
 
         public static bool HasMarkedWithQ(this Obj_AI_Base obj)
         {
-            return obj.HasBuff("leblancchaosorb");
+            var buff = obj.Buffs.Find(b => b.Name.Equals("Leblancpmark", StringComparison.InvariantCultureIgnoreCase));
+            return buff != null && buff.StartTime + 1.5 < Game.Time;
+            //return obj.HasBuff("leblancchaosorb");
         }
 
         public static bool HasSheenBuff(this Obj_AI_Base obj)
