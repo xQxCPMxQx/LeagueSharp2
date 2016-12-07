@@ -44,15 +44,18 @@ namespace SFXUtility.Features.Drawings
 
         private readonly List<int> _wards = new List<int>
         {
-            ItemData.Sightstone.Id,
-            ItemData.Ruby_Sightstone.Id,
-            ItemData.Eye_of_the_Equinox.Id,
-            ItemData.Eye_of_the_Oasis.Id,
-            ItemData.Eye_of_the_Watchers.Id,
-            ItemData.Trackers_Knife.Id,
-            ItemData.Warding_Totem_Trinket.Id,
-            ItemData.Vision_Ward.Id,
-            ItemData.Farsight_Alteration.Id
+            2055, //Control Ward
+            2301, //Eye of the Watchers
+            2302, //Eye of the Oasis
+            2303, //Eye of the Equinox
+            2045, //Ruby Sightstone
+            2049, //Sightstone
+            3711, //Tracker's Knife
+            1408, //Tracker's Knife Enchantment: Warrior
+            1409, //Tracker's Knife Enchantment: Cinderhulk
+            1410, //Tracker's Knife Enchantment: Runic Echoes
+            1418, //Tracker's Knife Enchantment: Bloodrazor
+            3340 //Warding Totem (Trinket)
         };
 
         #region Spots
