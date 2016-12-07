@@ -50,18 +50,19 @@ namespace SFXUtility.Features.Trackers
 
         private readonly List<WardStruct> _wardStructs = new List<WardStruct>
         {
-            new WardStruct(60*1, 1100, "YellowTrinket", "TrinketTotemLvl1", WardType.Green),
-            new WardStruct(60*1, 1100, "YellowTrinketUpgrade", "TrinketTotemLvl2", WardType.Green),
-            new WardStruct(int.MaxValue, 1100, "BlueTrinket", "TrinketOrbLvl3", WardType.Green),
-            new WardStruct(60*3, 1100, "SightWard", "ItemGhostWard", WardType.Green),
-            new WardStruct(60*3, 1100, "SightWard", "SightWard", WardType.Green),
-            new WardStruct(60*3, 1100, "MissileWard", "MissileWard", WardType.Green),
-            new WardStruct(int.MaxValue, 1100, "VisionWard", "VisionWard", WardType.Pink),
-            new WardStruct(60*4, 212, "CaitlynTrap", "CaitlynYordleTrap", WardType.Trap),
-            new WardStruct(60*10, 212, "TeemoMushroom", "BantamTrap", WardType.Trap),
-            new WardStruct(60*1, 212, "ShacoBox", "JackInTheBox", WardType.Trap),
-            new WardStruct(60*2, 212, "Nidalee_Spear", "Bushwhack", WardType.Trap),
-            new WardStruct(60*10, 212, "Noxious_Trap", "BantamTrap", WardType.Trap)
+            new WardStruct( 60 * 1, 1100, "YellowTrinket", "TrinketTotemLvl1", WardType.Green),
+            new WardStruct( int.MaxValue, 1100, "BlueTrinket", "TrinketOrbLvl3", WardType.Green),
+            new WardStruct( 60 * 2, 1100, "YellowTrinketUpgrade", "TrinketTotemLvl2", WardType.Green),
+            new WardStruct( 60 * 3, 1100, "SightWard", "ItemGhostWard", WardType.Green),
+            new WardStruct( 75 * 2, 1100, "SightWard", "SightWard", WardType.Green),
+            new WardStruct( 60 * 3, 1100, "MissileWard", "MissileWard", WardType.Green),
+            new WardStruct( 60 * 4, 212, "CaitlynTrap", "CaitlynYordleTrap", WardType.Trap),
+            new WardStruct( 60 * 10, 212, "TeemoMushroom", "BantamTrap", WardType.Trap),
+            new WardStruct( 60 * 1, 212, "ShacoBox", "JackInTheBox", WardType.Trap),
+            new WardStruct( 60 * 2, 212, "Nidalee_Spear", "Bushwhack", WardType.Trap),
+            new WardStruct( 60 * 10, 212, "Noxious_Trap", "BantamTrap", WardType.Trap),
+            new WardStruct( 120 * 1, 130, "jhintrap", "JhinE", WardType.Trap),
+            new WardStruct(int.MaxValue, 900, "JammerDevice", "JammerDevice", WardType.Pink)
         };
 
         private Texture _greenWardTexture;
