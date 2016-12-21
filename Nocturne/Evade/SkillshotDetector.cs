@@ -1,4 +1,4 @@
-﻿// Copyright 2014 - 2014 Esk0r
+// Copyright 2014 - 2014 Esk0r
 // SkillshotDetector.cs is part of Evade.
 // 
 // Evade is free software: you can redistribute it and/or modify
@@ -324,6 +324,13 @@ namespace Nocturne.Evade
                         }
                     }
                 }
+                
+                if (enemy.CharData.BaseSkinName.ToLower() == "irelia" && args.Slot == SpellSlot.E && args.Target.IsMe && ObjectManager.Player.HealthPercent > enemy.HealthPercent)
+                {
+                    PlayerSpells.W.Cast();
+                    DodgeMessage("Irelia's E");
+                }
+                
 
                 if (enemy.CharData.BaseSkinName.ToLower() == "riven" && args.Slot == SpellSlot.W && enemy.Position.Distance(ObjectManager.Player.Position) < Orbwalking.GetRealAutoAttackRange(null) + 150)
                 {
