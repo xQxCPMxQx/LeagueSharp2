@@ -1,8 +1,8 @@
 using System;
 using System.Drawing;
 using System.Linq;
-using LeagueSharp;
-using LeagueSharp.Common;
+using EnsoulSharp;
+using EnsoulSharp.Common;
 using SharpDX.Direct3D9;
 using Font = SharpDX.Direct3D9.Font;
 
